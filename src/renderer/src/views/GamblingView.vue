@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { GameCard, SlotMachine, RouletteGame, CoinFlip, BlackjackGame, DiceGame, PlinkoGame, LotteryGame } from '@renderer/components/gambling'
 import { CashDisplay } from '@renderer/components/dashboard'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 
 const gambling = useGamblingStore()
 const player = usePlayerStore()
@@ -177,6 +178,9 @@ const games = computed(() => [
                     :net-profit="formatCash(gambling.getStats(game.id).netProfit)"
                     :is-profitable="gambling.getStats(game.id).netProfit.gte(0)" @play="activeSubGame = game.id" />
             </div>
+
+            <!-- Info Panel -->
+            <InfoPanel :title="$t('gambling.info_title')" :description="$t('gambling.info_desc')" />
         </template>
     </div>
 </template>
@@ -244,7 +248,7 @@ const games = computed(() => [
 
 .casino-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: var(--t-space-4);
 }
 </style>

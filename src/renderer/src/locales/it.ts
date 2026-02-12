@@ -184,6 +184,7 @@ export default {
     available_for_purchase: 'Disponibili per l\'Acquisto',
     empty_hint: 'Aumenta il tuo patrimonio tramite lavori e investimenti per sbloccare le attività.',
     info_title: 'Come Funzionano le Attività',
+    info_desc: 'Ogni attività genera ricavi vendendo prodotti ai clienti. I ricavi dipendono da quanti clienti vogliono il tuo prodotto (domanda), quanto fai pagare (prezzo) e quante unità puoi produrre (capacità). Guadagni profitto ogni secondo, calcolato come ricavi meno costi operativi (stipendi, affitto, forniture, marketing). Usa i controlli su ogni scheda per assumere dipendenti, impostare i prezzi, investire in marketing e migliorare la qualità. Un manager può essere assunto per raccogliere automaticamente i profitti. Puoi comprare nuove attività man mano che il tuo patrimonio cresce — ognuna ha statistiche, costi e potenziale clienti diversi.',
     info: {
       revenue: {
         title: 'Ricavi e Vendite',
@@ -258,6 +259,8 @@ export default {
     ath: 'ATH',
     atl: 'ATL',
     data_points: 'Punti Dati',
+    info_title: 'Come Funziona la Borsa',
+    info_desc: 'La borsa ti permette di comprare e vendere azioni di società. Ogni azione ha un prezzo in tempo reale che si muove ad ogni tick seguendo un modello realistico (Moto Browniano Geometrico). I prezzi possono subire rialzi, crolli e movimenti laterali. Compra azioni quando i prezzi sono bassi e vendi quando salgono per realizzare un profitto. Il valore del portafoglio e il P/L non realizzato sono tracciati in tempo reale. Fissa qualsiasi azione per visualizzare il grafico completo con zoom, panoramica e intervalli temporali. Il profitto realizzato viene registrato quando vendi. Le condizioni di mercato (Toro, Orso, Crollo, Bolla) possono spostare temporaneamente tutti i prezzi — fai attenzione agli eventi!',
   },
 
   // ─── Crypto ───────────────────────────────────────────────────
@@ -271,6 +274,8 @@ export default {
     ath: 'ATH',
     atl: 'ATL',
     data_points: 'Punti Dati',
+    info_title: 'Come Funziona il Crypto',
+    info_desc: 'L\'exchange crypto funziona in modo simile alle azioni, ma con una volatilità molto più alta — i prezzi possono oscillare drasticamente in brevi periodi. Compra criptovalute quando credi che il prezzo salirà, e vendi per bloccare i profitti. Ogni asset crypto ha il proprio profilo di drift e volatilità. Il valore del portafoglio, il P/L non realizzato e realizzato sono mostrati in alto. Puoi fissare qualsiasi asset per una vista dettagliata del grafico. Attenzione: mentre il potenziale di grandi guadagni è più alto delle azioni, lo è anche il rischio di perdite ripide. Le condizioni di mercato e gli eventi influenzano i prezzi crypto come le azioni.',
   },
 
   // ─── Immobili ─────────────────────────────────────────────────
@@ -324,6 +329,7 @@ export default {
     rent: 'Affitto',
     no_properties_desc: 'Aumenta il tuo patrimonio per sbloccare opportunità immobiliari.',
     info_title: 'Come Funzionano gli Immobili',
+    info_desc: 'Gli immobili generano reddito passivo dagli affitti dei locatari. Ogni proprietà ha un numero di unità che possono essere occupate. Il tuo reddito netto al secondo è l\'affitto lordo meno manutenzione, tasse sulla proprietà e assicurazione. L\'occupazione dipende dalle condizioni, dal prezzo dell\'affitto, dall\'economia e dal livello di ristrutturazione — se alzi troppo l\'affitto, meno locatari resteranno. Le proprietà si degradano nel tempo (usura), e puoi ripararle in qualsiasi momento per ripristinare le condizioni. Le ristrutturazioni aumentano permanentemente l\'affitto (+12% per livello) e il valore della proprietà (+5% per livello). Il prezzo di vendita dipende dalle condizioni attuali (50–100% del valore di mercato). Il valore di mercato fluttua con l\'economia, ma non scende mai sotto il 30% del prezzo d\'acquisto. Nuove proprietà si sbloccano man mano che il tuo patrimonio cresce.',
     info: {
       basics: {
         title: 'Basi Immobiliari',
@@ -403,6 +409,14 @@ export default {
     investment: 'Investimento',
     unknown_success: '???',
     research: 'Ricerca ({cost})',
+    research_phase: '{phase} ({cost})',
+    fully_researched: 'Ricerca Completata',
+    risk_rating: 'Rischio',
+    founder_score: 'Fondatore',
+    research_none: 'Nessuna Ricerca',
+    research_basic: 'Scansione Rapida',
+    research_detailed: 'Due Diligence',
+    research_deep: 'Analisi Profonda',
     invest: 'Investi',
     history: 'Storico Investimenti',
     dialog_title: 'Investi in Startup',
@@ -419,6 +433,8 @@ export default {
     maturity: 'Maturità',
     min_label: 'Min:',
     invest_amount: 'Investi {amount}',
+    info_title: 'Come Funzionano gli Investimenti',
+    info_desc: 'Gli investimenti in startup sono operazioni ad alto rischio e alto rendimento. Un set di opportunità si aggiorna periodicamente — ogni startup ha un settore, una fase (da Seed a Pre-IPO), un range di investimento e un moltiplicatore di rendimento. Prima di investire, puoi condurre ricerche in tre fasi: Scansione Rapida (~8% dell\'investimento minimo) rivela un range approssimativo di successo, Due Diligence (~18%) rivela la probabilità esatta e un rating di rischio (1–5), e Analisi Profonda (~35%) rivela il punteggio di competenza del fondatore e concede un piccolo bonus al successo. Ogni fase costa significativamente di più della precedente, rendendo la ricerca approfondita un serio impegno finanziario. Una volta investito, la startup richiede tempo per maturare. Quando si risolve, o ha successo (riscuoti investimento × moltiplicatore) oppure fallisce (fondi persi). Le Offerte Speciali offrono rendimenti migliori ma scadono prima. I Tratti (positivi o negativi) modificano ulteriormente ogni opportunità. Eventi casuali come Boom Startup o Inverno VC possono influenzare le probabilità di successo e i rendimenti di tutto il mercato. Costruisci un portafoglio diversificato e usa la ricerca strategicamente per gestire il rischio.',
   },
 
   // ─── Prestiti ─────────────────────────────────────────────────
@@ -447,6 +463,7 @@ export default {
     on_time: 'Puntuali:',
     late: 'In ritardo:',
     how_it_works: 'Come Funzionano i Prestiti',
+    info_desc: 'I prestiti ti permettono di prendere in prestito contanti ora e ripagarli nel tempo con gli interessi. Il tuo punteggio di credito (0–100) determina a quali prestiti puoi accedere e a quale tasso — un credito migliore significa interessi più bassi. I rimborsi sono manuali: scegli tu quando effettuare un pagamento o saldare per intero. Saltare un pagamento programmato danneggia il tuo credito e comporta penali per ritardo. Ci sono sei categorie di prestito: Personale (piccolo, veloce), Aziendale (più grande, serve buon credito), Mutuo (tasso basso, garantito da immobili), Predatorio (nessun controllo credito, tasso molto alto), Investimento (garantito dal portafoglio) e Speciale (condizioni uniche). Alcuni prestiti richiedono un collaterale basato su asset — come un\'attività, un immobile o un portafoglio — che resta bloccato fino al rimborso. Puoi rifinanziare un prestito esistente per ottenere condizioni migliori se il tuo credito migliora. Costruisci il tuo credito effettuando pagamenti puntuali, mantenendo il debito basso e avendo un mix di tipi di prestito.',
     apply_title: 'Richiedi Prestito',
     loan_amount: 'Importo Prestito',
     interest_rate: 'Tasso di Interesse',
@@ -580,6 +597,7 @@ export default {
     matured: 'Maturati',
     early_withdrawals: 'Prelievi Anticipati',
     how_it_works: 'Come Funzionano i Depositi',
+    info_desc: 'I depositi ti permettono di bloccare contanti in conti fruttiferi per guadagnare reddito passivo. Ogni conto ha un APY (rendimento percentuale annuo) e una frequenza di capitalizzazione che determina quanto velocemente cresce il tuo saldo. I conti a termine fisso bloccano i tuoi soldi per un periodo stabilito — prelevare anticipatamente ti costa una percentuale degli interessi maturati, ma il capitale è sempre al sicuro. I conti flessibili ti permettono di prelevare in qualsiasi momento senza penali ma offrono tassi più bassi. Alcuni conti sono volatili: offrono un APY più alto, ma le oscillazioni di mercato casuali possono azzerare gli interessi maturati. Il tuo APY effettivo è potenziato dal tasso base dell\'economia, dal punteggio di credito, dai bonus dell\'albero abilità, dai potenziamenti prestigio e dagli eventi attivi. Mantenere oltre la scadenza concede un bonus fedeltà. Nuovi tipi di conto si sbloccano man mano che il tuo patrimonio e punteggio di credito migliorano.',
     open_title: 'Apri Conto Deposito',
     deposit_amount: 'Importo Deposito',
     effective_apy: 'APY Effettivo',
@@ -868,6 +886,8 @@ export default {
     lt_total_payout: 'Vincita Totale',
     lt_cant_afford_multi: 'Non hai abbastanza per {n} biglietti ({cost})',
     lt_abilities_found: 'Abilità Trovate:',
+    info_title: 'Come Funziona il Casinò',
+    info_desc: 'Il casinò offre sette giochi diversi, ognuno con le proprie probabilità, vincite e stile di gioco. Il tuo Bonus Fortuna (da abilità, prestigio ed eventi) si applica a tutti i giochi — quando attivo, la maggior parte dei giochi ti dà una meccanica di Seconda Chance che può salvare le scommesse perdenti, mentre il Blackjack ti dà la protezione Anti-Sballo. Ogni gioco traccia il tuo record individuale di vittorie/sconfitte e il profitto netto. Testa o Croce e Dadi sono scommesse rapide, Blackjack e Roulette sono giochi da tavolo con più strategia, Slot e Plinko sono giochi a macchina con vincite variabili, e la Lotteria offre jackpot enormi con probabilità basse. Scegli un gioco dalla lobby e gestisci il tuo bankroll con saggezza.',
     // Sezioni InfoPanel
     info: {
       blackjack: {
@@ -942,9 +962,12 @@ export default {
   skilltree: {
     title: 'Albero Abilità',
     subtitle: 'Sblocca potenziamenti permanenti per il tuo impero',
+    info_title: 'Come Funziona l\'Albero Abilità',
+    info_desc: 'L\'albero abilità offre potenziamenti che migliorano diversi aspetti del tuo impero. Le abilità sono organizzate in categorie, ognuna con il proprio albero di nodi interconnessi. Per sbloccare un\'abilità, devi aver acquistato tutti i prerequisiti e avere abbastanza contanti per pagarne il costo. Ogni nodo fornisce un effetto specifico, come moltiplicatori al reddito, riduzioni di costo o bonus fortuna. Nota: le abilità vengono azzerate quando effettui una rinascita prestigio, quindi dovrai riacquistarle a ogni run. Esplora ogni scheda categoria per pianificare la tua build e sbloccare prima i nodi più impattanti.',
     unlocked: 'Sbloccati',
     balance: 'Saldo',
     purchased: 'Acquistato',
+    available: 'Disponibile',
     effect: 'Effetto',
     cost: 'Costo',
     prerequisites: 'Prerequisiti',
@@ -956,6 +979,8 @@ export default {
   prestige: {
     title: 'Prestigio',
     subtitle: 'Rinasci per ottenere bonus permanenti e sbloccare nuove ere',
+    info_title: 'Come Funziona il Prestigio',
+    info_desc: 'Il prestigio ti permette di sacrificare i tuoi progressi attuali in cambio di bonus permanenti. Quando Rinasci, i tuoi contanti, attività, lavori, investimenti, prestiti, depositi, posizioni di mercato, albero abilità e statistiche del gambling vengono tutti azzerati — ma guadagni Punti Prestigio basati sul totale dei contanti guadagnati. Questi punti possono essere spesi in Potenziamenti (boost statistici ripetibili come moltiplicatori al reddito), Vantaggi (sblocchi una tantum potenti), e contribuiscono ai Traguardi (ricompense automatiche a determinate soglie). Il tuo Moltiplicatore Globale cresce con ogni livello di potenziamento, aumentando permanentemente tutti i redditi. Man mano che accumuli punti totali e rinascite, avanzi attraverso le Ere che forniscono ulteriori bonus globali. Obiettivi e Abilità Divine (dalla lotteria) vengono mantenuti per sempre.',
     tab_upgrades: 'Potenziamenti',
     tab_perks: 'Vantaggi',
     tab_milestones: 'Traguardi',

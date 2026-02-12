@@ -12,6 +12,7 @@ import PriceChart from '@renderer/components/charts/PriceChart.vue'
 import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 
 const crypto = useCryptoStore()
 const player = usePlayerStore()
@@ -155,6 +156,9 @@ function handleSell(assetId: string, amount: number) {
                 :show-chart="showCharts" :available-cash="availableCash" :pinned="pinnedAssetId === asset.id"
                 type="crypto" @buy="handleBuy" @sell="handleSell" @pin="togglePin" />
         </div>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="$t('crypto.info_title')" :description="$t('crypto.info_desc')" />
     </div>
 </template>
 

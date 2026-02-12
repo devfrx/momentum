@@ -311,7 +311,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                         <div class="sidebar-stat">
                             <span class="sidebar-stat-label">{{ $t('loans.total_interest_paid') }}</span>
                             <span class="sidebar-stat-value text-warning">{{ formatCash(loanStore.totalInterestPaidEver)
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -374,9 +374,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                                     </div>
                                     <div class="history-details">
                                         <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                        }}</span>
+                                            }}</span>
                                         <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                        }} {{ entry.latePayments
+                                            }} {{ entry.latePayments
                                             }}</span>
                                         <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                     </div>
@@ -389,7 +389,8 @@ const loanInfoSections = computed<InfoSection[]>(() => [
         </div>
 
         <!-- Loan Documentation -->
-        <InfoPanel :title="$t('loans.how_it_works')" :sections="loanInfoSections" />
+        <InfoPanel :title="$t('loans.how_it_works')" :description="$t('loans.info_desc')"
+            :sections="loanInfoSections" />
 
         <!-- Apply for Loan Dialog -->
         <Dialog v-model:visible="showApplyDialog" modal :header="$t('loans.apply_title')" :style="{ width: '450px' }">

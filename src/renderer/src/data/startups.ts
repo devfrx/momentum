@@ -21,6 +21,43 @@ export type StartupSector =
 
 export type StartupStage = 'seed' | 'seriesA' | 'seriesB' | 'seriesC' | 'preIPO'
 
+/**
+ * Multi-phase research system.
+ * Each phase reveals more information about the startup at increasing cost.
+ *  - none:     No research done — success chance hidden
+ *  - basic:    Quick scan — reveals approximate success chance range
+ *  - detailed: Due diligence — reveals exact success chance + risk rating
+ *  - deep:     Deep analysis — reveals founder score + grants a small success bonus
+ */
+export type ResearchPhase = 'none' | 'basic' | 'detailed' | 'deep'
+
+export const RESEARCH_PHASES: ResearchPhase[] = ['none', 'basic', 'detailed', 'deep']
+
+export interface ResearchPhaseData {
+  id: ResearchPhase
+  name: string
+  icon: string
+  /** Cost multiplier relative to min investment */
+  costMultiplier: number
+  /** What this phase reveals (used for UI descriptions) */
+  reveals: string
+}
+
+/**
+ * Research cost scales per phase.
+ * basic =  8% of minInvestment, detailed = 18%, deep = 35%.
+ * This makes deep research a serious financial commitment.
+ */
+export const RESEARCH_PHASE_DATA: Record<ResearchPhase, ResearchPhaseData> = {
+  none:     { id: 'none',     name: 'None',            icon: 'mdi:help-circle-outline', costMultiplier: 0,    reveals: '' },
+  basic:    { id: 'basic',    name: 'Quick Scan',      icon: 'mdi:magnify',             costMultiplier: 0.08, reveals: 'Approximate success range' },
+  detailed: { id: 'detailed', name: 'Due Diligence',   icon: 'mdi:file-search',         costMultiplier: 0.18, reveals: 'Exact success chance + Risk rating' },
+  deep:     { id: 'deep',     name: 'Deep Analysis',   icon: 'mdi:brain',               costMultiplier: 0.35, reveals: 'Founder score + Success bonus' },
+}
+
+/** Success chance bonus granted by deep analysis */
+export const DEEP_ANALYSIS_BONUS = 0.04
+
 export type StartupTrait =
   | 'experienced_team'
   | 'first_mover'
@@ -63,8 +100,16 @@ export interface StartupOpportunity {
   expiresAtTick: number        // When this opportunity disappears
   appearedAtTick: number       // When this opportunity was generated
   isHotDeal: boolean           // Hot deals have better returns but shorter windows
-  dueDiligenceCost: number     // Cost to reveal true success chance
-  dueDiligenceDone: boolean    // Whether player has researched this
+  /** @deprecated — use researchPhases instead */
+  dueDiligenceCost: number     // Legacy: cost for basic research
+  dueDiligenceDone: boolean    // Legacy: whether basic research is done
+  /** Multi-phase research system */
+  researchPhase: ResearchPhase // Current research level
+  researchCosts: Record<ResearchPhase, number> // Cost per phase
+  /** Hidden risk rating revealed at phase 2+ (1–5 scale, 5 = very risky) */
+  hiddenRiskRating: number
+  /** Hidden founder score revealed at phase 3 (1–100, higher = more competent) */
+  hiddenFounderScore: number
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -674,9 +719,44 @@ export function generateOpportunity(
   const windowMultiplier = isHotDeal ? 0.3 : 1
   const expiresAtTick = currentTick + Math.round(refreshIntervalTicks * windowMultiplier)
 
-  // Due diligence cost scales with investment size (~5% of min investment)
+  // ═══ RESEARCH COSTS (multi-phase) ════════════════════════════════
+  // Each phase costs a % of minInvestment — basic(8%), detailed(18%), deep(35%)
+  // Legacy dueDiligenceCost kept for backward compatibility
+  // ═════════════════════════════════════════════════════════════════
   const ddRoundTo = minInvestment >= 1_000_000 ? 100_000 : minInvestment >= 10_000 ? 1_000 : 100
   const dueDiligenceCost = Math.max(100, Math.round(minInvestment * 0.05 / ddRoundTo) * ddRoundTo)
+
+  const researchCosts = {} as Record<ResearchPhase, number>
+  for (const phase of RESEARCH_PHASES) {
+    const data = RESEARCH_PHASE_DATA[phase]
+    if (data.costMultiplier === 0) {
+      researchCosts[phase] = 0
+    } else {
+      const rawCost = minInvestment * data.costMultiplier
+      researchCosts[phase] = Math.max(100, Math.round(rawCost / ddRoundTo) * ddRoundTo)
+    }
+  }
+
+  // ═══ HIDDEN ATTRIBUTES (revealed through research) ═════════════
+  // Risk rating (1–5): derived from sector risk × stage risk, plus some randomness
+  const compositeRisk = sectorData.baseRiskMod * stageData.riskMod
+  // Map composite risk [0.35 .. 3.0] → [1 .. 5]
+  const riskNorm = Math.min(1, Math.max(0, (compositeRisk - 0.3) / 2.7))
+  const riskBase = 1 + riskNorm * 4
+  // Jitter ±0.5 then clamp to [1, 5]
+  const hiddenRiskRating = Math.round(Math.min(5, Math.max(1, riskBase + (Math.random() - 0.5))))
+
+  // Founder score (1–100): base 50, influenced by traits
+  let founderBase = 50 + (Math.random() * 20 - 10) // random ±10
+  for (const t of traits) {
+    const td = TRAITS[t]
+    if (t === 'experienced_team')   founderBase += 20
+    else if (t === 'celebrity_founder')   founderBase += 8
+    else if (t === 'key_person_risk')     founderBase -= 15
+    else if (td.isPositive)               founderBase += 5
+    else                                  founderBase -= 5
+  }
+  const hiddenFounderScore = Math.round(Math.min(100, Math.max(1, founderBase)))
 
   opportunityIdCounter++
   const id = `startup_${currentTick}_${opportunityIdCounter}`
@@ -698,7 +778,11 @@ export function generateOpportunity(
     appearedAtTick: currentTick,
     isHotDeal,
     dueDiligenceCost,
-    dueDiligenceDone: false
+    dueDiligenceDone: false,
+    researchPhase: 'none' as ResearchPhase,
+    researchCosts,
+    hiddenRiskRating,
+    hiddenFounderScore
   }
 }
 

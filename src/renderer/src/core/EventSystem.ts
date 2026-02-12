@@ -32,6 +32,9 @@ export type EventEffectType =
   | 'loan_rate_modifier'
   | 'credit_score_modifier'
   | 'deposit_rate_modifier'
+  | 'startup_success_modifier'
+  | 'startup_return_modifier'
+  | 'research_cost_modifier'
 
 export interface EventEffect {
   type: EventEffectType

@@ -15,8 +15,12 @@ import {
   OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES,
   MAX_OPPORTUNITIES,
+  RESEARCH_PHASES,
+  RESEARCH_PHASE_DATA,
+  DEEP_ANALYSIS_BONUS,
   type StartupOpportunity,
   type StartupSector,
+  type ResearchPhase,
   SECTORS,
   STAGES,
   TRAITS
@@ -173,7 +177,7 @@ export const useStartupStore = defineStore('startups', () => {
   }
 
   /**
-   * Perform due diligence on an opportunity
+   * Perform due diligence on an opportunity (legacy — calls performResearch internally)
    */
   function performDueDiligence(opportunityId: string): boolean {
     const opp = opportunities.value.find((o) => o.id === opportunityId)
@@ -187,6 +191,50 @@ export const useStartupStore = defineStore('startups', () => {
     player.spendCash(cost)
     opp.dueDiligenceDone = true
     return true
+  }
+
+  /**
+   * Advance research phase on a startup opportunity.
+   * Returns the new phase, or null if the action could not proceed.
+   *
+   * Phase progression: none → basic → detailed → deep
+   *  • basic:    Reveals approximate success chance range
+   *  • detailed: Reveals exact success chance + risk rating
+   *  • deep:     Reveals founder score + grants DEEP_ANALYSIS_BONUS to success
+   */
+  function performResearch(opportunityId: string): ResearchPhase | null {
+    const opp = opportunities.value.find((o) => o.id === opportunityId)
+    if (!opp) return null
+
+    const currentIdx = RESEARCH_PHASES.indexOf(opp.researchPhase)
+    if (currentIdx >= RESEARCH_PHASES.length - 1) return null // already at max
+
+    const nextPhase = RESEARCH_PHASES[currentIdx + 1]
+    const cost = D(opp.researchCosts[nextPhase])
+
+    const player = usePlayerStore()
+    if (!gte(player.cash, cost)) return null
+
+    player.spendCash(cost)
+    opp.researchPhase = nextPhase
+
+    // Backward compat: basic phase = legacy dueDiligenceDone
+    if (nextPhase === 'basic') {
+      opp.dueDiligenceDone = true
+    }
+
+    // Deep analysis grants a permanent success bonus to THIS opportunity
+    if (nextPhase === 'deep') {
+      opp.baseSuccessChance = Math.min(0.95, opp.baseSuccessChance + DEEP_ANALYSIS_BONUS)
+    }
+
+    // XP scales with research depth (20 / 50 / 120)
+    const xpRewards: Record<ResearchPhase, number> = {
+      none: 0, basic: 20, detailed: 50, deep: 120
+    }
+    player.addXp(D(xpRewards[nextPhase]))
+
+    return nextPhase
   }
 
   /**
@@ -310,6 +358,11 @@ export const useStartupStore = defineStore('startups', () => {
 
   /**
    * Get opportunity details (for UI)
+   * Information revealed depends on the research phase:
+   *  - none:     No success data shown
+   *  - basic:    Approximate success range (±10% band)
+   *  - detailed: Exact success chance + risk rating
+   *  - deep:     Everything above + founder score
    */
   function getOpportunityDetails(opportunityId: string) {
     const opp = opportunities.value.find((o) => o.id === opportunityId)
@@ -327,6 +380,44 @@ export const useStartupStore = defineStore('startups', () => {
     )
     const effectiveReturn = calculateEffectiveReturn(opp, globalReturnBonus.value)
 
+    const phase = opp.researchPhase
+    const phaseIdx = RESEARCH_PHASES.indexOf(phase)
+
+    // What the player sees depends on research depth
+    let displayedSuccessChance: number | null = null
+    let displayedSuccessRange: [number, number] | null = null
+    let displayedRiskRating: number | null = null
+    let displayedFounderScore: number | null = null
+    let nextResearchPhase: ResearchPhase | null = null
+    let nextResearchCost: number | null = null
+
+    if (phaseIdx >= 1) {
+      // basic: show an approximate ±10% band
+      const lo = Math.max(0, effectiveSuccessChance - 0.10)
+      const hi = Math.min(1, effectiveSuccessChance + 0.10)
+      displayedSuccessRange = [lo, hi]
+    }
+    if (phaseIdx >= 2) {
+      // detailed: exact chance + risk rating
+      displayedSuccessChance = effectiveSuccessChance
+      displayedRiskRating = opp.hiddenRiskRating
+    }
+    if (phaseIdx >= 3) {
+      // deep: founder score
+      displayedFounderScore = opp.hiddenFounderScore
+    }
+
+    // Legacy compat
+    if (opp.dueDiligenceDone && phaseIdx < 1) {
+      displayedSuccessChance = effectiveSuccessChance
+    }
+
+    // Next research phase & cost
+    if (phaseIdx < RESEARCH_PHASES.length - 1) {
+      nextResearchPhase = RESEARCH_PHASES[phaseIdx + 1]
+      nextResearchCost = opp.researchCosts[nextResearchPhase]
+    }
+
     return {
       ...opp,
       sectorData,
@@ -334,7 +425,14 @@ export const useStartupStore = defineStore('startups', () => {
       traitData,
       effectiveSuccessChance,
       effectiveReturn,
-      displayedSuccessChance: opp.dueDiligenceDone ? effectiveSuccessChance : null
+      displayedSuccessChance,
+      displayedSuccessRange,
+      displayedRiskRating,
+      displayedFounderScore,
+      nextResearchPhase,
+      nextResearchCost,
+      researchPhaseData: RESEARCH_PHASE_DATA[phase],
+      nextResearchPhaseData: nextResearchPhase ? RESEARCH_PHASE_DATA[nextResearchPhase] : null
     }
   }
 
@@ -381,7 +479,25 @@ export const useStartupStore = defineStore('startups', () => {
    * Load from save
    */
   function loadFromSave(state: Partial<StartupStoreState>): void {
-    if (state.opportunities) opportunities.value = state.opportunities
+    if (state.opportunities) {
+      // Migrate old saves: backfill new research fields if missing
+      opportunities.value = state.opportunities.map((opp) => {
+        if (!opp.researchPhase) {
+          const ddRoundTo = opp.minInvestment >= 1_000_000 ? 100_000
+            : opp.minInvestment >= 10_000 ? 1_000 : 100
+          const rc = (mult: number) =>
+            Math.max(100, Math.round(opp.minInvestment * mult / ddRoundTo) * ddRoundTo)
+          return {
+            ...opp,
+            researchPhase: (opp.dueDiligenceDone ? 'basic' : 'none') as ResearchPhase,
+            researchCosts: { none: 0, basic: rc(0.08), detailed: rc(0.18), deep: rc(0.35) },
+            hiddenRiskRating: Math.round(1 + Math.random() * 4),
+            hiddenFounderScore: Math.round(20 + Math.random() * 60)
+          }
+        }
+        return opp
+      })
+    }
     if (state.investments) {
       // Convert saved amounts back to Decimal
       investments.value = state.investments.map((inv) => ({
@@ -446,6 +562,7 @@ export const useStartupStore = defineStore('startups', () => {
     // Actions
     refreshOpportunities,
     performDueDiligence,
+    performResearch,
     invest,
     tick,
     exitInvestment,

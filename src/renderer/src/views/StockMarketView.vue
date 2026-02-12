@@ -12,6 +12,7 @@ import PriceChart from '@renderer/components/charts/PriceChart.vue'
 import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 
 const stocks = useStockStore()
 const player = usePlayerStore()
@@ -148,6 +149,9 @@ function handleSell(assetId: string, amount: number) {
                 :pinned="pinnedAssetId === asset.id" type="stock" @buy="handleBuy" @sell="handleSell"
                 @pin="togglePin" />
         </div>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="$t('stocks.info_title')" :description="$t('stocks.info_desc')" />
     </div>
 </template>
 

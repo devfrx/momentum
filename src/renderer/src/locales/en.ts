@@ -184,6 +184,7 @@ export default {
     available_for_purchase: 'Available for Purchase',
     empty_hint: 'Increase your net worth through jobs and investments to unlock businesses.',
     info_title: 'How Businesses Work',
+    info_desc: 'Each business generates revenue by selling products to customers. Revenue depends on how many customers want your product (demand), how much you charge (price), and how many units you can produce (capacity). You earn profit every second, calculated as revenue minus operating costs (wages, rent, supplies, marketing). Use the controls on each card to hire employees, set prices, invest in marketing, and upgrade quality. A manager can be hired to auto-collect profits. You can buy new businesses as your net worth grows — each one has different base stats, costs, and customer potential.',
     info: {
       revenue: {
         title: 'Revenue & Sales',
@@ -258,6 +259,8 @@ export default {
     ath: 'ATH',
     atl: 'ATL',
     data_points: 'Data Points',
+    info_title: 'How the Stock Market Works',
+    info_desc: 'The stock market lets you buy and sell shares of companies. Each stock has a live price that moves every tick based on a realistic price model (Geometric Brownian Motion). Prices can experience bull runs, crashes, and sideways movement. Buy shares when prices are low and sell when they rise to make a profit. Your portfolio value and unrealized P/L are tracked in real time. Pin any stock to focus on its full chart with zoom, pan, and time range controls. Realized profit is recorded when you sell. Market conditions (Bull, Bear, Crash, Bubble) can temporarily shift all prices — watch for events!',
   },
 
   // ─── Crypto ───────────────────────────────────────────────────
@@ -271,6 +274,8 @@ export default {
     ath: 'ATH',
     atl: 'ATL',
     data_points: 'Data Points',
+    info_title: 'How the Crypto Exchange Works',
+    info_desc: 'The crypto exchange works similarly to stocks, but with much higher volatility — prices can swing dramatically in short periods. Buy cryptocurrency when you believe the price will rise, and sell to lock in profits. Each crypto asset has its own drift and volatility profile. Your wallet value, unrealized and realized P/L are displayed at the top. You can pin any asset for a detailed chart view. Be cautious: while the potential for large gains is higher than stocks, so is the risk of steep losses. Market conditions and events affect crypto prices just like stocks.',
   },
 
   // ─── Real Estate ──────────────────────────────────────────────
@@ -324,6 +329,7 @@ export default {
     rent: 'Rent',
     no_properties_desc: 'Increase your net worth to unlock real estate opportunities.',
     info_title: 'How Realty Works',
+    info_desc: 'Real estate generates passive rental income from tenants. Each property has a number of units that can be occupied. Your net income per second is gross rent minus maintenance, property tax, and insurance. Occupancy depends on condition, rent price, economy, and renovation level — if you raise rent too high, fewer tenants will stay. Properties degrade over time (wear), and you can repair them at any point to restore condition. Renovations permanently boost rent (+12% per level) and property value (+5% per level). Selling price depends on current condition (50–100% of market value). Market value fluctuates with the economy, but never drops below 30% of the purchase price. New properties unlock as your net worth grows.',
     info: {
       basics: {
         title: 'Property Basics',
@@ -403,6 +409,14 @@ export default {
     investment: 'Investment',
     unknown_success: '???',
     research: 'Research ({cost})',
+    research_phase: '{phase} ({cost})',
+    fully_researched: 'Fully Researched',
+    risk_rating: 'Risk',
+    founder_score: 'Founder',
+    research_none: 'No Research',
+    research_basic: 'Quick Scan',
+    research_detailed: 'Due Diligence',
+    research_deep: 'Deep Analysis',
     invest: 'Invest',
     history: 'Investment History',
     dialog_title: 'Invest in Startup',
@@ -419,6 +433,8 @@ export default {
     maturity: 'Maturity',
     min_label: 'Min:',
     invest_amount: 'Invest {amount}',
+    info_title: 'How Startup Investments Work',
+    info_desc: 'Startup investments are high-risk, high-reward ventures. A set of opportunities refreshes periodically — each startup has a sector, stage (Seed to Pre-IPO), investment range, and return multiplier. Before investing, you can conduct research in three phases: Quick Scan (~8% of min investment) reveals an approximate success range, Due Diligence (~18%) reveals the exact success chance and a risk rating (1–5), and Deep Analysis (~35%) reveals the founder competence score and grants a small success bonus. Each phase costs significantly more than the last, making thorough research a serious financial commitment. Once you invest, the startup matures over time. When it resolves, it either succeeds (collect investment × return multiplier) or fails (funds lost). Hot Deals offer better returns but expire faster. Traits (positive or negative) further modify each opportunity. Random events like Startup Booms or VC Winters can shift success odds and returns across the whole market. Build a diversified portfolio and use research strategically to manage risk.',
   },
 
   // ─── Loans ────────────────────────────────────────────────────
@@ -447,6 +463,7 @@ export default {
     on_time: 'On-time:',
     late: 'Late:',
     how_it_works: 'How Loans Work',
+    info_desc: 'Loans let you borrow cash now and repay it over time with interest. Your credit score (0–100) determines which loans you qualify for and at what rate — better credit means lower interest. Repayments are manual: you choose when to make a payment or pay in full. Missing a scheduled payment hurts your credit and incurs late fees. There are six loan categories: Personal (small, quick), Business (larger, needs good credit), Mortgage (low rate, backed by property collateral), Predatory (no credit check, very high rate), Investment (backed by portfolio collateral), and Special (unique terms). Some loans require asset-based collateral — such as a business, property, or portfolio — that stays locked until repaid. You can refinance an existing loan to get better terms if your credit improves. Build your credit by making on-time payments, keeping debt low, and having a mix of loan types.',
     apply_title: 'Apply for Loan',
     loan_amount: 'Loan Amount',
     interest_rate: 'Interest Rate',
@@ -581,6 +598,7 @@ export default {
     matured: 'Matured',
     early_withdrawals: 'Early Withdrawals',
     how_it_works: 'How Deposits Work',
+    info_desc: 'Deposits let you lock cash into interest-bearing accounts to earn passive income. Each account has an APY (annual percentage yield) and a compounding frequency that determines how fast your balance grows. Fixed-term accounts lock your money for a set period — withdrawing early costs you a percentage of the earned interest, but your principal is always safe. Flexible accounts let you withdraw anytime with no penalty but offer lower rates. Some accounts are volatile: they offer higher APY, but random market swings can wipe your accrued interest. Your effective APY is boosted by the economy base rate, your credit score, skill tree bonuses, prestige upgrades, and active events. Holding past maturity earns a loyalty bonus. New account types unlock as your net worth and credit score improve.',
     open_title: 'Open Deposit Account',
     deposit_amount: 'Deposit Amount',
     effective_apy: 'Effective APY',
@@ -869,6 +887,8 @@ export default {
     lt_total_payout: 'Total Payout',
     lt_cant_afford_multi: 'Not enough cash for {n} tickets ({cost})',
     lt_abilities_found: 'Abilities Found:',
+    info_title: 'How the Casino Works',
+    info_desc: 'The casino offers seven different games, each with its own odds, payouts, and playstyle. Your Luck Bonus (from skills, prestige, and events) applies across all games — when active, most games give you a Second Chance mechanic that can save losing bets, while Blackjack gives you Anti-Bust protection. Each game tracks your individual win/loss record and net profit. Coin Flip and Dice are quick bets, Blackjack and Roulette are table games with more strategy, Slots and Plinko are machine games with variable payouts, and the Lottery offers massive jackpots with low odds. Pick a game to play from the lobby and manage your bankroll wisely.',
     // InfoPanel sections
     info: {
       blackjack: {
@@ -946,9 +966,12 @@ export default {
   skilltree: {
     title: 'Skill Tree',
     subtitle: 'Unlock permanent upgrades to boost your empire',
+    info_title: 'How the Skill Tree Works',
+    info_desc: 'The skill tree offers upgrades that boost different aspects of your empire. Skills are organized into categories, each with its own tree of interconnected nodes. To unlock a skill, you must have purchased all of its prerequisites and have enough cash to pay its cost. Each node provides a specific effect, such as multipliers to income, cost reductions, or luck bonuses. Note: skills are reset when you perform a prestige rebirth, so you will need to re-purchase them each run. Explore each category tab to plan your build and unlock the most impactful nodes first.',
     unlocked: 'Unlocked',
     balance: 'Balance',
     purchased: 'Purchased',
+    available: 'Available',
     effect: 'Effect',
     cost: 'Cost',
     prerequisites: 'Prerequisites',
@@ -960,6 +983,8 @@ export default {
   prestige: {
     title: 'Prestige',
     subtitle: 'Rebirth to gain powerful permanent bonuses and unlock new eras',
+    info_title: 'How Prestige Works',
+    info_desc: 'Prestige lets you sacrifice your current progress in exchange for permanent bonuses. When you Rebirth, your cash, businesses, jobs, investments, loans, deposits, market positions, skill tree, and gambling stats are all reset — but you earn Prestige Points based on your total cash earned. These points can be spent on Upgrades (repeatable stat boosts like income multipliers), Perks (one-time powerful unlocks), and apply toward Milestones (automatic rewards at certain thresholds). Your Global Multiplier grows with each upgrade level, boosting all income permanently. As you accumulate total points and rebirths, you advance through Eras that provide additional global bonuses. Achievements and Divine Abilities (from lottery) are kept forever.',
     tab_upgrades: 'Upgrades',
     tab_perks: 'Perks',
     tab_milestones: 'Milestones',

@@ -7,6 +7,7 @@ import { D, mul, gte } from '@renderer/core/BigNum'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { useOnTick } from '@renderer/composables/useGameLoop'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -16,6 +17,8 @@ import {
     SECTORS,
     STAGES,
     TRAITS,
+    RESEARCH_PHASES,
+    RESEARCH_PHASE_DATA,
     type StartupOpportunity,
     type StartupTrait,
     OPPORTUNITY_REFRESH_TICKS
@@ -91,9 +94,14 @@ function confirmInvest(): void {
     }
 }
 
-// Due diligence
-function doDueDiligence(oppId: string): void {
-    startups.performDueDiligence(oppId)
+// Perform multi-phase research (new system)
+function doResearch(oppId: string): void {
+    startups.performResearch(oppId)
+}
+
+// Research phase index for a given opportunity
+function getPhaseIndex(opp: StartupOpportunity): number {
+    return RESEARCH_PHASES.indexOf(opp.researchPhase ?? 'none')
 }
 
 // Collect returns
@@ -191,9 +199,9 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                     </div>
                     <div class="card-stats">
                         <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
-                                formatCash(inv.investedAmount) }}</strong></span>
+                            formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                                }}x</strong></span>
+                        }}x</strong></span>
                     </div>
                     <div class="success-result">
                         <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
@@ -224,10 +232,10 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                     </div>
                     <div class="card-stats">
                         <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
-                                formatCash(inv.investedAmount) }}</strong></span>
+                            formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.success') }} <strong class="text-sky">{{ formatRate(inv.successChance *
-                                100)
-                                }}</strong></span>
+                            100)
+                        }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{
                             inv.returnMultiplier.toFixed(1)
                                 }}x</strong></span>
@@ -273,7 +281,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                             <span class="opp-card__tagline">{{ opp.tagline }}</span>
                         </div>
                         <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">{{ STAGES[opp.stage].name
-                        }}</span>
+                            }}</span>
                     </div>
 
                     <!-- Meta row: sector + timer -->
@@ -306,11 +314,21 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                         </div>
                         <div class="opp-card__kpi">
                             <span class="opp-card__kpi-label">{{ $t('investments.success') }}</span>
-                            <span v-if="opp.dueDiligenceDone" class="opp-card__kpi-value opp-card__kpi-value--blue">
+                            <!-- Phase 0: nothing -->
+                            <span v-if="getPhaseIndex(opp) === 0"
+                                class="opp-card__kpi-value opp-card__kpi-value--muted">
+                                {{ $t('investments.unknown_success') }}
+                            </span>
+                            <!-- Phase 1 (basic): approximate range -->
+                            <span v-else-if="getPhaseIndex(opp) === 1"
+                                class="opp-card__kpi-value opp-card__kpi-value--blue">
+                                ~{{ formatRate(Math.max(0, opp.baseSuccessChance - 0.10) * 100) }}–{{
+                                    formatRate(Math.min(1, opp.baseSuccessChance + 0.10) * 100) }}
+                            </span>
+                            <!-- Phase 2+ (detailed/deep): exact -->
+                            <span v-else class="opp-card__kpi-value opp-card__kpi-value--blue">
                                 {{ formatRate(opp.baseSuccessChance * 100) }}
                             </span>
-                            <span v-else class="opp-card__kpi-value opp-card__kpi-value--muted">{{
-                                $t('investments.unknown_success') }}</span>
                         </div>
                         <div class="opp-card__kpi">
                             <span class="opp-card__kpi-label">{{ $t('investments.return_label') }}</span>
@@ -320,13 +338,55 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                         </div>
                     </div>
 
+                    <!-- Research reveals (risk rating & founder score) -->
+                    <div v-if="getPhaseIndex(opp) >= 2" class="opp-card__reveals">
+                        <div class="opp-card__reveal-item">
+                            <AppIcon icon="mdi:shield-alert" />
+                            <span class="opp-card__reveal-label">{{ $t('investments.risk_rating') }}</span>
+                            <span class="opp-card__reveal-value"
+                                :class="opp.hiddenRiskRating >= 4 ? 'text-red' : opp.hiddenRiskRating >= 3 ? 'text-gold' : 'text-emerald'">
+                                {{ opp.hiddenRiskRating }}/5
+                            </span>
+                        </div>
+                        <div v-if="getPhaseIndex(opp) >= 3" class="opp-card__reveal-item">
+                            <AppIcon icon="mdi:account-star" />
+                            <span class="opp-card__reveal-label">{{ $t('investments.founder_score') }}</span>
+                            <span class="opp-card__reveal-value"
+                                :class="opp.hiddenFounderScore >= 70 ? 'text-emerald' : opp.hiddenFounderScore >= 40 ? 'text-gold' : 'text-red'">
+                                {{ opp.hiddenFounderScore }}/100
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Research Phase Indicator -->
+                    <div class="opp-card__research">
+                        <div class="research-phases">
+                            <div v-for="(phase, idx) in RESEARCH_PHASES.slice(1)" :key="phase"
+                                class="research-phase-dot" :class="{
+                                    'research-phase-dot--done': getPhaseIndex(opp) > idx,
+                                    'research-phase-dot--current': getPhaseIndex(opp) === idx,
+                                    'research-phase-dot--locked': getPhaseIndex(opp) < idx
+                                }" :title="RESEARCH_PHASE_DATA[phase].name">
+                                <AppIcon :icon="RESEARCH_PHASE_DATA[phase].icon" />
+                            </div>
+                            <span v-if="getPhaseIndex(opp) > 0" class="research-phase-label">
+                                {{ RESEARCH_PHASE_DATA[opp.researchPhase].name }}
+                            </span>
+                        </div>
+                    </div>
+
                     <!-- Actions -->
                     <div class="opp-card__actions">
-                        <Button v-if="!opp.dueDiligenceDone"
-                            :label="$t('investments.research', { cost: formatCash(D(opp.dueDiligenceCost)) })"
-                            icon="pi pi-search" severity="secondary" size="small"
-                            :disabled="!gte(player.cash, D(opp.dueDiligenceCost))" @click="doDueDiligence(opp.id)"
-                            class="opp-card__btn" />
+                        <Button v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1" :label="$t('investments.research_phase', {
+                            phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
+                            cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
+                        })" icon="pi pi-search" severity="secondary" size="small"
+                            :disabled="!gte(player.cash, D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))"
+                            @click="doResearch(opp.id)" class="opp-card__btn" />
+                        <span v-else class="opp-card__research-complete">
+                            <AppIcon icon="mdi:check-decagram" />
+                            {{ $t('investments.fully_researched') }}
+                        </span>
                         <Button :label="$t('investments.invest')" icon="pi pi-send" size="small"
                             :disabled="!gte(player.cash, D(opp.minInvestment))" @click="openInvestDialog(opp)"
                             class="opp-card__btn opp-card__btn--primary" />
@@ -397,7 +457,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                        }}</strong>
+                    }}</strong>
                 </div>
             </div>
 
@@ -406,6 +466,9 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                 <Button :label="$t('investments.confirm_investment')" icon="pi pi-check" @click="confirmInvest" />
             </template>
         </Dialog>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="$t('investments.info_title')" :description="$t('investments.info_desc')" />
     </div>
 </template>
 
@@ -699,6 +762,101 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
 
 .opp-card__kpi-value--muted {
     color: var(--t-text-muted);
+}
+
+/* Research reveals (risk rating, founder score) */
+.opp-card__reveals {
+    display: flex;
+    gap: var(--t-space-3);
+    padding: var(--t-space-2) var(--t-space-3);
+    background: color-mix(in srgb, var(--_accent) 5%, var(--t-bg-muted));
+    border-radius: var(--t-radius-sm);
+    border-left: 2px solid var(--_accent);
+}
+
+.opp-card__reveal-item {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-1);
+    font-size: var(--t-font-size-xs);
+}
+
+.opp-card__reveal-label {
+    color: var(--t-text-muted);
+}
+
+.opp-card__reveal-value {
+    font-family: var(--t-font-mono);
+    font-weight: 600;
+}
+
+/* Research phase indicator */
+.opp-card__research {
+    display: flex;
+    align-items: center;
+}
+
+.research-phases {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+}
+
+.research-phase-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    border: 2px solid var(--t-border);
+    color: var(--t-text-muted);
+    transition: all var(--t-transition-normal);
+}
+
+.research-phase-dot--done {
+    background: var(--t-success);
+    border-color: var(--t-success);
+    color: #fff;
+}
+
+.research-phase-dot--current {
+    border-color: var(--t-accent);
+    color: var(--t-accent);
+    animation: phase-pulse 2s ease-in-out infinite;
+}
+
+.research-phase-dot--locked {
+    opacity: 0.35;
+}
+
+@keyframes phase-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+
+    50% {
+        box-shadow: 0 0 6px 1px color-mix(in srgb, var(--t-accent) 40%, transparent);
+    }
+}
+
+.research-phase-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--t-text-secondary);
+    margin-left: var(--t-space-1);
+}
+
+.opp-card__research-complete {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
+    color: var(--t-success);
 }
 
 /* Actions */

@@ -2,7 +2,7 @@
 /**
  * SkillTreeGraph — SVG-based tree visualization for one skill category.
  * Lays out nodes in a grid defined by each node's row/col and draws
- * connection lines between prerequisites and dependents.
+ * curved connection paths between prerequisites and dependents.
  */
 import { computed } from 'vue'
 import SkillNode from './SkillNode.vue'
@@ -64,18 +64,15 @@ function nodeTop(row: number): string {
     return `${row * ROW_GAP + PAD}px`
 }
 
-// ─── Connection lines ──────────────────────────────────────
+// ─── Connection paths (curved) ─────────────────────────────
 interface Connection {
-    x1: number
-    y1: number
-    x2: number
-    y2: number
+    path: string
     state: 'purchased' | 'available' | 'locked'
     key: string
 }
 
 const connections = computed<Connection[]>(() => {
-    const lines: Connection[] = []
+    const paths: Connection[] = []
     for (const node of props.nodes) {
         for (const preId of node.prerequisites) {
             const parent = nodeMap.value.get(preId)
@@ -88,26 +85,34 @@ const connections = computed<Connection[]>(() => {
                         ? 'available'
                         : 'locked'
 
-            lines.push({
-                x1: cx(parent.col),
-                y1: cy(parent.row) + 28, // bottom of parent ring
-                x2: cx(node.col),
-                y2: cy(node.row) - 28, // top of child ring
-                state,
-                key: `${preId}-${node.id}`,
-            })
+            const x1 = cx(parent.col)
+            const y1 = cy(parent.row) + 28 // bottom of parent ring
+            const x2 = cx(node.col)
+            const y2 = cy(node.row) - 28   // top of child ring
+
+            // Cubic bezier: vertical ease-out from parent, ease-in to child
+            const midY = (y1 + y2) / 2
+            const path = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`
+
+            paths.push({ path, state, key: `${preId}-${node.id}` })
         }
     }
-    return lines
+    return paths
 })
 </script>
 
 <template>
     <div class="tree-canvas" :style="{ width: canvasW + 'px', height: canvasH + 'px' }">
-        <!-- SVG connection lines -->
+        <!-- SVG connection paths -->
         <svg class="tree-lines" :viewBox="`0 0 ${canvasW} ${canvasH}`" :width="canvasW" :height="canvasH">
-            <line v-for="conn in connections" :key="conn.key" :x1="conn.x1" :y1="conn.y1" :x2="conn.x2" :y2="conn.y2"
-                :class="`line-${conn.state}`" />
+            <defs>
+                <linearGradient id="grad-purchased" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--t-success)" stop-opacity="0.8" />
+                    <stop offset="100%" stop-color="var(--t-success)" stop-opacity="0.5" />
+                </linearGradient>
+            </defs>
+            <path v-for="conn in connections" :key="conn.key" :d="conn.path" :class="`conn-${conn.state}`"
+                fill="none" />
         </svg>
 
         <!-- Node buttons -->
@@ -132,25 +137,36 @@ const connections = computed<Connection[]>(() => {
     pointer-events: none;
 }
 
-.tree-lines line {
-    stroke-width: 2;
+.tree-lines path {
+    stroke-width: 2.5;
     stroke-linecap: round;
+    transition:
+        stroke var(--t-transition-normal),
+        opacity var(--t-transition-normal);
 }
 
-.line-purchased {
+.conn-purchased {
     stroke: var(--t-success);
-    opacity: 0.7;
+    opacity: 0.65;
 }
 
-.line-available {
+.conn-available {
     stroke: var(--t-text-secondary);
-    opacity: 0.5;
+    opacity: 0.45;
+    stroke-dasharray: 8 4;
+    animation: dash-flow 1.5s linear infinite;
 }
 
-.line-locked {
+.conn-locked {
     stroke: var(--t-border);
-    stroke-dasharray: 6 4;
-    opacity: 0.35;
+    stroke-dasharray: 4 6;
+    opacity: 0.25;
+}
+
+@keyframes dash-flow {
+    to {
+        stroke-dashoffset: -24;
+    }
 }
 
 /* Node positioning */

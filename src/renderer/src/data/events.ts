@@ -372,5 +372,77 @@ export const EVENTS: GameEventDef[] = [
     ],
     icon: 'mdi:trending-down',
     category: 'economy'
+  },
+
+  // ─── Startup / Investment events ──────────────────────────────
+
+  {
+    id: 'startup_boom',
+    name: 'Startup Boom',
+    description: 'The venture capital scene is on fire! Startup success chances boosted.',
+    probability: 0.02,
+    durationTicks: 1800, // 3 minutes
+    effects: [{ type: 'startup_success_modifier', value: 0.08 }],
+    icon: 'mdi:rocket-launch',
+    category: 'market'
+  },
+  {
+    id: 'vc_winter',
+    name: 'VC Winter',
+    description: 'Investors are pulling back. Startup returns are lower than usual.',
+    probability: 0.015,
+    durationTicks: 2400, // 4 minutes
+    effects: [{ type: 'startup_return_modifier', value: -0.20 }],
+    icon: 'mdi:snowflake-alert',
+    category: 'market'
+  },
+  {
+    id: 'research_grant',
+    name: 'Research Grant',
+    description: 'A government research fund subsidises due diligence costs!',
+    probability: 0.02,
+    durationTicks: 1500, // 2.5 minutes
+    effects: [{ type: 'research_cost_modifier', value: -0.30 }],
+    icon: 'mdi:file-certificate',
+    category: 'opportunity'
+  },
+  {
+    id: 'unicorn_mania',
+    name: 'Unicorn Mania',
+    description: 'Everyone wants in on the next unicorn! Startup returns skyrocket.',
+    probability: 0.012,
+    durationTicks: 1200,
+    effects: [
+      { type: 'startup_return_modifier', value: 0.40 },
+      { type: 'startup_success_modifier', value: -0.05 }
+    ],
+    icon: 'mdi:unicorn-variant',
+    category: 'market'
+  },
+  {
+    id: 'due_diligence_leak',
+    name: 'Industry Insider Leak',
+    description: 'Insider intel surfaces — research is cheaper and more effective!',
+    probability: 0.015,
+    durationTicks: 900,
+    effects: [
+      { type: 'research_cost_modifier', value: -0.50 },
+      { type: 'startup_success_modifier', value: 0.04 }
+    ],
+    icon: 'mdi:account-voice',
+    category: 'opportunity'
+  },
+  {
+    id: 'tech_bubble_burst',
+    name: 'Tech Bubble Burst',
+    description: 'A wave of startup failures shakes investor confidence.',
+    probability: 0.01,
+    durationTicks: 2400,
+    effects: [
+      { type: 'startup_success_modifier', value: -0.10 },
+      { type: 'startup_return_modifier', value: -0.15 }
+    ],
+    icon: 'mdi:chart-bubble',
+    category: 'market'
   }
 ]

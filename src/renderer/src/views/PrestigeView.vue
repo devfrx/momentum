@@ -17,6 +17,7 @@ import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { gameEngine } from '@renderer/core/GameEngine'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import {
     PrestigePanel,
     PrestigeUpgradeCard,
@@ -354,6 +355,9 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
                 </TabPanel>
             </TabPanels>
         </Tabs>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="$t('prestige.info_title')" :description="$t('prestige.info_desc')" />
     </div>
 </template>
 

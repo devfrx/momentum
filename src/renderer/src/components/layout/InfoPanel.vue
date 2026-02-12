@@ -23,6 +23,8 @@ export interface InfoSection {
 defineProps<{
     /** Panel title */
     title?: string
+    /** Introductory description paragraph shown above sections */
+    description?: string
     /** Flat list of entries (if no sections needed) */
     entries?: InfoEntry[]
     /** Grouped sections */
@@ -44,6 +46,9 @@ const open = ref(false)
 
         <Transition name="info-slide">
             <div v-if="open" class="info-body">
+                <!-- Intro description -->
+                <p v-if="description" class="info-description">{{ description }}</p>
+
                 <!-- Flat entries (no sections) -->
                 <dl v-if="entries && entries.length && !sections" class="info-list">
                     <div v-for="e in entries" :key="e.term" class="info-entry">
@@ -134,6 +139,18 @@ const open = ref(false)
 .info-body {
     padding: 0 var(--t-space-4) var(--t-space-4);
     border-top: 1px solid var(--t-border);
+}
+
+/* ── Description ── */
+.info-description {
+    margin: var(--t-space-3) 0 var(--t-space-2);
+    padding: var(--t-space-3) var(--t-space-4);
+    font-size: var(--t-font-size-sm);
+    line-height: 1.65;
+    color: var(--t-text-secondary);
+    background: var(--t-bg-muted);
+    border-radius: var(--t-radius-md);
+    border-left: 3px solid var(--t-accent);
 }
 
 /* ── Section ── */

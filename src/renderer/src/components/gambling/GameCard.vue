@@ -28,245 +28,274 @@ defineEmits<{ play: [] }>()
 </script>
 
 <template>
-    <div class="game-card item-card" :style="{ '--card-accent': accent }">
-        <!-- Accent stripe -->
-        <div class="card-stripe"></div>
+    <div class="game-card" :style="{ '--_accent': accent }">
 
-        <!-- Header: icon + name + category -->
-        <div class="card-head">
-            <div class="icon-box">
-                <AppIcon :icon="icon" class="game-icon" />
-            </div>
-            <div class="head-info">
-                <h3 class="game-name">{{ name }}</h3>
-                <div class="tag-row">
-                    <span class="category-tag">{{ category }}</span>
-                    <template v-if="Array.isArray(luckMechanic) ? luckMechanic.length : luckMechanic">
-                        <span v-for="m in (Array.isArray(luckMechanic) ? luckMechanic : [luckMechanic])" :key="m"
-                            class="luck-tag luck-yes">
-                            <AppIcon icon="mdi:clover" class="luck-icon" />
-                            {{ m }}
-                        </span>
-                    </template>
-                    <span v-else class="luck-tag luck-no">
-                        <AppIcon icon="mdi:dice-multiple" class="luck-icon" />
-                        {{ $t('gambling.pure_rng') }}
-                    </span>
+        <!-- Top row: icon + name + category badge -->
+        <div class="game-card__head">
+            <AppIcon :icon="icon" class="game-card__icon" />
+            <div class="game-card__identity">
+                <div class="game-card__name-row">
+                    <span class="game-card__name">{{ name }}</span>
                 </div>
+                <span class="game-card__tagline">{{ description }}</span>
             </div>
+            <span class="game-card__stage">{{ category }}</span>
         </div>
 
-        <!-- Description -->
-        <p class="game-desc">{{ description }}</p>
-
-        <!-- Odds / Payout badges -->
-        <div class="info-row">
-            <div class="info-tile">
-                <span class="info-lbl">{{ $t('gambling.odds_label') }}</span>
-                <span class="info-val">{{ odds }}</span>
-            </div>
-            <div class="info-tile">
-                <span class="info-lbl">{{ $t('gambling.payout_label') }}</span>
-                <span class="info-val">{{ payout }}</span>
-            </div>
-        </div>
-
-        <!-- Win / Loss record -->
-        <div class="record-row">
-            <template v-if="gamesPlayed > 0">
-                <span class="rec positive">W {{ wins }}</span>
-                <span class="rec-dot">·</span>
-                <span class="rec negative">L {{ losses }}</span>
-                <span class="rec-dot">·</span>
-                <span class="rec" :class="isProfitable ? 'positive' : 'negative'">{{ netProfit }}</span>
+        <!-- Meta row: luck mechanic tags -->
+        <div class="game-card__meta">
+            <template v-if="Array.isArray(luckMechanic) ? luckMechanic.length : luckMechanic">
+                <span v-for="m in (Array.isArray(luckMechanic) ? luckMechanic : [luckMechanic])" :key="m"
+                    class="game-card__trait game-card__trait--pos">
+                    <AppIcon icon="mdi:clover" />
+                    {{ m }}
+                </span>
             </template>
-            <span v-else class="rec text-muted">{{ $t('gambling.no_games_yet') }}</span>
+            <span v-else class="game-card__trait game-card__trait--neutral">
+                <AppIcon icon="mdi:dice-multiple" />
+                {{ $t('gambling.pure_rng') }}
+            </span>
         </div>
 
-        <!-- Play -->
-        <Button :label="$t('gambling.play')" class="play-btn" @click="$emit('play')" />
+        <!-- Stats grid: odds / payout / record -->
+        <div class="game-card__stats">
+            <div class="game-card__kpi">
+                <span class="game-card__kpi-label">{{ $t('gambling.odds_label') }}</span>
+                <span class="game-card__kpi-value game-card__kpi-value--blue">{{ odds }}</span>
+            </div>
+            <div class="game-card__kpi">
+                <span class="game-card__kpi-label">{{ $t('gambling.payout_label') }}</span>
+                <span class="game-card__kpi-value game-card__kpi-value--green">{{ payout }}</span>
+            </div>
+            <div class="game-card__kpi">
+                <span class="game-card__kpi-label">{{ $t('gambling.record_label', 'Record') }}</span>
+                <template v-if="gamesPlayed > 0">
+                    <span class="game-card__kpi-value"
+                        :class="isProfitable ? 'game-card__kpi-value--green' : 'game-card__kpi-value--red'">
+                        {{ wins }}W / {{ losses }}L
+                    </span>
+                </template>
+                <span v-else class="game-card__kpi-value game-card__kpi-value--muted">—</span>
+            </div>
+        </div>
+
+        <!-- Net profit (if played) -->
+        <div v-if="gamesPlayed > 0" class="game-card__net">
+            <span class="game-card__net-label">{{ $t('gambling.net') }}</span>
+            <span class="game-card__net-value" :class="isProfitable ? 'positive' : 'negative'">{{ netProfit }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="game-card__actions">
+            <Button :label="$t('gambling.play')" icon="pi pi-play" size="small"
+                class="game-card__btn game-card__btn--primary" @click="$emit('play')" />
+        </div>
     </div>
 </template>
 
 <style scoped>
+/* ─── Card shell (matches opp-card) ─── */
 .game-card {
+    --_accent: var(--t-accent);
+    position: relative;
     display: flex;
     flex-direction: column;
-    padding: 0;
-    overflow: hidden;
+    gap: var(--t-space-3);
+    padding: var(--t-space-4) var(--t-space-4) var(--t-space-4) calc(var(--t-space-4) + 4px);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    box-shadow: var(--t-shadow-sm);
+    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
     cursor: pointer;
-    transition:
-        border-color var(--t-transition-normal),
-        box-shadow var(--t-transition-normal),
-        transform var(--t-transition-normal);
 }
+
+/* .game-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    left: -1px;
+    width: 4px;
+    border-radius: var(--t-radius-md) 0 0 var(--t-radius-md);
+    background: var(--_accent);
+} */
 
 .game-card:hover {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--card-accent) 25%, transparent);
-    transform: translateY(-2px);
+    border-color: var(--t-border-hover);
+    box-shadow: var(--t-shadow-sm);
 }
 
-/* Accent top stripe */
-.card-stripe {
-    height: 3px;
-    background: var(--card-accent, var(--t-accent));
-}
-
-/* ── Header ─────────────────────────────── */
-.card-head {
+/* ─── Head ─── */
+.game-card__head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--t-space-3);
-    padding: var(--t-space-4) var(--t-space-5) 0;
 }
 
-.icon-box {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--t-radius-md);
-    background: color-mix(in srgb, var(--card-accent, var(--t-accent)) 12%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background var(--t-transition-normal);
-}
-
-.game-card:hover .icon-box {
-    background: color-mix(in srgb, var(--card-accent, var(--t-accent)) 20%, transparent);
-}
-
-.game-icon {
+.game-card__icon {
     font-size: 1.5rem;
-    color: var(--card-accent, var(--t-text-secondary));
+    color: var(--_accent);
+    flex-shrink: 0;
+    margin-top: 1px;
 }
 
-.head-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
+.game-card__identity {
+    flex: 1;
     min-width: 0;
 }
 
-.game-name {
-    font-size: var(--t-font-size-lg);
-    font-weight: 700;
-    color: var(--t-text);
-    margin: 0;
+.game-card__name-row {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+}
+
+.game-card__name {
+    font-weight: 600;
+    font-size: var(--t-font-size-base);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.tag-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-}
-
-.category-tag {
+.game-card__tagline {
+    display: block;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
     color: var(--t-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
 }
 
-.luck-tag {
+.game-card__stage {
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--_accent) 12%, transparent);
+    color: var(--_accent);
+}
+
+/* ─── Meta / Traits ─── */
+.game-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
+}
+
+.game-card__trait {
     display: inline-flex;
     align-items: center;
-    gap: 0.2rem;
-    font-size: 0.6rem;
-    font-weight: 600;
-    padding: 0.1rem 0.4rem;
-    border-radius: var(--t-radius-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1.3;
+    gap: 3px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
-.luck-icon {
-    font-size: 0.65rem;
+.game-card__trait--pos {
+    background: var(--t-success-muted);
+    color: var(--t-success);
 }
 
-.luck-yes {
-    background: color-mix(in srgb, #22c55e 15%, transparent);
-    color: #22c55e;
-    border: 1px solid color-mix(in srgb, #22c55e 25%, transparent);
-}
-
-.luck-no {
+.game-card__trait--neutral {
     background: color-mix(in srgb, var(--t-text-muted) 10%, transparent);
     color: var(--t-text-muted);
-    border: 1px solid color-mix(in srgb, var(--t-text-muted) 15%, transparent);
 }
 
-/* ── Description ────────────────────────── */
-.game-desc {
-    font-size: var(--t-font-size-sm);
-    color: var(--t-text-secondary);
-    line-height: 1.5;
-    padding: 0 var(--t-space-5);
-    margin: var(--t-space-3) 0;
-}
-
-/* ── Odds / Payout tiles ────────────────── */
-.info-row {
-    display: flex;
-    gap: var(--t-space-2);
-    padding: 0 var(--t-space-5);
-    margin-bottom: var(--t-space-3);
-}
-
-.info-tile {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--t-space-2) var(--t-space-3);
+/* ─── Stats grid ─── */
+.game-card__stats {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: var(--t-space-3);
+    padding: var(--t-space-3);
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-sm);
 }
 
-.info-lbl {
+.game-card__kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.game-card__kpi:not(:first-child) {
+    text-align: right;
+    padding-left: var(--t-space-3);
+    border-left: 1px solid var(--t-border);
+}
+
+.game-card__kpi-label {
     font-size: 0.65rem;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     color: var(--t-text-muted);
 }
 
-.info-val {
+.game-card__kpi-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
     font-size: var(--t-font-size-sm);
-    color: var(--t-text);
+    font-weight: 600;
 }
 
-/* ── W / L record ───────────────────────── */
-.record-row {
+.game-card__kpi-value--gold {
+    color: var(--t-warning);
+}
+
+.game-card__kpi-value--blue {
+    color: var(--t-info);
+}
+
+.game-card__kpi-value--green {
+    color: var(--t-success);
+}
+
+.game-card__kpi-value--red {
+    color: var(--t-danger);
+}
+
+.game-card__kpi-value--muted {
+    color: var(--t-text-muted);
+}
+
+/* ─── Net profit row ─── */
+.game-card__net {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: 0 var(--t-space-5);
-    margin-bottom: var(--t-space-4);
-    font-size: var(--t-font-size-sm);
-    font-family: var(--t-font-mono);
-    min-height: 1.4rem;
+    font-size: var(--t-font-size-xs);
 }
 
-.rec {
-    font-weight: 600;
-}
-
-.rec-dot {
+.game-card__net-label {
     color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-/* ── Play button ────────────────────────── */
-.play-btn {
-    margin: 0 var(--t-space-5) var(--t-space-5);
+.game-card__net-value {
+    font-family: var(--t-font-mono);
+    font-weight: 600;
+    font-size: var(--t-font-size-sm);
+}
+
+/* ─── Actions ─── */
+.game-card__actions {
+    display: flex;
+    gap: var(--t-space-2);
+    justify-content: flex-end;
     margin-top: auto;
+}
+
+.game-card__btn {
+    font-size: var(--t-font-size-xs) !important;
+}
+
+.game-card__btn--primary {
+    font-weight: 600;
 }
 </style>

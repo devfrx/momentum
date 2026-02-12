@@ -25,7 +25,7 @@ defineEmits<{ buy: [] }>()
 
 <template>
     <div class="skill-panel" :style="{ '--panel-accent': accent }">
-        <!-- Header -->
+        <!-- Header with accent left border -->
         <div class="panel-header">
             <div class="panel-icon-box">
                 <AppIcon :icon="icon" class="panel-icon" />
@@ -40,8 +40,15 @@ defineEmits<{ buy: [] }>()
                     <AppIcon icon="mdi:lock" />
                     {{ $t('common.locked') }}
                 </span>
+                <span v-else class="panel-badge available-badge">
+                    <AppIcon icon="mdi:lock-open-variant" />
+                    {{ $t('skilltree.available') }}
+                </span>
             </div>
         </div>
+
+        <!-- Divider -->
+        <div class="panel-divider" />
 
         <!-- Description -->
         <p class="panel-desc">{{ description }}</p>
@@ -81,6 +88,10 @@ defineEmits<{ buy: [] }>()
                 :icon="available ? 'pi pi-lock-open' : 'pi pi-lock'"
                 :severity="available && canAfford ? undefined : 'secondary'" :disabled="!available || !canAfford"
                 class="w-full" @click="$emit('buy')" />
+            <div v-else class="panel-owned-indicator">
+                <AppIcon icon="mdi:check-decagram" />
+                <span>{{ $t('skilltree.purchased') }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -89,6 +100,7 @@ defineEmits<{ buy: [] }>()
 .skill-panel {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
+    /* border-left: 3px solid var(--panel-accent, var(--t-accent)); */
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-5);
     box-shadow: var(--t-shadow-sm);
@@ -97,7 +109,6 @@ defineEmits<{ buy: [] }>()
     gap: var(--t-space-4);
     min-width: 260px;
     max-width: 320px;
-    /* Smooth scrollbar for internal overflow */
     scrollbar-width: thin;
     scrollbar-color: var(--t-border) transparent;
 }
@@ -151,8 +162,19 @@ defineEmits<{ buy: [] }>()
     color: var(--t-success);
 }
 
+.available-badge {
+    color: var(--panel-accent, var(--t-accent));
+}
+
 .locked-badge {
     color: var(--t-text-muted);
+}
+
+/* ── Divider ─────────────────────────── */
+.panel-divider {
+    height: 1px;
+    background: var(--t-border);
+    margin: 0 calc(var(--t-space-1) * -1);
 }
 
 /* ── Description ─────────────────────── */
@@ -188,6 +210,7 @@ defineEmits<{ buy: [] }>()
     padding: var(--t-space-2) var(--t-space-3);
     background: var(--t-success-muted);
     border-radius: var(--t-radius-sm);
+    border: 1px solid color-mix(in srgb, var(--t-success) 15%, transparent);
 }
 
 .effect-icon {
@@ -204,14 +227,17 @@ defineEmits<{ buy: [] }>()
     padding: var(--t-space-2) var(--t-space-3);
     border-radius: var(--t-radius-sm);
     background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
 }
 
 .panel-cost.affordable {
     color: var(--t-success);
+    border-color: color-mix(in srgb, var(--t-success) 20%, transparent);
 }
 
 .panel-cost.expensive {
     color: var(--t-danger);
+    border-color: color-mix(in srgb, var(--t-danger) 20%, transparent);
 }
 
 /* ── Prerequisites ───────────────────── */
@@ -236,5 +262,19 @@ defineEmits<{ buy: [] }>()
 /* ── Action ──────────────────────────── */
 .panel-action {
     margin-top: auto;
+}
+
+.panel-owned-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-success-muted);
+    border: 1px solid color-mix(in srgb, var(--t-success) 20%, transparent);
+    border-radius: var(--t-radius-sm);
+    font-size: var(--t-font-size-sm);
+    font-weight: 600;
+    color: var(--t-success);
 }
 </style>

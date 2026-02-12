@@ -269,9 +269,9 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                                 <span>{{ $t('deposits.apy_label') }} {{ (entry.effectiveAPY * 100).toFixed(1) }}%</span>
                                 <span v-if="entry.earlyWithdrawal" class="text-warning">{{
                                     $t('deposits.early_withdrawal', { penalty: formatCash(entry.penaltyPaid) })
-                                }}</span>
-                                <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
                                     }}</span>
+                                <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -305,7 +305,8 @@ const depositInfoSections = computed<InfoSection[]>(() => [
         </div>
 
         <!-- InfoPanel -->
-        <InfoPanel :title="$t('deposits.how_it_works')" :sections="depositInfoSections" />
+        <InfoPanel :title="$t('deposits.how_it_works')" :description="$t('deposits.info_desc')"
+            :sections="depositInfoSections" />
 
         <!-- Open Deposit Dialog -->
         <Dialog v-model:visible="showOpenDialog" modal :header="$t('deposits.open_title')" :style="{ width: '450px' }">
@@ -332,7 +333,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                     <div class="term-row">
                         <span>{{ $t('deposits.effective_apy') }}</span>
                         <strong class="text-success">{{ (depositStore.getModifiedAPY(selectedDeposit) * 100).toFixed(2)
-                            }}%</strong>
+                        }}%</strong>
                     </div>
                     <div class="term-row">
                         <span>{{ $t('deposits.term') }}</span>

@@ -611,9 +611,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                                }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                         }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                                }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -631,7 +631,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                        }}%</span>
+                            }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -656,6 +656,7 @@ const multiplierInfo = computed(() => {
                     <Button :label="t('dev.plus_100_ticks')" severity="secondary" size="small"
                         @click="fastForward(100)" />
                     <Button :label="t('dev.plus_1000_ticks')" severity="warn" size="small" @click="fastForward(1000)" />
+                    <Button label="+10K ticks" severity="danger" size="small" @click="fastForward(10000)" />
                 </div>
             </section>
 
@@ -746,14 +747,14 @@ const multiplierInfo = computed(() => {
                 </div>
                 <div class="debug-row">
                     <span>Divine Abilities: <strong class="text-gold">{{ gambling.divineAbilities.length }} / {{
-                            DIVINE_ABILITIES.length }}</strong></span>
+                        DIVINE_ABILITIES.length }}</strong></span>
                     <span>Lottery Wins: <strong>{{ Object.keys(gambling.lotteryWins).length }}</strong></span>
                 </div>
                 <div v-if="gambling.divineAbilities.length > 0" class="startup-debug-opps">
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                            }}</span>
+                        }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
                 </div>

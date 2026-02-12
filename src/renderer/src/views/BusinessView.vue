@@ -174,7 +174,8 @@ function buyBusiness(defId: string): void {
         </div>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('business.info_title')" :sections="businessInfoSections" />
+        <InfoPanel :title="$t('business.info_title')" :description="$t('business.info_desc')"
+            :sections="businessInfoSections" />
     </div>
 </template>
 

@@ -4,6 +4,7 @@ import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import { SKILL_TREE_META } from '@renderer/data/upgrades'
 import { SkillTreeGraph, SkillTreePanel } from '@renderer/components/skilltree'
 import type { GraphNode } from '@renderer/components/skilltree/SkillTreeGraph.vue'
@@ -13,7 +14,7 @@ const player = usePlayerStore()
 const { formatCash } = useFormat()
 
 // ─── Active tab (category) ──────────────────────────────────
-type CategoryId = typeof SKILL_TREE_META[number]['id']
+type CategoryId = (typeof SKILL_TREE_META)[number]['id']
 const activeTab = ref<CategoryId>(SKILL_TREE_META[0].id)
 
 // ─── Selected node for detail panel ─────────────────────────
@@ -60,6 +61,12 @@ function totalInCategory(catId: string): number {
     return upgrades.nodes.filter((n) => n.category === catId).length
 }
 
+function categoryProgress(catId: string): number {
+    const total = totalInCategory(catId)
+    if (total === 0) return 0
+    return (purchasedInCategory(catId) / total) * 100
+}
+
 // ─── Selected node prereqs detail ───────────────────────────
 const selectedPrereqs = computed(() => {
     if (!selectedNode.value) return []
@@ -68,6 +75,9 @@ const selectedPrereqs = computed(() => {
         return { name: pre?.name ?? preId, met: pre?.purchased ?? false }
     })
 })
+
+// ─── Active category meta ───────────────────────────────────
+const activeMeta = computed(() => SKILL_TREE_META.find((m) => m.id === activeTab.value)!)
 
 // ─── Actions ────────────────────────────────────────────────
 function selectNode(id: string): void {
@@ -107,21 +117,50 @@ function buySelected(): void {
             </div>
         </div>
 
-        <!-- Category Tabs -->
-        <div class="tree-tabs">
-            <button v-for="meta in SKILL_TREE_META" :key="meta.id" class="tree-tab"
-                :class="{ active: activeTab === meta.id }" :style="{ '--tab-accent': meta.accent }"
+        <!-- Category Selector -->
+        <div class="st-categories">
+            <button v-for="meta in SKILL_TREE_META" :key="meta.id" class="st-cat-btn"
+                :class="{ active: activeTab === meta.id }" :style="{ '--_cat-accent': meta.accent }"
                 @click="activeTab = meta.id; selectedId = null">
-                <AppIcon :icon="meta.icon" class="tab-icon" />
-                <span class="tab-label">{{ meta.name }}</span>
-                <span class="tab-counter">{{ purchasedInCategory(meta.id) }}/{{ totalInCategory(meta.id) }}</span>
+                <div class="st-cat-icon-wrap">
+                    <AppIcon :icon="meta.icon" class="st-cat-icon" />
+                </div>
+                <div class="st-cat-info">
+                    <span class="st-cat-name">{{ meta.name }}</span>
+                    <div class="st-cat-progress-row">
+                        <div class="st-cat-progress-bar">
+                            <div class="st-cat-progress-fill" :style="{ width: categoryProgress(meta.id) + '%' }" />
+                        </div>
+                        <span class="st-cat-counter">{{ purchasedInCategory(meta.id) }}/{{
+                            totalInCategory(meta.id) }}</span>
+                    </div>
+                </div>
             </button>
         </div>
 
+        <!-- Active Category Header -->
+        <div class="st-active-header" :style="{ '--_active-accent': activeMeta.accent }">
+            <AppIcon :icon="activeMeta.icon" class="st-active-icon" />
+            <div class="st-active-info">
+                <h2 class="st-active-name">{{ activeMeta.name }}</h2>
+                <span class="st-active-stats">{{ purchasedInCategory(activeMeta.id) }} / {{
+                    totalInCategory(activeMeta.id) }} {{ $t('skilltree.unlocked').toLowerCase() }}</span>
+            </div>
+            <div class="st-active-progress-ring">
+                <svg viewBox="0 0 40 40" class="st-ring-svg">
+                    <circle cx="20" cy="20" r="17" fill="none" stroke="var(--t-border)" stroke-width="3" />
+                    <circle cx="20" cy="20" r="17" fill="none" stroke="var(--_active-accent)" stroke-width="3"
+                        stroke-linecap="round" :stroke-dasharray="`${categoryProgress(activeMeta.id) * 1.068} 200`"
+                        transform="rotate(-90 20 20)" class="st-ring-progress" />
+                </svg>
+                <span class="st-ring-pct">{{ Math.round(categoryProgress(activeMeta.id)) }}%</span>
+            </div>
+        </div>
+
         <!-- Tree + Panel Layout -->
-        <div class="tree-layout">
+        <div class="st-workspace">
             <!-- Graph for active category -->
-            <div class="tree-scroll">
+            <div class="st-graph-scroll">
                 <SkillTreeGraph v-for="meta in SKILL_TREE_META" v-show="activeTab === meta.id" :key="meta.id"
                     :nodes="graphNodesForCategory(meta.id)" :selected-id="selectedId" :accent="meta.accent"
                     @select="selectNode" />
@@ -129,110 +168,241 @@ function buySelected(): void {
 
             <!-- Detail Panel -->
             <Transition name="panel-slide">
-                <SkillTreePanel v-if="selectedNode" :key="selectedNode.id" :name="selectedNode.name"
-                    :description="selectedNode.description" :effect-description="selectedNode.effectDescription"
-                    :icon="selectedNode.icon" :cost="formatCash(upgrades.getNodeCost(selectedNode.id))"
-                    :purchased="selectedNode.purchased"
+                <SkillTreePanel v-if="selectedNode" :name="selectedNode.name" :description="selectedNode.description"
+                    :effect-description="selectedNode.effectDescription" :icon="selectedNode.icon"
+                    :cost="formatCash(upgrades.getNodeCost(selectedNode.id))" :purchased="selectedNode.purchased"
                     :available="!selectedNode.purchased && arePrereqsMet(selectedNode)"
                     :can-afford="player.cash.gte(upgrades.getNodeCost(selectedNode.id))" :prereqs="selectedPrereqs"
-                    :accent="SKILL_TREE_META.find(m => m.id === activeTab)?.accent ?? 'var(--t-text-secondary)'"
-                    @buy="buySelected" />
+                    :accent="activeMeta.accent" @buy="buySelected" />
             </Transition>
         </div>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="$t('skilltree.info_title')" :description="$t('skilltree.info_desc')" />
     </div>
 </template>
 
 <style scoped>
-/* ── Category tabs ───────────────────── */
-.tree-tabs {
+/* ═══════════════════════════════════════════════════════════════════
+   CATEGORY SELECTOR — Horizontal cards with progress bars
+   ═══════════════════════════════════════════════════════════════════ */
+.st-categories {
     display: flex;
     gap: var(--t-space-2);
     overflow-x: auto;
     padding-bottom: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--t-border) transparent;
 }
 
-.tree-tab {
-    display: inline-flex;
+.st-cat-btn {
+    display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
+    gap: var(--t-space-3);
+    padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    font-size: var(--t-font-size-sm);
-    font-weight: 600;
     cursor: pointer;
-    white-space: nowrap;
+    min-width: 175px;
     transition:
         background var(--t-transition-normal),
         border-color var(--t-transition-normal),
-        color var(--t-transition-normal);
+        box-shadow var(--t-transition-normal);
 }
 
-.tree-tab:hover {
+.st-cat-btn:hover {
     border-color: var(--t-border-hover);
+    background: var(--t-bg-card-hover);
+}
+
+.st-cat-btn.active {
+    border-color: var(--_cat-accent, var(--t-accent));
+    background: color-mix(in srgb, var(--_cat-accent, var(--t-accent)) 6%, var(--t-bg-card));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_cat-accent, var(--t-accent)) 20%, transparent);
+}
+
+.st-cat-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--t-radius-sm);
+    background: color-mix(in srgb, var(--_cat-accent, var(--t-accent)) 12%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.st-cat-icon {
+    font-size: 1.15rem;
+    color: var(--_cat-accent, var(--t-accent));
+}
+
+.st-cat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.st-cat-name {
+    font-size: var(--t-font-size-sm);
+    font-weight: 600;
     color: var(--t-text);
+    white-space: nowrap;
 }
 
-.tree-tab.active {
-    border-color: var(--tab-accent, var(--t-accent));
-    color: var(--t-text);
-    background: color-mix(in srgb, var(--tab-accent, var(--t-accent)) 8%, var(--t-bg-card));
+.st-cat-progress-row {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
 }
 
-.tab-icon {
-    font-size: 1.1rem;
+.st-cat-progress-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--t-bg-muted);
+    overflow: hidden;
 }
 
-.tab-label {
-    /* visible on md+ */
+.st-cat-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--_cat-accent, var(--t-accent));
+    transition: width 0.3s ease;
 }
 
-.tab-counter {
+.st-cat-counter {
     font-size: var(--t-font-size-xs);
     font-family: var(--t-font-mono);
     color: var(--t-text-muted);
+    white-space: nowrap;
 }
 
-/* ── Layout ──────────────────────────── */
-.tree-layout {
+/* ═══════════════════════════════════════════════════════════════════
+   ACTIVE CATEGORY HEADER — bar with icon, name, and progress ring
+   ═══════════════════════════════════════════════════════════════════ */
+.st-active-header {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-4);
+    padding: var(--t-space-4) var(--t-space-5);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    /* border-left: 3px solid var(--_active-accent, var(--t-accent)); */
+}
+
+.st-active-icon {
+    font-size: 1.5rem;
+    color: var(--_active-accent, var(--t-accent));
+}
+
+.st-active-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.st-active-name {
+    font-size: var(--t-font-size-lg);
+    font-weight: 700;
+    color: var(--t-text);
+    margin: 0;
+}
+
+.st-active-stats {
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ── Progress ring ── */
+.st-active-progress-ring {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+
+.st-ring-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.st-ring-progress {
+    transition: stroke-dasharray 0.4s ease;
+}
+
+.st-ring-pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: var(--t-font-mono);
+    color: var(--t-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WORKSPACE — Graph + Panel side by side
+   ═══════════════════════════════════════════════════════════════════ */
+.st-workspace {
     display: flex;
     gap: var(--t-space-5);
     flex: 1;
-    min-height: 0;
+    min-height: 400px;
+    max-height: calc(100vh - 320px);
     position: relative;
+    overflow: hidden;
 }
 
-.tree-scroll {
+.st-graph-scroll {
     flex: 1;
     overflow: auto;
     display: flex;
     justify-content: center;
     padding: var(--t-space-4) 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--t-scrollbar-thumb) var(--t-scrollbar-track);
 }
 
 /* Keep the panel fixed on right side */
-.tree-layout> :deep(.skill-panel) {
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    max-height: calc(100vh - 280px);
+.st-workspace> :deep(.skill-panel) {
+    align-self: stretch;
     overflow-y: auto;
     flex-shrink: 0;
+    max-height: 100%;
 }
 
-/* ── Panel slide transition ──────────── */
-.panel-slide-enter-active,
+/* ═══════════════════════════════════════════════════════════════════
+   PANEL SLIDE TRANSITION
+   ═══════════════════════════════════════════════════════════════════ */
+.panel-slide-enter-active {
+    transition:
+        opacity 0.25s ease-out,
+        transform 0.25s ease-out;
+}
+
 .panel-slide-leave-active {
     transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
+        opacity 0.15s ease-in,
+        transform 0.15s ease-in;
 }
 
-.panel-slide-enter-from,
+.panel-slide-enter-from {
+    opacity: 0;
+    transform: translateX(16px);
+}
+
 .panel-slide-leave-to {
     opacity: 0;
-    transform: translateX(12px);
+    transform: translateX(10px);
 }
 </style>

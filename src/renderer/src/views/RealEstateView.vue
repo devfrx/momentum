@@ -229,7 +229,8 @@ function buyProperty(def: (typeof PROPERTIES)[number]): void {
         </div>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('realestate.info_title')" :sections="realEstateInfoSections" />
+        <InfoPanel :title="$t('realestate.info_title')" :description="$t('realestate.info_desc')"
+            :sections="realEstateInfoSections" />
     </div>
 </template>
 
