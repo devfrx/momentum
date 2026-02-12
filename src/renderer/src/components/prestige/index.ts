@@ -1,0 +1,6 @@
+export { default as PrestigePanel } from './PrestigePanel.vue'
+export { default as PrestigeUpgradeCard } from './PrestigeUpgradeCard.vue'
+export { default as EraProgress } from './EraProgress.vue'
+export { default as MilestoneCard } from './MilestoneCard.vue'
+export { default as PerkCard } from './PerkCard.vue'
+export { default as PrestigeStats } from './PrestigeStats.vue'
