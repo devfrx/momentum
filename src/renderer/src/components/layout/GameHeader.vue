@@ -1,47 +1,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
 import { usePrestigeStore } from '@renderer/stores/usePrestigeStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import { useFormat } from '@renderer/composables/useFormat'
-import { useMultipliers, type CategoryBreakdown } from '@renderer/composables/useMultipliers'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import MultiplierBreakdownPanel from '@renderer/components/MultiplierBreakdownPanel.vue'
 
-const route = useRoute()
 const player = usePlayerStore()
 const business = useBusinessStore()
 const prestige = usePrestigeStore()
 const settings = useSettingsStore()
 const { formatCash, formatNumber, formatMultiplier } = useFormat()
-const { breakdowns } = useMultipliers()
-
-// ─── Route-to-Multiplier Mapping ─────────────────────────────
-// Maps each route to the multiplier categories relevant to that page
-// Includes multipliers from: Skill Tree, Prestige, Events, Achievements
-const ROUTE_MULTIPLIERS: Record<string, string[]> = {
-    dashboard: ['all_income', 'offline_efficiency'],
-    business: ['business_revenue', 'job_efficiency', 'cost_reduction', 'customer_attraction', 'all_income'],
-    stocks: ['stock_returns', 'all_income'],
-    crypto: ['crypto_returns', 'all_income'],
-    realestate: ['real_estate_rent', 'all_income'],
-    investments: ['startup_success', 'all_income'],
-    loans: ['loan_rate'],
-    deposits: ['deposit_rate', 'all_income'],
-    gambling: ['gambling_luck', 'all_income'],
-    skills: ['xp_gain'],
-    prestige: ['prestige_gain', 'all_income'],
-    settings: ['offline_efficiency'],
-}
-
-/** Get relevant multiplier breakdowns for current page */
-const pageMultipliers = computed<CategoryBreakdown[]>(() => {
-    const routeName = String(route.name ?? 'dashboard')
-    const relevantIds = ROUTE_MULTIPLIERS[routeName] ?? ROUTE_MULTIPLIERS['dashboard']
-    return breakdowns.value.filter((b) => relevantIds.includes(b.category.id))
-})
 
 const showMultiplierPanel = ref(false)
 
@@ -79,49 +50,38 @@ function handleClose(): void {
             <span class="brand-text">{{ $t('header.brand') }}</span>
         </div>
 
-        <!-- HUD Stats -->
+        <!-- Hero: Primary Cash -->
+        <div class="hero-stat">
+            <span class="hero-value">{{ formatCash(player.cash) }}</span>
+            <span class="hero-profit">
+                <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
+                {{ formatCash(business.profitPerSecond) }}{{ $t('common.per_second') }}
+            </span>
+        </div>
+
+        <!-- Secondary Stats -->
         <div class="hud-stats">
-            <div class="hud-item primary-stat">
-                <span class="hud-value">{{ formatCash(player.cash) }}</span>
+            <div class="hud-chip" :title="$t('header.net_worth')">
+                <span class="hud-chip-label">{{ $t('header.net_worth') }}</span>
+                <span class="hud-chip-value">{{ formatCash(player.netWorth, 2) }}</span>
             </div>
 
-            <div class="hud-divider"></div>
-
-            <div class="hud-item">
-                <span class="hud-label">{{ $t('header.profit') }}</span>
-                <span class="hud-value success">{{ formatCash(business.profitPerSecond) }}{{ $t('common.per_second')
-                    }}</span>
+            <div class="hud-chip" :title="$t('header.prestige')">
+                <span class="hud-chip-label">{{ $t('header.prestige') }}</span>
+                <span class="hud-chip-value">{{ formatNumber(prestige.points) }}</span>
             </div>
 
-            <div class="hud-item">
-                <span class="hud-label">{{ $t('header.net_worth') }}</span>
-                <span class="hud-value">{{ formatCash(player.netWorth, 2) }}</span>
-            </div>
-
-            <div class="hud-item">
-                <span class="hud-label">{{ $t('header.prestige') }}</span>
-                <span class="hud-value">{{ formatNumber(prestige.points) }}</span>
-            </div>
-
-            <div class="hud-item clickable" @click="showMultiplierPanel = !showMultiplierPanel"
+            <div class="hud-chip clickable" @click="showMultiplierPanel = !showMultiplierPanel"
                 :title="$t('header.view_multipliers')">
-                <span class="hud-label">{{ $t('header.multi') }}</span>
-                <span class="hud-value">{{ formatMultiplier(prestige.globalMultiplier) }}</span>
+                <span class="hud-chip-label">{{ $t('header.multi') }}</span>
+                <span class="hud-chip-value accent">{{ formatMultiplier(prestige.globalMultiplier) }}</span>
                 <AppIcon icon="mdi:chevron-down" class="hud-chevron" />
             </div>
 
-            <!-- Page-specific multipliers -->
-            <div v-if="pageMultipliers.length > 0" class="hud-divider"></div>
-            <div v-for="pm in pageMultipliers" :key="pm.category.id" class="hud-item page-bonus"
-                :class="{ active: pm.hasBonus }" :title="$t(pm.category.labelKey)">
-                <AppIcon :icon="pm.category.icon" class="bonus-icon" />
-                <span class="bonus-value">{{ pm.totalFormatted }}</span>
-            </div>
-
-            <div class="hud-item level-item"
+            <div class="hud-chip level-chip"
                 :title="`${formatNumber(player.xp)} / ${formatNumber(player.xpToNextLevel)} XP`">
-                <span class="hud-label">{{ $t('common.level', { n: '' }) }}</span>
-                <span class="hud-value">{{ player.level }}</span>
+                <span class="hud-chip-label">{{ $t('common.level', { n: '' }) }}</span>
+                <span class="hud-chip-value">{{ player.level }}</span>
                 <div class="xp-bar">
                     <div class="xp-fill" :style="{ width: xpProgress + '%' }"></div>
                 </div>
@@ -130,7 +90,6 @@ function handleClose(): void {
 
         <!-- Actions -->
         <div class="header-actions">
-            <!-- Theme Toggle -->
             <button class="icon-btn" @click="toggleTheme"
                 :title="settings.theme === 'dark' ? $t('header.switch_light') : $t('header.switch_dark')">
                 <AppIcon :icon="settings.theme === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'" />
@@ -138,7 +97,6 @@ function handleClose(): void {
 
             <div class="header-divider"></div>
 
-            <!-- Window Controls -->
             <button class="icon-btn" @click="handleMinimize" :title="$t('header.minimize')">
                 <AppIcon icon="mdi:minus" />
             </button>
@@ -167,7 +125,7 @@ function handleClose(): void {
     z-index: 100;
     -webkit-app-region: drag;
     user-select: none;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .drag-region {
@@ -179,105 +137,137 @@ function handleClose(): void {
     -webkit-app-region: drag;
 }
 
-/* Brand */
+/* ─── Brand ─── */
 .brand {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     z-index: 1;
     -webkit-app-region: no-drag;
-    padding: 0 0.75rem 0 0.25rem;
-    border-right: 1px solid var(--t-border);
+    padding-right: 0.75rem;
     margin-right: 0.25rem;
 }
 
 .brand-icon {
-    font-size: 1.25rem;
-    color: var(--t-text);
+    font-size: 1.15rem;
+    color: var(--t-accent);
 }
 
 .brand-text {
     font-size: var(--t-font-size-base);
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: var(--t-text);
 }
 
-/* HUD Stats */
-.hud-stats {
+/* ─── Hero Cash (primary focus) ─── */
+.hero-stat {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    flex: 1;
+    gap: 0.6rem;
     z-index: 1;
     -webkit-app-region: no-drag;
-}
-
-.hud-item {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.hud-item.clickable {
-    cursor: pointer;
-    padding: 0.15rem 0.45rem;
-    border-radius: var(--t-radius-sm);
-    transition: background 0.15s;
-}
-
-.hud-item.clickable:hover {
-    background: var(--t-bg-muted);
-}
-
-.hud-chevron {
-    font-size: 0.7rem;
-    color: var(--t-text-muted);
-    margin-left: -0.1rem;
-}
-
-.hud-divider {
-    width: 1px;
-    height: 20px;
-    background: var(--t-border);
-}
-
-.primary-stat {
-    padding: 0.2rem 0.55rem;
+    padding: 0.2rem 0.65rem;
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-md);
     border: 1px solid var(--t-border);
 }
 
-.primary-stat .hud-icon {
-    font-size: 0.9rem;
-    color: var(--t-text-secondary);
-}
-
-.primary-stat .hud-value {
+.hero-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-base);
     font-weight: 700;
     color: var(--t-text);
+    letter-spacing: -0.02em;
 }
 
-.hud-label {
+.hero-profit {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
+    color: var(--t-success);
+}
+
+.hero-profit-icon {
+    font-size: 0.7rem;
+}
+
+/* ─── Secondary HUD Stats ─── */
+.hud-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    z-index: 1;
+    -webkit-app-region: no-drag;
+}
+
+.hud-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--t-radius-sm);
+    transition: background 0.15s;
+}
+
+.hud-chip.clickable {
+    cursor: pointer;
+}
+
+.hud-chip.clickable:hover {
+    background: var(--t-bg-muted);
+}
+
+.hud-chip-label {
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
+    white-space: nowrap;
 }
 
-.hud-value {
+.hud-chip-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
     font-weight: 600;
     color: var(--t-text-secondary);
+    white-space: nowrap;
 }
 
-.hud-value.success {
-    color: var(--t-success);
+.hud-chip-value.accent {
+    color: var(--t-accent);
 }
 
-/* Actions */
+.hud-chevron {
+    font-size: 0.65rem;
+    color: var(--t-text-muted);
+    margin-left: -0.05rem;
+}
+
+/* ─── Level + XP ─── */
+.level-chip {
+    margin-left: auto;
+}
+
+.xp-bar {
+    width: 44px;
+    height: 3px;
+    background: var(--t-bg-muted);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-left: 0.2rem;
+}
+
+.xp-fill {
+    height: 100%;
+    background: var(--t-accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* ─── Actions ─── */
 .header-actions {
     display: flex;
     align-items: center;
@@ -288,7 +278,7 @@ function handleClose(): void {
 
 .header-divider {
     width: 1px;
-    height: 20px;
+    height: 18px;
     background: var(--t-border);
     margin: 0 4px;
 }
@@ -305,7 +295,7 @@ function handleClose(): void {
     cursor: pointer;
     border-radius: var(--t-radius-sm);
     transition: all 0.1s;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .icon-btn:hover {
@@ -316,64 +306,5 @@ function handleClose(): void {
 .icon-btn.close:hover {
     background: #dc2626;
     color: white;
-}
-
-/* Level + XP Progress */
-.level-item {
-    position: relative;
-    padding-right: 0.25rem;
-}
-
-.xp-bar {
-    width: 50px;
-    height: 3px;
-    background: var(--t-bg-muted);
-    border-radius: 1px;
-    overflow: hidden;
-    margin-left: 0.25rem;
-}
-
-.xp-fill {
-    height: 100%;
-    background: var(--t-accent);
-    border-radius: 1px;
-    transition: width 0.3s ease;
-}
-
-/* Page-specific bonus chips */
-.page-bonus {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.15rem 0.4rem;
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-sm);
-    border: 1px solid transparent;
-    transition: all 0.15s;
-}
-
-.page-bonus.active {
-    background: color-mix(in srgb, var(--t-accent) 12%, transparent);
-    border-color: color-mix(in srgb, var(--t-accent) 25%, transparent);
-}
-
-.page-bonus .bonus-icon {
-    font-size: 0.85rem;
-    color: var(--t-text-muted);
-}
-
-.page-bonus.active .bonus-icon {
-    color: var(--t-accent);
-}
-
-.page-bonus .bonus-value {
-    font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    color: var(--t-text-muted);
-}
-
-.page-bonus.active .bonus-value {
-    color: var(--t-accent);
 }
 </style>

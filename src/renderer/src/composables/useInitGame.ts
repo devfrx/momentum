@@ -22,6 +22,7 @@ import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { D, hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
+import { gameEngine } from '@renderer/core/GameEngine'
 import { calculateOfflineProgress, type OfflineSummary } from '@renderer/core/OfflineCalc'
 import { Formulas } from '@renderer/core'
 
@@ -87,6 +88,13 @@ export function useInitGame() {
       if (result.success && result.data) {
         const save: SaveData = hydrateDecimals(result.data)
         console.log('[Init] Loading saved game:', save)
+
+        // Restore GameEngine tick counter and total play time so that
+        // tick-relative logic (real-estate appreciation, startup maturity, etc.)
+        // continues seamlessly after reload instead of resetting to 0.
+        if (typeof save.totalTicks === 'number' || typeof save.totalPlayTime === 'number') {
+          gameEngine.restore(save.totalTicks ?? 0, save.totalPlayTime ?? 0)
+        }
 
         // Restore player state
         if (save.player) {

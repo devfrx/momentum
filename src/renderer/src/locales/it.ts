@@ -56,6 +56,11 @@ export default {
     prestige: 'Prestigio',
     settings: 'Impostazioni',
     dev: 'Dev Cheats',
+    group_earn: 'Guadagna',
+    group_invest: 'Investi',
+    group_finance: 'Finanza',
+    group_fun: 'Svago',
+    group_progress: 'Progresso',
   },
 
   // ─── Header ───────────────────────────────────────────────────

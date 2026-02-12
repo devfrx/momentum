@@ -92,6 +92,16 @@ export class GameEngine {
     return this.totalTime
   }
 
+  /**
+   * Restore tick count and totalTime from a saved state.
+   * Must be called BEFORE start() so that subscribers see the
+   * correct cumulative tick numbers from the very first tick.
+   */
+  restore(savedTick: number, savedTotalTime: number): void {
+    this.tick = savedTick ?? 0
+    this.totalTime = savedTotalTime ?? 0
+  }
+
   // ─── Subscription ───────────────────────────────────────────────
 
   /**
