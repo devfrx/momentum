@@ -1,275 +1,228 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRealEstateStore, type Property } from '@renderer/stores/useRealEstateStore'
+import { useFormat } from '@renderer/composables/useFormat'
+import { getDistrict, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
-import { useFormat } from '@renderer/composables/useFormat'
-import { mul } from '@renderer/core/BigNum'
-import type { Property } from '@renderer/stores/useRealEstateStore'
-import type Decimal from 'break_infinity.js'
+import Tag from 'primevue/tag'
+import Slider from 'primevue/slider'
+import InputText from 'primevue/inputtext'
 
-const props = defineProps<{
-    property: Property
-    renovationCost: Decimal
-    canAffordRenovation: boolean
-    canAffordRepair: boolean
-}>()
+const { t } = useI18n()
+const realEstate = useRealEstateStore()
+const { formatCash, formatPercent } = useFormat()
 
+const props = defineProps<{ property: Property }>()
 const emit = defineEmits<{
-    repair: []
-    renovate: []
-    'set-rent': [multiplier: number]
-    rename: [name: string]
-    sell: []
+    (e: 'sold'): void
+    (e: 'open-improvements'): void
 }>()
 
-const { formatCash } = useFormat()
+const showRename = ref(false)
+const newName = ref('')
+const confirmSell = ref(false)
 
+const district = computed(() => getDistrict(props.property.districtId))
+const traits = computed(() => props.property.traits.map(tid => getTrait(tid)).filter(Boolean) as PropertyTrait[])
+const improvements = computed(() => props.property.improvements.map(id => getImprovement(id)).filter(Boolean) as ImprovementDef[])
+const netRent = computed(() => realEstate.computePropertyNetRent(props.property))
+const synergy = computed(() => realEstate.getDistrictSynergy(props.property.districtId))
 const displayName = computed(() => props.property.customName || props.property.name)
-const netPerSecond = computed(() => mul(props.property.netIncomePerTick, 10))
-const grossPerSecond = computed(() => mul(props.property.grossRentPerTick, 10))
-const expensesPerSecond = computed(() => mul(props.property.expensesPerTick, 10))
-const isProfitable = computed(() => props.property.netIncomePerTick.gte(0))
-const occupancyPct = computed(() => Math.round(props.property.occupancy * 100))
-const conditionPct = computed(() => Math.round(props.property.condition))
-const needsRepair = computed(() => props.property.condition < 70)
 
-// Condition bar color
-const conditionCls = computed(() => {
-    if (props.property.condition >= 80) return 'good'
-    if (props.property.condition >= 50) return 'warn'
-    return 'danger'
+const roi = computed(() => {
+    const purchase = props.property.purchasePrice.toNumber()
+    if (purchase <= 0) return 0
+    return (netRent.value.toNumber() * 10 * 3600 * 24 * 365) / purchase
 })
 
-// Occupancy bar color
-const occupancyCls = computed(() => {
-    if (props.property.occupancy >= 0.85) return 'good'
-    if (props.property.occupancy >= 0.5) return 'warn'
-    return 'danger'
+const conditionColor = computed(() => {
+    if (props.property.condition >= 80) return 'var(--t-success)'
+    if (props.property.condition >= 50) return 'var(--t-warning)'
+    if (props.property.condition >= 25) return '#f97316'
+    return 'var(--t-danger)'
 })
 
-// ── Rename ──
-const editing = ref(false)
-const editName = ref('')
-const nameInput = ref<HTMLInputElement>()
-
-function startRename(): void {
-    editName.value = displayName.value
-    editing.value = true
-    nextTick(() => nameInput.value?.select())
+function handleRenovate(): void { realEstate.renovateProperty(props.property.id) }
+function handleRepair(): void { realEstate.repairProperty(props.property.id) }
+function handleSell(): void {
+    if (!confirmSell.value) { confirmSell.value = true; setTimeout(() => { confirmSell.value = false }, 3000); return }
+    realEstate.sellProperty(props.property.id)
+    emit('sold')
 }
-
-function confirmRename(): void {
-    editing.value = false
-    emit('rename', editName.value)
+function handleRename(): void { realEstate.renameProperty(props.property.id, newName.value); showRename.value = false }
+function handleStyleChange(style: ManagementStyle): void { realEstate.setManagementStyle(props.property.id, style) }
+function handleRentSlider(val: number | number[]): void {
+    realEstate.setRentMultiplier(props.property.id, (Array.isArray(val) ? val[0] : val) / 100)
 }
-
-function cancelRename(): void {
-    editing.value = false
-}
-
-// ── Rent adjustment ──
-function adjustRent(delta: number): void {
-    const newMul = Math.round((props.property.rentMultiplier + delta) * 10) / 10
-    emit('set-rent', Math.max(0.5, Math.min(3.0, newMul)))
-}
-
-// ── Details toggle ──
-const showDetails = ref(false)
 </script>
 
 <template>
-    <div class="prop-card" :class="{ profitable: isProfitable, loss: !isProfitable }">
+    <div class="prop-card" :style="{ '--_accent': district?.color ?? 'var(--t-accent)' }">
         <!-- Header -->
-        <div class="prop-header">
-            <div class="prop-icon-wrap">
-                <AppIcon :icon="property.icon || 'mdi:home'" class="prop-icon" />
-            </div>
-            <div class="prop-info">
-                <div class="prop-name-row">
-                    <template v-if="editing">
-                        <input ref="nameInput" v-model="editName" class="rename-input" maxlength="30"
-                            @keyup.enter="confirmRename" @keyup.escape="cancelRename" @blur="confirmRename" />
-                    </template>
-                    <template v-else>
-                        <h3 class="prop-name" @dblclick="startRename" :title="$t('common.double_click_rename')">
-                            {{ displayName }}
-                        </h3>
-                        <button class="rename-btn" @click="startRename" :title="$t('common.rename')">
-                            <AppIcon icon="mdi:pencil-outline" />
-                        </button>
-                    </template>
-                    <span class="prop-category">{{ property.category }}</span>
+        <div class="prop-card__head">
+            <AppIcon :icon="property.icon" class="prop-card__icon" />
+            <div class="prop-card__identity">
+                <div class="prop-card__name-row">
+                    <span v-if="!showRename" class="prop-card__name"
+                        @dblclick="showRename = true; newName = displayName">
+                        {{ displayName }}
+                    </span>
+                    <div v-else class="prop-card__rename">
+                        <InputText v-model="newName" size="small" class="prop-card__rename-input"
+                            @keyup.enter="handleRename" />
+                        <Button icon="pi pi-check" text rounded size="small" @click="handleRename" />
+                        <Button icon="pi pi-times" text rounded size="small" @click="showRename = false" />
+                    </div>
                 </div>
-                <div class="prop-meta">
-                    <span>{{ property.units }} {{ $t('common.unit', property.units) }}</span>
-                    <span>·</span>
-                    <span>{{ $t('realestate.reno_lv', { level: property.renovationLevel }) }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Condition & Occupancy Bars -->
-        <div class="bars-section">
-            <div class="bar-row">
-                <div class="bar-label">
-                    <AppIcon icon="mdi:wrench" class="bar-icon" />
-                    <span>{{ $t('realestate.condition') }}</span>
-                </div>
-                <div class="bar-track">
-                    <div class="bar-fill" :class="conditionCls" :style="{ width: conditionPct + '%' }"></div>
-                </div>
-                <span class="bar-value" :class="conditionCls">{{ conditionPct }}%</span>
-            </div>
-            <div class="bar-row">
-                <div class="bar-label">
-                    <AppIcon icon="mdi:account-multiple" class="bar-icon" />
-                    <span>{{ $t('realestate.occupancy') }}</span>
-                </div>
-                <div class="bar-track">
-                    <div class="bar-fill" :class="occupancyCls" :style="{ width: occupancyPct + '%' }"></div>
-                </div>
-                <span class="bar-value" :class="occupancyCls">{{ occupancyPct }}%
-                    <small>({{ property.occupiedUnits }}/{{ property.units }})</small>
-                </span>
-            </div>
-        </div>
-
-        <!-- P&L Summary -->
-        <div class="pl-row">
-            <div class="pl-item">
-                <span class="pl-label">{{ $t('realestate.gross_s') }}</span>
-                <span class="pl-value success">{{ formatCash(grossPerSecond) }}</span>
-            </div>
-            <div class="pl-item">
-                <span class="pl-label">{{ $t('realestate.expenses_s') }}</span>
-                <span class="pl-value danger">{{ formatCash(expensesPerSecond) }}</span>
-            </div>
-            <div class="pl-item">
-                <span class="pl-label">{{ $t('realestate.net_s') }}</span>
-                <span class="pl-value" :class="isProfitable ? 'success' : 'danger'">
-                    {{ formatCash(netPerSecond) }}
-                </span>
-            </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls-section">
-            <!-- Rent Multiplier -->
-            <div class="control-row">
-                <div class="control-label">
-                    <AppIcon icon="mdi:cash-multiple" class="control-icon" />
-                    <span>{{ $t('realestate.rent_price') }}</span>
-                    <span class="control-hint">
-                        ({{ property.rentMultiplier < 1 ? $t('realestate.discount') : property.rentMultiplier > 1.1 ?
-                            $t('realestate.premium') :
-                            $t('realestate.market') }})
+                <div class="prop-card__meta">
+                    <Tag :value="property.category" size="small" severity="secondary" />
+                    <span v-if="district" class="prop-card__district">
+                        <AppIcon :icon="district.icon" /> {{ t(district.nameKey) }}
                     </span>
                 </div>
-                <div class="control-actions">
-                    <button class="adj-btn" :disabled="property.rentMultiplier <= 0.5"
-                        @click="adjustRent(-0.1)">−</button>
-                    <span class="control-value">×{{ property.rentMultiplier.toFixed(1) }}</span>
-                    <button class="adj-btn" :disabled="property.rentMultiplier >= 3.0"
-                        @click="adjustRent(0.1)">+</button>
-                </div>
-            </div>
-
-            <!-- Repair -->
-            <div v-if="needsRepair" class="control-row repair-row">
-                <div class="control-label">
-                    <AppIcon icon="mdi:hammer-wrench" class="control-icon warn-icon" />
-                    <span class="warn-text">{{ $t('realestate.needs_repair') }}</span>
-                </div>
-                <Button size="small" severity="warn" outlined :disabled="!canAffordRepair" @click="$emit('repair')">
-                    {{ $t('realestate.repair_cost', { cost: formatCash(property.repairCost) }) }}
-                </Button>
-            </div>
-
-            <!-- Renovate -->
-            <div v-if="property.renovationLevel < property.maxRenovationLevel" class="control-row">
-                <div class="control-label">
-                    <AppIcon icon="mdi:home-modern" class="control-icon" />
-                    <span>{{ $t('realestate.renovate') }}</span>
-                    <span class="control-hint">{{ $t('realestate.reno_hint') }}</span>
-                </div>
-                <Button size="small" severity="secondary" outlined :disabled="!canAffordRenovation"
-                    @click="$emit('renovate')">
-                    {{ $t('realestate.reno_level', {
-                        level: property.renovationLevel + 1, cost:
-                            formatCash(renovationCost) }) }}
-                </Button>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="card-footer">
-            <div class="footer-left">
-                <span class="valuation-label">{{ $t('realestate.value_label', {
-                    value: formatCash(property.currentValue)
-                    })
-                    }}</span>
-                <button class="details-toggle" @click="showDetails = !showDetails">
-                    <AppIcon :icon="showDetails ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
-                    {{ showDetails ? $t('common.less') : $t('common.details') }}
-                </button>
+        <!-- KPI Grid -->
+        <div class="prop-card__kpis">
+            <div class="prop-card__kpi">
+                <span class="prop-card__kpi-label">{{ t('realestate.current_value') }}</span>
+                <span class="prop-card__kpi-value text-gold">{{ formatCash(property.currentValue) }}</span>
             </div>
-            <Button size="small" severity="danger" text @click="$emit('sell')">
-                <AppIcon icon="mdi:home-remove" />
-                {{ $t('common.sell') }}
-            </Button>
+            <div class="prop-card__kpi">
+                <span class="prop-card__kpi-label">{{ t('realestate.purchase_price') }}</span>
+                <span class="prop-card__kpi-value text-secondary">{{ formatCash(property.purchasePrice) }}</span>
+            </div>
+            <div class="prop-card__kpi">
+                <span class="prop-card__kpi-label">{{ t('realestate.net_rent') }}/t</span>
+                <span class="prop-card__kpi-value" :class="netRent.gt(0) ? 'text-emerald' : 'text-red'">
+                    {{ formatCash(netRent) }}
+                </span>
+            </div>
+            <div class="prop-card__kpi">
+                <span class="prop-card__kpi-label">{{ t('realestate.roi') }}</span>
+                <span class="prop-card__kpi-value" :class="roi > 0 ? 'text-emerald' : 'text-red'">
+                    {{ formatPercent(roi) }}
+                </span>
+            </div>
         </div>
 
-        <!-- Expandable details -->
-        <Transition name="slide">
-            <div v-if="showDetails" class="details-panel">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.purchase_price') }}</span>
-                        <span class="d-value">{{ formatCash(property.purchasePrice) }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.current_value') }}</span>
-                        <span class="d-value">{{ formatCash(property.currentValue) }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.base_rent_tick') }}</span>
-                        <span class="d-value">{{ formatCash(property.baseRent) }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.wear_rate') }}</span>
-                        <span class="d-value">{{ property.wearRate.toFixed(4) }}/t</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.tax_rate') }}</span>
-                        <span class="d-value">{{ (property.taxRate * 100).toFixed(1) }}% /yr</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.maint_tick') }}</span>
-                        <span class="d-value">{{ formatCash(property.baseMaintenance) }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.total_rent') }}</span>
-                        <span class="d-value success">{{ formatCash(property.totalRentEarned) }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.total_expenses') }}</span>
-                        <span class="d-value danger">{{ formatCash(property.totalExpensesPaid) }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.total_net') }}</span>
-                        <span class="d-value" :class="property.totalNetIncome.gte(0) ? 'success' : 'danger'">
-                            {{ formatCash(property.totalNetIncome) }}
-                        </span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="d-label">{{ $t('realestate.owned_for') }}</span>
-                        <span class="d-value">{{ Math.floor((property.ownedSinceTick > 0 ? property.ownedSinceTick : 0)
-                            / 10)
-                            }}s</span>
+        <!-- Bars -->
+        <div class="prop-card__bars">
+            <div class="bar-row">
+                <span class="bar-label">{{ t('realestate.condition') }}</span>
+                <div class="bar-track">
+                    <div class="bar-fill" :style="{ width: property.condition + '%', background: conditionColor }">
                     </div>
                 </div>
+                <span class="bar-value" :style="{ color: conditionColor }">{{ Math.round(property.condition) }}%</span>
             </div>
-        </Transition>
+            <div class="bar-row">
+                <span class="bar-label">{{ t('realestate.occupancy') }}</span>
+                <div class="bar-track">
+                    <div class="bar-fill"
+                        :style="{ width: (property.occupancy * 100) + '%', background: 'var(--t-accent)' }"></div>
+                </div>
+                <span class="bar-value">{{ formatPercent(property.occupancy) }}</span>
+            </div>
+        </div>
+
+        <!-- Quick chips -->
+        <div class="prop-card__chips">
+            <span class="chip">
+                <AppIcon icon="mdi:door" /> {{ property.units }} {{ t('realestate.units') }}
+            </span>
+            <span class="chip">
+                <AppIcon icon="mdi:arrow-up-bold" /> LV. {{ property.renovationLevel }}/{{ property.maxRenovationLevel
+                }}
+            </span>
+            <span class="chip">
+                <AppIcon icon="mdi:puzzle" /> {{ property.improvements.length }}/{{ property.maxImprovements }} {{
+                    t('realestate.improvements_label') }}
+            </span>
+        </div>
+
+        <!-- Synergy banner -->
+        <div v-if="synergy.rentBonus > 0" class="prop-card__synergy">
+            <AppIcon icon="mdi:link-variant" />
+            <span>{{ t('realestate.synergy.active_bonus') }}: +{{ formatPercent(synergy.rentBonus) }} {{
+                t('realestate.rent') }}</span>
+        </div>
+
+        <!-- Traits -->
+        <div v-if="traits.length > 0" class="prop-card__section">
+            <span class="prop-card__section-label">{{ t('realestate.traits_label') }}</span>
+            <div class="prop-card__traits">
+                <span v-for="tr in traits" :key="tr.id" class="trait-badge"
+                    :class="tr.isPositive ? 'trait-badge--pos' : 'trait-badge--neg'">
+                    <AppIcon :icon="tr.icon" /> {{ t(tr.nameKey) }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Improvements -->
+        <div v-if="improvements.length > 0" class="prop-card__section">
+            <span class="prop-card__section-label">{{ t('realestate.improvements_label') }}</span>
+            <div class="prop-card__improvements">
+                <span v-for="im in improvements" :key="im.id" class="imp-badge">
+                    <AppIcon :icon="im.icon" /> {{ t(im.nameKey) }}
+                </span>
+            </div>
+        </div>
+
+        <button v-if="property.improvements.length < property.maxImprovements" class="prop-card__link-btn"
+            @click="emit('open-improvements')">
+            <AppIcon icon="mdi:plus-circle-outline" /> {{ t('realestate.add_improvement') }}
+        </button>
+
+        <!-- Management Style -->
+        <div class="prop-card__section">
+            <span class="prop-card__section-label">{{ t('realestate.management_style') }}</span>
+            <div class="prop-card__styles">
+                <div v-for="style in MANAGEMENT_STYLES" :key="style.id" class="style-opt"
+                    :class="{ active: property.managementStyle === style.id }" @click="handleStyleChange(style.id)">
+                    <AppIcon :icon="style.icon" />
+                    <span>{{ t(style.nameKey) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rent Slider -->
+        <div class="prop-card__section">
+            <div class="prop-card__slider-head">
+                <span class="prop-card__section-label">{{ t('realestate.rent_multiplier') }}</span>
+                <span class="prop-card__rent-val">{{ property.rentMultiplier.toFixed(2) }}×</span>
+            </div>
+            <Slider :modelValue="Math.round(property.rentMultiplier * 100)" :min="50" :max="200" :step="5"
+                class="prop-card__slider" @update:modelValue="handleRentSlider" />
+            <div class="prop-card__slider-labels">
+                <span>0.5×</span><span>1.0×</span><span>2.0×</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="prop-card__actions">
+            <button class="prop-card__act-btn" :disabled="property.condition >= 98" @click="handleRepair">
+                <AppIcon icon="mdi:wrench" /> {{ t('realestate.repair') }}
+            </button>
+            <button class="prop-card__act-btn" :disabled="property.renovationLevel >= property.maxRenovationLevel"
+                @click="handleRenovate">
+                <AppIcon icon="mdi:arrow-up-bold" /> {{ t('realestate.renovate') }}
+            </button>
+            <button class="prop-card__act-btn prop-card__act-btn--sell"
+                :class="{ 'prop-card__act-btn--confirm': confirmSell }" @click="handleSell">
+                <AppIcon icon="mdi:currency-usd" /> {{ confirmSell ? t('realestate.confirm_sell') : t('realestate.sell')
+                }}
+            </button>
+        </div>
+
+        <!-- Lifetime stats -->
+        <div class="prop-card__footer">
+            <span>{{ t('realestate.total_rent_collected') }}: {{ formatCash(property.totalRentCollected) }}</span>
+            <span>{{ t('realestate.total_maint_paid') }}: {{ formatCash(property.totalMaintenancePaid) }}</span>
+        </div>
     </div>
 </template>
 
@@ -278,7 +231,7 @@ const showDetails = ref(false)
     display: flex;
     flex-direction: column;
     gap: var(--t-space-3);
-    padding: var(--t-space-5);
+    padding: var(--t-space-4);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
@@ -288,103 +241,99 @@ const showDetails = ref(false)
 
 .prop-card:hover {
     border-color: var(--t-border-hover);
+    box-shadow: var(--t-shadow-md);
 }
 
-/* Header */
-.prop-header {
+/* ── Head ── */
+.prop-card__head {
     display: flex;
     gap: var(--t-space-3);
+    align-items: flex-start;
 }
 
-.prop-icon-wrap {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.prop-card__icon {
+    font-size: 1.75rem;
+    color: var(--_accent);
     flex-shrink: 0;
 }
 
-.prop-icon {
-    font-size: 1.25rem;
-    color: var(--t-text-secondary);
-}
-
-.prop-info {
+.prop-card__identity {
     flex: 1;
     min-width: 0;
 }
 
-.prop-name-row {
+.prop-card__name-row {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.3rem;
 }
 
-.prop-name {
-    font-size: var(--t-font-size-base);
-    font-weight: 600;
+.prop-card__name {
+    font-size: var(--t-font-size-lg);
+    font-weight: 700;
     color: var(--t-text);
     cursor: pointer;
-    margin: 0;
 }
 
-.prop-name:hover {
+.prop-card__name:hover {
     text-decoration: underline dotted;
 }
 
-.rename-btn {
-    background: none;
-    border: none;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    font-size: 0.85rem;
-    padding: 0;
-    opacity: 0.5;
-    transition: opacity var(--t-transition-fast);
-}
-
-.rename-btn:hover {
-    opacity: 1;
-    color: var(--t-text);
-}
-
-.rename-input {
-    font-size: var(--t-font-size-base);
-    font-weight: 600;
-    color: var(--t-text);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-primary, #71717a);
-    border-radius: var(--t-radius-sm);
-    padding: 0.1rem 0.35rem;
-    outline: none;
-    max-width: 160px;
-    -webkit-app-region: no-drag;
-}
-
-.prop-category {
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    padding: 0.1rem 0.35rem;
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.prop-meta {
+.prop-card__rename {
     display: flex;
-    gap: 0.35rem;
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.prop-card__rename-input {
+    width: 140px;
+}
+
+.prop-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     margin-top: 0.15rem;
 }
 
-/* Condition & Occupancy Bars */
-.bars-section {
+.prop-card__district {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+}
+
+/* ── KPIs ── */
+.prop-card__kpis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--t-space-2);
+}
+
+.prop-card__kpi {
+    display: flex;
+    flex-direction: column;
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-bg-muted);
+    border-radius: var(--t-radius-sm);
+}
+
+.prop-card__kpi-label {
+    font-size: var(--t-font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--t-text-muted);
+}
+
+.prop-card__kpi-value {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-base);
+    font-weight: 700;
+}
+
+/* ── Bars ── */
+.prop-card__bars {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
@@ -397,16 +346,12 @@ const showDetails = ref(false)
 }
 
 .bar-label {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-    min-width: 5.5rem;
-}
-
-.bar-icon {
-    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    width: 80px;
+    flex-shrink: 0;
 }
 
 .bar-track {
@@ -420,272 +365,239 @@ const showDetails = ref(false)
 .bar-fill {
     height: 100%;
     border-radius: 3px;
-    transition: width 0.3s ease;
-}
-
-.bar-fill.good {
-    background: var(--t-success);
-}
-
-.bar-fill.warn {
-    background: var(--t-warning, #f59e0b);
-}
-
-.bar-fill.danger {
-    background: var(--t-danger, #e74c3c);
+    transition: width 0.5s ease;
 }
 
 .bar-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    min-width: 4.5rem;
+    font-weight: 700;
+    width: 40px;
     text-align: right;
 }
 
-.bar-value small {
-    font-weight: 400;
-    opacity: 0.7;
+/* ── Chips ── */
+.prop-card__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
 }
 
-.bar-value.good {
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
+    border-radius: 6px;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-secondary);
+}
+
+/* ── Synergy ── */
+.prop-card__synergy {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-success-muted);
+    border: 1px solid color-mix(in srgb, var(--t-success) 25%, transparent);
+    border-radius: var(--t-radius-sm);
+    font-size: var(--t-font-size-sm);
     color: var(--t-success);
 }
 
-.bar-value.warn {
-    color: var(--t-warning, #f59e0b);
-}
-
-.bar-value.danger {
-    color: var(--t-danger, #e74c3c);
-}
-
-/* P&L Row */
-.pl-row {
+/* ── Section ── */
+.prop-card__section {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-md);
+    flex-direction: column;
+    gap: var(--t-space-1);
 }
 
-.pl-item {
+.prop-card__section-label {
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--t-text-muted);
+}
+
+/* ── Traits ── */
+.prop-card__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
+}
+
+.trait-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: var(--t-font-size-xs);
+    font-weight: 500;
+}
+
+.trait-badge--pos {
+    background: var(--t-success-muted);
+    color: var(--t-success);
+}
+
+.trait-badge--neg {
+    background: var(--t-warning-muted);
+    color: var(--t-warning);
+}
+
+/* ── Improvements ── */
+.prop-card__improvements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
+}
+
+.imp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--t-info-muted);
+    border-radius: 6px;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-secondary);
+}
+
+/* ── Styles ── */
+.prop-card__styles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--t-space-1);
+}
+
+.style-opt {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.1rem;
-}
-
-.pl-label {
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.pl-value {
-    font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-sm);
-    font-weight: 700;
-}
-
-.pl-value.success {
-    color: var(--t-success);
-}
-
-.pl-value.danger {
-    color: var(--t-danger, #e74c3c);
-}
-
-/* Controls */
-.controls-section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-2);
-}
-
-.control-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.3rem 0;
-}
-
-.repair-row {
-    padding: 0.4rem var(--t-space-2);
-    background: rgba(245, 158, 11, 0.08);
+    padding: var(--t-space-2) var(--t-space-1);
     border-radius: var(--t-radius-sm);
-}
-
-.control-label {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: var(--t-font-size-sm);
-    color: var(--t-text-secondary);
-}
-
-.control-icon {
-    font-size: 1rem;
-    color: var(--t-text-muted);
-}
-
-.warn-icon {
-    color: var(--t-warning, #f59e0b);
-}
-
-.warn-text {
-    color: var(--t-warning, #f59e0b);
-    font-weight: 600;
-}
-
-.control-hint {
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-    opacity: 0.7;
-}
-
-.control-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.control-value {
-    font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-sm);
-    font-weight: 600;
-    min-width: 2.5rem;
-    text-align: center;
-    color: var(--t-text);
-}
-
-.adj-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    font-size: 1rem;
-    font-weight: 700;
     cursor: pointer;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
     transition: all var(--t-transition-fast);
-    -webkit-app-region: no-drag;
 }
 
-.adj-btn:hover:not(:disabled) {
-    background: var(--t-bg-elevated, var(--t-bg-card));
+.style-opt:hover {
+    background: var(--t-bg-card-hover);
     border-color: var(--t-border-hover);
 }
 
-.adj-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+.style-opt.active {
+    border-color: var(--t-accent);
+    background: color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card));
+    color: var(--t-accent);
 }
 
-/* Footer */
-.card-footer {
+/* ── Slider ── */
+.prop-card__slider-head {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding-top: var(--t-space-2);
-    border-top: 1px solid var(--t-border);
-    margin-top: auto;
-}
-
-.footer-left {
-    display: flex;
     align-items: center;
-    gap: var(--t-space-3);
 }
 
-.valuation-label {
-    font-size: var(--t-font-size-sm);
-    color: var(--t-text-muted);
+.prop-card__rent-val {
     font-family: var(--t-font-mono);
+    font-weight: 700;
+    font-size: var(--t-font-size-base);
+    color: var(--t-accent);
 }
 
-.details-toggle {
+.prop-card__slider {
+    width: 100%;
+}
+
+.prop-card__slider-labels {
     display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--t-text-muted);
+}
+
+/* ── Link button (add improvement) ── */
+.prop-card__link-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 0.2rem;
+    gap: 0.3rem;
     background: none;
     border: none;
-    color: var(--t-text-muted);
-    font-size: var(--t-font-size-xs);
     cursor: pointer;
-    padding: 0.15rem 0.4rem;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    padding: var(--t-space-1) 0;
+    transition: color var(--t-transition-fast);
+}
+
+.prop-card__link-btn:hover {
+    color: var(--t-accent);
+}
+
+/* ── Actions ── */
+.prop-card__actions {
+    display: flex;
+    gap: var(--t-space-2);
+    flex-wrap: wrap;
+}
+
+.prop-card__act-btn {
+    flex: 1;
+    min-width: 75px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: var(--t-space-2) var(--t-space-3);
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
     border-radius: var(--t-radius-sm);
+    border: 1px solid var(--t-border);
+    background: var(--t-bg-muted);
+    color: var(--t-text-secondary);
+    cursor: pointer;
     transition: all var(--t-transition-fast);
 }
 
-.details-toggle:hover {
-    background: var(--t-bg-muted);
+.prop-card__act-btn:hover:not(:disabled) {
+    border-color: var(--t-border-hover);
     color: var(--t-text);
+    background: var(--t-bg-card-hover);
 }
 
-/* Details Panel */
-.details-panel {
-    padding: var(--t-space-3);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-md);
-    border: 1px solid var(--t-border);
+.prop-card__act-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
 }
 
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.25rem 1rem;
+.prop-card__act-btn--sell:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--t-warning) 35%, var(--t-border));
+    color: var(--t-warning);
 }
 
-.detail-item {
+.prop-card__act-btn--confirm {
+    border-color: var(--t-danger);
+    background: var(--t-danger-muted);
+    color: var(--t-danger);
+}
+
+/* ── Footer ── */
+.prop-card__footer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.1rem 0;
-}
-
-.d-label {
+    flex-direction: column;
+    gap: 0.1rem;
+    padding-top: var(--t-space-2);
+    border-top: 1px solid var(--t-border);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-}
-
-.d-value {
-    font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    color: var(--t-text);
-}
-
-.d-value.success {
-    color: var(--t-success);
-}
-
-.d-value.danger {
-    color: var(--t-danger, #e74c3c);
-}
-
-/* Slide transition */
-.slide-enter-active,
-.slide-leave-active {
-    transition: all 0.2s ease;
-    overflow: hidden;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-    opacity: 0;
-    max-height: 0;
-}
-
-.slide-enter-to,
-.slide-leave-from {
-    opacity: 1;
-    max-height: 500px;
 }
 </style>

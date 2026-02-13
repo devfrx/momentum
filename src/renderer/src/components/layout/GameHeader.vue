@@ -1,20 +1,64 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
+import { useJobStore } from '@renderer/stores/useJobStore'
+import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
+import { useDepositStore } from '@renderer/stores/useDepositStore'
+import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { usePrestigeStore } from '@renderer/stores/usePrestigeStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
+import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { useFormat } from '@renderer/composables/useFormat'
+import { add, sub, ZERO } from '@renderer/core/BigNum'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import MultiplierBreakdownPanel from '@renderer/components/MultiplierBreakdownPanel.vue'
 
+const route = useRoute()
 const player = usePlayerStore()
 const business = useBusinessStore()
+const jobs = useJobStore()
+const realEstate = useRealEstateStore()
+const deposits = useDepositStore()
+const loans = useLoanStore()
 const prestige = usePrestigeStore()
 const settings = useSettingsStore()
+const upgrades = useUpgradeStore()
 const { formatCash, formatNumber, formatMultiplier } = useFormat()
 
 const showMultiplierPanel = ref(false)
+
+// ── Total income per second (all sources) ──
+const totalIncomePerSecond = computed(() => {
+    let total = ZERO
+    total = add(total, business.profitPerSecond)
+    total = add(total, jobs.jobIncomePerSecond)
+    total = add(total, realEstate.rentPerSecond)
+    total = add(total, deposits.interestPerSecond)
+    total = sub(total, loans.totalInterestPerSecond)
+    return total
+})
+
+// ── Route-specific multiplier ──
+const ROUTE_MULTIPLIER_MAP: Record<string, { id: string; icon: string; labelKey: string }> = {
+    business: { id: 'business_revenue', icon: 'mdi:store', labelKey: 'multipliers.business_revenue' },
+    realestate: { id: 'real_estate_rent', icon: 'mdi:home-city', labelKey: 'multipliers.real_estate_rent' },
+    stocks: { id: 'stock_returns', icon: 'mdi:chart-line', labelKey: 'multipliers.stock_returns' },
+    crypto: { id: 'crypto_returns', icon: 'mdi:bitcoin', labelKey: 'multipliers.crypto_returns' },
+    gambling: { id: 'gambling_luck', icon: 'mdi:dice-multiple', labelKey: 'multipliers.gambling_luck' },
+    investments: { id: 'startup_success', icon: 'mdi:rocket-launch', labelKey: 'multipliers.startup_success' },
+    loans: { id: 'loan_rate', icon: 'mdi:bank', labelKey: 'multipliers.loan_rate' },
+    deposits: { id: 'deposit_rate', icon: 'mdi:piggy-bank', labelKey: 'multipliers.deposit_rate' },
+}
+
+const routeMultiplier = computed(() => {
+    const name = route.name as string
+    const mapping = ROUTE_MULTIPLIER_MAP[name]
+    if (!mapping) return null
+    const mul = upgrades.getMultiplier(mapping.id as any)
+    return { ...mapping, value: mul, formatted: formatMultiplier(mul), hasBonus: mul.gt(1) }
+})
 
 // XP progress percentage (0-100)
 const xpProgress = computed(() => {
@@ -53,9 +97,9 @@ function handleClose(): void {
         <!-- Hero: Primary Cash -->
         <div class="hero-stat">
             <span class="hero-value">{{ formatCash(player.cash) }}</span>
-            <span class="hero-profit">
+            <span class="hero-profit" :class="{ negative: totalIncomePerSecond.lt(0) }">
                 <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
-                {{ formatCash(business.profitPerSecond) }}{{ $t('common.per_second') }}
+                {{ formatCash(totalIncomePerSecond) }}{{ $t('common.per_second') }}
             </span>
         </div>
 
@@ -69,6 +113,13 @@ function handleClose(): void {
             <div class="hud-chip" :title="$t('header.prestige')">
                 <span class="hud-chip-label">{{ $t('header.prestige') }}</span>
                 <span class="hud-chip-value">{{ formatNumber(prestige.points) }}</span>
+            </div>
+
+            <!-- Route-specific multiplier chip -->
+            <div v-if="routeMultiplier" class="hud-chip" :class="{ 'has-bonus': routeMultiplier.hasBonus }">
+                <AppIcon :icon="routeMultiplier.icon" class="hud-route-icon" />
+                <span class="hud-chip-value" :class="{ accent: routeMultiplier.hasBonus }">{{ routeMultiplier.formatted
+                    }}</span>
             </div>
 
             <div class="hud-chip clickable" @click="showMultiplierPanel = !showMultiplierPanel"
@@ -191,8 +242,21 @@ function handleClose(): void {
     color: var(--t-success);
 }
 
+.hero-profit.negative {
+    color: var(--t-danger, #e74c3c);
+}
+
 .hero-profit-icon {
     font-size: 0.7rem;
+}
+
+.hud-route-icon {
+    font-size: 0.75rem;
+    color: var(--t-text-muted);
+}
+
+.hud-chip.has-bonus .hud-route-icon {
+    color: var(--t-accent);
 }
 
 /* ─── Secondary HUD Stats ─── */

@@ -9,7 +9,7 @@ import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { DIVINE_ABILITIES, type DivineAbilityDef } from '@renderer/data/lottery'
 
-export type GamblingGame = 'slots' | 'roulette' | 'dice' | 'blackjack' | 'poker' | 'coinflip' | 'plinko' | 'lottery'
+export type GamblingGame = 'slots' | 'roulette' | 'dice' | 'blackjack' | 'poker' | 'coinflip' | 'plinko' | 'lottery' | 'scratchcard' | 'horseracing'
 
 export interface GameStat {
   played: number

@@ -21,14 +21,6 @@ export interface SD {
 
 // ─── Player ─────────────────────────────────────────────────────────
 
-export interface LoanSave {
-  id: string
-  principal: SD
-  remaining: SD
-  annualRate: number
-  ticksActive: number
-}
-
 export interface PlayerSave {
   cash: SD
   totalCashEarned: SD
@@ -41,8 +33,6 @@ export interface PlayerSave {
   level: number
   xp: SD
   xpToNextLevel: SD
-  /** Outstanding loans */
-  loans: LoanSave[]
   /** Pre-computed net worth */
   netWorth: SD
 }
@@ -190,6 +180,10 @@ export interface GamblingSave {
   biggestLoss: SD
   /** Per mini-game stats */
   gameStats: Record<string, { played: number; won: number; netProfit: SD }>
+  /** Divine abilities unlocked via lottery */
+  divineAbilities: string[]
+  /** Lottery jackpot wins tracking */
+  lotteryWins: Record<string, boolean>
 }
 
 // ─── Upgrades / Skill tree ──────────────────────────────────────────
@@ -220,13 +214,25 @@ export interface PrestigeUpgradeSave {
   level: number
 }
 
+export interface PrestigeMilestoneSave {
+  id: string
+  unlocked: boolean
+  unlockedAtTick: number | null
+}
+
+export interface PrestigePerkSave {
+  id: string
+  purchased: boolean
+  purchasedAtTick: number | null
+}
+
 export interface PrestigeSave {
   points: SD
   totalPointsEarned: SD
   rebirthCount: number
   upgrades: PrestigeUpgradeSave[]
-  /** Multiplier derived from prestige tree */
-  globalMultiplier: SD
+  milestones: PrestigeMilestoneSave[]
+  perks: PrestigePerkSave[]
 }
 
 // ─── Events ─────────────────────────────────────────────────────────
@@ -246,6 +252,8 @@ export interface EventsSave {
 // ─── Settings ───────────────────────────────────────────────────────
 
 export interface SettingsSave {
+  /** Locale code */
+  locale: string
   /** Auto-save interval in seconds */
   autoSaveInterval: number
   /** Offline progress efficiency override */
@@ -266,6 +274,10 @@ export interface SettingsSave {
   theme: 'dark' | 'light'
   /** Animation speed multiplier (0.5, 1.0, 2.0) */
   animationSpeed: number
+  /** Lottery draw speed multiplier */
+  lotteryDrawSpeed: number
+  /** Lottery multi-draw count */
+  lotteryMultiDraw: number
   /** GitHub PAT for cloud saves (encrypted, stored separately) */
   cloudSaveEnabled: boolean
   /** Gist ID for cloud saves */
@@ -284,6 +296,10 @@ export interface SettingsSave {
   particleEffects: boolean
   /** Market update frequency in game ticks */
   marketUpdateInterval: number
+  /** Pinned stock for dashboard */
+  pinnedStockId: string | null
+  /** Pinned crypto for dashboard */
+  pinnedCryptoId: string | null
 }
 
 // ─── Root Save Schema ───────────────────────────────────────────────
@@ -313,13 +329,24 @@ export interface GameSave {
   cryptoStats: { totalRealizedProfit: SD }
   cryptoMarketState: unknown
 
-  realEstate: PropertySave[]
-  startups: StartupInvestmentSave[]
+  // Real estate — uses exportState() which returns a full state object
+  realEstate: unknown
+  // Startups — uses exportState() which returns a full state object
+  startups: unknown
+
   gambling: GamblingSave
   upgrades: UpgradeNodeSave[]
   achievements: AchievementSave[]
   prestige: PrestigeSave
-  events: EventsSave
+
+  /** Event system state */
+  eventState: EventsSave
+
+  /** Loan system state */
+  loans: unknown
+  /** Deposit system state */
+  deposits: unknown
+
   settings: SettingsSave
 }
 
@@ -329,7 +356,6 @@ export const CURRENT_SAVE_VERSION = 2
 // ─── Default / factory ──────────────────────────────────────────────
 
 const ZERO_SD: SD = { m: 0, e: 0 }
-const ONE_SD: SD = { m: 1, e: 0 }
 
 export function createDefaultSave(): GameSave {
   return {
@@ -347,7 +373,6 @@ export function createDefaultSave(): GameSave {
       level: 1,
       xp: ZERO_SD,
       xpToNextLevel: { m: 1, e: 2 }, // 100
-      loans: [],
       netWorth: { m: 5, e: 1 }
     },
 
@@ -383,9 +408,9 @@ export function createDefaultSave(): GameSave {
     },
     cryptoMarketState: null,
 
-    realEstate: [],
+    realEstate: { properties: [], opportunities: [] },
 
-    startups: [],
+    startups: { investments: [], opportunities: [], lastRefreshTick: 0 },
 
     gambling: {
       totalBet: ZERO_SD,
@@ -394,7 +419,9 @@ export function createDefaultSave(): GameSave {
       gamesPlayed: 0,
       biggestWin: ZERO_SD,
       biggestLoss: ZERO_SD,
-      gameStats: {}
+      gameStats: {},
+      divineAbilities: [],
+      lotteryWins: {}
     },
 
     upgrades: [],
@@ -406,17 +433,22 @@ export function createDefaultSave(): GameSave {
       totalPointsEarned: ZERO_SD,
       rebirthCount: 0,
       upgrades: [],
-      globalMultiplier: ONE_SD
+      milestones: [],
+      perks: []
     },
 
-    events: {
+    eventState: {
       activeEvents: [],
       cooldowns: {},
       pendingChoices: [],
       totalTicks: 0
     },
 
+    loans: { loans: [], creditScore: 50, loanHistory: [] },
+    deposits: { deposits: [], depositHistory: [] },
+
     settings: {
+      locale: 'en',
       autoSaveInterval: 30,
       offlineEfficiency: 0.5,
       offlineMaxHours: 24,
@@ -427,6 +459,8 @@ export function createDefaultSave(): GameSave {
       numberFormat: 'short',
       theme: 'dark',
       animationSpeed: 1.0,
+      lotteryDrawSpeed: 1.0,
+      lotteryMultiDraw: 1,
       cloudSaveEnabled: false,
       gistId: null,
       buyAmount: 1,
@@ -435,7 +469,9 @@ export function createDefaultSave(): GameSave {
       confirmPrestige: true,
       showTooltips: true,
       particleEffects: true,
-      marketUpdateInterval: 50
+      marketUpdateInterval: 50,
+      pinnedStockId: null,
+      pinnedCryptoId: null
     }
   }
 }

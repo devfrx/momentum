@@ -95,11 +95,10 @@ export class EconomySimulator {
         break
     }
 
-    // Apply inflation per tick (convert annual to per-tick)
-    // At 10 ticks/s: ~315,360,000 ticks/year
-    // inflationIndex *= (1 + inflationRate)^(1/315360000) ≈ 1 + inflationRate/315360000
-    const ticksPerYear = 10 * 3600 * 24 * 365
-    this.state.inflationIndex *= (1 + this.state.inflationRate / ticksPerYear)
+    // Apply inflation per tick (convert rate to per-tick)
+    // At 10 ticks/s: 216,000 ticks per 6h period
+    const ticksPerPeriod = 10 * 3600 * 6
+    this.state.inflationIndex *= (1 + this.state.inflationRate / ticksPerPeriod)
 
     // Wage index tracks inflation with a lag
     this.state.wageIndex = this.lerp(this.state.wageIndex, this.state.inflationIndex, 0.00001)
@@ -147,7 +146,12 @@ export class EconomySimulator {
 
   /** Restore from save */
   deserialize(data: Partial<EconomyState>): void {
-    this.state = { ...createDefaultEconomyState(), ...data }
+    // Use deterministic defaults to avoid re-rolling random cyclePhaseDuration
+    // when restoring a save. The spread ensures saved values take priority.
+    const defaults = createDefaultEconomyState()
+    // Override the random duration with a stable default; the save should provide the real value
+    defaults.cyclePhaseDuration = 3000
+    this.state = { ...defaults, ...data }
   }
 
   // ─── Internal ───────────────────────────────────────────────────

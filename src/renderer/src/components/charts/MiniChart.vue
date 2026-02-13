@@ -28,6 +28,40 @@ const palette: Record<string, { line: string; fill: string; buy: string }> = {
     red: { line: '#ef4444', fill: 'rgba(239,68,68,0.15)', buy: '#71717a' }
 }
 
+/** Downsample an array to at most `maxPts` using LTTB algorithm */
+function downsample(data: number[], maxPts: number): number[] {
+    if (data.length <= maxPts) return data
+
+    const out: number[] = [data[0]]
+    const bucketSize = (data.length - 2) / (maxPts - 2)
+
+    let prevIndex = 0
+    for (let i = 1; i < maxPts - 1; i++) {
+        const avgStart = Math.floor((i) * bucketSize) + 1
+        const avgEnd = Math.min(Math.floor((i + 1) * bucketSize) + 1, data.length)
+
+        let avgX = 0, avgY = 0, count = 0
+        for (let j = avgStart; j < avgEnd; j++) {
+            avgX += j; avgY += data[j]; count++
+        }
+        avgX /= count; avgY /= count
+
+        const rangeStart = Math.floor((i - 1) * bucketSize) + 1
+        const rangeEnd = Math.floor((i) * bucketSize) + 1
+
+        let maxArea = -1, bestIdx = rangeStart
+        for (let j = rangeStart; j < rangeEnd; j++) {
+            const area = Math.abs((prevIndex - avgX) * (data[j] - data[prevIndex]) - (prevIndex - j) * (avgY - data[prevIndex]))
+            if (area > maxArea) { maxArea = area; bestIdx = j }
+        }
+
+        out.push(data[bestIdx])
+        prevIndex = bestIdx
+    }
+    out.push(data[data.length - 1])
+    return out
+}
+
 function draw() {
     const canvas = canvasRef.value
     const wrap = wrapRef.value
@@ -47,7 +81,7 @@ function draw() {
     ctx.scale(dpr, dpr)
     ctx.clearRect(0, 0, w, h)
 
-    const d = props.data
+    const d = downsample(props.data, 300)
     if (d.length < 2) return
 
     const colors = palette[props.color] || palette.emerald

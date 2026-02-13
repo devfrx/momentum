@@ -363,6 +363,7 @@
 }
 
 .text-gold { color: var(--t-text) !important; }
+.text-green { color: var(--t-success) !important; }
 .text-emerald { color: var(--t-success) !important; }
 .text-sky { color: var(--t-text-secondary) !important; }
 .text-purple { color: var(--t-text-secondary) !important; }

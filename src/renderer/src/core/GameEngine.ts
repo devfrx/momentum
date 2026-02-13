@@ -98,8 +98,8 @@ export class GameEngine {
    * correct cumulative tick numbers from the very first tick.
    */
   restore(savedTick: number, savedTotalTime: number): void {
-    this.tick = savedTick ?? 0
-    this.totalTime = savedTotalTime ?? 0
+    this.tick = (Number.isFinite(savedTick) && savedTick >= 0) ? savedTick : 0
+    this.totalTime = (Number.isFinite(savedTotalTime) && savedTotalTime >= 0) ? savedTotalTime : 0
   }
 
   // ─── Subscription ───────────────────────────────────────────────

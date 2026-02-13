@@ -191,8 +191,8 @@ export function useInitGame() {
           }
         }
 
-        // Restore real estate
-        if (save.realEstate && Array.isArray(save.realEstate)) {
+        // Restore real estate (handles both old array format and new object format)
+        if (save.realEstate) {
           realEstate.loadFromSave(save.realEstate)
         }
 
@@ -205,6 +205,10 @@ export function useInitGame() {
         if (save.prestige) {
           prestige.loadFromSave(save.prestige)
         }
+
+        // Sync player store prestige fields from the authoritative prestige store
+        player.prestigePoints = prestige.points
+        player.rebirthCount = prestige.rebirthCount
 
         // Restore upgrades
         if (save.upgrades && Array.isArray(save.upgrades)) {

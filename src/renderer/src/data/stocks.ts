@@ -10,7 +10,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.08,
     volatility: 0.25,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'GRAINX',
@@ -21,7 +21,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.06,
     volatility: 0.20,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'SOLARW',
@@ -32,7 +32,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.10,
     volatility: 0.30,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'MEDVX',
@@ -43,7 +43,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.05,
     volatility: 0.28,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'RETLX',
@@ -54,7 +54,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.04,
     volatility: 0.18,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'FINBK',
@@ -65,7 +65,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.03,
     volatility: 0.15,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'AEROX',
@@ -76,7 +76,7 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.07,
     volatility: 0.22,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'GAMEV',
@@ -87,6 +87,6 @@ export const STOCKS: AssetConfig[] = [
     drift: 0.12,
     volatility: 0.35,
     minPrice: 1,
-    maxHistory: 500
+    maxHistory: 50000
   }
 ]

@@ -63,6 +63,8 @@ const currentSecondChance = ref(false)
 const currentOriginalResult = ref<LotteryDrawResult | null>(null)
 /** Luck chances for the original (phase 1) draw */
 const currentOriginalLuckChances = ref<number[] | null>(null)
+/** Indices forced by Rolling Luck in the original (phase 1) draw */
+const currentOriginalLuckyIndices = ref<Set<number>>(new Set())
 
 /** Session draw history (most recent first) */
 const drawHistory = ref<Array<{
@@ -81,6 +83,7 @@ interface MultiDrawEntry {
     result: LotteryDrawResult
     luckyIndices: Set<number>
     luckChances: number[]
+    originalLuckyIndices: Set<number>
     originalLuckChances: number[] | null
     secondChance: boolean
     originalResult: LotteryDrawResult | null
@@ -160,7 +163,7 @@ function executeSingleDrawWithLuck(
     ticket: LotteryTicketDef,
     numbers: number[],
     bonus: number | null,
-): { result: LotteryDrawResult; ability: DivineAbilityDef | null; luckyIndices: Set<number>; luckChances: number[]; originalLuckChances: number[] | null; secondChance: boolean; originalResult: LotteryDrawResult | null } {
+): { result: LotteryDrawResult; ability: DivineAbilityDef | null; luckyIndices: Set<number>; luckChances: number[]; originalLuckyIndices: Set<number>; originalLuckChances: number[] | null; secondChance: boolean; originalResult: LotteryDrawResult | null } {
     const rawBonus = luckBonus.value
 
     function computeLuckChances(drawnNums: number[]): number[] {
@@ -179,23 +182,13 @@ function executeSingleDrawWithLuck(
         return chances
     }
 
-    let drawResult = executeDraw(ticket, numbers, bonus)
-    let secondChance = false
-    let originalDrawResult: ReturnType<typeof executeDraw> | null = null
-    const luckyIdx = new Set<number>()
-
-    // Second chance
-    if (!drawResult.prizeTier && luckBonus.value > 0 && Math.random() < luckBonus.value) {
-        originalDrawResult = drawResult
-        drawResult = executeDraw(ticket, numbers, bonus)
-        secondChance = true
-    }
-
-    // Rolling luck
-    if (rawBonus > 0 && !drawResult.prizeTier) {
+    /** Apply rolling luck to a draw result independently. Returns modified draw + forced indices. */
+    function applyRollingLuck(draw: ReturnType<typeof executeDraw>): { draw: ReturnType<typeof executeDraw>; luckyIdx: Set<number> } {
+        const luckyIdx = new Set<number>()
+        if (rawBonus <= 0 || draw.prizeTier) return { draw, luckyIdx }
         const cap = LUCK_CAP_BY_PICKS[ticket.pickCount] ?? 0.22
         const baseLuck = cap * Math.sqrt(rawBonus)
-        const drawnArr = [...drawResult.drawnNumbers]
+        const drawnArr = [...draw.drawnNumbers]
         const unmatchedPlayer = numbers.filter((n) => !new Set(drawnArr).has(n))
         let forcedCount = 0
         const forcedValues = new Set<number>()
@@ -214,9 +207,33 @@ function executeSingleDrawWithLuck(
             drawnArr.sort((a, b) => a - b)
             drawnArr.forEach((n, i) => { if (forcedValues.has(n)) luckyIdx.add(i) })
             const newMatchCount = countMatches(numbers, drawnArr)
-            const newPrize = determinePrize(newMatchCount, drawResult.bonusMatched, ticket.prizes)
-            drawResult = { ...drawResult, drawnNumbers: drawnArr, matchedCount: newMatchCount, prizeTier: newPrize }
+            const newPrize = determinePrize(newMatchCount, draw.bonusMatched, ticket.prizes)
+            return { draw: { ...draw, drawnNumbers: drawnArr, matchedCount: newMatchCount, prizeTier: newPrize }, luckyIdx }
         }
+        return { draw, luckyIdx }
+    }
+
+    let drawResult = executeDraw(ticket, numbers, bonus)
+    let secondChance = false
+    let originalDrawResult: ReturnType<typeof executeDraw> | null = null
+    let luckyIdx = new Set<number>()
+    let originalLuckyIdx = new Set<number>()
+
+    // Apply rolling luck to Phase 1
+    const phase1 = applyRollingLuck(drawResult)
+    drawResult = phase1.draw
+    luckyIdx = phase1.luckyIdx
+
+    // Second chance (only if Phase 1 still lost after rolling luck)
+    if (!drawResult.prizeTier && luckBonus.value > 0 && Math.random() < luckBonus.value) {
+        originalDrawResult = drawResult
+        originalLuckyIdx = luckyIdx
+        drawResult = executeDraw(ticket, numbers, bonus)
+        secondChance = true
+        // Apply rolling luck to Phase 2 independently
+        const phase2 = applyRollingLuck(drawResult)
+        drawResult = phase2.draw
+        luckyIdx = phase2.luckyIdx
     }
 
     // Calculate payout
@@ -276,6 +293,7 @@ function executeSingleDrawWithLuck(
         ability: unlockedAbility,
         luckyIndices: luckyIdx,
         luckChances: computeLuckChances(fullResult.drawnNumbers),
+        originalLuckyIndices: originalLuckyIdx,
         originalLuckChances: originalDrawResult ? computeLuckChances(originalDrawResult.drawnNumbers) : null,
         secondChance,
         originalResult,
@@ -313,11 +331,12 @@ async function handlePlay(numbers: number[], bonus: number | null): Promise<void
         // ─── Single draw — LotteryDraw handles all animation phases ─────
         await sleep(200)
 
-        const { result, ability, luckyIndices, luckChances, originalLuckChances, secondChance, originalResult } =
+        const { result, ability, luckyIndices, luckChances, originalLuckyIndices, originalLuckChances, secondChance, originalResult } =
             executeSingleDrawWithLuck(ticket, numbers, bonus)
 
         currentLuckChances.value = luckChances
         currentLuckyIndices.value = luckyIndices
+        currentOriginalLuckyIndices.value = originalLuckyIndices
         currentSecondChance.value = secondChance
         currentOriginalResult.value = originalResult
         currentOriginalLuckChances.value = originalLuckChances
@@ -338,8 +357,8 @@ async function handlePlay(numbers: number[], bonus: number | null): Promise<void
             const nums = i === 0 ? numbers : generateQuickPick(ticket).numbers
             const bn = i === 0 ? bonus : generateQuickPick(ticket).bonus
 
-            const { result, ability, luckyIndices, luckChances, originalLuckChances, secondChance, originalResult } = executeSingleDrawWithLuck(ticket, nums, bn)
-            entries.push({ result, luckyIndices, luckChances, originalLuckChances, secondChance, originalResult })
+            const { result, ability, luckyIndices, luckChances, originalLuckyIndices, originalLuckChances, secondChance, originalResult } = executeSingleDrawWithLuck(ticket, nums, bn)
+            entries.push({ result, luckyIndices, luckChances, originalLuckyIndices, originalLuckChances, secondChance, originalResult })
             if (result.prizeTier) {
                 wins++
                 totalPayout += result.payout
@@ -387,6 +406,7 @@ function clearResult(): void {
     currentSecondChance.value = false
     currentOriginalResult.value = null
     currentOriginalLuckChances.value = null
+    currentOriginalLuckyIndices.value = new Set()
 }
 
 function selectTicket(id: string): void {
@@ -399,6 +419,7 @@ function selectTicket(id: string): void {
     currentSecondChance.value = false
     currentOriginalResult.value = null
     currentOriginalLuckChances.value = null
+    currentOriginalLuckyIndices.value = new Set()
 }
 
 // ─── Dev: Simulate jackpots ─────────────────────────────────
@@ -550,7 +571,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                     <span class="divine-gallery-title">{{ $t('gambling.lt_divine_gallery') }}</span>
                     <span class="divine-gallery-count">{{ gambling.divineAbilities.length }} / {{
                         DIVINE_ABILITIES.length
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="divine-gallery-grid">
                     <div v-for="ability in DIVINE_ABILITIES" :key="ability.id" class="divine-gallery-card"
@@ -559,7 +580,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                             <AppIcon :icon="gambling.hasDivineAbility(ability.id) ? ability.icon : 'mdi:lock-outline'"
                                 class="dg-icon" />
                             <span class="dg-name">{{ gambling.hasDivineAbility(ability.id) ? ability.name : '???'
-                                }}</span>
+                            }}</span>
                             <span v-if="gambling.hasDivineAbility(ability.id)" class="dg-value"
                                 :style="{ color: rarityCssVar(ability.rarity) }">+{{ Math.round((ability.effect.value -
                                     1) *
@@ -599,7 +620,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                     <LotteryDraw :result="currentResult" :ticket="selectedTicket" :lucky-indices="currentLuckyIndices"
                         :luck-chances="currentLuckChances" :second-chance="currentSecondChance"
                         :original-result="currentOriginalResult" :original-luck-chances="currentOriginalLuckChances"
-                        :speed-multiplier="drawSpeed"
+                        :original-lucky-indices="currentOriginalLuckyIndices" :speed-multiplier="drawSpeed"
                         @done="onSingleDrawDone" />
                     <button class="new-draw-btn" @click="clearResult" :disabled="isDrawing">
                         <AppIcon icon="mdi:refresh" /> {{ $t('gambling.lt_new_draw') }}
@@ -620,12 +641,12 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                             <div class="multi-stat">
                                 <span class="multi-stat-label">{{ $t('gambling.lt_total_cost') }}</span>
                                 <span class="multi-stat-value negative">-{{ formatCash(D(multiDrawSummary.totalCost))
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="multi-stat">
                                 <span class="multi-stat-label">{{ $t('gambling.lt_total_payout') }}</span>
                                 <span class="multi-stat-value positive">+{{ formatCash(D(multiDrawSummary.totalPayout))
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="multi-stat">
                                 <span class="multi-stat-label">{{ $t('gambling.stats_net') }}</span>
@@ -652,7 +673,8 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                                 :lucky-indices="entry.luckyIndices" :luck-chances="entry.luckChances"
                                 :second-chance="entry.secondChance" :original-result="entry.originalResult"
                                 :original-luck-chances="entry.originalLuckChances"
-                                :speed-multiplier="drawSpeed" @done="onMultiDrawDone" />
+                                :original-lucky-indices="entry.originalLuckyIndices" :speed-multiplier="drawSpeed"
+                                @done="onMultiDrawDone" />
                         </div>
                     </div>
 
@@ -715,7 +737,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                 <div class="stat-item">
                     <span class="stat-label">{{ $t('gambling.stats_win_rate') }}</span>
                     <span class="stat-value">{{ stats.played > 0 ? Math.round(stats.won / stats.played * 100) : 0
-                    }}%</span>
+                        }}%</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">{{ $t('gambling.stats_net') }}</span>
@@ -740,7 +762,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                         <span class="history-ticket">{{ entry.ticketName }}</span>
                         <span class="history-matches">{{ entry.result.matchedCount }}/{{
                             LOTTERY_TICKETS.find(t => t.name === entry.ticketName)?.pickCount ?? '?'
-                        }}</span>
+                            }}</span>
                         <span v-if="entry.result.prizeTier" class="history-prize"
                             :style="{ color: rarityCssVar(entry.result.prizeTier.rarity) }">
                             {{ entry.result.prizeTier.label }} — {{ formatCash(entry.result.payout) }}

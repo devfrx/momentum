@@ -90,13 +90,13 @@ export function useAutoSave() {
       totalTicks: gameEngine.currentTick,
       totalPlayTime: gameEngine.elapsedTime,
       
-      // Player state
+      // Player state (use prestige store as authoritative source for prestige fields)
       player: {
         cash: player.cash,
         totalCashEarned: player.totalCashEarned,
         totalCashSpent: player.totalCashSpent,
-        prestigePoints: player.prestigePoints,
-        rebirthCount: player.rebirthCount,
+        prestigePoints: prestige.points,
+        rebirthCount: prestige.rebirthCount,
         level: player.level,
         xp: player.xp,
         xpToNextLevel: player.xpToNextLevel,
@@ -139,39 +139,8 @@ export function useAutoSave() {
       },
       cryptoMarketState: crypto.getSimulator().serialize(),
 
-      // Real estate state
-      realEstate: realEstate.properties.map(p => ({
-        id: p.id,
-        definitionId: p.definitionId,
-        name: p.name,
-        icon: p.icon,
-        category: p.category,
-        customName: p.customName,
-        units: p.units,
-        purchasePrice: p.purchasePrice,
-        currentValue: p.currentValue,
-        baseRent: p.baseRent,
-        rentMultiplier: p.rentMultiplier,
-        condition: p.condition,
-        wearRate: p.wearRate,
-        renovationLevel: p.renovationLevel,
-        maxRenovationLevel: p.maxRenovationLevel,
-        renovationCostBase: p.renovationCostBase,
-        renovationCostGrowth: p.renovationCostGrowth,
-        baseMaintenance: p.baseMaintenance,
-        taxRate: p.taxRate,
-        baseAppreciationRate: p.baseAppreciationRate,
-        occupancy: p.occupancy,
-        occupiedUnits: p.occupiedUnits,
-        grossRentPerTick: p.grossRentPerTick,
-        expensesPerTick: p.expensesPerTick,
-        netIncomePerTick: p.netIncomePerTick,
-        totalRentEarned: p.totalRentEarned,
-        totalExpensesPaid: p.totalExpensesPaid,
-        totalNetIncome: p.totalNetIncome,
-        ownedSinceTick: p.ownedSinceTick,
-        repairCost: p.repairCost,
-      })),
+      // Real estate state (use exportState for full state including opportunities)
+      realEstate: realEstate.exportState(),
 
       // Startups state (use exportState for full state including opportunities)
       startups: startups.exportState(),

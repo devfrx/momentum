@@ -294,10 +294,26 @@ export class EventSystem {
   // ─── State persistence ──────────────────────────────────────────
 
   getState(): EventSystemState {
-    return { ...this.state }
+    return {
+      ...this.state,
+      activeEvents: this.state.activeEvents.map(e => ({
+        ...e,
+        effects: [...e.effects]
+      })),
+      cooldowns: { ...this.state.cooldowns },
+      pendingChoices: [...this.state.pendingChoices]
+    }
   }
 
   setState(state: EventSystemState): void {
-    this.state = { ...state }
+    this.state = {
+      ...state,
+      activeEvents: (state.activeEvents ?? []).map(e => ({
+        ...e,
+        effects: [...(e.effects ?? [])]
+      })),
+      cooldowns: { ...(state.cooldowns ?? {}) },
+      pendingChoices: [...(state.pendingChoices ?? [])]
+    }
   }
 }

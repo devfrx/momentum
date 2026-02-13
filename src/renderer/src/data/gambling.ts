@@ -13,7 +13,7 @@ export interface GamblingGameDef {
 
 export const GAMBLING_GAMES: GamblingGameDef[] = [
   {
-    id: 'coinFlip',
+    id: 'coinflip',
     name: 'Coin Flip',
     description: 'Heads or tails. Simple and clean.',
     icon: 'mdi:circle-half-full',
@@ -85,7 +85,7 @@ export const GAMBLING_GAMES: GamblingGameDef[] = [
     rules: 'Jacks or Better. Draw up to 5 cards. Best hand wins.'
   },
   {
-    id: 'scratchCard',
+    id: 'scratchcard',
     name: 'Scratch Card',
     description: 'Scratch and see if you won.',
     icon: 'mdi:cards',
@@ -97,7 +97,7 @@ export const GAMBLING_GAMES: GamblingGameDef[] = [
     rules: 'Scratch 3 matching symbols to win. Various tiers.'
   },
   {
-    id: 'horseRacing',
+    id: 'horseracing',
     name: 'Horse Racing',
     description: 'Bet on the winning horse.',
     icon: 'mdi:horse-variant',

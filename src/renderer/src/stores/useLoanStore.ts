@@ -14,6 +14,7 @@ import { ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, div, gte, max } from '@renderer/core/BigNum'
 import { Formulas } from '@renderer/core'
+import { gameEngine } from '@renderer/core/GameEngine'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
@@ -702,7 +703,7 @@ export const useLoanStore = defineStore('loans', () => {
     const needToRepay = sub(loan.remaining, safeBalance)
 
     if (needToRepay.gt(0) && player.cash.gte(needToRepay)) {
-      repayLoan(loan.id, needToRepay, 0)
+      repayLoan(loan.id, needToRepay, gameEngine.currentTick)
     } else {
       // Can't meet margin call - default
       handleDefault(loan)

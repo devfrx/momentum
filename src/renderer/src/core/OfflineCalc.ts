@@ -116,7 +116,7 @@ export function calculateOfflineProgress(
 
   // Net cash earned = all income - loan interest (deposits don't go to cash)
   const totalIncome = add(add(add(jobIncome, businessIncome), realEstateIncome), dividendIncome)
-  const cashEarned = totalIncome
+  const cashEarned = Decimal.max(ZERO, totalIncome.sub(loanInterestPaid))
 
   return {
     elapsedSeconds,

@@ -31,15 +31,46 @@ const zoomOptions = [
     { label: '1m', points: 20 },
     { label: '5m', points: 60 },
     { label: '15m', points: 150 },
-    { label: '1h', points: 360 },
+    { label: '1h', points: 720 },
+    { label: '6h', points: 4320 },
+    { label: '1d', points: 17280 },
     { label: 'All', points: 0 }
 ]
-const selectedRange = ref(2)
+const selectedRange = ref(3)
+
+/** Maximum data points to render in Chart.js for performance */
+const MAX_CHART_POINTS = 800
+
+/** Downsample array to at most maxPts entries using LTTB */
+function lttb(data: number[], maxPts: number): number[] {
+    if (data.length <= maxPts) return data
+    const out: number[] = [data[0]]
+    const bucketSize = (data.length - 2) / (maxPts - 2)
+    let prevIndex = 0
+    for (let i = 1; i < maxPts - 1; i++) {
+        const avgStart = Math.floor(i * bucketSize) + 1
+        const avgEnd = Math.min(Math.floor((i + 1) * bucketSize) + 1, data.length)
+        let avgX = 0, avgY = 0, count = 0
+        for (let j = avgStart; j < avgEnd; j++) { avgX += j; avgY += data[j]; count++ }
+        avgX /= count; avgY /= count
+        const rangeStart = Math.floor((i - 1) * bucketSize) + 1
+        const rangeEnd = Math.floor(i * bucketSize) + 1
+        let maxArea = -1, bestIdx = rangeStart
+        for (let j = rangeStart; j < rangeEnd; j++) {
+            const area = Math.abs((prevIndex - avgX) * (data[j] - data[prevIndex]) - (prevIndex - j) * (avgY - data[prevIndex]))
+            if (area > maxArea) { maxArea = area; bestIdx = j }
+        }
+        out.push(data[bestIdx])
+        prevIndex = bestIdx
+    }
+    out.push(data[data.length - 1])
+    return out
+}
 
 const visibleData = computed(() => {
     const pts = zoomOptions[selectedRange.value].points
-    if (pts === 0 || pts >= props.data.length) return props.data
-    return props.data.slice(-pts)
+    const raw = (pts === 0 || pts >= props.data.length) ? props.data : props.data.slice(-pts)
+    return lttb(raw, MAX_CHART_POINTS)
 })
 
 const priceChange = computed(() => {
@@ -340,16 +371,22 @@ function formatPrice(v: number): string {
     <div class="chart-container">
         <!-- Toolbar -->
         <div class="chart-toolbar">
-            <div class="toolbar-left">
+            <div class="toolbar-row toolbar-row--top">
                 <div class="range-group">
                     <button v-for="(opt, idx) in zoomOptions" :key="opt.label"
                         :class="['range-btn', { active: selectedRange === idx }]" @click="selectedRange = idx">
                         {{ opt.label }}
                     </button>
                 </div>
+                <button class="reset-btn" @click="resetZoom" :title="$t('charts.reset_zoom')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path d="M1 4v6h6M23 20v-6h-6" />
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                    </svg>
+                </button>
             </div>
-
-            <div class="toolbar-center">
+            <div class="toolbar-row toolbar-row--bottom">
                 <div class="live-price" :class="priceChange.value >= 0 ? 'is-up' : 'is-down'">
                     <span class="live-price-value">{{ formatPrice(currentPrice) }}</span>
                     <span class="live-price-change">
@@ -359,9 +396,6 @@ function formatPrice(v: number): string {
                         ({{ priceChange.percent >= 0 ? '+' : '' }}{{ priceChange.percent.toFixed(2) }}%)
                     </span>
                 </div>
-            </div>
-
-            <div class="toolbar-right">
                 <div class="hl-badges">
                     <span class="hl-badge hl-badge--high">
                         <span class="hl-label">{{ $t('charts.high') }}</span>
@@ -372,13 +406,6 @@ function formatPrice(v: number): string {
                         <span class="hl-val">{{ formatPrice(lowPrice) }}</span>
                     </span>
                 </div>
-                <button class="reset-btn" @click="resetZoom" :title="$t('charts.reset_zoom')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
-                        <path d="M1 4v6h6M23 20v-6h-6" />
-                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
-                    </svg>
-                </button>
             </div>
         </div>
 
@@ -403,30 +430,27 @@ function formatPrice(v: number): string {
 /* ─── Toolbar ─── */
 .chart-toolbar {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
     border-bottom: 1px solid var(--t-border, #27272a);
     background: var(--t-bg-card, #18181b);
-    flex-wrap: wrap;
-    min-height: 36px;
 }
 
-.toolbar-left,
-.toolbar-right {
+.toolbar-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
-    flex-shrink: 0;
     white-space: nowrap;
 }
 
-.toolbar-center {
-    display: flex;
-    align-items: center;
-    flex-shrink: 1;
-    min-width: 0;
+.toolbar-row--top {
+    gap: 0.5rem;
+}
+
+.toolbar-row--bottom {
+    gap: 0.75rem;
 }
 
 .range-group {
@@ -438,8 +462,8 @@ function formatPrice(v: number): string {
 }
 
 .range-btn {
-    padding: 0.2rem 0.45rem;
-    font-size: 0.62rem;
+    padding: 0.2rem 0.35rem;
+    font-size: 0.6rem;
     font-weight: 600;
     font-family: var(--t-font-mono, monospace);
     letter-spacing: 0.02em;

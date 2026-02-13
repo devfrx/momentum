@@ -201,7 +201,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                         <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
                             formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                        }}x</strong></span>
+                                }}x</strong></span>
                     </div>
                     <div class="success-result">
                         <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
@@ -235,7 +235,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                             formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.success') }} <strong class="text-sky">{{ formatRate(inv.successChance *
                             100)
-                        }}</strong></span>
+                                }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{
                             inv.returnMultiplier.toFixed(1)
                                 }}x</strong></span>
@@ -281,7 +281,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                             <span class="opp-card__tagline">{{ opp.tagline }}</span>
                         </div>
                         <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">{{ STAGES[opp.stage].name
-                            }}</span>
+                        }}</span>
                     </div>
 
                     <!-- Meta row: sector + timer -->
@@ -457,7 +457,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                    }}</strong>
+                        }}</strong>
                 </div>
             </div>
 

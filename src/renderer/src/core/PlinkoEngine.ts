@@ -361,10 +361,28 @@ export class PlinkoEngine {
     return this.buckets[bucketIndex]?.multiplier ?? 0
   }
 
-  /** Expected value (simple average) */
+  /** Expected value (binomial-weighted average for Galton board) */
   getExpectedValue(): number {
-    const sum = this.buckets.reduce((s, b) => s + b.multiplier, 0)
-    return sum / this.buckets.length
+    const n = this.rows
+    const total = Math.pow(2, n)
+    let ev = 0
+    for (let k = 0; k < this.buckets.length; k++) {
+      // Binomial coefficient C(n, k) / 2^n
+      const prob = this.binomialCoeff(n, k) / total
+      ev += prob * this.buckets[k].multiplier
+    }
+    return ev
+  }
+
+  /** Compute binomial coefficient C(n, k) */
+  private binomialCoeff(n: number, k: number): number {
+    if (k < 0 || k > n) return 0
+    if (k === 0 || k === n) return 1
+    let result = 1
+    for (let i = 0; i < Math.min(k, n - k); i++) {
+      result = result * (n - i) / (i + 1)
+    }
+    return Math.round(result)
   }
 
   /** Clean up — stop the Matter engine */

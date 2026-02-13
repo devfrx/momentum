@@ -10,7 +10,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.15,
     volatility: 0.60,
     minPrice: 0.01,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'ETH',
@@ -21,7 +21,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.12,
     volatility: 0.55,
     minPrice: 0.01,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'DOGE',
@@ -32,7 +32,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.20,
     volatility: 0.80,
     minPrice: 0.0001,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'SOL',
@@ -43,7 +43,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.18,
     volatility: 0.65,
     minPrice: 0.01,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'PEPE',
@@ -54,7 +54,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.25,
     volatility: 0.90,
     minPrice: 0.000001,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'LINK',
@@ -65,7 +65,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.10,
     volatility: 0.50,
     minPrice: 0.01,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'AVAX',
@@ -76,7 +76,7 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.14,
     volatility: 0.55,
     minPrice: 0.01,
-    maxHistory: 500
+    maxHistory: 50000
   },
   {
     id: 'SHIB',
@@ -87,6 +87,6 @@ export const CRYPTOS: AssetConfig[] = [
     drift: 0.30,
     volatility: 0.95,
     minPrice: 0.0000001,
-    maxHistory: 500
+    maxHistory: 50000
   }
 ]

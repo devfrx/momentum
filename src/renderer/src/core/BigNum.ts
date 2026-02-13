@@ -44,6 +44,8 @@ export function mul(a: Decimal, b: Decimal | number): Decimal {
 }
 
 export function div(a: Decimal, b: Decimal | number): Decimal {
+  const bDec = b instanceof Decimal ? b : new Decimal(b)
+  if (bDec.eq(0)) return ZERO
   return a.div(b)
 }
 

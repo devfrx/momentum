@@ -198,9 +198,13 @@ export class MarketSimulator {
     return this.state.condition
   }
 
-  /** Get full state (for serialization) */
+  /** Get full state (for serialization — returns a copy to prevent external mutation) */
   getState(): MarketState {
-    return this.state
+    return {
+      ...this.state,
+      assets: new Map(this.state.assets),
+      sectorModifiers: { ...this.state.sectorModifiers }
+    }
   }
 
   /** Restore full state (from deserialization) */

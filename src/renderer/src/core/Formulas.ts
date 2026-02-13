@@ -7,6 +7,13 @@
 import Decimal from 'break_infinity.js'
 import { D, ZERO, ONE, pow, mul, div, floor, max, add } from './BigNum'
 
+/**
+ * Game time unit: rates (interest, taxes, inflation…) are "per 6 hours" of real time.
+ * 1 rate-period = ticksPerSecond × 3600 × 6 ticks  (= 216,000 ticks @ 10 tps).
+ * Change the multiplier here to retune globally.
+ */
+export const TICKS_PER_RATE_PERIOD = (tps: number): number => tps * 3600 * 6
+
 // ─── Cost formulas ──────────────────────────────────────────────────
 
 /**
@@ -56,7 +63,11 @@ export function maxAffordable(
   const gOwned = pow(g, owned)
   const inner = cash.mul(g.sub(1)).div(mul(baseCost, gOwned)).add(1)
   if (inner.lte(0)) return 0
-  const n = inner.log10() / g.log10()
+  const logInner = inner.log10()
+  const logG = g.log10()
+  if (!Number.isFinite(logInner) || !Number.isFinite(logG) || logG === 0) return 0
+  const n = logInner / logG
+  if (!Number.isFinite(n)) return 0
   return Math.max(0, Math.floor(n))
 }
 
@@ -170,32 +181,32 @@ export function businessValuation(
 
 /**
  * Loan interest amount per tick.
- * interestPerTick = principal × annualRate / ticksPerYear
+ * interestPerTick = principal × rate / ticksPerPeriod
  */
 export function loanInterestPerTick(
   remainingPrincipal: Decimal,
-  annualRate: number,
+  rate: number,
   ticksPerSecond: number = 10
 ): Decimal {
-  const ticksPerYear = ticksPerSecond * 3600 * 24 * 365
-  return mul(remainingPrincipal, annualRate / ticksPerYear)
+  const ticksPerPeriod = TICKS_PER_RATE_PERIOD(ticksPerSecond)
+  return mul(remainingPrincipal, rate / ticksPerPeriod)
 }
 
 /**
  * Minimum payment per tick for an amortized loan.
  * Uses simplified amortization formula to spread principal + interest over term.
  * paymentPerTick = principal × (r × (1+r)^n) / ((1+r)^n - 1) / n
- * where r = annualRate/ticksPerYear, n = termTicks
+ * where r = rate/ticksPerPeriod, n = termTicks
  */
 export function loanPaymentPerTick(
   principal: Decimal,
-  annualRate: number,
+  rate: number,
   termTicks: number,
   ticksPerSecond: number = 10
 ): Decimal {
   if (termTicks <= 0) return ZERO
-  const ticksPerYear = ticksPerSecond * 3600 * 24 * 365
-  const r = annualRate / ticksPerYear
+  const ticksPerPeriod = TICKS_PER_RATE_PERIOD(ticksPerSecond)
+  const r = rate / ticksPerPeriod
   const n = termTicks
 
   if (r <= 0) {
@@ -530,15 +541,15 @@ export function hardCap(value: Decimal, maximum: Decimal): Decimal {
 
 /**
  * Deposit interest earned per tick.
- * interestPerTick = balance × APY / ticksPerYear
+ * interestPerTick = balance × rate / ticksPerPeriod
  */
 export function depositInterestPerTick(
   balance: Decimal,
-  annualRate: number,
+  rate: number,
   ticksPerSecond: number = 10
 ): Decimal {
-  const ticksPerYear = ticksPerSecond * 3600 * 24 * 365
-  return mul(balance, annualRate / ticksPerYear)
+  const ticksPerPeriod = TICKS_PER_RATE_PERIOD(ticksPerSecond)
+  return mul(balance, rate / ticksPerPeriod)
 }
 
 /**
@@ -548,16 +559,16 @@ export function depositInterestPerTick(
  */
 export function depositProjectedInterest(
   principal: Decimal,
-  annualRate: number,
+  rate: number,
   termTicks: number,
   compoundIntervalTicks: number,
   ticksPerSecond: number = 10
 ): Decimal {
-  if (termTicks <= 0 || annualRate <= 0) return ZERO
-  const ticksPerYear = ticksPerSecond * 3600 * 24 * 365
-  const n = ticksPerYear / compoundIntervalTicks          // compounds per year
-  const t = termTicks / ticksPerYear                      // years
-  const ratePerCompound = annualRate / n
+  if (termTicks <= 0 || rate <= 0) return ZERO
+  const ticksPerPeriod = TICKS_PER_RATE_PERIOD(ticksPerSecond)
+  const n = ticksPerPeriod / compoundIntervalTicks        // compounds per period
+  const t = termTicks / ticksPerPeriod                    // periods
+  const ratePerCompound = rate / n
   const compoundPeriods = n * t
   const growthFactor = Math.pow(1 + ratePerCompound, compoundPeriods)
   return max(ZERO, mul(principal, growthFactor - 1))

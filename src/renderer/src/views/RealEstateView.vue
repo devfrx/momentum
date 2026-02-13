@@ -1,129 +1,67 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
-import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { useFormat } from '@renderer/composables/useFormat'
-import { gameEngine } from '@renderer/core/GameEngine'
-import { PROPERTIES } from '@renderer/data/properties'
+import { type District } from '@renderer/data/realestate'
+import CityMap from '@renderer/components/realestate/CityMap.vue'
+import DistrictPanel from '@renderer/components/realestate/DistrictPanel.vue'
+import OpportunityCard from '@renderer/components/realestate/OpportunityCard.vue'
+import PropertyCard from '@renderer/components/realestate/PropertyCard.vue'
+import ImprovementShop from '@renderer/components/realestate/ImprovementShop.vue'
+import PropertyCustomizer from '@renderer/components/realestate/PropertyCustomizer.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { PropertyCard } from '@renderer/components/realestate'
-import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
-import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import Dialog from 'primevue/dialog'
 
+const { t } = useI18n()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
-const upgrades = useUpgradeStore()
-const { formatCash, formatPercent } = useFormat()
-const { t } = useI18n()
+const { formatCash, formatNumber } = useFormat()
 
-const availableProperties = computed(() => {
-    const ownedIds = new Set(realEstate.properties.map((p) => p.definitionId))
-    return PROPERTIES.filter((def) => !ownedIds.has(def.id) && player.netWorth.gte(def.unlockAt))
+const activeTab = ref<'map' | 'opportunities' | 'portfolio'>('map')
+const selectedDistrict = ref<District | null>(null)
+const selectedPropertyId = ref<string | null>(null)
+const showImprovements = ref(false)
+const showCustomizer = ref(false)
+
+const selectedProperty = computed(() =>
+    selectedPropertyId.value ? realEstate.properties.find(p => p.id === selectedPropertyId.value) ?? null : null,
+)
+
+const improvementProperty = computed(() =>
+    showImprovements.value && selectedPropertyId.value
+        ? realEstate.properties.find(p => p.id === selectedPropertyId.value) ?? null : null,
+)
+
+const customizerProperty = computed(() =>
+    showCustomizer.value && selectedPropertyId.value
+        ? realEstate.properties.find(p => p.id === selectedPropertyId.value) ?? null : null,
+)
+
+onMounted(() => {
+    realEstate.ensureOpportunities(player.netWorth.toNumber(), Date.now())
 })
 
-// Rent bonus from skills/prestige
-const rentBonus = computed(() => {
-    const mul = upgrades.getMultiplier('real_estate_rent').toNumber()
-    return mul > 1 ? `+${formatPercent(mul - 1)}` : t('realestate.no_bonus')
-})
-
-const realEstateInfoSections = computed<InfoSection[]>(() => [
-    {
-        title: t('realestate.info.basics.title'),
-        icon: 'mdi:home-city',
-        entries: [
-            { term: t('realestate.info.basics.units'), desc: t('realestate.info.basics.units_desc'), icon: 'mdi:door' },
-            { term: t('realestate.info.basics.category'), desc: t('realestate.info.basics.category_desc'), icon: 'mdi:tag' },
-            { term: t('realestate.info.basics.base_rent'), desc: t('realestate.info.basics.base_rent_desc'), icon: 'mdi:cash' },
-            { term: t('realestate.info.basics.current_value'), desc: t('realestate.info.basics.current_value_desc'), icon: 'mdi:chart-line' },
-        ]
-    },
-    {
-        title: t('realestate.info.condition.title'),
-        icon: 'mdi:wrench',
-        entries: [
-            { term: t('realestate.info.condition.condition'), desc: t('realestate.info.condition.condition_desc'), icon: 'mdi:home-thermometer' },
-            { term: t('realestate.info.condition.wear_rate'), desc: t('realestate.info.condition.wear_rate_desc'), icon: 'mdi:arrow-down' },
-            { term: t('realestate.info.condition.repair'), desc: t('realestate.info.condition.repair_desc'), icon: 'mdi:hammer-wrench' },
-            { term: t('realestate.info.condition.low_condition_penalty'), desc: t('realestate.info.condition.low_condition_penalty_desc'), icon: 'mdi:alert-circle' },
-        ]
-    },
-    {
-        title: t('realestate.info.occupancy.title'),
-        icon: 'mdi:account-multiple',
-        entries: [
-            { term: t('realestate.info.occupancy.formula'), desc: t('realestate.info.occupancy.formula_desc'), icon: 'mdi:function-variant' },
-            { term: t('realestate.info.occupancy.condition_factor'), desc: t('realestate.info.occupancy.condition_factor_desc'), icon: 'mdi:home-thermometer' },
-            { term: t('realestate.info.occupancy.price_factor'), desc: t('realestate.info.occupancy.price_factor_desc'), icon: 'mdi:cash-multiple' },
-            { term: t('realestate.info.occupancy.economy_factor'), desc: t('realestate.info.occupancy.economy_factor_desc'), icon: 'mdi:earth' },
-            { term: t('realestate.info.occupancy.renovation_bonus'), desc: t('realestate.info.occupancy.renovation_bonus_desc'), icon: 'mdi:home-modern' },
-        ]
-    },
-    {
-        title: t('realestate.info.financials.title'),
-        icon: 'mdi:finance',
-        entries: [
-            { term: t('realestate.info.financials.gross_rent'), desc: t('realestate.info.financials.gross_rent_desc'), icon: 'mdi:trending-up' },
-            { term: t('realestate.info.financials.maintenance'), desc: t('realestate.info.financials.maintenance_desc'), icon: 'mdi:tools' },
-            { term: t('realestate.info.financials.property_tax'), desc: t('realestate.info.financials.property_tax_desc'), icon: 'mdi:bank' },
-            { term: t('realestate.info.financials.insurance'), desc: t('realestate.info.financials.insurance_desc'), icon: 'mdi:shield-home' },
-            { term: t('realestate.info.financials.net_income'), desc: t('realestate.info.financials.net_income_desc'), icon: 'mdi:scale-balance' },
-        ]
-    },
-    {
-        title: t('realestate.info.controls.title'),
-        icon: 'mdi:tune',
-        entries: [
-            { term: t('realestate.info.controls.rent_multiplier'), desc: t('realestate.info.controls.rent_multiplier_desc'), icon: 'mdi:cash-multiple' },
-            { term: t('realestate.info.controls.renovate'), desc: t('realestate.info.controls.renovate_desc'), icon: 'mdi:home-modern' },
-            { term: t('realestate.info.controls.renovation_cost'), desc: t('realestate.info.controls.renovation_cost_desc'), icon: 'mdi:calculator' },
-            { term: t('realestate.info.controls.repair'), desc: t('realestate.info.controls.repair_desc'), icon: 'mdi:hammer-wrench' },
-            { term: t('realestate.info.controls.sell'), desc: t('realestate.info.controls.sell_desc'), icon: 'mdi:home-remove' },
-            { term: t('realestate.info.controls.rename'), desc: t('realestate.info.controls.rename_desc'), icon: 'mdi:pencil' },
-        ]
-    },
-    {
-        title: t('realestate.info.market_value.title'),
-        icon: 'mdi:chart-areaspline',
-        entries: [
-            { term: t('realestate.info.market_value.appreciation'), desc: t('realestate.info.market_value.appreciation_desc'), icon: 'mdi:trending-up' },
-            { term: t('realestate.info.market_value.economy_multiplier'), desc: t('realestate.info.market_value.economy_multiplier_desc'), icon: 'mdi:sine-wave' },
-            { term: t('realestate.info.market_value.value_floor'), desc: t('realestate.info.market_value.value_floor_desc'), icon: 'mdi:shield' },
-        ]
-    },
-    {
-        title: t('realestate.info.details.title'),
-        icon: 'mdi:text-box-outline',
-        entries: [
-            { term: t('realestate.info.details.purchase_price'), desc: t('realestate.info.details.purchase_price_desc'), icon: 'mdi:receipt' },
-            { term: t('realestate.info.details.base_stats'), desc: t('realestate.info.details.base_stats_desc'), icon: 'mdi:information-outline' },
-            { term: t('realestate.info.details.lifetime_totals'), desc: t('realestate.info.details.lifetime_totals_desc'), icon: 'mdi:chart-bar' },
-        ]
-    },
-])
-
-function buyProperty(def: (typeof PROPERTIES)[number]): void {
-    realEstate.buyProperty(
-        {
-            id: def.id + '-' + Date.now(),
-            definitionId: def.id,
-            name: def.name,
-            icon: def.icon,
-            category: def.category,
-            units: def.units,
-            purchasePrice: def.price,
-            baseRent: def.baseRent,
-            baseMaintenance: def.baseMaintenance,
-            wearRate: def.wearRate,
-            taxRate: def.taxRate,
-            baseAppreciationRate: def.baseAppreciationRate,
-            renovationCostMultiplier: def.renovationCostMultiplier,
-            maxRenovationLevel: def.maxRenovationLevel,
-        },
-        gameEngine.currentTick
-    )
+function handleSelectDistrict(district: District): void {
+    selectedDistrict.value = district
+}
+function handleSelectOpportunity(oppId: string): void {
+    activeTab.value = 'opportunities'
+}
+function handleSelectProperty(propId: string): void {
+    selectedPropertyId.value = propId
+    activeTab.value = 'portfolio'
+}
+function handleBought(propId: string): void {
+    selectedPropertyId.value = propId
+    activeTab.value = 'portfolio'
+}
+function handleSold(): void {
+    selectedPropertyId.value = null
+}
+function handleOpenImprovements(): void {
+    showImprovements.value = true
 }
 </script>
 
@@ -133,270 +71,220 @@ function buyProperty(def: (typeof PROPERTIES)[number]): void {
         <div class="page-header">
             <div>
                 <h1 class="page-title">
-                    <AppIcon icon="mdi:home-city" class="page-title-icon" />
-                    {{ $t('realestate.title') }}
+                    <AppIcon icon="mdi:city-variant-outline" class="page-title-icon" />
+                    {{ t('realestate.title') }}
                 </h1>
-                <p class="page-subtitle">{{ $t('realestate.subtitle') }}</p>
+                <p class="page-subtitle">{{ t('realestate.subtitle') }}</p>
             </div>
         </div>
 
         <!-- Stats Bar -->
         <div class="stats-bar">
-            <div class="stat-chip bonus-chip">
-                <AppIcon icon="mdi:trending-up" class="stat-chip-icon" />
-                <span class="stat-chip-label">{{ $t('realestate.rent_bonus') }}</span>
-                <span class="stat-chip-value"
-                    :class="{ 'text-success': upgrades.getMultiplier('real_estate_rent').gt(1) }">{{ rentBonus }}</span>
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ t('realestate.stat.properties') }}</span>
+                <span class="stat-chip-value text-sky">{{ realEstate.properties.length }}</span>
             </div>
             <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('realestate.rental_income') }}</span>
-                <span class="stat-chip-value text-emerald">{{ formatCash(realEstate.rentPerSecond) }}/sec</span>
+                <span class="stat-chip-label">{{ t('realestate.stat.rent_tick') }}</span>
+                <span class="stat-chip-value text-emerald">{{ formatCash(realEstate.totalRentPerTick) }}</span>
             </div>
             <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('realestate.total_value') }}</span>
-                <span class="stat-chip-value text-sky">{{ formatCash(realEstate.totalPropertyValue) }}</span>
+                <span class="stat-chip-label">{{ t('realestate.stat.portfolio_value') }}</span>
+                <span class="stat-chip-value text-gold">{{ formatCash(realEstate.totalPropertyValue) }}</span>
             </div>
             <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('realestate.total_properties') }}</span>
-                <span class="stat-chip-value">{{ realEstate.properties.length }}</span>
+                <span class="stat-chip-label">{{ t('realestate.stat.opportunities') }}</span>
+                <span class="stat-chip-value text-sky">{{ realEstate.availableOpportunities.length }}</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ t('realestate.stat.hot_deals') }}</span>
+                <span class="stat-chip-value text-red">{{ realEstate.hotDeals.length }}</span>
             </div>
         </div>
 
-        <!-- Owned Properties -->
-        <section v-if="realEstate.properties.length">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:key" class="section-icon text-sky" />
-                {{ $t('realestate.portfolio') }}
-            </h2>
-            <div class="card-grid">
-                <PropertyCard v-for="prop in realEstate.properties" :key="prop.id" :property="prop"
-                    :renovation-cost="realEstate.getRenovationCost(prop)"
-                    :can-afford-renovation="!player.cash.lt(realEstate.getRenovationCost(prop))"
-                    :can-afford-repair="!player.cash.lt(prop.repairCost)" @repair="realEstate.repairProperty(prop.id)"
-                    @renovate="realEstate.renovateProperty(prop.id)"
-                    @set-rent="(m: number) => realEstate.setRentMultiplier(prop.id, m)"
-                    @rename="(n: string) => realEstate.renameProperty(prop.id, n)"
-                    @sell="realEstate.sellProperty(prop.id)" />
-            </div>
-        </section>
+        <!-- Tab Navigation -->
+        <div class="re-tabs">
+            <button class="re-tab" :class="{ active: activeTab === 'map' }" @click="activeTab = 'map'">
+                <AppIcon icon="mdi:map-outline" />
+                <span>{{ t('realestate.tab.map') }}</span>
+            </button>
+            <button class="re-tab" :class="{ active: activeTab === 'opportunities' }"
+                @click="activeTab = 'opportunities'">
+                <AppIcon icon="mdi:tag-multiple-outline" />
+                <span>{{ t('realestate.tab.opportunities') }}</span>
+                <span v-if="realEstate.hotDeals.length > 0" class="tab-badge tab-badge--hot">{{
+                    realEstate.hotDeals.length }}</span>
+            </button>
+            <button class="re-tab" :class="{ active: activeTab === 'portfolio' }" @click="activeTab = 'portfolio'">
+                <AppIcon icon="mdi:briefcase-outline" />
+                <span>{{ t('realestate.tab.portfolio') }}</span>
+                <span v-if="realEstate.properties.length > 0" class="tab-badge">{{ realEstate.properties.length
+                    }}</span>
+            </button>
+        </div>
 
-        <!-- Available Properties -->
-        <section v-if="availableProperties.length">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:home-search" class="section-icon" />
-                {{ $t('realestate.market') }}
-            </h2>
-            <div class="card-grid">
-                <div v-for="def in availableProperties" :key="def.id" class="purchase-card">
-                    <div class="purchase-header">
-                        <div class="purchase-icon-wrap">
-                            <AppIcon :icon="def.icon" class="purchase-icon" />
-                        </div>
-                        <div>
-                            <h3 class="purchase-name">{{ def.name }}</h3>
-                            <div class="purchase-meta">
-                                <span class="purchase-category">{{ def.category }}</span>
-                                <span class="purchase-units">{{ def.units }} unit{{ def.units > 1 ? 's' : '' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="purchase-stats">
-                        <div class="purchase-stat">
-                            <span class="ps-label">{{ $t('realestate.rent') }}</span>
-                            <span class="ps-value text-emerald">{{ formatCash(def.baseRent) }}/t</span>
-                        </div>
-                        <div class="purchase-stat">
-                            <span class="ps-label">{{ $t('realestate.maintenance') }}</span>
-                            <span class="ps-value text-orange">{{ formatCash(def.baseMaintenance) }}/t</span>
-                        </div>
-                        <div class="purchase-stat">
-                            <span class="ps-label">{{ $t('realestate.tax_rate') }}</span>
-                            <span class="ps-value">{{ (def.taxRate * 100).toFixed(1) }}%</span>
-                        </div>
-                    </div>
-                    <button class="buy-btn" :disabled="!player.canAfford(def.price)" @click="buyProperty(def)">
-                        {{ $t('realestate.buy') }} — {{ formatCash(def.price) }}
-                    </button>
+        <!-- TAB: City Map -->
+        <section v-if="activeTab === 'map'" class="section">
+            <div class="map-layout">
+                <div class="map-area">
+                    <CityMap @select-district="handleSelectDistrict" @select-opportunity="handleSelectOpportunity"
+                        @select-property="handleSelectProperty" />
                 </div>
+                <transition name="slide-panel">
+                    <DistrictPanel v-if="selectedDistrict" :district="selectedDistrict" @close="selectedDistrict = null"
+                        @view-property="handleSelectProperty" @view-opportunity="handleSelectOpportunity" />
+                </transition>
             </div>
         </section>
 
-        <!-- Empty State -->
-        <div v-if="realEstate.properties.length === 0 && availableProperties.length === 0" class="empty-state">
-            <AppIcon icon="mdi:home-city-outline" class="empty-icon" />
-            <p class="empty-title">{{ $t('realestate.no_properties') }}</p>
-            <p class="empty-text">{{ $t('realestate.no_properties_desc') }}</p>
-        </div>
+        <!-- TAB: Opportunities -->
+        <section v-if="activeTab === 'opportunities'" class="section">
+            <h2 class="section-header">
+                <AppIcon icon="mdi:tag-multiple" class="section-icon text-gold" />
+                {{ t('realestate.opp.market_title') }}
+                <span class="opp-count">({{ realEstate.availableOpportunities.length }})</span>
+            </h2>
 
-        <!-- Info Panel -->
-        <InfoPanel :title="$t('realestate.info_title')" :description="$t('realestate.info_desc')"
-            :sections="realEstateInfoSections" />
+            <div v-if="realEstate.availableOpportunities.length === 0" class="empty-state">
+                <AppIcon icon="mdi:map-search-outline" class="empty-icon" />
+                <p>{{ t('realestate.no_opportunities') }}</p>
+                <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.scan_hint') }}</p>
+            </div>
+
+            <div v-else class="card-grid">
+                <OpportunityCard v-for="opp in realEstate.availableOpportunities" :key="opp.id" :opportunity="opp"
+                    @bought="handleBought" />
+            </div>
+        </section>
+
+        <!-- TAB: Portfolio -->
+        <section v-if="activeTab === 'portfolio'" class="section">
+            <h2 class="section-header">
+                <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
+                {{ t('realestate.portfolio') }}
+                <span class="opp-count">({{ realEstate.properties.length }})</span>
+            </h2>
+
+            <div v-if="realEstate.properties.length === 0" class="empty-state">
+                <AppIcon icon="mdi:home-outline" class="empty-icon" />
+                <p>{{ t('realestate.no_properties') }}</p>
+                <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.buy_hint') }}</p>
+            </div>
+
+            <div v-else class="card-grid-lg">
+                <PropertyCard v-for="prop in realEstate.properties" :key="prop.id" :property="prop" @sold="handleSold"
+                    @open-improvements="selectedPropertyId = prop.id; handleOpenImprovements()" />
+            </div>
+        </section>
+
+        <!-- Dialogs -->
+        <Dialog v-model:visible="showImprovements" :header="t('realestate.improvement_shop')" modal
+            :style="{ width: '500px', maxHeight: '80vh' }" :dismissableMask="true">
+            <ImprovementShop v-if="improvementProperty" :property="improvementProperty"
+                @close="showImprovements = false" @installed="() => { }" />
+        </Dialog>
+
+        <Dialog v-model:visible="showCustomizer" :header="t('realestate.customize')" modal
+            :style="{ width: '500px', maxHeight: '80vh' }" :dismissableMask="true">
+            <PropertyCustomizer v-if="customizerProperty" :property="customizerProperty"
+                @close="showCustomizer = false" />
+        </Dialog>
     </div>
 </template>
 
 <style scoped>
-section {
-    margin-bottom: var(--t-space-8);
-}
-
-.section-icon.text-sky {
-    color: var(--t-text-secondary);
-}
-
-.purchase-card {
+.re-tabs {
     display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-5);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    gap: var(--t-space-1);
+    border-bottom: 1px solid var(--t-border);
+    padding-bottom: 0;
 }
 
-.purchase-card:hover {
-    border-color: var(--t-border-hover);
-}
-
-.purchase-header {
-    display: flex;
-    gap: var(--t-space-3);
+.re-tab {
+    display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    font-size: var(--t-font-size-sm);
+    font-weight: 500;
+    color: var(--t-text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color var(--t-transition-fast), border-color var(--t-transition-fast);
 }
 
-.purchase-icon-wrap {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    display: flex;
+.re-tab:hover {
+    color: var(--t-text);
+}
+
+.re-tab.active {
+    color: var(--t-accent);
+    border-bottom-color: var(--t-accent);
+}
+
+.tab-badge {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--t-accent);
+    color: var(--t-bg-base);
+    font-size: 0.65rem;
+    font-weight: 700;
 }
 
-.purchase-icon {
-    font-size: 1.2rem;
-    color: var(--t-text-secondary);
+.tab-badge--hot {
+    background: var(--t-danger);
+    color: white;
 }
 
-.purchase-name {
-    font-size: var(--t-font-size-base);
-    font-weight: 600;
-    color: var(--t-text);
-    margin: 0;
-}
-
-.purchase-meta {
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-    margin-top: 0.15rem;
-}
-
-.purchase-category {
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    padding: 0.1rem 0.35rem;
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.purchase-units {
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-}
-
-.purchase-stats {
+.map-layout {
     display: flex;
     gap: var(--t-space-4);
-    padding: var(--t-space-2) 0;
+    min-height: 520px;
 }
 
-.purchase-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
+.map-area {
+    flex: 1;
+    min-width: 0;
 }
 
-.ps-label {
-    font-size: var(--t-font-size-xs);
+.opp-count {
+    font-weight: 400;
     color: var(--t-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.ps-value {
-    font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
-    color: var(--t-text);
+    margin-left: 0.3rem;
 }
 
-.ps-value.text-emerald {
-    color: var(--t-success);
-}
-
-.ps-value.text-orange {
-    color: var(--t-warning, #f59e0b);
-}
-
-.buy-btn {
-    width: 100%;
-    padding: var(--t-space-2) var(--t-space-4);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    font-weight: 600;
-    font-size: var(--t-font-size-sm);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.buy-btn:hover:not(:disabled) {
-    background: var(--t-text);
-    color: var(--t-bg-base);
-    border-color: var(--t-text);
-}
-
-.buy-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-/* Empty state */
 .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 2rem;
-    border: 1px dashed var(--t-border);
-    border-radius: var(--t-radius-lg);
+    padding: var(--t-space-10) var(--t-space-4);
+    color: var(--t-text-muted);
+    text-align: center;
 }
 
 .empty-icon {
-    font-size: 3rem;
-    color: var(--t-text-muted);
-    margin-bottom: var(--t-space-3);
+    font-size: 2.5rem;
     opacity: 0.4;
+    margin-bottom: var(--t-space-2);
 }
 
-.empty-title {
-    font-size: var(--t-font-size-lg);
-    font-weight: 600;
-    color: var(--t-text-secondary);
-    margin: 0 0 var(--t-space-2) 0;
+.slide-panel-enter-active,
+.slide-panel-leave-active {
+    transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.empty-text {
-    font-size: var(--t-font-size-sm);
-    color: var(--t-text-muted);
-    margin: 0;
+.slide-panel-enter-from,
+.slide-panel-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
 }
 </style>

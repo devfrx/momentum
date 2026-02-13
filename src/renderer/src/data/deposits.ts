@@ -2,12 +2,13 @@
  * Deposits Data Definitions
  *
  * Defines all savings / fixed-deposit account types available in the game.
- * Each deposit type has different APY, term, minimum balance, and risk profile.
+ * Each deposit type has different interest rate, term, minimum balance, and risk profile.
  *
  * Mechanics overview:
  *  - Players lock cash into a deposit account for a fixed or flexible term.
- *  - Interest accrues every tick based on the effective APY (modified by
+ *  - Interest accrues every tick based on the effective rate (modified by
  *    credit score, skill tree, prestige, and events).
+ *  - Rates are **per hour** of real time (see Formulas.TICKS_PER_RATE_PERIOD).
  *  - Early withdrawal incurs a penalty (partial loss of accrued interest).
  *  - Compound frequency affects how often interest is reinvested into principal.
  *  - Higher-tier accounts require minimum net worth / level / credit score.
@@ -40,9 +41,9 @@ export interface DepositDef {
   category: DepositCategory
   icon: string
 
-  /** Base annual percentage yield (e.g. 0.05 = 5%) */
+  /** Base interest rate per hour (e.g. 0.05 = 5%/h) */
   baseAPY: number
-  /** Whether APY scales with credit score (higher score → better rate) */
+  /** Whether rate scales with credit score (higher score → better rate) */
   apyScalesWithCredit: boolean
 
   /** Minimum deposit amount */

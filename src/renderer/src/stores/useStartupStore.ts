@@ -8,6 +8,7 @@ import Decimal from 'break_infinity.js'
 import { ZERO, D, add, sub, mul, gte } from '@renderer/core/BigNum'
 import { usePlayerStore } from './usePlayerStore'
 import { rollChance } from '@renderer/core/Formulas'
+import { gameEngine } from '@renderer/core/GameEngine'
 import {
   generateOpportunityBatch,
   calculateEffectiveSuccessChance,
@@ -77,6 +78,7 @@ export const useStartupStore = defineStore('startups', () => {
   const opportunities = ref<StartupOpportunity[]>([])
   const investments = ref<StartupInvestment[]>([])
   const lastRefreshTick = ref(0)
+  const _currentTick = ref(0)
   const totalInvested = ref<Decimal>(ZERO)
   const totalReturned = ref<Decimal>(ZERO)
   const sectorBonuses = ref<Partial<Record<StartupSector, number>>>({})
@@ -116,12 +118,12 @@ export const useStartupStore = defineStore('startups', () => {
 
   /** Time until next opportunity refresh (in ticks) */
   const ticksUntilRefresh = computed(() => {
-    return Math.max(0, lastRefreshTick.value + OPPORTUNITY_REFRESH_TICKS - Date.now())
+    return Math.max(0, lastRefreshTick.value + OPPORTUNITY_REFRESH_TICKS - _currentTick.value)
   })
 
   /** Available (non-expired) opportunities */
   const availableOpportunities = computed(() =>
-    opportunities.value.filter((o) => !isOpportunityExpired(o, Date.now()))
+    opportunities.value.filter((o) => !isOpportunityExpired(o, _currentTick.value))
   )
 
   /** Hot deals in current batch */
@@ -139,8 +141,8 @@ export const useStartupStore = defineStore('startups', () => {
 
   function getPlayerNetWorth(): number {
     const player = usePlayerStore()
-    // Approximate net worth for opportunity scaling
-    return player.cash.toNumber()
+    // Use actual net worth for opportunity scaling
+    return player.netWorth.toNumber()
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -302,6 +304,9 @@ export const useStartupStore = defineStore('startups', () => {
    * Process tick - check for matured investments and expired opportunities
    */
   function tick(currentTick: number): void {
+    // Update reactive tick counter for computeds
+    _currentTick.value = currentTick
+
     // Check for matured investments
     for (const inv of investments.value) {
       if (inv.status !== 'active') continue
@@ -506,6 +511,8 @@ export const useStartupStore = defineStore('startups', () => {
       }))
     }
     if (state.lastRefreshTick !== undefined) lastRefreshTick.value = state.lastRefreshTick
+    // Seed _currentTick so computeds work before first tick() call
+    _currentTick.value = gameEngine.currentTick || state.lastRefreshTick || 0
     if (state.totalInvested) totalInvested.value = D(state.totalInvested)
     if (state.totalReturned) totalReturned.value = D(state.totalReturned)
     if (state.sectorBonuses) sectorBonuses.value = state.sectorBonuses

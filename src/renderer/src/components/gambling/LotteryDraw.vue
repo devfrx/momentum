@@ -27,6 +27,8 @@ const props = defineProps<{
     originalResult?: LotteryDrawResult | null
     /** Per-ball luck chances for the original (phase 1) draw */
     originalLuckChances?: number[] | null
+    /** Indices forced by Rolling Luck in the original (phase 1) draw */
+    originalLuckyIndices?: Set<number>
 }>()
 
 const { formatCash } = useFormat()
@@ -77,12 +79,20 @@ const isJackpot = computed(() =>
     activeResult.value.prizeTier?.rarity === 'jackpot' || activeResult.value.prizeTier?.rarity === 'legendary'
 )
 
-/** Active luck chances — switches between original (phase 1) and final (phase 2 / no second chance) */
+/** Active luck chances — switches between Phase 1 (original) and Phase 2 (final) */
 const activeLuckChances = computed(() => {
     if (props.secondChance && !inSecondPhase.value && props.originalLuckChances) {
         return props.originalLuckChances
     }
     return props.luckChances ?? []
+})
+
+/** Active lucky indices — Phase 1 uses originalLuckyIndices, Phase 2 uses luckyIndices */
+const activeLuckyIndices = computed(() => {
+    if (props.secondChance && !inSecondPhase.value) {
+        return props.originalLuckyIndices ?? new Set<number>()
+    }
+    return props.luckyIndices ?? new Set<number>()
 })
 
 // ─── Animate reveal ──────────────────────────────────────────
@@ -124,7 +134,18 @@ function startReveal(): void {
                     inSecondPhase.value = true
                     // Phase 2: Animate the actual (winning/better) result
                     animateReveal(props.result, () => {
-                        emit('done')
+                        // Show rolling luck banner after Phase 2 if lucky indices exist
+                        if (props.luckyIndices && props.luckyIndices.size > 0) {
+                            setTimeout(() => {
+                                showRollingLuck.value = true
+                                setTimeout(() => {
+                                    showRollingLuck.value = false
+                                    emit('done')
+                                }, 1500)
+                            }, 300)
+                        } else {
+                            emit('done')
+                        }
                     })
                 }, 1500)
             }, 500)
@@ -169,11 +190,11 @@ watch(() => props.result, () => startReveal())
             </div>
         </Transition>
 
-        <!-- Rolling Luck "Lucky!" banner (after final phase) -->
+        <!-- Rolling Luck banner (after final phase) -->
         <Transition name="lucky-pop">
             <div v-if="showRollingLuck" class="draw-lucky-banner rolling-luck">
                 <AppIcon icon="mdi:clover" class="draw-lucky-icon" />
-                <span class="draw-lucky-text">{{ $t('gambling.lucky_trigger') }}</span>
+                <span class="draw-lucky-text">{{ $t('gambling.rolling_luck_trigger') }}</span>
             </div>
         </Transition>
 
@@ -185,16 +206,16 @@ watch(() => props.result, () => startReveal())
                     revealed: i < revealedCount,
                     matched: i < revealedCount && playerSet.has(num),
                     unmatched: i < revealedCount && !playerSet.has(num),
-                    'lucky-forced': i < revealedCount && luckyIndices?.has(i),
+                    'lucky-forced': i < revealedCount && activeLuckyIndices.has(i),
                 }">
                     <span v-if="i < revealedCount">{{ num }}</span>
                     <span v-else class="ball-placeholder">?</span>
-                    <AppIcon v-if="i < revealedCount && luckyIndices?.has(i)" icon="mdi:clover" class="ball-clover" />
+                    <AppIcon v-if="i < revealedCount && activeLuckyIndices.has(i)" icon="mdi:clover"
+                        class="ball-clover" />
                     <span
                         v-if="i < revealedCount && activeLuckChances[i] !== undefined && activeLuckChances[i] >= 0 && !playerSet.has(num)"
                         class="luck-pct"
-                        :class="{ 'luck-high': activeLuckChances[i] >= 0.20, 'luck-mid': activeLuckChances[i] >= 0.10 && activeLuckChances[i] < 0.20 }"
-                    >
+                        :class="{ 'luck-high': activeLuckChances[i] >= 0.20, 'luck-mid': activeLuckChances[i] >= 0.10 && activeLuckChances[i] < 0.20 }">
                         <AppIcon icon="mdi:clover" class="luck-pct-icon" />
                         {{ (activeLuckChances[i] * 100).toFixed(1) }}%
                     </span>
@@ -238,22 +259,30 @@ watch(() => props.result, () => startReveal())
                 <template v-if="activeResult.prizeTier">
                     <div class="win-result" :class="`win-${jackpotTier}`" :style="{ '--rarity-color': rarityColorVal }">
                         <!-- Particle overlays for epic+ tiers -->
-                        <div v-if="jackpotTier === 'grand' || jackpotTier === 'mega' || jackpotTier === 'cosmic'" class="win-particles">
-                            <span v-for="p in (jackpotTier === 'cosmic' ? 24 : jackpotTier === 'mega' ? 16 : 10)" :key="p" class="particle" :style="{ '--i': p, '--total': jackpotTier === 'cosmic' ? 24 : jackpotTier === 'mega' ? 16 : 10 }" />
+                        <div v-if="jackpotTier === 'grand' || jackpotTier === 'mega' || jackpotTier === 'cosmic'"
+                            class="win-particles">
+                            <span v-for="p in (jackpotTier === 'cosmic' ? 24 : jackpotTier === 'mega' ? 16 : 10)"
+                                :key="p" class="particle"
+                                :style="{ '--i': p, '--total': jackpotTier === 'cosmic' ? 24 : jackpotTier === 'mega' ? 16 : 10 }" />
                         </div>
                         <!-- Screen flash for mega+ -->
                         <div v-if="jackpotTier === 'mega' || jackpotTier === 'cosmic'" class="screen-flash" />
                         <div class="win-label-row">
-                            <AppIcon :icon="jackpotTier === 'cosmic' ? 'mdi:creation' : jackpotTier === 'mega' ? 'mdi:fire' : jackpotTier === 'grand' ? 'mdi:crown' : isJackpot ? 'mdi:trophy' : 'mdi:party-popper'" class="win-trophy" :class="`trophy-${jackpotTier}`" />
-                            <span class="win-tier" :class="`tier-text-${jackpotTier}`">{{ activeResult.prizeTier.label }}</span>
+                            <AppIcon
+                                :icon="jackpotTier === 'cosmic' ? 'mdi:creation' : jackpotTier === 'mega' ? 'mdi:fire' : jackpotTier === 'grand' ? 'mdi:crown' : isJackpot ? 'mdi:trophy' : 'mdi:party-popper'"
+                                class="win-trophy" :class="`trophy-${jackpotTier}`" />
+                            <span class="win-tier" :class="`tier-text-${jackpotTier}`">{{ activeResult.prizeTier.label
+                                }}</span>
                             <span class="win-rarity-tag">{{ activeResult.prizeTier.rarity.toUpperCase() }}</span>
                         </div>
                         <div class="win-details">
                             <span class="win-matches">
-                                {{ $t('gambling.lt_matched', { n: activeResult.matchedCount, total: ticket.pickCount }) }}
+                                {{ $t('gambling.lt_matched', { n: activeResult.matchedCount, total: ticket.pickCount })
+                                }}
                                 <template v-if="activeResult.bonusMatched"> {{ $t('gambling.lt_bonus') }}</template>
                             </span>
-                            <span class="win-payout" :class="`payout-${jackpotTier}`">{{ formatCash(activeResult.payout) }}</span>
+                            <span class="win-payout" :class="`payout-${jackpotTier}`">{{ formatCash(activeResult.payout)
+                                }}</span>
                             <span class="win-multi">{{ $t('gambling.lt_payout_multi', {
                                 n:
                                     activeResult.prizeTier.payoutMultiplier.toLocaleString()
@@ -297,19 +326,23 @@ watch(() => props.result, () => startReveal())
     animation: tierMinorGlow 2s ease infinite alternate;
     border-color: color-mix(in srgb, #a855f7 40%, transparent);
 }
+
 .tier-major {
     animation: tierMajorGlow 1.5s ease infinite alternate;
     border-color: color-mix(in srgb, #f59e0b 50%, transparent);
 }
+
 .tier-grand {
     animation: tierGrandGlow 1.2s ease infinite alternate;
     border-color: color-mix(in srgb, #ef4444 50%, transparent);
 }
+
 .tier-mega {
     animation: tierMegaGlow 1s ease infinite alternate;
     border-color: transparent;
     border-image: linear-gradient(135deg, #ef4444, #f59e0b, #a855f7, #3b82f6) 1;
 }
+
 .tier-cosmic {
     animation: tierCosmicGlow 0.8s ease infinite alternate;
     border-color: transparent;
@@ -318,24 +351,53 @@ watch(() => props.result, () => startReveal())
 }
 
 @keyframes tierMinorGlow {
-    from { box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
-    to { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); }
+    from {
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+    }
+
+    to {
+        box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+    }
 }
+
 @keyframes tierMajorGlow {
-    from { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
-    to { box-shadow: 0 0 50px rgba(245, 158, 11, 0.5); }
+    from {
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 50px rgba(245, 158, 11, 0.5);
+    }
 }
+
 @keyframes tierGrandGlow {
-    from { box-shadow: 0 0 25px rgba(239, 68, 68, 0.3), 0 0 50px rgba(239, 68, 68, 0.1); }
-    to { box-shadow: 0 0 50px rgba(239, 68, 68, 0.5), 0 0 80px rgba(239, 68, 68, 0.2); }
+    from {
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.3), 0 0 50px rgba(239, 68, 68, 0.1);
+    }
+
+    to {
+        box-shadow: 0 0 50px rgba(239, 68, 68, 0.5), 0 0 80px rgba(239, 68, 68, 0.2);
+    }
 }
+
 @keyframes tierMegaGlow {
-    from { box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), 0 0 60px rgba(245, 158, 11, 0.2), 0 0 90px rgba(168, 85, 247, 0.1); }
-    to { box-shadow: 0 0 60px rgba(239, 68, 68, 0.6), 0 0 100px rgba(245, 158, 11, 0.4), 0 0 140px rgba(168, 85, 247, 0.2); }
+    from {
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), 0 0 60px rgba(245, 158, 11, 0.2), 0 0 90px rgba(168, 85, 247, 0.1);
+    }
+
+    to {
+        box-shadow: 0 0 60px rgba(239, 68, 68, 0.6), 0 0 100px rgba(245, 158, 11, 0.4), 0 0 140px rgba(168, 85, 247, 0.2);
+    }
 }
+
 @keyframes tierCosmicGlow {
-    from { box-shadow: 0 0 40px rgba(236, 72, 153, 0.5), 0 0 80px rgba(139, 92, 246, 0.3), 0 0 120px rgba(6, 182, 212, 0.2); }
-    to { box-shadow: 0 0 80px rgba(236, 72, 153, 0.7), 0 0 140px rgba(139, 92, 246, 0.5), 0 0 200px rgba(6, 182, 212, 0.3); }
+    from {
+        box-shadow: 0 0 40px rgba(236, 72, 153, 0.5), 0 0 80px rgba(139, 92, 246, 0.3), 0 0 120px rgba(6, 182, 212, 0.2);
+    }
+
+    to {
+        box-shadow: 0 0 80px rgba(236, 72, 153, 0.7), 0 0 140px rgba(139, 92, 246, 0.5), 0 0 200px rgba(6, 182, 212, 0.3);
+    }
 }
 
 /* ── Sections ── */
@@ -361,7 +423,8 @@ watch(() => props.result, () => startReveal())
     gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
-    padding-bottom: 20px; /* room for luck % labels */
+    padding-bottom: 20px;
+    /* room for luck % labels */
 }
 
 .drawn-ball {
@@ -509,8 +572,15 @@ watch(() => props.result, () => startReveal())
 }
 
 @keyframes luckPctFade {
-    0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
-    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 @keyframes ballReveal {
@@ -548,65 +618,164 @@ watch(() => props.result, () => startReveal())
 .win-minor {
     animation: resultPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), winPulseSoft 2s ease 0.5s infinite alternate;
 }
+
 .win-major {
     animation: resultShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97), winPulseMedium 1.5s ease 0.6s infinite alternate;
 }
+
 .win-grand {
     animation: resultEpicEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), winPulseStrong 1.2s ease 0.8s infinite alternate;
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(245, 158, 11, 0.08));
 }
+
 .win-mega {
     animation: resultEpicEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1), winRainbow 3s linear 1s infinite;
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.1), rgba(168, 85, 247, 0.08));
 }
+
 .win-cosmic {
     animation: resultCosmicEntry 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), winCosmicPulse 2s ease 1.2s infinite alternate;
     background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.12), rgba(6, 182, 212, 0.08));
 }
 
 @keyframes winPulseSoft {
-    from { box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.05); }
-    to { box-shadow: inset 0 0 40px rgba(168, 85, 247, 0.12); }
+    from {
+        box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.05);
+    }
+
+    to {
+        box-shadow: inset 0 0 40px rgba(168, 85, 247, 0.12);
+    }
 }
+
 @keyframes winPulseMedium {
-    from { box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.08); }
-    to { box-shadow: inset 0 0 50px rgba(245, 158, 11, 0.18); }
+    from {
+        box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.08);
+    }
+
+    to {
+        box-shadow: inset 0 0 50px rgba(245, 158, 11, 0.18);
+    }
 }
+
 @keyframes winPulseStrong {
-    from { box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.1); }
-    to { box-shadow: inset 0 0 60px rgba(239, 68, 68, 0.25); }
+    from {
+        box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.1);
+    }
+
+    to {
+        box-shadow: inset 0 0 60px rgba(239, 68, 68, 0.25);
+    }
 }
+
 @keyframes winRainbow {
-    0% { filter: hue-rotate(0deg); }
-    100% { filter: hue-rotate(360deg); }
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(360deg);
+    }
 }
+
 @keyframes winCosmicPulse {
-    from { box-shadow: inset 0 0 40px rgba(236, 72, 153, 0.15), inset 0 0 80px rgba(139, 92, 246, 0.08); }
-    to { box-shadow: inset 0 0 80px rgba(236, 72, 153, 0.3), inset 0 0 120px rgba(6, 182, 212, 0.15); }
+    from {
+        box-shadow: inset 0 0 40px rgba(236, 72, 153, 0.15), inset 0 0 80px rgba(139, 92, 246, 0.08);
+    }
+
+    to {
+        box-shadow: inset 0 0 80px rgba(236, 72, 153, 0.3), inset 0 0 120px rgba(6, 182, 212, 0.15);
+    }
 }
+
 @keyframes resultShake {
-    0% { transform: scale(0.3); opacity: 0; }
-    40% { transform: scale(1.08); opacity: 1; }
-    50% { transform: scale(1.08) rotate(1deg); }
-    60% { transform: scale(1.05) rotate(-1deg); }
-    70% { transform: scale(1.03) rotate(0.5deg); }
-    80% { transform: scale(1.01) rotate(-0.5deg); }
-    100% { transform: scale(1) rotate(0); }
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+
+    40% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.08) rotate(1deg);
+    }
+
+    60% {
+        transform: scale(1.05) rotate(-1deg);
+    }
+
+    70% {
+        transform: scale(1.03) rotate(0.5deg);
+    }
+
+    80% {
+        transform: scale(1.01) rotate(-0.5deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
 }
+
 @keyframes resultEpicEntry {
-    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
-    30% { transform: scale(1.15) rotate(2deg); opacity: 1; }
-    50% { transform: scale(0.95) rotate(-1deg); }
-    70% { transform: scale(1.05) rotate(0.5deg); }
-    100% { transform: scale(1) rotate(0); }
+    0% {
+        transform: scale(0) rotate(-10deg);
+        opacity: 0;
+    }
+
+    30% {
+        transform: scale(1.15) rotate(2deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.95) rotate(-1deg);
+    }
+
+    70% {
+        transform: scale(1.05) rotate(0.5deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
 }
+
 @keyframes resultCosmicEntry {
-    0% { transform: scale(0) rotate(-20deg); opacity: 0; filter: brightness(3); }
-    20% { transform: scale(1.3) rotate(5deg); opacity: 1; filter: brightness(2); }
-    40% { transform: scale(0.9) rotate(-3deg); filter: brightness(1.5); }
-    60% { transform: scale(1.1) rotate(1deg); filter: brightness(1.2); }
-    80% { transform: scale(0.98) rotate(-0.5deg); filter: brightness(1.1); }
-    100% { transform: scale(1) rotate(0); filter: brightness(1); }
+    0% {
+        transform: scale(0) rotate(-20deg);
+        opacity: 0;
+        filter: brightness(3);
+    }
+
+    20% {
+        transform: scale(1.3) rotate(5deg);
+        opacity: 1;
+        filter: brightness(2);
+    }
+
+    40% {
+        transform: scale(0.9) rotate(-3deg);
+        filter: brightness(1.5);
+    }
+
+    60% {
+        transform: scale(1.1) rotate(1deg);
+        filter: brightness(1.2);
+    }
+
+    80% {
+        transform: scale(0.98) rotate(-0.5deg);
+        filter: brightness(1.1);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+        filter: brightness(1);
+    }
 }
 
 /* ── Particle burst ── */
@@ -616,6 +785,7 @@ watch(() => props.result, () => startReveal())
     pointer-events: none;
     overflow: hidden;
 }
+
 .particle {
     position: absolute;
     width: 6px;
@@ -629,16 +799,24 @@ watch(() => props.result, () => startReveal())
     --angle: calc(var(--i) * (360 / var(--total)) * 1deg);
     --dist: calc(60px + var(--i) * 8px);
 }
+
 @keyframes particleBurst {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-    30% { transform: translate(
-        calc(-50% + cos(var(--angle)) * var(--dist)),
-        calc(-50% + sin(var(--angle)) * var(--dist))
-    ) scale(1.5); opacity: 1; }
-    100% { transform: translate(
-        calc(-50% + cos(var(--angle)) * var(--dist) * 2),
-        calc(-50% + sin(var(--angle)) * var(--dist) * 2)
-    ) scale(0); opacity: 0; }
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+
+    30% {
+        transform: translate(calc(-50% + cos(var(--angle)) * var(--dist)),
+                calc(-50% + sin(var(--angle)) * var(--dist))) scale(1.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(calc(-50% + cos(var(--angle)) * var(--dist) * 2),
+                calc(-50% + sin(var(--angle)) * var(--dist) * 2)) scale(0);
+        opacity: 0;
+    }
 }
 
 /* ── Screen flash ── */
@@ -651,74 +829,229 @@ watch(() => props.result, () => startReveal())
     animation: flashBang 0.6s ease-out forwards;
     border-radius: inherit;
 }
+
 @keyframes flashBang {
-    0% { opacity: 0.8; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
 /* ── Trophy icon tiers ── */
-.trophy-minor { animation: trophySpin 0.6s ease; }
-.trophy-major { animation: trophySpin 0.8s ease; font-size: 2.2rem !important; }
-.trophy-grand { animation: trophyGrandEntry 1s ease; font-size: 2.5rem !important; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5)); }
-.trophy-mega { animation: trophyGrandEntry 1.2s ease; font-size: 2.8rem !important; filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6)); }
-.trophy-cosmic { animation: trophyCosmicEntry 1.5s ease; font-size: 3.2rem !important; filter: drop-shadow(0 0 16px rgba(236, 72, 153, 0.7)); }
+.trophy-minor {
+    animation: trophySpin 0.6s ease;
+}
+
+.trophy-major {
+    animation: trophySpin 0.8s ease;
+    font-size: 2.2rem !important;
+}
+
+.trophy-grand {
+    animation: trophyGrandEntry 1s ease;
+    font-size: 2.5rem !important;
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+.trophy-mega {
+    animation: trophyGrandEntry 1.2s ease;
+    font-size: 2.8rem !important;
+    filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
+}
+
+.trophy-cosmic {
+    animation: trophyCosmicEntry 1.5s ease;
+    font-size: 3.2rem !important;
+    filter: drop-shadow(0 0 16px rgba(236, 72, 153, 0.7));
+}
 
 @keyframes trophySpin {
-    0% { transform: scale(0) rotate(-360deg); }
-    60% { transform: scale(1.3) rotate(20deg); }
-    100% { transform: scale(1) rotate(0); }
+    0% {
+        transform: scale(0) rotate(-360deg);
+    }
+
+    60% {
+        transform: scale(1.3) rotate(20deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
 }
+
 @keyframes trophyGrandEntry {
-    0% { transform: scale(0) rotate(-360deg); filter: brightness(3); }
-    40% { transform: scale(1.5) rotate(10deg); filter: brightness(2); }
-    70% { transform: scale(0.9) rotate(-5deg); filter: brightness(1.2); }
-    100% { transform: scale(1) rotate(0); filter: brightness(1); }
+    0% {
+        transform: scale(0) rotate(-360deg);
+        filter: brightness(3);
+    }
+
+    40% {
+        transform: scale(1.5) rotate(10deg);
+        filter: brightness(2);
+    }
+
+    70% {
+        transform: scale(0.9) rotate(-5deg);
+        filter: brightness(1.2);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+        filter: brightness(1);
+    }
 }
+
 @keyframes trophyCosmicEntry {
-    0% { transform: scale(0) rotate(-720deg); opacity: 0; filter: brightness(5); }
-    30% { transform: scale(2) rotate(30deg); opacity: 1; filter: brightness(3); }
-    50% { transform: scale(0.8) rotate(-15deg); filter: brightness(1.5); }
-    70% { transform: scale(1.2) rotate(5deg); filter: brightness(1.2); }
-    100% { transform: scale(1) rotate(0); filter: brightness(1); }
+    0% {
+        transform: scale(0) rotate(-720deg);
+        opacity: 0;
+        filter: brightness(5);
+    }
+
+    30% {
+        transform: scale(2) rotate(30deg);
+        opacity: 1;
+        filter: brightness(3);
+    }
+
+    50% {
+        transform: scale(0.8) rotate(-15deg);
+        filter: brightness(1.5);
+    }
+
+    70% {
+        transform: scale(1.2) rotate(5deg);
+        filter: brightness(1.2);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+        filter: brightness(1);
+    }
 }
 
 /* ── Tier text effects ── */
-.tier-text-grand { text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-.tier-text-mega { text-shadow: 0 0 15px rgba(239, 68, 68, 0.6), 0 0 30px rgba(245, 158, 11, 0.3); animation: textPulse 1s ease infinite alternate; }
-.tier-text-cosmic { text-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 0 40px rgba(139, 92, 246, 0.4); animation: textRainbow 3s linear infinite; }
+.tier-text-grand {
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.tier-text-mega {
+    text-shadow: 0 0 15px rgba(239, 68, 68, 0.6), 0 0 30px rgba(245, 158, 11, 0.3);
+    animation: textPulse 1s ease infinite alternate;
+}
+
+.tier-text-cosmic {
+    text-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 0 40px rgba(139, 92, 246, 0.4);
+    animation: textRainbow 3s linear infinite;
+}
 
 @keyframes textPulse {
-    from { opacity: 0.9; transform: scale(1); }
-    to { opacity: 1; transform: scale(1.05); }
+    from {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.05);
+    }
 }
+
 @keyframes textRainbow {
-    0% { filter: hue-rotate(0deg); }
-    100% { filter: hue-rotate(360deg); }
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(360deg);
+    }
 }
 
 /* ── Payout amount tiers ── */
-.payout-minor { font-size: 2rem; }
-.payout-major { font-size: 2.2rem; animation: payoutBounce 0.8s ease; }
-.payout-grand { font-size: 2.5rem; animation: payoutBounce 1s ease; text-shadow: 0 0 10px var(--rarity-color, #ef4444); }
-.payout-mega { font-size: 2.8rem; animation: payoutCountUp 1.5s ease; text-shadow: 0 0 15px var(--rarity-color, #ef4444); }
-.payout-cosmic { font-size: 3.2rem; animation: payoutCountUp 2s ease, payoutGlow 2s ease 2s infinite alternate; text-shadow: 0 0 20px rgba(236, 72, 153, 0.7); }
+.payout-minor {
+    font-size: 2rem;
+}
+
+.payout-major {
+    font-size: 2.2rem;
+    animation: payoutBounce 0.8s ease;
+}
+
+.payout-grand {
+    font-size: 2.5rem;
+    animation: payoutBounce 1s ease;
+    text-shadow: 0 0 10px var(--rarity-color, #ef4444);
+}
+
+.payout-mega {
+    font-size: 2.8rem;
+    animation: payoutCountUp 1.5s ease;
+    text-shadow: 0 0 15px var(--rarity-color, #ef4444);
+}
+
+.payout-cosmic {
+    font-size: 3.2rem;
+    animation: payoutCountUp 2s ease, payoutGlow 2s ease 2s infinite alternate;
+    text-shadow: 0 0 20px rgba(236, 72, 153, 0.7);
+}
 
 @keyframes payoutBounce {
-    0% { transform: scale(0.5); opacity: 0; }
-    50% { transform: scale(1.2); opacity: 1; }
-    75% { transform: scale(0.95); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+
+    75% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
+
 @keyframes payoutCountUp {
-    0% { transform: scale(0.3) translateY(20px); opacity: 0; filter: blur(4px); }
-    40% { transform: scale(1.3) translateY(-5px); opacity: 1; filter: blur(0); }
-    60% { transform: scale(0.95) translateY(2px); }
-    80% { transform: scale(1.05) translateY(-1px); }
-    100% { transform: scale(1) translateY(0); }
+    0% {
+        transform: scale(0.3) translateY(20px);
+        opacity: 0;
+        filter: blur(4px);
+    }
+
+    40% {
+        transform: scale(1.3) translateY(-5px);
+        opacity: 1;
+        filter: blur(0);
+    }
+
+    60% {
+        transform: scale(0.95) translateY(2px);
+    }
+
+    80% {
+        transform: scale(1.05) translateY(-1px);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+    }
 }
+
 @keyframes payoutGlow {
-    from { text-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
-    to { text-shadow: 0 0 30px rgba(236, 72, 153, 0.9), 0 0 60px rgba(139, 92, 246, 0.4); }
+    from {
+        text-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+    }
+
+    to {
+        text-shadow: 0 0 30px rgba(236, 72, 153, 0.9), 0 0 60px rgba(139, 92, 246, 0.4);
+    }
 }
 
 .win-label-row {
@@ -857,26 +1190,42 @@ watch(() => props.result, () => startReveal())
 }
 
 @keyframes drawLuckyPulse {
-    from { box-shadow: 0 0 12px rgba(34, 197, 94, 0.2); }
-    to { box-shadow: 0 0 28px rgba(34, 197, 94, 0.4); }
+    from {
+        box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+    }
+
+    to {
+        box-shadow: 0 0 28px rgba(34, 197, 94, 0.4);
+    }
 }
 
 @keyframes drawCloverSpin {
-    0% { transform: scale(0) rotate(-180deg); }
-    60% { transform: scale(1.3) rotate(20deg); }
-    100% { transform: scale(1) rotate(0); }
+    0% {
+        transform: scale(0) rotate(-180deg);
+    }
+
+    60% {
+        transform: scale(1.3) rotate(20deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
 }
 
 .lucky-pop-enter-active {
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .lucky-pop-leave-active {
     transition: all 0.3s ease;
 }
+
 .lucky-pop-enter-from {
     opacity: 0;
     transform: scale(0.5);
 }
+
 .lucky-pop-leave-to {
     opacity: 0;
     transform: scale(0.8);
