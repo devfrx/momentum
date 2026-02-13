@@ -1,5 +1,44 @@
-export { BUSINESSES } from './businesses'
-export type { BusinessDef, BusinessCategory } from './businesses'
+// ─── Businesses ─────────────────────────────────────────────────
+export {
+  BUSINESS_DEFS,
+  LEVEL_COST_GROWTH,
+  LEVEL_OUTPUT_EXPONENT,
+  BRANCH_COST_GROWTH,
+  TRAINING_COST_GROWTH,
+  BUSINESS_UPGRADES,
+  POLICIES,
+  ADVISOR_DEFS,
+  computePolicyEffects,
+  advisorCost,
+  advisorEffect,
+  getActiveMilestones,
+  aggregateMilestoneBonuses,
+  MILESTONE_TIERS,
+  synergyCategoryMultiplier,
+  getAllSynergies,
+  GEO_TIERS,
+  getGeoTier,
+  getNextGeoTier,
+  MEGA_CORP_REQUIREMENTS,
+  marketDominanceMultiplier,
+} from './businesses'
+export type {
+  BusinessDef,
+  BusinessCategory,
+  UpgradeEffectType,
+  BusinessUpgradeDef,
+  PolicyDef,
+  AdvisorType,
+  AdvisorDef,
+  AdvisorState,
+  MilestoneType,
+  MilestoneBonusType,
+  MilestoneTier,
+  ActiveMilestone,
+  SynergyBonus,
+  GeographicTier,
+  GeoTierDef,
+} from './businesses'
 
 export { JOBS } from './jobs'
 export type { JobDef } from './jobs'

@@ -1,21 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { BusinessCard } from '@renderer/components/business'
-import { BUSINESSES } from '@renderer/data/businesses'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
-import Button from 'primevue/button'
+import { BusinessCard, BusinessPurchaseCard } from '@renderer/components/business'
+import { BusinessAdvisorCard } from '@renderer/components/business'
+import { BUSINESS_DEFS } from '@renderer/data/businesses'
 
+const { t } = useI18n()
 const business = useBusinessStore()
 const player = usePlayerStore()
 const { formatCash } = useFormat()
-const { t } = useI18n()
 
+// ── Tabs ──
+const activeTab = ref<'overview' | 'portfolio' | 'market' | 'advisors'>('overview')
+
+// ── Market ──
+const availableBusinesses = computed(() =>
+    BUSINESS_DEFS.filter(def => player.netWorth.gte(def.unlockAtNetWorth))
+)
+
+// ── Overview KPIs ──
+const totalLevels = computed(() => business.totalLevels)
+const totalBranches = computed(() => business.totalBranches)
+const corpCount = computed(() => business.corporationCount)
+const totalBiz = computed(() => business.totalBusinessCount)
+
+// ── Info Panel ──
 const businessInfoSections = computed<InfoSection[]>(() => [
     {
         title: t('business.info.revenue.title'),
@@ -29,6 +44,18 @@ const businessInfoSections = computed<InfoSection[]>(() => [
         ]
     },
     {
+        title: t('business.info.scaling.title'),
+        icon: 'mdi:arrow-expand-up',
+        entries: [
+            { term: t('business.info.scaling.levels'), desc: t('business.info.scaling.levels_desc'), icon: 'mdi:arrow-up-bold-circle' },
+            { term: t('business.info.scaling.branches'), desc: t('business.info.scaling.branches_desc'), icon: 'mdi:source-branch' },
+            { term: t('business.info.scaling.upgrades'), desc: t('business.info.scaling.upgrades_desc'), icon: 'mdi:arrow-up-bold-box' },
+            { term: t('business.info.scaling.synergies'), desc: t('business.info.scaling.synergies_desc'), icon: 'mdi:lightning-bolt' },
+            { term: t('business.info.scaling.corporation'), desc: t('business.info.scaling.corporation_desc'), icon: 'mdi:domain' },
+            { term: t('business.info.scaling.milestones'), desc: t('business.info.scaling.milestones_desc'), icon: 'mdi:trophy' },
+        ]
+    },
+    {
         title: t('business.info.demand.title'),
         icon: 'mdi:chart-line',
         entries: [
@@ -39,16 +66,6 @@ const businessInfoSections = computed<InfoSection[]>(() => [
             { term: t('business.info.demand.economy_demand'), desc: t('business.info.demand.economy_demand_desc'), icon: 'mdi:earth' },
             { term: t('business.info.demand.elasticity'), desc: t('business.info.demand.elasticity_desc'), icon: 'mdi:swap-vertical' },
             { term: t('business.info.demand.customer_attraction'), desc: t('business.info.demand.customer_attraction_desc'), icon: 'mdi:magnet' },
-        ]
-    },
-    {
-        title: t('business.info.price_status.title'),
-        icon: 'mdi:information-outline',
-        entries: [
-            { term: t('business.info.price_status.optimal'), desc: t('business.info.price_status.optimal_desc'), icon: 'mdi:check-circle' },
-            { term: t('business.info.price_status.underpriced'), desc: t('business.info.price_status.underpriced_desc'), icon: 'mdi:arrow-down-bold' },
-            { term: t('business.info.price_status.overpriced'), desc: t('business.info.price_status.overpriced_desc'), icon: 'mdi:arrow-up-bold' },
-            { term: t('business.info.price_status.too_expensive'), desc: t('business.info.price_status.too_expensive_desc'), icon: 'mdi:alert' },
         ]
     },
     {
@@ -72,46 +89,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
             { term: t('business.info.profit.valuation'), desc: t('business.info.profit.valuation_desc'), icon: 'mdi:cash' },
         ]
     },
-    {
-        title: t('business.info.controls.title'),
-        icon: 'mdi:tune',
-        entries: [
-            { term: t('business.info.controls.employees'), desc: t('business.info.controls.employees_desc'), icon: 'mdi:account-group' },
-            { term: t('business.info.controls.price'), desc: t('business.info.controls.price_desc'), icon: 'mdi:currency-usd' },
-            { term: t('business.info.controls.marketing'), desc: t('business.info.controls.marketing_desc'), icon: 'mdi:bullhorn' },
-            { term: t('business.info.controls.quality_upgrade'), desc: t('business.info.controls.quality_upgrade_desc'), icon: 'mdi:star' },
-            { term: t('business.info.controls.rename'), desc: t('business.info.controls.rename_desc'), icon: 'mdi:pencil' },
-            { term: t('business.info.controls.sell'), desc: t('business.info.controls.sell_desc'), icon: 'mdi:store-remove' },
-        ]
-    },
-    {
-        title: t('business.info.details.title'),
-        icon: 'mdi:text-box-outline',
-        entries: [
-            { term: t('business.info.details.base_customers'), desc: t('business.info.details.base_customers_desc') },
-            { term: t('business.info.details.price_factor'), desc: t('business.info.details.price_factor_desc') },
-            { term: t('business.info.details.quality_marketing'), desc: t('business.info.details.quality_marketing_desc') },
-            { term: t('business.info.details.elasticity'), desc: t('business.info.details.elasticity_desc') },
-            { term: t('business.info.details.final_demand'), desc: t('business.info.details.final_demand_desc') },
-            { term: t('business.info.details.cost_breakdown'), desc: t('business.info.details.cost_breakdown_desc') },
-            { term: t('business.info.details.total_revenue_costs_profit'), desc: t('business.info.details.total_revenue_costs_profit_desc') },
-            { term: t('business.info.details.ticks_owned'), desc: t('business.info.details.ticks_owned_desc') },
-        ]
-    },
 ])
-
-/** Businesses available for purchase (not yet owned) */
-const availableBusinesses = computed(() =>
-    BUSINESSES.filter(def =>
-        !business.businesses.find(b => b.id === def.id) &&
-        player.netWorth.gte(def.unlockAtNetWorth)
-    )
-)
-
-function buyBusiness(defId: string): void {
-    const def = BUSINESSES.find(d => d.id === defId)
-    if (def) business.buyBusiness(def)
-}
 </script>
 
 <template>
@@ -128,58 +106,188 @@ function buyBusiness(defId: string): void {
 
             <div class="header-stat">
                 <span class="header-stat-label">{{ $t('business.profit') }}</span>
-                <span class="header-stat-value">{{ formatCash(business.profitPerSecond) }}<span
-                        class="header-stat-suffix">{{ $t('common.per_second') }}</span></span>
+                <span class="header-stat-value">
+                    {{ formatCash(business.profitPerSecond) }}
+                    <span class="header-stat-suffix">{{ $t('common.per_second') }}</span>
+                </span>
             </div>
         </div>
 
-        <!-- Owned Businesses -->
-        <div v-if="business.businesses.length > 0" class="card-grid">
-            <BusinessCard v-for="biz in business.businesses" :key="biz.id" :business="biz"
-                @hire="business.hireEmployee(biz.id)" @fire="business.fireEmployee(biz.id)"
-                @set-price="(p: number) => business.setPrice(biz.id, p)"
-                @set-marketing="(m: number) => business.setMarketingBudget(biz.id, m)"
-                @upgrade-quality="business.upgradeQuality(biz.id)"
-                @rename="(n: string) => business.renameBusiness(biz.id, n)" @sell="business.sellBusiness(biz.id)"
-                @hire-manager="business.hireManager(biz.id)" @collect-profit="business.collectProfit(biz.id)" />
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ $t('business.stat_businesses') }}</span>
+                <span class="stat-chip-value text-sky">{{ totalBiz }}</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ $t('business.stat_levels') }}</span>
+                <span class="stat-chip-value text-gold">{{ totalLevels }}</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ $t('business.stat_branches') }}</span>
+                <span class="stat-chip-value text-emerald">{{ totalBranches }}</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ $t('business.stat_corps') }}</span>
+                <span class="stat-chip-value text-red">{{ corpCount }}</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-chip-label">{{ $t('business.stat_value') }}</span>
+                <span class="stat-chip-value text-emerald">{{ formatCash(business.totalBusinessValue) }}</span>
+            </div>
         </div>
 
-        <!-- Available for Purchase -->
-        <div v-if="availableBusinesses.length > 0" class="available-section">
-            <h2 class="section-heading">
-                <AppIcon icon="mdi:store-plus" class="section-icon" />
-                {{ $t('business.available_for_purchase') }}
-            </h2>
-            <div class="card-grid">
-                <div v-for="def in availableBusinesses" :key="def.id" class="purchase-card">
-                    <div class="purchase-header">
-                        <AppIcon :icon="def.icon" class="purchase-icon" />
-                        <div>
-                            <h3 class="purchase-name">{{ def.name }}</h3>
-                            <span class="purchase-category">{{ def.category }}</span>
-                        </div>
-                    </div>
-                    <Button :disabled="!player.canAfford(def.purchasePrice)" @click="buyBusiness(def.id)">
-                        {{ $t('common.buy') }} — {{ formatCash(def.purchasePrice) }}
-                    </Button>
+        <!-- Tab Navigation (RealEstateView style) -->
+        <div class="re-tabs">
+            <button class="re-tab" :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">
+                <AppIcon icon="mdi:view-dashboard-outline" />
+                <span>{{ $t('business.tab_overview') }}</span>
+            </button>
+            <button class="re-tab" :class="{ active: activeTab === 'portfolio' }" @click="activeTab = 'portfolio'">
+                <AppIcon icon="mdi:briefcase-outline" />
+                <span>{{ $t('business.tab_portfolio') }}</span>
+                <span v-if="business.businesses.length > 0" class="tab-badge">{{ business.businesses.length }}</span>
+            </button>
+            <button class="re-tab" :class="{ active: activeTab === 'market' }" @click="activeTab = 'market'">
+                <AppIcon icon="mdi:store-plus-outline" />
+                <span>{{ $t('business.tab_market') }}</span>
+                <span v-if="availableBusinesses.length > 0" class="tab-badge">{{ availableBusinesses.length }}</span>
+            </button>
+            <button class="re-tab" :class="{ active: activeTab === 'advisors' }" @click="activeTab = 'advisors'">
+                <AppIcon icon="mdi:account-tie" />
+                <span>{{ $t('business.tab_advisors') }}</span>
+            </button>
+        </div>
+
+        <!-- TAB: Overview -->
+        <section v-if="activeTab === 'overview'" class="section">
+            <div class="overview-grid">
+                <!-- Profit Summary -->
+                <div class="kpi-card">
+                    <div class="kpi-label">{{ $t('business.kpi_profit') }}</div>
+                    <div class="kpi-value success">{{ formatCash(business.profitPerSecond) }}/s</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">{{ $t('business.kpi_value') }}</div>
+                    <div class="kpi-value gold">{{ formatCash(business.totalBusinessValue) }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">{{ $t('business.kpi_businesses') }}</div>
+                    <div class="kpi-value">{{ totalBiz }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">{{ $t('business.kpi_levels') }}</div>
+                    <div class="kpi-value">{{ totalLevels }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">{{ $t('business.kpi_branches') }}</div>
+                    <div class="kpi-value">{{ totalBranches }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">{{ $t('business.kpi_corps') }}</div>
+                    <div class="kpi-value">{{ corpCount }}</div>
                 </div>
             </div>
-        </div>
 
-        <!-- Empty State -->
-        <div v-if="business.businesses.length === 0 && availableBusinesses.length === 0" class="empty-state">
-            <AppIcon icon="mdi:store-off" class="empty-icon" />
-            <p class="empty-title">{{ $t('business.no_businesses') }}</p>
-            <p class="empty-text">{{ $t('business.empty_hint') }}</p>
-        </div>
+            <!-- Quick business list -->
+            <div v-if="business.businesses.length > 0" class="overview-list">
+                <h3 class="section-header">
+                    <AppIcon icon="mdi:format-list-bulleted" class="section-icon" />
+                    {{ $t('business.overview_list') }}
+                </h3>
+                <div class="overview-table">
+                    <div v-for="biz in business.businesses" :key="biz.id" class="overview-row"
+                        @click="activeTab = 'portfolio'">
+                        <AppIcon :icon="biz.icon || 'mdi:store'" class="overview-row-icon" />
+                        <span class="overview-row-name">{{ biz.customName || biz.name }}</span>
+                        <span class="overview-row-level">Lv.{{ biz.level }}</span>
+                        <span class="overview-row-profit" :class="biz.avgProfitPerTick.gte(0) ? 'success' : 'danger'">
+                            {{ formatCash(biz.avgProfitPerTick.mul(10)) }}/s
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Info Panel -->
-        <InfoPanel :title="$t('business.info_title')" :description="$t('business.info_desc')"
-            :sections="businessInfoSections" />
+            <!-- Empty -->
+            <div v-else class="empty-state">
+                <AppIcon icon="mdi:store-off" class="empty-icon" />
+                <p class="empty-title">{{ $t('business.no_businesses') }}</p>
+                <p class="empty-text">{{ $t('business.empty_hint') }}</p>
+            </div>
+
+            <!-- Info Panel -->
+            <InfoPanel :title="$t('business.info_title')" :description="$t('business.info_desc')"
+                :sections="businessInfoSections" />
+        </section>
+
+        <!-- TAB: Portfolio -->
+        <section v-if="activeTab === 'portfolio'" class="section">
+            <h2 class="section-header">
+                <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
+                {{ $t('business.tab_portfolio') }}
+                <span class="count-badge">({{ business.businesses.length }})</span>
+            </h2>
+
+            <div v-if="business.businesses.length === 0" class="empty-state">
+                <AppIcon icon="mdi:store-off" class="empty-icon" />
+                <p class="empty-title">{{ $t('business.no_businesses') }}</p>
+                <p class="empty-text">{{ $t('business.empty_hint') }}</p>
+            </div>
+
+            <div v-else class="card-grid">
+                <BusinessCard v-for="biz in business.businesses" :key="biz.id" :business="biz" />
+            </div>
+        </section>
+
+        <!-- TAB: Market -->
+        <section v-if="activeTab === 'market'" class="section">
+            <h2 class="section-header">
+                <AppIcon icon="mdi:store-plus" class="section-icon text-gold" />
+                {{ $t('business.tab_market') }}
+                <span class="count-badge">({{ availableBusinesses.length }})</span>
+            </h2>
+
+            <div v-if="availableBusinesses.length === 0" class="empty-state">
+                <AppIcon icon="mdi:store-search-outline" class="empty-icon" />
+                <p class="empty-title">{{ $t('business.no_available') }}</p>
+                <p class="empty-text">{{ $t('business.market_hint') }}</p>
+            </div>
+
+            <div v-else class="card-grid">
+                <BusinessPurchaseCard v-for="def in availableBusinesses" :key="def.id" :def="def" :owned="false"
+                    @buy="business.buyBusiness" />
+            </div>
+        </section>
+
+        <!-- TAB: Advisors (global overview) -->
+        <section v-if="activeTab === 'advisors'" class="section">
+            <h2 class="section-header">
+                <AppIcon icon="mdi:account-tie" class="section-icon text-sky" />
+                {{ $t('business.tab_advisors') }}
+            </h2>
+
+            <div v-if="business.businesses.length === 0" class="empty-state">
+                <AppIcon icon="mdi:account-search-outline" class="empty-icon" />
+                <p class="empty-title">{{ $t('business.no_businesses') }}</p>
+                <p class="empty-text">{{ $t('business.advisors_hint') }}</p>
+            </div>
+
+            <div v-else class="advisor-section">
+                <div v-for="biz in business.businesses" :key="biz.id" class="advisor-biz-block">
+                    <h3 class="advisor-biz-name">
+                        <AppIcon :icon="biz.icon || 'mdi:store'" />
+                        {{ biz.customName || biz.name }}
+                        <span class="advisor-biz-level">Lv.{{ biz.level }}</span>
+                    </h3>
+                    <BusinessAdvisorCard :business="biz" />
+                </div>
+            </div>
+        </section>
     </div>
 </template>
 
 <style scoped>
+/* Header stat */
 .header-stat {
     display: flex;
     flex-direction: column;
@@ -209,82 +317,201 @@ function buyBusiness(defId: string): void {
     opacity: 0.7;
 }
 
-.available-section {
-    margin-top: var(--t-space-6);
+/* Tabs (identical to RealEstateView) */
+.re-tabs {
+    display: flex;
+    gap: var(--t-space-1);
+    border-bottom: 1px solid var(--t-border);
+    padding-bottom: 0;
 }
 
-.section-heading {
+.re-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    font-size: var(--t-font-size-sm);
+    font-weight: 500;
+    color: var(--t-text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color var(--t-transition-fast), border-color var(--t-transition-fast);
+}
+
+.re-tab:hover {
+    color: var(--t-text);
+}
+
+.re-tab.active {
+    color: var(--t-accent);
+    border-bottom-color: var(--t-accent);
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--t-accent);
+    color: var(--t-bg-base);
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+/* Overview */
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--t-space-3);
+    margin-bottom: var(--t-space-5);
+}
+
+.kpi-card {
+    padding: var(--t-space-4);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-lg);
+    text-align: center;
+}
+
+.kpi-label {
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--t-space-1);
+}
+
+.kpi-value {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xl);
+    font-weight: 700;
+    color: var(--t-text);
+}
+
+.kpi-value.success {
+    color: var(--t-success);
+}
+
+.kpi-value.gold {
+    color: goldenrod;
+}
+
+/* Overview list */
+.overview-list {
+    margin-top: var(--t-space-5);
+}
+
+.overview-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.overview-row {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-3);
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.overview-row:hover {
+    border-color: var(--t-accent);
+}
+
+.overview-row-icon {
+    font-size: 1.1rem;
+    color: var(--t-text-muted);
+}
+
+.overview-row-name {
+    flex: 1;
+    font-size: var(--t-font-size-sm);
+    font-weight: 500;
+}
+
+.overview-row-level {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+}
+
+.overview-row-profit {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-sm);
+    font-weight: 600;
+}
+
+.overview-row-profit.success {
+    color: var(--t-success);
+}
+
+.overview-row-profit.danger {
+    color: var(--t-error);
+}
+
+/* Count badge */
+.count-badge {
+    font-weight: 400;
+    color: var(--t-text-muted);
+    font-size: var(--t-font-size-sm);
+    margin-left: 0.3rem;
+}
+
+/* Advisor per-business blocks */
+.advisor-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--t-space-5);
+}
+
+.advisor-biz-block {
+    padding: var(--t-space-4);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-lg);
+}
+
+.advisor-biz-name {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: var(--t-font-size-lg);
-    font-weight: 600;
-    color: var(--t-text);
-    margin-bottom: var(--t-space-4);
-}
-
-.section-icon {
-    color: var(--t-text-muted);
-    font-size: 1.1rem;
-}
-
-.purchase-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px dashed var(--t-border);
-    border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
-}
-
-.purchase-header {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--t-space-3);
-}
-
-.purchase-icon {
-    font-size: 1.6rem;
-    color: var(--t-text-secondary);
-}
-
-.purchase-name {
     font-size: var(--t-font-size-base);
     font-weight: 600;
-    color: var(--t-text);
+    margin: 0 0 var(--t-space-3);
 }
 
-.purchase-desc {
+.advisor-biz-level {
+    font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-    margin: 0;
 }
 
-.purchase-category {
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-    background: var(--t-bg-secondary);
-    padding: 0.1rem 0.4rem;
-    border-radius: var(--t-radius-sm);
-}
-
+/* Empty state */
 .empty-state {
-    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 2rem;
-    border: 1px dashed var(--t-border);
-    border-radius: var(--t-radius-lg);
+    padding: var(--t-space-10) var(--t-space-4);
+    color: var(--t-text-muted);
+    text-align: center;
 }
 
 .empty-icon {
-    font-size: 3rem;
-    color: var(--t-text-muted);
-    margin-bottom: var(--t-space-3);
+    font-size: 2.5rem;
+    opacity: 0.4;
+    margin-bottom: var(--t-space-2);
 }
 
 .empty-title {
