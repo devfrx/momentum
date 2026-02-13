@@ -107,11 +107,9 @@ export {
   OPPORTUNITY_REFRESH_TICKS as RE_OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES as RE_MIN_OPPORTUNITIES,
   MAX_OPPORTUNITIES as RE_MAX_OPPORTUNITIES,
-  OPPORTUNITY_LIFETIME_MS,
   generateOpportunity as generatePropertyOpportunity,
   generateScanOpportunity,
   generateOpportunityBatch as generatePropertyOpportunityBatch,
-  isOpportunityExpired,
 } from './realestate'
 export type {
   District,

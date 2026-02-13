@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
@@ -11,10 +11,12 @@ import Tag from 'primevue/tag'
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
-const { formatCash } = useFormat()
+const { formatCash, formatPercent, formatRate } = useFormat()
 
 const props = defineProps<{ opportunity: PropertyOpportunity }>()
 const emit = defineEmits<{ (e: 'bought', propId: string): void }>()
+
+const showDetails = ref(false)
 
 const district = computed(() => getDistrict(props.opportunity.districtId))
 
@@ -41,6 +43,12 @@ const traits = computed(() => {
     return props.opportunity.traits
 })
 
+const estimatedRoi = computed(() => {
+    const price = props.opportunity.askingPrice.toNumber()
+    if (price <= 0) return 0
+    return (props.opportunity.baseRent.toNumber() * props.opportunity.units * 10 * 3600 * 24 * 365) / price
+})
+
 const scanCostFormatted = computed(() => formatCash(nextScoutCost.value))
 
 function handleScout(): void {
@@ -58,7 +66,7 @@ function handleBuy(): void {
         :class="{ 'opp-card--hot': opportunity.isHotDeal, 'opp-card--scanned': opportunity.isScanned }"
         :style="{ '--_accent': district?.color ?? 'var(--t-accent)' }">
 
-        <!-- Head row -->
+        <!-- ── Header ── -->
         <div class="opp-card__head">
             <AppIcon :icon="opportunity.icon" class="opp-card__icon" />
             <div class="opp-card__identity">
@@ -67,7 +75,6 @@ function handleBuy(): void {
                     <span v-if="opportunity.isHotDeal" class="opp-card__hot">
                         <AppIcon icon="mdi:fire" /> {{ t('realestate.opp.hot') }}
                     </span>
-                    <!-- <Tag v-if="opportunity.isScanned" value="SCANNED" severity="info" size="small" /> -->
                 </div>
                 <div class="opp-card__meta">
                     <Tag :value="opportunity.category" size="small" severity="secondary" />
@@ -76,53 +83,31 @@ function handleBuy(): void {
                     </span>
                 </div>
             </div>
-        </div>
-
-        <!-- Price section -->
-        <div class="opp-card__stats">
-            <div class="opp-card__kpi">
-                <span class="opp-card__kpi-label">{{ t('realestate.asking_price') }}</span>
-                <span class="opp-card__kpi-value opp-card__kpi-value--gold">{{ formatCash(opportunity.askingPrice)
-                }}</span>
-            </div>
-            <div v-if="showTrueValue" class="opp-card__kpi">
-                <span class="opp-card__kpi-label">{{ t('realestate.true_value') }}</span>
-                <span class="opp-card__kpi-value" :class="isGoodDeal ? 'text-emerald' : 'text-red'">
-                    {{ formatCash(opportunity.trueValue) }}
-                </span>
-            </div>
-            <div class="opp-card__kpi">
-                <span class="opp-card__kpi-label">{{ t('realestate.rent') }}/t</span>
-                <span class="opp-card__kpi-value opp-card__kpi-value--green">{{ formatCash(opportunity.baseRent)
-                }}</span>
-            </div>
-            <div class="opp-card__kpi">
-                <span class="opp-card__kpi-label">{{ t('realestate.units') }}</span>
-                <span class="opp-card__kpi-value">{{ opportunity.units }}</span>
+            <!-- Price hero -->
+            <div class="opp-card__hero-price">
+                <span class="opp-card__hero-label">{{ t('realestate.asking_price') }}</span>
+                <span class="opp-card__hero-value">{{ formatCash(opportunity.askingPrice) }}</span>
             </div>
         </div>
 
-        <!-- Hidden scores (inspection+) -->
-        <div v-if="showHiddenScores" class="opp-card__reveals">
-            <div class="opp-card__reveal-item">
-                <AppIcon icon="mdi:map-marker" />
-                <span class="opp-card__reveal-label">{{ t('realestate.neighborhood') }}</span>
-                <span class="opp-card__reveal-value"
-                    :class="opportunity.hiddenNeighborhoodScore >= 70 ? 'text-emerald' : opportunity.hiddenNeighborhoodScore >= 40 ? 'text-gold' : 'text-red'">
-                    {{ opportunity.hiddenNeighborhoodScore }}/100
-                </span>
-            </div>
-            <div class="opp-card__reveal-item">
-                <AppIcon icon="mdi:home-analytics" />
-                <span class="opp-card__reveal-label">{{ t('realestate.structural') }}</span>
-                <span class="opp-card__reveal-value"
-                    :class="opportunity.hiddenStructuralScore >= 70 ? 'text-emerald' : opportunity.hiddenStructuralScore >= 40 ? 'text-gold' : 'text-red'">
-                    {{ opportunity.hiddenStructuralScore }}/100
-                </span>
-            </div>
+        <!-- ── Quick stats chips ── -->
+        <div class="opp-card__chips">
+            <span class="chip chip--accent">
+                <AppIcon icon="mdi:cash-plus" /> {{ formatCash(opportunity.baseRent) }}/t
+            </span>
+            <span class="chip">
+                <AppIcon icon="mdi:door" /> {{ opportunity.units }} {{ t('realestate.units') }}
+            </span>
+            <span class="chip">
+                <AppIcon icon="mdi:percent" /> ~{{ formatPercent(estimatedRoi) }} ROI
+            </span>
+            <span v-if="showTrueValue" class="chip" :class="isGoodDeal ? 'chip--pos' : 'chip--neg'">
+                <AppIcon :icon="isGoodDeal ? 'mdi:check-circle' : 'mdi:alert'" />
+                {{ formatCash(opportunity.trueValue) }}
+            </span>
         </div>
 
-        <!-- Traits -->
+        <!-- ── Traits ── -->
         <div v-if="traits.length > 0" class="opp-card__traits">
             <span v-for="tr in traits" :key="tr.id" class="opp-card__trait"
                 :class="tr.isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
@@ -130,14 +115,14 @@ function handleBuy(): void {
             </span>
         </div>
 
-        <!-- Hidden hint -->
+        <!-- ── Hidden hint ── -->
         <div v-if="currentScoutIdx < 1" class="opp-card__hidden-hint">
             <AppIcon icon="mdi:eye-off-outline" />
             <span>{{ t('realestate.scout.hidden_info') }}</span>
         </div>
 
-        <!-- Scout Phase Indicator -->
-        <div class="opp-card__research">
+        <!-- ── Scout Phase Indicator + Action ── -->
+        <div class="opp-card__scout-row">
             <div class="research-phases">
                 <div v-for="(phase, idx) in SCOUT_PHASES" :key="phase" class="research-phase-dot" :class="{
                     'research-phase-dot--done': currentScoutIdx > idx,
@@ -150,23 +135,107 @@ function handleBuy(): void {
                     {{ t(SCOUT_PHASE_DATA[opportunity.scoutPhase].nameKey) }}
                 </span>
             </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="opp-card__actions">
-            <button v-if="nextScoutPhase" class="opp-card__act-btn" :disabled="!canAffordScout" @click="handleScout">
-                <AppIcon icon="mdi:magnify" /> {{ t('realestate.scout.action', {
-                    phase:
-                        t(SCOUT_PHASE_DATA[nextScoutPhase].nameKey), cost: scanCostFormatted
-                }) }}
+            <button v-if="nextScoutPhase" class="opp-card__scout-btn" :disabled="!canAffordScout" @click="handleScout">
+                <AppIcon icon="mdi:magnify" />
+                {{ t(SCOUT_PHASE_DATA[nextScoutPhase].nameKey) }}
+                <span class="scout-cost">{{ scanCostFormatted }}</span>
             </button>
             <span v-else class="opp-card__research-complete">
                 <AppIcon icon="mdi:check-decagram" /> {{ t('realestate.scout.appraisal') }}
             </span>
-            <button class="opp-card__act-btn opp-card__act-btn--buy" :disabled="!canAfford" @click="handleBuy">
-                <AppIcon icon="mdi:cart" /> {{ t('realestate.buy') }}
-            </button>
         </div>
+
+        <!-- ── Buy action ── -->
+        <button class="opp-card__buy-btn" :disabled="!canAfford" @click="handleBuy">
+            <AppIcon icon="mdi:cart" />
+            <span>{{ t('realestate.buy') }}</span>
+            <span class="opp-card__buy-price">{{ formatCash(opportunity.askingPrice) }}</span>
+        </button>
+
+        <!-- ── Details toggle ── -->
+        <button class="details-toggle" @click="showDetails = !showDetails">
+            <AppIcon :icon="showDetails ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
+            {{ showDetails ? t('common.less') : t('common.details') }}
+        </button>
+
+        <!-- ── Expandable Details ── -->
+        <Transition name="slide">
+            <div v-if="showDetails" class="details-panel">
+                <!-- Hidden scores (inspection+) -->
+                <div v-if="showHiddenScores" class="detail-section">
+                    <h4 class="detail-title">
+                        <AppIcon icon="mdi:clipboard-check-outline" /> {{ t('realestate.inspection_results') }}
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.neighborhood') }}</span>
+                            <span class="d-value"
+                                :class="opportunity.hiddenNeighborhoodScore >= 70 ? 'success' : opportunity.hiddenNeighborhoodScore >= 40 ? 'warn' : 'danger'">
+                                {{ opportunity.hiddenNeighborhoodScore }}/100
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.structural') }}</span>
+                            <span class="d-value"
+                                :class="opportunity.hiddenStructuralScore >= 70 ? 'success' : opportunity.hiddenStructuralScore >= 40 ? 'warn' : 'danger'">
+                                {{ opportunity.hiddenStructuralScore }}/100
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property details -->
+                <div class="detail-section">
+                    <h4 class="detail-title">
+                        <AppIcon icon="mdi:information-outline" /> {{ t('realestate.property_info') }}
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.condition') }}</span>
+                            <span class="d-value">{{ opportunity.startingCondition }}%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.wear_rate') }}</span>
+                            <span class="d-value">{{ opportunity.wearRate.toFixed(4) }}/t</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.tax_rate') }}</span>
+                            <span class="d-value">{{ formatRate(opportunity.taxRate * 100) }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.appreciation') }}</span>
+                            <span class="d-value success">{{ formatPercent(opportunity.baseAppreciationRate * 100)
+                            }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.maintenance') }}</span>
+                            <span class="d-value danger">{{ formatCash(opportunity.baseMaintenance) }}/t</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="d-label">{{ t('realestate.max_renovation') }}</span>
+                            <span class="d-value">Lv.{{ opportunity.maxRenovationLevel }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scout costs breakdown -->
+                <div class="detail-section">
+                    <h4 class="detail-title">
+                        <AppIcon icon="mdi:magnify" /> {{ t('realestate.scout_costs') }}
+                    </h4>
+                    <div class="detail-grid">
+                        <div v-for="phase in SCOUT_PHASES.slice(1)" :key="phase" class="detail-item">
+                            <span class="d-label">{{ t(SCOUT_PHASE_DATA[phase].nameKey) }}</span>
+                            <span class="d-value"
+                                :class="currentScoutIdx >= SCOUT_PHASES.indexOf(phase) ? 'success' : ''">
+                                {{ currentScoutIdx >= SCOUT_PHASES.indexOf(phase) ? '✓' :
+                                    formatCash(opportunity.scoutCosts[phase]) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -174,10 +243,11 @@ function handleBuy(): void {
 .opp-card {
     display: flex;
     flex-direction: column;
+    justify-content: space-evenly;
     gap: var(--t-space-3);
     padding: var(--t-space-4);
     background: var(--t-bg-card);
-    /* border: 1px solid var(--t-border); */
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     box-shadow: var(--t-shadow-sm);
     transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
@@ -257,69 +327,63 @@ function handleBuy(): void {
     color: var(--t-text-muted);
 }
 
-/* ── Stats ── */
-.opp-card__stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-sm);
-}
-
-.opp-card__kpi {
+/* ── Hero price ── */
+.opp-card__hero-price {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
 }
 
-.opp-card__kpi-label {
+.opp-card__hero-label {
     font-size: var(--t-font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--t-text-muted);
 }
 
-.opp-card__kpi-value {
+.opp-card__hero-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
-    font-size: var(--t-font-size-sm);
-    color: var(--t-text);
-}
-
-.opp-card__kpi-value--gold {
+    font-size: var(--t-font-size-lg);
+    font-weight: 800;
     color: var(--t-warning);
 }
 
-.opp-card__kpi-value--green {
-    color: var(--t-success);
-}
-
-/* ── Reveals ── */
-.opp-card__reveals {
+/* ── Chips ── */
+.opp-card__chips {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: var(--t-space-1);
-    padding: var(--t-space-2) var(--t-space-3);
-    border-left: 3px solid var(--_accent);
-    background: color-mix(in srgb, var(--_accent) 4%, var(--t-bg-card));
-    border-radius: 0 var(--t-radius-sm) var(--t-radius-sm) 0;
 }
 
-.opp-card__reveal-item {
-    display: flex;
+.chip {
+    display: inline-flex;
     align-items: center;
-    gap: var(--t-space-2);
-    font-size: var(--t-font-size-sm);
-}
-
-.opp-card__reveal-label {
-    flex: 1;
+    gap: 0.2rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
+    border-radius: 6px;
+    font-size: var(--t-font-size-xs);
     color: var(--t-text-secondary);
 }
 
-.opp-card__reveal-value {
-    font-family: var(--t-font-mono);
-    font-weight: 600;
+.chip--accent {
+    background: var(--t-success-muted);
+    color: var(--t-success);
+    border-color: color-mix(in srgb, var(--t-success) 20%, transparent);
+}
+
+.chip--pos {
+    background: var(--t-success-muted);
+    color: var(--t-success);
+    border-color: color-mix(in srgb, var(--t-success) 20%, transparent);
+}
+
+.chip--neg {
+    background: var(--t-danger-muted);
+    color: var(--t-danger);
+    border-color: color-mix(in srgb, var(--t-danger) 20%, transparent);
 }
 
 /* ── Traits ── */
@@ -362,10 +426,12 @@ function handleBuy(): void {
     font-style: italic;
 }
 
-/* ── Scout / Research phases ── */
-.opp-card__research {
+/* ── Scout row ── */
+.opp-card__scout-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: var(--t-space-2);
 }
 
 .research-phases {
@@ -409,15 +475,7 @@ function handleBuy(): void {
     margin-left: var(--t-space-1);
 }
 
-/* ── Actions ── */
-.opp-card__actions {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-2);
-    justify-content: flex-end;
-}
-
-.opp-card__act-btn {
+.opp-card__scout-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -433,25 +491,22 @@ function handleBuy(): void {
     white-space: nowrap;
 }
 
-.opp-card__act-btn:hover:not(:disabled) {
+.opp-card__scout-btn:hover:not(:disabled) {
     border-color: var(--t-border-hover);
     color: var(--t-text);
     background: var(--t-bg-card-hover);
 }
 
-.opp-card__act-btn:disabled {
+.opp-card__scout-btn:disabled {
     opacity: 0.35;
     cursor: default;
 }
 
-.opp-card__act-btn--buy {
-    border-color: color-mix(in srgb, var(--t-accent) 25%, var(--t-border));
-    color: var(--t-accent);
-}
-
-.opp-card__act-btn--buy:hover:not(:disabled) {
-    border-color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card));
+.scout-cost {
+    font-family: var(--t-font-mono);
+    font-size: 0.6rem;
+    color: var(--t-text-muted);
+    margin-left: 0.2rem;
 }
 
 .opp-card__research-complete {
@@ -461,5 +516,143 @@ function handleBuy(): void {
     font-size: var(--t-font-size-sm);
     color: var(--t-accent);
     font-weight: 500;
+}
+
+/* ── Buy button ── */
+.opp-card__buy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--t-space-2);
+    padding: var(--t-space-2) var(--t-space-3);
+    font-size: var(--t-font-size-sm);
+    font-weight: 700;
+    border-radius: var(--t-radius-sm);
+    border: 1px solid color-mix(in srgb, var(--t-accent) 25%, var(--t-border));
+    background: color-mix(in srgb, var(--t-accent) 6%, var(--t-bg-card));
+    color: var(--t-accent);
+    cursor: pointer;
+    transition: all var(--t-transition-fast);
+}
+
+.opp-card__buy-btn:hover:not(:disabled) {
+    border-color: var(--t-accent);
+    background: color-mix(in srgb, var(--t-accent) 12%, var(--t-bg-card));
+}
+
+.opp-card__buy-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.opp-card__buy-price {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xs);
+    opacity: 0.7;
+}
+
+/* ── Details toggle ── */
+.details-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: var(--t-space-1) var(--t-space-2);
+    border: none;
+    background: none;
+    color: var(--t-text-muted);
+    font-size: var(--t-font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--t-radius-sm);
+    transition: color var(--t-transition-fast), background var(--t-transition-fast);
+}
+
+.details-toggle:hover {
+    color: var(--t-accent);
+    background: color-mix(in srgb, var(--t-accent) 6%, transparent);
+}
+
+/* ── Slide transition ── */
+.slide-enter-active,
+.slide-leave-active {
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+    opacity: 0;
+    max-height: 0;
+}
+
+.slide-enter-to,
+.slide-leave-from {
+    opacity: 1;
+    max-height: 600px;
+}
+
+/* ── Details Panel ── */
+.details-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--t-space-3);
+    padding: var(--t-space-3);
+    background: var(--t-bg-muted);
+    border-radius: var(--t-radius-md);
+    border: 1px solid var(--t-border);
+}
+
+.detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--t-space-2);
+}
+
+.detail-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-1);
+    font-size: var(--t-font-size-sm);
+    font-weight: 600;
+    color: var(--t-text-secondary);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--t-space-1) var(--t-space-3);
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--t-space-1) 0;
+}
+
+.d-label {
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+}
+
+.d-value {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xs);
+    font-weight: 700;
+    color: var(--t-text);
+}
+
+.d-value.success {
+    color: var(--t-success);
+}
+
+.d-value.danger {
+    color: var(--t-danger);
+}
+
+.d-value.warn {
+    color: var(--t-warning);
 }
 </style>

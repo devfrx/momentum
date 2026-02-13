@@ -7,15 +7,15 @@ import { useFormat } from '@renderer/composables/useFormat'
 import {
     type District,
     getActiveSynergies,
-    getCombinedSynergyBonus,
 } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
+import Tag from 'primevue/tag'
 
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
-const { formatCash, formatPercent } = useFormat()
+const { formatCash, formatPercent, formatRate } = useFormat()
 
 const props = defineProps<{ district: District }>()
 const emit = defineEmits<{
@@ -28,7 +28,6 @@ const owned = computed(() => realEstate.propertiesByDistrict.get(props.district.
 const opps = computed(() => realEstate.availableOpportunities.filter(o => o.districtId === props.district.id))
 
 const activeSynergies = computed(() => getActiveSynergies(props.district, owned.value.length))
-const combinedBonus = computed(() => getCombinedSynergyBonus(props.district, owned.value.length))
 const nextSynergy = computed(() => {
     const all = props.district.synergies
     const next = all.find(s => s.minProperties > owned.value.length)
@@ -95,7 +94,7 @@ const tierColors: Record<string, string> = {
             </div>
             <div class="dp-stat">
                 <span class="dp-stat__label">{{ t('realestate.district.volatility') }}</span>
-                <span class="dp-stat__value">{{ formatPercent(district.volatility) }}</span>
+                <span class="dp-stat__value">{{ formatRate(district.volatility * 100) }}</span>
             </div>
             <div class="dp-stat">
                 <span class="dp-stat__label">{{ t('realestate.district.owned') }}</span>
@@ -113,7 +112,7 @@ const tierColors: Record<string, string> = {
                 <div v-for="syn in activeSynergies" :key="syn.labelKey" class="dp-synergy active">
                     <AppIcon icon="mdi:check-circle" class="text-emerald" />
                     <span>{{ t(syn.labelKey) }}</span>
-                    <span class="dp-synergy-bonus text-emerald">+{{ formatPercent(syn.rentBonus) }}</span>
+                    <span class="dp-synergy-bonus text-emerald">{{ formatPercent(syn.rentBonus * 100) }}</span>
                 </div>
             </div>
             <p v-else class="dp-hint">{{ t('realestate.synergy.none') }}</p>

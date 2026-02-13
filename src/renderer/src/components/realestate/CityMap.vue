@@ -3,7 +3,6 @@ import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
-import { useFormat } from '@renderer/composables/useFormat'
 import { DISTRICTS, getUnlockedDistricts, type District } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import L from 'leaflet'
@@ -12,7 +11,6 @@ import 'leaflet/dist/leaflet.css'
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
-const { formatCash } = useFormat()
 
 const emit = defineEmits<{
     (e: 'select-district', district: District): void
@@ -138,9 +136,9 @@ interface CellDot {
 function dotsForDistrict(districtId: string): CellDot[] {
     const dots: CellDot[] = []
 
-    // Scanned opportunities in this district
+    // All opportunities in this district
     const opps = realEstate.availableOpportunities.filter(
-        o => o.districtId === districtId && o.isScanned,
+        o => o.districtId === districtId,
     )
     for (const opp of opps) {
         dots.push({
@@ -457,7 +455,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     position: absolute;
     width: 15px;
     height: 15px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-sm);
     border: 2px solid var(--t-border);
     transform: translate(-50%, -50%);
     cursor: pointer;
@@ -467,7 +465,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 }
 
 .cell-dot:hover {
-    transform: translate(-50%, -50%) scale(1.6);
+    transform: translate(-50%, -50%) scale(1.2);
     z-index: 5;
 }
 
@@ -475,7 +473,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 .cell-dot--opp {
     background: var(--t-warning);
     /* box-shadow: 0 0 6px var(--t-warning), 0 0 12px rgba(245, 158, 11, 0.3); */
-    animation: dot-pulse 2s ease-in-out infinite;
+    /* animation: dot-pulse 2s ease-in-out infinite; */
 }
 
 .cell-dot--opp:hover {
@@ -486,7 +484,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 .cell-dot--hot {
     background: var(--t-danger);
     /* box-shadow: 0 0 6px var(--t-danger), 0 0 12px rgba(239, 68, 68, 0.3); */
-    animation: dot-pulse 1.2s ease-in-out infinite;
+    /* animation: dot-pulse 1.2s ease-in-out infinite; */
 }
 
 .cell-dot--hot:hover {

@@ -28,13 +28,11 @@ export {
   OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES,
   MAX_OPPORTUNITIES,
-  OPPORTUNITY_LIFETIME_MS,
   SCOUT_PHASES,
   SCOUT_PHASE_DATA,
   APPRAISAL_DISCOUNT,
   generateOpportunity,
   generateScanOpportunity,
   generateOpportunityBatch,
-  isOpportunityExpired,
 } from './generators'
 export type { ScoutPhase, ScoutPhaseData, PropertyOpportunity } from './generators'

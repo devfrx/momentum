@@ -11,7 +11,6 @@ import { useFormat } from '@renderer/composables/useFormat'
 import { getAvailableImprovements, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
-import Tag from 'primevue/tag'
 
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
@@ -89,23 +88,24 @@ function handleInstall(imp: ImprovementDef): void {
                 <div class="imp-stats">
                     <div class="imp-stat" v-if="imp.rentBonus > 0">
                         <AppIcon icon="mdi:cash-plus" size="0.7rem" />
-                        <span>+{{ formatPercent(imp.rentBonus) }} {{ t('realestate.rent') }}</span>
+                        <span>{{ formatPercent(imp.rentBonus * 100) }} {{ t('realestate.rent') }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.occupancyBonus > 0">
                         <AppIcon icon="mdi:account-plus" size="0.7rem" />
-                        <span>+{{ formatPercent(imp.occupancyBonus) }} {{ t('realestate.occupancy') }}</span>
+                        <span>{{ formatPercent(imp.occupancyBonus * 100) }} {{ t('realestate.occupancy') }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.wearMod < 1">
                         <AppIcon icon="mdi:shield-check" size="0.7rem" />
-                        <span>{{ formatPercent(1 - imp.wearMod) }} {{ t('realestate.less_wear') }}</span>
+                        <span>{{ formatPercent((1 - imp.wearMod) * 100) }} {{ t('realestate.less_wear') }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.appreciationMod > 1">
                         <AppIcon icon="mdi:trending-up" size="0.7rem" />
-                        <span>+{{ formatPercent(imp.appreciationMod - 1) }} {{ t('realestate.appreciation') }}</span>
+                        <span>{{ formatPercent((imp.appreciationMod - 1) * 100) }} {{ t('realestate.appreciation')
+                            }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.valueFraction > 0">
                         <AppIcon icon="mdi:home-plus" size="0.7rem" />
-                        <span>+{{ formatPercent(imp.valueFraction) }} {{ t('realestate.current_value') }}</span>
+                        <span>{{ formatPercent(imp.valueFraction * 100) }} {{ t('realestate.current_value') }}</span>
                     </div>
                 </div>
 

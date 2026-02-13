@@ -39,6 +39,7 @@ export default {
     import_btn: 'Import',
     filter_by_category: 'Filter by category',
     all: 'All',
+    cycle: 'cycle',
   },
 
   // ─── Navigation / Sidebar ─────────────────────────────────────
@@ -337,6 +338,15 @@ export default {
     no_owned_desc: 'Buy properties from the market tab to start building your portfolio.',
     info_title: 'How Realty Works',
     info_desc: 'Real estate generates passive rental income from tenants. Each property has a number of units that can be occupied. Your net income per second is gross rent minus maintenance, property tax, and insurance. Occupancy depends on condition, rent price, economy, and renovation level — if you raise rent too high, fewer tenants will stay. Properties degrade over time (wear), and you can repair them at any point to restore condition. Renovations permanently boost rent (+12% per level) and property value (+5% per level). Selling price depends on current condition (50–100% of market value). Market value fluctuates with the economy, but never drops below 30% of the purchase price. New properties unlock as your net worth grows.',
+
+    // Expandable details keys
+    financials: 'Financials',
+    gross_rent: 'Gross Rent',
+    property_info: 'Property Info',
+    sell_value: 'Sell Value',
+    inspection_results: 'Inspection Results',
+    scout_costs: 'Scout Costs',
+    max_renovation: 'Max Renovation',
 
     // New view controls
     asking_price: 'Asking Price',

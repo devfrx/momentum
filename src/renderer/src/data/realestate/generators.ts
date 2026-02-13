@@ -1,9 +1,10 @@
 /**
  * Property Opportunity Generator — Procedural real estate deals
  *
- * Generates dynamic, time-limited property opportunities (like startups).
- * Each opportunity has randomized attributes, location, and expires after
- * a certain window. Once purchased, it becomes a permanent property.
+ * Generates dynamic property opportunities discovered via district scanning.
+ * Each opportunity has randomized attributes and location. Opportunities
+ * persist until the next periodic refresh or scan replacement.
+ * Once purchased, they become permanent properties.
  */
 import { D } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
@@ -18,7 +19,6 @@ import { PROPERTY_TRAITS, type PropertyTrait } from './customizations'
 export const OPPORTUNITY_REFRESH_TICKS = 90_000
 export const MIN_OPPORTUNITIES = 2
 export const MAX_OPPORTUNITIES = 5
-export const OPPORTUNITY_LIFETIME_MS = 120_000
 
 export type ScoutPhase = 'none' | 'drive_by' | 'inspection' | 'appraisal'
 export const SCOUT_PHASES: ScoutPhase[] = ['none', 'drive_by', 'inspection', 'appraisal']
@@ -75,7 +75,6 @@ export interface PropertyOpportunity {
   hiddenStructuralScore: number
 
   appearedAt: number
-  expiresAt: number
   isHotDeal: boolean
   /** Whether this opportunity was found via district scan */
   isScanned: boolean
@@ -167,9 +166,6 @@ export function generateOpportunity(
   const traits = pickN(PROPERTY_TRAITS, traitCount)
 
   const isHotDeal = Math.random() < 0.15
-  // Scanned opportunities last longer (reward for scanning)
-  const baseLifetime = isScanned ? OPPORTUNITY_LIFETIME_MS * 1.5 : OPPORTUNITY_LIFETIME_MS
-  const lifetime = isHotDeal ? baseLifetime * 0.5 : baseLifetime
 
   const priceNum = askingPrice.toNumber()
   const scoutCosts: Record<ScoutPhase, number> = {
@@ -210,10 +206,9 @@ export function generateOpportunity(
     traits,
     scoutPhase: 'none',
     scoutCosts,
-    hiddenNeighborhoodScore: Math.round(rand(1, 10)),
-    hiddenStructuralScore: Math.round(rand(1, 10)),
+    hiddenNeighborhoodScore: Math.round(rand(10, 100)),
+    hiddenStructuralScore: Math.round(rand(10, 100)),
     appearedAt: currentTime,
-    expiresAt: currentTime + lifetime,
     isHotDeal,
     isScanned,
   }
@@ -252,9 +247,4 @@ export function generateOpportunityBatch(
   return opps
 }
 
-export function isOpportunityExpired(
-  opp: PropertyOpportunity,
-  currentTime: number,
-): boolean {
-  return currentTime >= opp.expiresAt
-}
+

@@ -17,17 +17,13 @@ import Dialog from 'primevue/dialog'
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
-const { formatCash, formatNumber } = useFormat()
+const { formatCash } = useFormat()
 
 const activeTab = ref<'map' | 'opportunities' | 'portfolio'>('map')
 const selectedDistrict = ref<District | null>(null)
 const selectedPropertyId = ref<string | null>(null)
 const showImprovements = ref(false)
 const showCustomizer = ref(false)
-
-const selectedProperty = computed(() =>
-    selectedPropertyId.value ? realEstate.properties.find(p => p.id === selectedPropertyId.value) ?? null : null,
-)
 
 const improvementProperty = computed(() =>
     showImprovements.value && selectedPropertyId.value
@@ -46,7 +42,7 @@ onMounted(() => {
 function handleSelectDistrict(district: District): void {
     selectedDistrict.value = district
 }
-function handleSelectOpportunity(oppId: string): void {
+function handleSelectOpportunity(_oppId: string): void {
     activeTab.value = 'opportunities'
 }
 function handleSelectProperty(propId: string): void {
@@ -119,7 +115,7 @@ function handleOpenImprovements(): void {
                 <AppIcon icon="mdi:briefcase-outline" />
                 <span>{{ t('realestate.tab.portfolio') }}</span>
                 <span v-if="realEstate.properties.length > 0" class="tab-badge">{{ realEstate.properties.length
-                    }}</span>
+                }}</span>
             </button>
         </div>
 

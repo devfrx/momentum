@@ -39,6 +39,7 @@ export default {
     import_btn: 'Importa',
     filter_by_category: 'Filtra per categoria',
     all: 'Tutto',
+    cycle: 'ciclo',
   },
 
   // ─── Navigazione / Sidebar ────────────────────────────────────
@@ -337,6 +338,15 @@ export default {
     no_owned_desc: 'Compra proprietà dalla scheda mercato per iniziare a costruire il tuo portafoglio.',
     info_title: 'Come Funzionano gli Immobili',
     info_desc: 'Gli immobili generano reddito passivo dagli affitti dei locatari. Ogni proprietà ha un numero di unità che possono essere occupate. Il tuo reddito netto al secondo è l\'affitto lordo meno manutenzione, tasse sulla proprietà e assicurazione. L\'occupazione dipende dalle condizioni, dal prezzo dell\'affitto, dall\'economia e dal livello di ristrutturazione — se alzi troppo l\'affitto, meno locatari resteranno. Le proprietà si degradano nel tempo (usura), e puoi ripararle in qualsiasi momento per ripristinare le condizioni. Le ristrutturazioni aumentano permanentemente l\'affitto (+12% per livello) e il valore della proprietà (+5% per livello). Il prezzo di vendita dipende dalle condizioni attuali (50–100% del valore di mercato). Il valore di mercato fluttua con l\'economia, ma non scende mai sotto il 30% del prezzo d\'acquisto. Nuove proprietà si sbloccano man mano che il tuo patrimonio cresce.',
+
+    // Chiavi dettagli espandibili
+    financials: 'Finanze',
+    gross_rent: 'Affitto Lordo',
+    property_info: 'Info Proprietà',
+    sell_value: 'Valore di Vendita',
+    inspection_results: 'Risultati Ispezione',
+    scout_costs: 'Costi Perlustrazione',
+    max_renovation: 'Ristrutturazione Max',
 
     // Nuovi controlli vista
     asking_price: 'Prezzo Richiesto',

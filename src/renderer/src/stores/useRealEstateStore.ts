@@ -35,7 +35,6 @@ import {
   generateOpportunity,
   generateScanOpportunity,
   generateOpportunityBatch,
-  isOpportunityExpired,
   OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES,
   MAX_OPPORTUNITIES,
@@ -251,12 +250,6 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       if (trait) traitMaintenanceMod *= trait.maintenanceMod
     }
 
-    let improvementWearMod = 1
-    for (const impId of p.improvements) {
-      const imp = getImprovement(impId)
-      if (imp) improvementWearMod *= imp.wearMod
-    }
-
     return mul(mul(p.baseMaintenance, mgmt.expenseMod * traitMaintenanceMod), p.units)
   }
 
@@ -266,6 +259,26 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const maintenance = computePropertyMaintenance(p)
     const tax = mul(rent, p.taxRate)
     return sub(rent, add(maintenance, tax))
+  }
+
+  /** Get repair cost for a property (restores condition to 100) */
+  function getRepairCost(p: Property): Decimal {
+    if (p.condition >= 98) return ZERO
+    const repairAmount = 100 - p.condition
+    return D(Math.round(p.baseMaintenance.toNumber() * repairAmount * 5 * p.units))
+  }
+
+  /** Get renovation cost for a property (next level) */
+  function getRenovateCost(p: Property): Decimal {
+    if (p.renovationLevel >= p.maxRenovationLevel) return ZERO
+    const baseCost = p.currentValue.toNumber() * 0.15
+    return D(Math.round(baseCost * Math.pow(p.renovationCostMultiplier, p.renovationLevel)))
+  }
+
+  /** Get estimated sell price for a property */
+  function getSellPrice(p: Property): Decimal {
+    const conditionFactor = 0.5 + (p.condition / 100) * 0.5
+    return D(Math.round(p.currentValue.toNumber() * conditionFactor))
   }
 
   /** Total rent per tick across all properties */
@@ -282,14 +295,14 @@ export const useRealEstateStore = defineStore('realEstate', () => {
   /** Rent per second (for offline calc) = rentPerTick × 10 */
   const rentPerSecond = computed<Decimal>(() => mul(totalRentPerTick.value, 10))
 
-  /** Hot deals (isHotDeal and not expired) */
+  /** Hot deals */
   const hotDeals = computed<PropertyOpportunity[]>(() =>
-    opportunities.value.filter((o) => o.isHotDeal && (o.isScanned || !isOpportunityExpired(o, Date.now()))),
+    opportunities.value.filter((o) => o.isHotDeal),
   )
 
-  /** Available (non-expired) opportunities — scanned opps never expire automatically */
+  /** All available opportunities (no expiration — managed via scans & refreshes) */
   const availableOpportunities = computed<PropertyOpportunity[]>(() =>
-    opportunities.value.filter((o) => o.isScanned || !isOpportunityExpired(o, Date.now())),
+    [...opportunities.value],
   )
 
   // ─── Actions ───────────────────────────────────────────────────
@@ -305,12 +318,10 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     }
   }
 
-  /** Refresh opportunities (replaces expired, adds new) */
+  /** Refresh opportunities (replace old non-scanned, add new) */
   function refreshOpportunities(netWorth: number, currentTime: number): void {
-    // Remove expired — but keep scanned opps (they persist until next scan)
-    opportunities.value = opportunities.value.filter(
-      (o) => o.isScanned || !isOpportunityExpired(o, currentTime),
-    )
+    // On refresh, remove non-scanned opps to cycle in fresh ones
+    opportunities.value = opportunities.value.filter((o) => o.isScanned)
     // Fill up to minimum
     const unlocked = getUnlockedDistricts(netWorth)
     if (unlocked.length === 0) return
@@ -405,7 +416,6 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     if (oppIdx < 0) return null
 
     const opp = opportunities.value[oppIdx]
-    if (isOpportunityExpired(opp, Date.now())) return null
 
     // Appraisal discount if fully scouted
     let price = opp.askingPrice
@@ -487,7 +497,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     if (!prop) return false
     if (prop.renovationLevel >= prop.maxRenovationLevel) return false
 
-    const baseCost = prop.currentValue.toNumber() * 0.05
+    const baseCost = prop.currentValue.toNumber() * 0.15
     if (baseCost <= 0) return false // Prevent free renovation on zero-value properties
     const cost = D(Math.round(baseCost * Math.pow(prop.renovationCostMultiplier, prop.renovationLevel)))
     if (player.cash.lt(cost)) return false
@@ -506,7 +516,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     if (prop.condition >= 98) return false
 
     const repairAmount = 100 - prop.condition
-    const cost = D(Math.round(prop.baseMaintenance.toNumber() * repairAmount * 2 * prop.units))
+    const cost = D(Math.round(prop.baseMaintenance.toNumber() * repairAmount * 5 * prop.units))
     if (player.cash.lt(cost)) return false
 
     player.spendCash(cost)
@@ -586,19 +596,29 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       prop.condition = Math.max(0, prop.condition - effectiveWearRate)
 
       // Collect net rent
-      const netRent = mul(computePropertyNetRent(prop), globalRentMultiplier.value)
+      const grossRent = mul(computePropertyRent(prop), globalRentMultiplier.value)
+      const maintenance = computePropertyMaintenance(prop)
+      const tax = mul(grossRent, prop.taxRate)
+      const totalExpenses = add(maintenance, tax)
+      const netRent = sub(grossRent, totalExpenses)
+
+      // Always track maintenance + tax expenses
+      prop.totalMaintenancePaid = add(prop.totalMaintenancePaid, totalExpenses)
+      totalMaintenancePaid.value = add(totalMaintenancePaid.value, totalExpenses)
+
       if (netRent.gt(0)) {
         player.earnCash(netRent)
-        prop.totalRentCollected = add(prop.totalRentCollected, netRent)
-        totalRentEarned.value = add(totalRentEarned.value, netRent)
+        prop.totalRentCollected = add(prop.totalRentCollected, grossRent)
+        totalRentEarned.value = add(totalRentEarned.value, grossRent)
       } else if (netRent.lt(0)) {
         // Property is operating at a loss — deduct from cash
         const loss = netRent.abs()
         if (player.cash.gte(loss)) {
           player.spendCash(loss)
-          prop.totalMaintenancePaid = add(prop.totalMaintenancePaid, loss)
-          totalMaintenancePaid.value = add(totalMaintenancePaid.value, loss)
         }
+        // Still track the gross rent earned (even if net is negative)
+        prop.totalRentCollected = add(prop.totalRentCollected, grossRent)
+        totalRentEarned.value = add(totalRentEarned.value, grossRent)
       }
 
       // Occupancy recalculation
@@ -638,7 +658,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       }
     }
 
-    // ── Opportunity refresh ──
+    // ── Opportunity refresh (no expiration — only periodic refresh & min-fill) ──
     const ticksSinceRefresh = ctx.tick - lastRefreshTick.value
     if (ticksSinceRefresh >= OPPORTUNITY_REFRESH_TICKS || opportunities.value.length < MIN_OPPORTUNITIES) {
       const netWorth = player.netWorth.toNumber()
@@ -897,6 +917,9 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     computePropertyMaintenance,
     computePropertyNetRent,
     getDistrictSynergy,
+    getRepairCost,
+    getRenovateCost,
+    getSellPrice,
 
     // Game loop
     tick,
