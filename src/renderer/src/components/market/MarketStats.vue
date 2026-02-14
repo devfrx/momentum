@@ -11,6 +11,7 @@ const props = defineProps<{
     unrealizedProfit: Decimal
     positionCount: number
     realizedProfit?: Decimal
+    dividendsEarned?: Decimal
     /** 'stock' or 'crypto' — for theming */
     type: 'stock' | 'crypto'
 }>()
@@ -24,7 +25,7 @@ const valueColorClass = computed(() => props.type === 'crypto' ? 'text-purple' :
     <div class="stats-bar">
         <div class="stat-chip">
             <span class="stat-chip-label">{{ $t(type === 'crypto' ? 'market.wallet_value' : 'market.portfolio_value')
-                }}</span>
+            }}</span>
             <span class="stat-chip-value" :class="valueColorClass">{{ formatCash(portfolioValue) }}</span>
         </div>
         <div class="stat-chip">
@@ -37,6 +38,12 @@ const valueColorClass = computed(() => props.type === 'crypto' ? 'text-purple' :
             <span class="stat-chip-label">{{ $t('market.realized_pl') }}</span>
             <span class="stat-chip-value" :class="realizedProfit.gte(0) ? 'positive' : 'negative'">
                 {{ formatCash(realizedProfit) }}
+            </span>
+        </div>
+        <div class="stat-chip" v-if="dividendsEarned && dividendsEarned.gt(0)">
+            <span class="stat-chip-label">{{ $t('market.dividends') }}</span>
+            <span class="stat-chip-value positive">
+                {{ formatCash(dividendsEarned) }}
             </span>
         </div>
         <div class="stat-chip">

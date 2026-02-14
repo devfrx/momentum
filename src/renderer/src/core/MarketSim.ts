@@ -40,6 +40,8 @@ export interface AssetConfig {
   minPrice: number
   /** Max number of historical prices to keep (for charts) */
   maxHistory: number
+  /** Annual dividend yield as a fraction (e.g. 0.035 = 3.5%). 0 = no dividends. */
+  dividendYield?: number
 }
 
 export interface AssetState {

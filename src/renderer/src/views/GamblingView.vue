@@ -8,6 +8,7 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import { GameCard, SlotMachine, RouletteGame, CoinFlip, BlackjackGame, DiceGame, PlinkoGame, LotteryGame } from '@renderer/components/gambling'
 import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 
 const gambling = useGamblingStore()
 const player = usePlayerStore()
@@ -119,6 +120,50 @@ const games = computed(() => [
         luckMechanic: [t('gambling.luck_second_chance'), t('gambling.luck_rolling_luck')],
     },
 ])
+
+const gamblingInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('gambling.info_lobby.games.title'),
+        icon: 'mdi:gamepad-variant',
+        entries: [
+            { term: t('gambling.info_lobby.games.blackjack'), desc: t('gambling.info_lobby.games.blackjack_desc'), icon: 'mdi:cards-playing-spade' },
+            { term: t('gambling.info_lobby.games.roulette'), desc: t('gambling.info_lobby.games.roulette_desc'), icon: 'mdi:record-circle' },
+            { term: t('gambling.info_lobby.games.slots'), desc: t('gambling.info_lobby.games.slots_desc'), icon: 'mdi:slot-machine' },
+            { term: t('gambling.info_lobby.games.coinflip'), desc: t('gambling.info_lobby.games.coinflip_desc'), icon: 'mdi:circle-half-full' },
+            { term: t('gambling.info_lobby.games.dice'), desc: t('gambling.info_lobby.games.dice_desc'), icon: 'mdi:dice-6' },
+            { term: t('gambling.info_lobby.games.plinko'), desc: t('gambling.info_lobby.games.plinko_desc'), icon: 'mdi:triangle-outline' },
+            { term: t('gambling.info_lobby.games.lottery'), desc: t('gambling.info_lobby.games.lottery_desc'), icon: 'mdi:ticket' },
+        ],
+    },
+    {
+        title: t('gambling.info_lobby.luck.title'),
+        icon: 'mdi:clover',
+        entries: [
+            { term: t('gambling.info_lobby.luck.bonus'), desc: t('gambling.info_lobby.luck.bonus_desc'), icon: 'mdi:percent' },
+            { term: t('gambling.info_lobby.luck.formula'), desc: t('gambling.info_lobby.luck.formula_desc'), icon: 'mdi:function-variant' },
+            { term: t('gambling.info_lobby.luck.second_chance'), desc: t('gambling.info_lobby.luck.second_chance_desc'), icon: 'mdi:refresh' },
+            { term: t('gambling.info_lobby.luck.biased_random'), desc: t('gambling.info_lobby.luck.biased_random_desc'), icon: 'mdi:scale-unbalanced' },
+        ],
+    },
+    {
+        title: t('gambling.info_lobby.stats.title'),
+        icon: 'mdi:chart-bar',
+        entries: [
+            { term: t('gambling.info_lobby.stats.per_game'), desc: t('gambling.info_lobby.stats.per_game_desc'), icon: 'mdi:format-list-bulleted' },
+            { term: t('gambling.info_lobby.stats.win_rate'), desc: t('gambling.info_lobby.stats.win_rate_desc'), icon: 'mdi:percent-outline' },
+            { term: t('gambling.info_lobby.stats.xp'), desc: t('gambling.info_lobby.stats.xp_desc'), icon: 'mdi:star-circle' },
+        ],
+    },
+    {
+        title: t('gambling.info_lobby.divine.title'),
+        icon: 'mdi:shimmer',
+        entries: [
+            { term: t('gambling.info_lobby.divine.what'), desc: t('gambling.info_lobby.divine.what_desc'), icon: 'mdi:help-circle-outline' },
+            { term: t('gambling.info_lobby.divine.effect'), desc: t('gambling.info_lobby.divine.effect_desc'), icon: 'mdi:multiplication' },
+            { term: t('gambling.info_lobby.divine.persist'), desc: t('gambling.info_lobby.divine.persist_desc'), icon: 'mdi:shield-star' },
+        ],
+    },
+])
 </script>
 
 <template>
@@ -180,7 +225,8 @@ const games = computed(() => [
             </div>
 
             <!-- Info Panel -->
-            <InfoPanel :title="$t('gambling.info_title')" :description="$t('gambling.info_desc')" />
+            <InfoPanel :title="$t('gambling.info_title')" :description="$t('gambling.info_desc')"
+                :sections="gamblingInfoSections" />
         </template>
     </div>
 </template>

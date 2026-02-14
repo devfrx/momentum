@@ -13,11 +13,14 @@ import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import { useI18n } from 'vue-i18n'
 
 const crypto = useCryptoStore()
 const player = usePlayerStore()
 const settings = useSettingsStore()
 const { formatCash, formatPercent } = useFormat()
+const { t } = useI18n()
 
 const showCharts = ref(true)
 const pinnedAssetId = computed({
@@ -69,6 +72,53 @@ function handleBuy(assetId: string, amount: number) {
 function handleSell(assetId: string, amount: number) {
     crypto.sellCrypto(assetId, amount)
 }
+
+const cryptoInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('crypto.info.trading.title'),
+        icon: 'mdi:swap-horizontal',
+        entries: [
+            { term: t('crypto.info.trading.buy'), desc: t('crypto.info.trading.buy_desc'), icon: 'mdi:cart-arrow-down' },
+            { term: t('crypto.info.trading.sell'), desc: t('crypto.info.trading.sell_desc'), icon: 'mdi:cart-arrow-up' },
+            { term: t('crypto.info.trading.xp'), desc: t('crypto.info.trading.xp_desc'), icon: 'mdi:star-circle' },
+        ],
+    },
+    {
+        title: t('crypto.info.wallet.title'),
+        icon: 'mdi:wallet-outline',
+        entries: [
+            { term: t('crypto.info.wallet.holdings'), desc: t('crypto.info.wallet.holdings_desc'), icon: 'mdi:format-list-bulleted' },
+            { term: t('crypto.info.wallet.value'), desc: t('crypto.info.wallet.value_desc'), icon: 'mdi:cash-multiple' },
+            { term: t('crypto.info.wallet.profit'), desc: t('crypto.info.wallet.profit_desc'), icon: 'mdi:chart-line-variant' },
+        ],
+    },
+    {
+        title: t('crypto.info.volatility.title'),
+        icon: 'mdi:alert-outline',
+        entries: [
+            { term: t('crypto.info.volatility.warning'), desc: t('crypto.info.volatility.warning_desc'), icon: 'mdi:flash-alert' },
+            { term: t('crypto.info.volatility.no_dividends'), desc: t('crypto.info.volatility.no_dividends_desc'), icon: 'mdi:close-circle-outline' },
+            { term: t('crypto.info.volatility.separate_sim'), desc: t('crypto.info.volatility.separate_sim_desc'), icon: 'mdi:chart-multiple' },
+        ],
+    },
+    {
+        title: t('crypto.info.charts.title'),
+        icon: 'mdi:chart-areaspline',
+        entries: [
+            { term: t('crypto.info.charts.pin'), desc: t('crypto.info.charts.pin_desc'), icon: 'mdi:pin' },
+            { term: t('crypto.info.charts.ath_atl'), desc: t('crypto.info.charts.ath_atl_desc'), icon: 'mdi:arrow-expand-vertical' },
+            { term: t('crypto.info.charts.toggle'), desc: t('crypto.info.charts.toggle_desc'), icon: 'mdi:eye-outline' },
+        ],
+    },
+    {
+        title: t('crypto.info.multipliers.title'),
+        icon: 'mdi:multiplication',
+        entries: [
+            { term: t('crypto.info.multipliers.crypto_returns'), desc: t('crypto.info.multipliers.crypto_returns_desc'), icon: 'mdi:trending-up' },
+            { term: t('crypto.info.multipliers.prestige'), desc: t('crypto.info.multipliers.prestige_desc'), icon: 'mdi:crown' },
+        ],
+    },
+])
 </script>
 
 <template>
@@ -158,7 +208,8 @@ function handleSell(assetId: string, amount: number) {
         </div>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('crypto.info_title')" :description="$t('crypto.info_desc')" />
+        <InfoPanel :title="$t('crypto.info_title')" :description="$t('crypto.info_desc')"
+            :sections="cryptoInfoSections" />
     </div>
 </template>
 

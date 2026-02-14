@@ -18,6 +18,7 @@ export interface PortfolioPosition {
 
 export const useStockStore = defineStore('stocks', () => {
   const simulator = new MarketSimulator()
+  const configs = ref<AssetConfig[]>([])
   const portfolio = ref<PortfolioPosition[]>([])
   const assets = shallowRef<AssetState[]>([])
   const totalRealizedProfit = ref<Decimal>(ZERO)
@@ -49,12 +50,31 @@ export const useStockStore = defineStore('stocks', () => {
 
   // ─── Actions ──────────────────────────────────────────────────
 
-  function initStocks(configs: AssetConfig[]): void {
-    for (const config of configs) {
+  function initStocks(stockConfigs: AssetConfig[]): void {
+    configs.value = stockConfigs
+    for (const config of stockConfigs) {
       simulator.registerAsset(config)
     }
     assets.value = simulator.getAllAssets()
   }
+
+  /**
+   * Dividend income per second — used for offline progress calculation.
+   * Sum of (shares × currentPrice × annualYield / secondsPerYear) for all held stocks.
+   * We use 30240 game-seconds per year (252 trading days × 120 ticks/day ÷ 10 ticks/s).
+   */
+  const dividendIncomePerSecond = computed(() => {
+    const SECONDS_PER_GAME_YEAR = 252 * 12 // 252 trading days × 12 seconds per day at 10 ticks/s
+    let total = ZERO
+    for (const pos of portfolio.value) {
+      const asset = assets.value.find((a) => a.id === pos.assetId)
+      const config = configs.value.find((c) => c.id === pos.assetId)
+      if (!asset || !config || !config.dividendYield) continue
+      const annualDividend = asset.currentPrice * pos.shares * config.dividendYield
+      total = add(total, D(annualDividend / SECONDS_PER_GAME_YEAR))
+    }
+    return total
+  })
 
   function tick(): void {
     simulator.tick()
@@ -63,6 +83,37 @@ export const useStockStore = defineStore('stocks', () => {
       ...a,
       priceHistory: a.priceHistory.slice()
     }))
+  }
+
+  /**
+   * Pay dividends to the player for all held positions.
+   * Called from game loop at a configurable interval (e.g. every 100 ticks = 10s).
+   * Uses the same annual yield / ticksPerYear formula as the simulator dt.
+   * @param ticksSinceLastPayout Number of ticks since last dividend payout
+   */
+  function payDividends(ticksSinceLastPayout: number): void {
+    if (portfolio.value.length === 0) return
+    const TICKS_PER_GAME_YEAR = 252 * 120 // 252 trading days × 120 ticks/day
+    const player = usePlayerStore()
+    const upgrades = useUpgradeStore()
+    const stockReturnsMul = upgrades.getMultiplier('stock_returns')
+
+    let totalPayout = ZERO
+    for (const pos of portfolio.value) {
+      const asset = assets.value.find((a) => a.id === pos.assetId)
+      const config = configs.value.find((c) => c.id === pos.assetId)
+      if (!asset || !config || !config.dividendYield || config.dividendYield <= 0) continue
+
+      const payout = D(asset.currentPrice * pos.shares * config.dividendYield * ticksSinceLastPayout / TICKS_PER_GAME_YEAR)
+      totalPayout = add(totalPayout, payout)
+    }
+
+    if (totalPayout.gt(0)) {
+      // Apply stock_returns multiplier to dividends too
+      const adjustedPayout = mul(totalPayout, stockReturnsMul)
+      player.earnCash(adjustedPayout)
+      totalDividendsEarned.value = add(totalDividendsEarned.value, adjustedPayout)
+    }
   }
 
   /** Buy shares. Returns cost as Decimal, or null if asset not found. */
@@ -145,14 +196,17 @@ export const useStockStore = defineStore('stocks', () => {
   }
 
   return {
+    configs,
     portfolio,
     assets,
     totalRealizedProfit,
     totalDividendsEarned,
     unrealizedProfit,
     totalPortfolioValue,
+    dividendIncomePerSecond,
     initStocks,
     tick,
+    payDividends,
     buyShares,
     sellShares,
     getPosition,

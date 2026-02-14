@@ -291,7 +291,7 @@ export function useInitGame() {
                 jobs: jobs.jobIncomePerSecond,
                 business: business.profitPerSecond,
                 realEstate: realEstate.rentPerSecond,
-                dividends: D(0),
+                dividends: stocks.dividendIncomePerSecond,
                 depositInterest: depositStore.interestPerSecond,
                 loanInterest: loanStore.totalInterestPerSecond,
               },

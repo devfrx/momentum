@@ -108,6 +108,10 @@ export function useGameLoop() {
       if (ctx.tick % settings.marketUpdateInterval === 0) {
         stocks.tick()
       }
+      // Pay dividends every 100 ticks (10 seconds) — proportional payout
+      if (ctx.tick % 100 === 0) {
+        stocks.payDividends(100)
+      }
     })
 
     // ─── Crypto market ───────────────────────────────────────────

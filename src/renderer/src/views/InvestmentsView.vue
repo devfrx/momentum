@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStartupStore, type StartupInvestment } from '@renderer/stores/useStartupStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -8,6 +9,7 @@ import { gameEngine } from '@renderer/core/GameEngine'
 import { useOnTick } from '@renderer/composables/useGameLoop'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -27,6 +29,7 @@ import {
 const startups = useStartupStore()
 const player = usePlayerStore()
 const { formatCash, formatRate, formatTime } = useFormat()
+const { t } = useI18n()
 
 // Live tick counter
 const currentTick = ref(gameEngine.currentTick)
@@ -130,6 +133,58 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
     const remaining = inv.maturityTicks - (currentTick.value - inv.investedAtTick)
     return Math.max(0, Math.floor(remaining / 10))
 }
+
+const investInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('investments.info.opportunities.title'),
+        icon: 'mdi:lightbulb-outline',
+        entries: [
+            { term: t('investments.info.opportunities.refresh'), desc: t('investments.info.opportunities.refresh_desc'), icon: 'mdi:timer-sand' },
+            { term: t('investments.info.opportunities.expiry'), desc: t('investments.info.opportunities.expiry_desc'), icon: 'mdi:clock-alert-outline' },
+            { term: t('investments.info.opportunities.sectors'), desc: t('investments.info.opportunities.sectors_desc'), icon: 'mdi:shape-outline' },
+            { term: t('investments.info.opportunities.traits'), desc: t('investments.info.opportunities.traits_desc'), icon: 'mdi:tag-multiple' },
+        ],
+    },
+    {
+        title: t('investments.info.research.title'),
+        icon: 'mdi:magnify',
+        entries: [
+            { term: t('investments.info.research.quick_scan'), desc: t('investments.info.research.quick_scan_desc'), icon: 'mdi:eye-outline' },
+            { term: t('investments.info.research.due_diligence'), desc: t('investments.info.research.due_diligence_desc'), icon: 'mdi:file-search-outline' },
+            { term: t('investments.info.research.deep_analysis'), desc: t('investments.info.research.deep_analysis_desc'), icon: 'mdi:microscope' },
+        ],
+    },
+    {
+        title: t('investments.info.stages.title'),
+        icon: 'mdi:stairs',
+        entries: [
+            { term: t('investments.info.stages.seed'), desc: t('investments.info.stages.seed_desc'), icon: 'mdi:sprout' },
+            { term: t('investments.info.stages.series_a'), desc: t('investments.info.stages.series_a_desc'), icon: 'mdi:alpha-a-circle-outline' },
+            { term: t('investments.info.stages.series_b'), desc: t('investments.info.stages.series_b_desc'), icon: 'mdi:alpha-b-circle-outline' },
+            { term: t('investments.info.stages.series_c'), desc: t('investments.info.stages.series_c_desc'), icon: 'mdi:alpha-c-circle-outline' },
+            { term: t('investments.info.stages.pre_ipo'), desc: t('investments.info.stages.pre_ipo_desc'), icon: 'mdi:rocket-launch' },
+        ],
+    },
+    {
+        title: t('investments.info.investing.title'),
+        icon: 'mdi:cash-check',
+        entries: [
+            { term: t('investments.info.investing.invest'), desc: t('investments.info.investing.invest_desc'), icon: 'mdi:cash-plus' },
+            { term: t('investments.info.investing.maturity'), desc: t('investments.info.investing.maturity_desc'), icon: 'mdi:progress-clock' },
+            { term: t('investments.info.investing.success'), desc: t('investments.info.investing.success_desc'), icon: 'mdi:check-circle' },
+            { term: t('investments.info.investing.failure'), desc: t('investments.info.investing.failure_desc'), icon: 'mdi:close-circle' },
+        ],
+    },
+    {
+        title: t('investments.info.modifiers.title'),
+        icon: 'mdi:tune-vertical',
+        entries: [
+            { term: t('investments.info.modifiers.skill_tree'), desc: t('investments.info.modifiers.skill_tree_desc'), icon: 'mdi:file-tree' },
+            { term: t('investments.info.modifiers.events'), desc: t('investments.info.modifiers.events_desc'), icon: 'mdi:calendar-alert' },
+            { term: t('investments.info.modifiers.prestige'), desc: t('investments.info.modifiers.prestige_desc'), icon: 'mdi:crown' },
+        ],
+    },
+])
 </script>
 
 <template>
@@ -201,7 +256,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                         <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
                             formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                                }}x</strong></span>
+                        }}x</strong></span>
                     </div>
                     <div class="success-result">
                         <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
@@ -281,7 +336,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                             <span class="opp-card__tagline">{{ opp.tagline }}</span>
                         </div>
                         <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">{{ STAGES[opp.stage].name
-                        }}</span>
+                            }}</span>
                     </div>
 
                     <!-- Meta row: sector + timer -->
@@ -457,7 +512,7 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                        }}</strong>
+                    }}</strong>
                 </div>
             </div>
 
@@ -468,7 +523,8 @@ function getInvestmentTimeLeft(inv: StartupInvestment): number {
         </Dialog>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('investments.info_title')" :description="$t('investments.info_desc')" />
+        <InfoPanel :title="$t('investments.info_title')" :description="$t('investments.info_desc')"
+            :sections="investInfoSections" />
     </div>
 </template>
 

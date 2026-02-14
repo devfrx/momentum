@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { SKILL_TREE_META } from '@renderer/data/upgrades'
 import { SkillTreeGraph, SkillTreePanel } from '@renderer/components/skilltree'
 import type { GraphNode } from '@renderer/components/skilltree/SkillTreeGraph.vue'
@@ -12,6 +14,45 @@ import type { GraphNode } from '@renderer/components/skilltree/SkillTreeGraph.vu
 const upgrades = useUpgradeStore()
 const player = usePlayerStore()
 const { formatCash } = useFormat()
+const { t } = useI18n()
+
+const skillTreeInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('skilltree.info.nodes.title'),
+        icon: 'mdi:circle-double',
+        entries: [
+            { term: t('skilltree.info.nodes.cash_cost'), desc: t('skilltree.info.nodes.cash_cost_desc') },
+            { term: t('skilltree.info.nodes.binary'), desc: t('skilltree.info.nodes.binary_desc') },
+            { term: t('skilltree.info.nodes.no_refund'), desc: t('skilltree.info.nodes.no_refund_desc') },
+        ],
+    },
+    {
+        title: t('skilltree.info.categories.title'),
+        icon: 'mdi:shape',
+        entries: [
+            { term: t('skilltree.info.categories.five_trees'), desc: t('skilltree.info.categories.five_trees_desc') },
+            { term: t('skilltree.info.categories.three_paths'), desc: t('skilltree.info.categories.three_paths_desc') },
+            { term: t('skilltree.info.categories.capstones'), desc: t('skilltree.info.categories.capstones_desc') },
+        ],
+    },
+    {
+        title: t('skilltree.info.prerequisites.title'),
+        icon: 'mdi:lock-open-variant',
+        entries: [
+            { term: t('skilltree.info.prerequisites.chain'), desc: t('skilltree.info.prerequisites.chain_desc') },
+            { term: t('skilltree.info.prerequisites.strategy'), desc: t('skilltree.info.prerequisites.strategy_desc') },
+        ],
+    },
+    {
+        title: t('skilltree.info.effects.title'),
+        icon: 'mdi:multiplication',
+        entries: [
+            { term: t('skilltree.info.effects.stacking'), desc: t('skilltree.info.effects.stacking_desc') },
+            { term: t('skilltree.info.effects.targets'), desc: t('skilltree.info.effects.targets_desc') },
+            { term: t('skilltree.info.effects.prestige_reset'), desc: t('skilltree.info.effects.prestige_reset_desc') },
+        ],
+    },
+])
 
 // ─── Active tab (category) ──────────────────────────────────
 type CategoryId = (typeof SKILL_TREE_META)[number]['id']
@@ -178,7 +219,8 @@ function buySelected(): void {
         </div>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('skilltree.info_title')" :description="$t('skilltree.info_desc')" />
+        <InfoPanel :title="$t('skilltree.info_title')" :description="$t('skilltree.info_desc')"
+            :sections="skillTreeInfoSections" />
     </div>
 </template>
 

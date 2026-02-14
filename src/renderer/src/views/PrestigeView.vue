@@ -18,6 +18,7 @@ import { useFormat } from '@renderer/composables/useFormat'
 import { gameEngine } from '@renderer/core/GameEngine'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import {
     PrestigePanel,
     PrestigeUpgradeCard,
@@ -51,6 +52,61 @@ const { formatNumber, formatMultiplier } = useFormat()
 const { t } = useI18n()
 
 type UpgradeWithLevel = PrestigeUpgradeDef & { level: number }
+
+const prestigeInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('prestige.info.points.title'),
+        icon: 'mdi:star-circle',
+        entries: [
+            { term: t('prestige.info.points.formula'), desc: t('prestige.info.points.formula_desc') },
+            { term: t('prestige.info.points.threshold'), desc: t('prestige.info.points.threshold_desc') },
+        ],
+    },
+    {
+        title: t('prestige.info.rebirth.title'),
+        icon: 'mdi:refresh',
+        entries: [
+            { term: t('prestige.info.rebirth.resets'), desc: t('prestige.info.rebirth.resets_desc') },
+            { term: t('prestige.info.rebirth.keeps'), desc: t('prestige.info.rebirth.keeps_desc') },
+            { term: t('prestige.info.rebirth.starting_bonuses'), desc: t('prestige.info.rebirth.starting_bonuses_desc') },
+        ],
+    },
+    {
+        title: t('prestige.info.eras.title'),
+        icon: 'mdi:crown',
+        entries: [
+            { term: t('prestige.info.eras.progression'), desc: t('prestige.info.eras.progression_desc') },
+            { term: t('prestige.info.eras.bonus'), desc: t('prestige.info.eras.bonus_desc') },
+        ],
+    },
+    {
+        title: t('prestige.info.upgrades.title'),
+        icon: 'mdi:arrow-up-bold-circle',
+        entries: [
+            { term: t('prestige.info.upgrades.repeatable'), desc: t('prestige.info.upgrades.repeatable_desc') },
+            { term: t('prestige.info.upgrades.effects'), desc: t('prestige.info.upgrades.effects_desc') },
+            { term: t('prestige.info.upgrades.categories'), desc: t('prestige.info.upgrades.categories_desc') },
+        ],
+    },
+    {
+        title: t('prestige.info.perks.title'),
+        icon: 'mdi:gift',
+        entries: [
+            { term: t('prestige.info.perks.one_time'), desc: t('prestige.info.perks.one_time_desc') },
+            { term: t('prestige.info.perks.prerequisites'), desc: t('prestige.info.perks.prerequisites_desc') },
+            { term: t('prestige.info.perks.types'), desc: t('prestige.info.perks.types_desc') },
+        ],
+    },
+    {
+        title: t('prestige.info.milestones.title'),
+        icon: 'mdi:flag-checkered',
+        entries: [
+            { term: t('prestige.info.milestones.auto_unlock'), desc: t('prestige.info.milestones.auto_unlock_desc') },
+            { term: t('prestige.info.milestones.achievements'), desc: t('prestige.info.milestones.achievements_desc') },
+            { term: t('prestige.info.milestones.divine'), desc: t('prestige.info.milestones.divine_desc') },
+        ],
+    },
+])
 
 // ─── Computed ───────────────────────────────────────────────────
 const pendingPoints = computed(() => prestige.previewPointsGain(player.totalCashEarned))
@@ -357,7 +413,8 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
         </Tabs>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('prestige.info_title')" :description="$t('prestige.info_desc')" />
+        <InfoPanel :title="$t('prestige.info_title')" :description="$t('prestige.info_desc')"
+            :sections="prestigeInfoSections" />
     </div>
 </template>
 

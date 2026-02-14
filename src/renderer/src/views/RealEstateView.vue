@@ -13,6 +13,8 @@ import ImprovementShop from '@renderer/components/realestate/ImprovementShop.vue
 import PropertyCustomizer from '@renderer/components/realestate/PropertyCustomizer.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import Dialog from 'primevue/dialog'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
@@ -59,6 +61,81 @@ function handleSold(): void {
 function handleOpenImprovements(): void {
     showImprovements.value = true
 }
+
+const realEstateInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('realestate.info.basics.title'),
+        icon: 'mdi:home-outline',
+        entries: [
+            { term: t('realestate.info.basics.units'), desc: t('realestate.info.basics.units_desc'), icon: 'mdi:door-open' },
+            { term: t('realestate.info.basics.category'), desc: t('realestate.info.basics.category_desc'), icon: 'mdi:shape-outline' },
+            { term: t('realestate.info.basics.base_rent'), desc: t('realestate.info.basics.base_rent_desc'), icon: 'mdi:cash' },
+            { term: t('realestate.info.basics.current_value'), desc: t('realestate.info.basics.current_value_desc'), icon: 'mdi:tag-text-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.condition.title'),
+        icon: 'mdi:wrench-outline',
+        entries: [
+            { term: t('realestate.info.condition.condition'), desc: t('realestate.info.condition.condition_desc'), icon: 'mdi:gauge' },
+            { term: t('realestate.info.condition.wear_rate'), desc: t('realestate.info.condition.wear_rate_desc'), icon: 'mdi:trending-down' },
+            { term: t('realestate.info.condition.repair'), desc: t('realestate.info.condition.repair_desc'), icon: 'mdi:hammer-wrench' },
+            { term: t('realestate.info.condition.low_condition_penalty'), desc: t('realestate.info.condition.low_condition_penalty_desc'), icon: 'mdi:alert-circle-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.occupancy.title'),
+        icon: 'mdi:account-group-outline',
+        entries: [
+            { term: t('realestate.info.occupancy.formula'), desc: t('realestate.info.occupancy.formula_desc'), icon: 'mdi:function-variant' },
+            { term: t('realestate.info.occupancy.condition_factor'), desc: t('realestate.info.occupancy.condition_factor_desc'), icon: 'mdi:wrench' },
+            { term: t('realestate.info.occupancy.price_factor'), desc: t('realestate.info.occupancy.price_factor_desc'), icon: 'mdi:currency-usd' },
+            { term: t('realestate.info.occupancy.economy_factor'), desc: t('realestate.info.occupancy.economy_factor_desc'), icon: 'mdi:earth' },
+            { term: t('realestate.info.occupancy.renovation_bonus'), desc: t('realestate.info.occupancy.renovation_bonus_desc'), icon: 'mdi:arrow-up-bold-circle' },
+        ],
+    },
+    {
+        title: t('realestate.info.financials.title'),
+        icon: 'mdi:calculator',
+        entries: [
+            { term: t('realestate.info.financials.gross_rent'), desc: t('realestate.info.financials.gross_rent_desc'), icon: 'mdi:cash-plus' },
+            { term: t('realestate.info.financials.maintenance'), desc: t('realestate.info.financials.maintenance_desc'), icon: 'mdi:tools' },
+            { term: t('realestate.info.financials.property_tax'), desc: t('realestate.info.financials.property_tax_desc'), icon: 'mdi:file-document-outline' },
+            { term: t('realestate.info.financials.insurance'), desc: t('realestate.info.financials.insurance_desc'), icon: 'mdi:shield-check-outline' },
+            { term: t('realestate.info.financials.net_income'), desc: t('realestate.info.financials.net_income_desc'), icon: 'mdi:scale-balance' },
+        ],
+    },
+    {
+        title: t('realestate.info.controls.title'),
+        icon: 'mdi:tune-vertical',
+        entries: [
+            { term: t('realestate.info.controls.rent_multiplier'), desc: t('realestate.info.controls.rent_multiplier_desc'), icon: 'mdi:knob' },
+            { term: t('realestate.info.controls.renovate'), desc: t('realestate.info.controls.renovate_desc'), icon: 'mdi:hammer' },
+            { term: t('realestate.info.controls.renovation_cost'), desc: t('realestate.info.controls.renovation_cost_desc'), icon: 'mdi:cash-fast' },
+            { term: t('realestate.info.controls.repair'), desc: t('realestate.info.controls.repair_desc'), icon: 'mdi:hammer-wrench' },
+            { term: t('realestate.info.controls.sell'), desc: t('realestate.info.controls.sell_desc'), icon: 'mdi:home-export-outline' },
+            { term: t('realestate.info.controls.rename'), desc: t('realestate.info.controls.rename_desc'), icon: 'mdi:pencil-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.market_value.title'),
+        icon: 'mdi:chart-line',
+        entries: [
+            { term: t('realestate.info.market_value.appreciation'), desc: t('realestate.info.market_value.appreciation_desc'), icon: 'mdi:trending-up' },
+            { term: t('realestate.info.market_value.economy_multiplier'), desc: t('realestate.info.market_value.economy_multiplier_desc'), icon: 'mdi:earth' },
+            { term: t('realestate.info.market_value.value_floor'), desc: t('realestate.info.market_value.value_floor_desc'), icon: 'mdi:shield-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.details.title'),
+        icon: 'mdi:information-outline',
+        entries: [
+            { term: t('realestate.info.details.purchase_price'), desc: t('realestate.info.details.purchase_price_desc'), icon: 'mdi:receipt' },
+            { term: t('realestate.info.details.base_stats'), desc: t('realestate.info.details.base_stats_desc'), icon: 'mdi:format-list-numbered' },
+            { term: t('realestate.info.details.lifetime_totals'), desc: t('realestate.info.details.lifetime_totals_desc'), icon: 'mdi:sigma' },
+        ],
+    },
+])
 </script>
 
 <template>
@@ -115,7 +192,7 @@ function handleOpenImprovements(): void {
                 <AppIcon icon="mdi:briefcase-outline" />
                 <span>{{ t('realestate.tab.portfolio') }}</span>
                 <span v-if="realEstate.properties.length > 0" class="tab-badge">{{ realEstate.properties.length
-                }}</span>
+                    }}</span>
             </button>
         </div>
 
@@ -172,6 +249,10 @@ function handleOpenImprovements(): void {
                     @open-improvements="selectedPropertyId = prop.id; handleOpenImprovements()" />
             </div>
         </section>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="t('realestate.info_title')" :description="t('realestate.info_desc')"
+            :sections="realEstateInfoSections" />
 
         <!-- Dialogs -->
         <Dialog v-model:visible="showImprovements" :header="t('realestate.improvement_shop')" modal

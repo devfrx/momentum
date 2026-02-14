@@ -13,11 +13,14 @@ import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import { useI18n } from 'vue-i18n'
 
 const stocks = useStockStore()
 const player = usePlayerStore()
 const settings = useSettingsStore()
 const { formatCash, formatPercent } = useFormat()
+const { t } = useI18n()
 
 const showCharts = ref(true)
 const pinnedAssetId = computed({
@@ -67,6 +70,66 @@ function handleBuy(assetId: string, amount: number) {
 function handleSell(assetId: string, amount: number) {
     stocks.sellShares(assetId, amount)
 }
+
+const stockInfoSections = computed<InfoSection[]>(() => [
+    {
+        title: t('stocks.info.trading.title'),
+        icon: 'mdi:swap-horizontal',
+        entries: [
+            { term: t('stocks.info.trading.buy'), desc: t('stocks.info.trading.buy_desc'), icon: 'mdi:cart-arrow-down' },
+            { term: t('stocks.info.trading.sell'), desc: t('stocks.info.trading.sell_desc'), icon: 'mdi:cart-arrow-up' },
+            { term: t('stocks.info.trading.xp'), desc: t('stocks.info.trading.xp_desc'), icon: 'mdi:star-circle' },
+        ],
+    },
+    {
+        title: t('stocks.info.portfolio.title'),
+        icon: 'mdi:briefcase-outline',
+        entries: [
+            { term: t('stocks.info.portfolio.positions'), desc: t('stocks.info.portfolio.positions_desc'), icon: 'mdi:format-list-bulleted' },
+            { term: t('stocks.info.portfolio.unrealized'), desc: t('stocks.info.portfolio.unrealized_desc'), icon: 'mdi:chart-line-variant' },
+            { term: t('stocks.info.portfolio.realized'), desc: t('stocks.info.portfolio.realized_desc'), icon: 'mdi:check-decagram' },
+        ],
+    },
+    {
+        title: t('stocks.info.charts.title'),
+        icon: 'mdi:chart-areaspline',
+        entries: [
+            { term: t('stocks.info.charts.pin'), desc: t('stocks.info.charts.pin_desc'), icon: 'mdi:pin' },
+            { term: t('stocks.info.charts.ath_atl'), desc: t('stocks.info.charts.ath_atl_desc'), icon: 'mdi:arrow-expand-vertical' },
+            { term: t('stocks.info.charts.toggle'), desc: t('stocks.info.charts.toggle_desc'), icon: 'mdi:eye-outline' },
+        ],
+    },
+    {
+        title: t('stocks.info.price_model.title'),
+        icon: 'mdi:function-variant',
+        entries: [
+            { term: t('stocks.info.price_model.gbm'), desc: t('stocks.info.price_model.gbm_desc'), icon: 'mdi:sigma' },
+            { term: t('stocks.info.price_model.drift'), desc: t('stocks.info.price_model.drift_desc'), icon: 'mdi:trending-up' },
+            { term: t('stocks.info.price_model.volatility'), desc: t('stocks.info.price_model.volatility_desc'), icon: 'mdi:pulse' },
+        ],
+    },
+    {
+        title: t('stocks.info.conditions.title'),
+        icon: 'mdi:weather-partly-cloudy',
+        entries: [
+            { term: t('stocks.info.conditions.normal'), desc: t('stocks.info.conditions.normal_desc'), icon: 'mdi:minus-circle-outline' },
+            { term: t('stocks.info.conditions.bull'), desc: t('stocks.info.conditions.bull_desc'), icon: 'mdi:bull' },
+            { term: t('stocks.info.conditions.bear'), desc: t('stocks.info.conditions.bear_desc'), icon: 'mdi:arrow-down-bold' },
+            { term: t('stocks.info.conditions.crash'), desc: t('stocks.info.conditions.crash_desc'), icon: 'mdi:alert-octagon' },
+            { term: t('stocks.info.conditions.bubble'), desc: t('stocks.info.conditions.bubble_desc'), icon: 'mdi:rocket-launch' },
+        ],
+    },
+    {
+        title: t('stocks.info.dividends.title'),
+        icon: 'mdi:currency-usd',
+        entries: [
+            { term: t('stocks.info.dividends.yield'), desc: t('stocks.info.dividends.yield_desc'), icon: 'mdi:percent' },
+            { term: t('stocks.info.dividends.payout'), desc: t('stocks.info.dividends.payout_desc'), icon: 'mdi:clock-outline' },
+            { term: t('stocks.info.dividends.multiplier'), desc: t('stocks.info.dividends.multiplier_desc'), icon: 'mdi:multiplication' },
+            { term: t('stocks.info.dividends.total'), desc: t('stocks.info.dividends.total_desc'), icon: 'mdi:cash-multiple' },
+        ],
+    },
+])
 </script>
 
 <template>
@@ -90,7 +153,8 @@ function handleSell(assetId: string, amount: number) {
 
         <!-- Stats Bar -->
         <MarketStats :portfolio-value="stocks.totalPortfolioValue" :unrealized-profit="stocks.unrealizedProfit"
-            :realized-profit="stocks.totalRealizedProfit" :position-count="stocks.portfolio.length" type="stock" />
+            :realized-profit="stocks.totalRealizedProfit" :dividends-earned="stocks.totalDividendsEarned"
+            :position-count="stocks.portfolio.length" type="stock" />
 
         <!-- Pinned / Focus Asset -->
         <section v-if="pinnedAsset" class="pinned-section">
@@ -151,7 +215,8 @@ function handleSell(assetId: string, amount: number) {
         </div>
 
         <!-- Info Panel -->
-        <InfoPanel :title="$t('stocks.info_title')" :description="$t('stocks.info_desc')" />
+        <InfoPanel :title="$t('stocks.info_title')" :description="$t('stocks.info_desc')"
+            :sections="stockInfoSections" />
     </div>
 </template>
 
