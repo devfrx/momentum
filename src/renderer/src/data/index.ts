@@ -168,18 +168,23 @@ export type {
 
 // ─── Storage Wars ───────────────────────────────────────────────
 export {
-  STORAGE_LOCATIONS,
-  getLocation,
+  findLocationInPool,
   getUnlockedLocations,
   ITEM_POOL,
   generateUnitContents,
   calculateTotalItemsValue,
+  applySellTax,
   APPRAISER_DEFS,
   getAppraiser,
   AUCTION_CONFIG,
   generateAuction,
   generateAuctionBatch,
   calculateBidderBehavior,
+  generateLocationPool,
+  generateLocation,
+  regenerateTierLocations,
+  TIER_ORDER,
+  getTierUnlockAt,
 } from './storage'
 export type {
   StorageLocation,

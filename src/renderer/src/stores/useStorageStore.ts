@@ -2,8 +2,8 @@
  * useStorageStore — Storage Wars auction state and operations
  *
  * Manages storage unit auctions, inventory of won items, appraisal,
- * and selling mechanics. Follows the same Pinia composition API pattern
- * as other stores in the application.
+ * selling mechanics, procedural locations, and session P&L tracking.
+ * Follows the same Pinia composition API pattern as other stores.
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
@@ -12,18 +12,29 @@ import { D, ZERO, add, sub, mul, max } from '@renderer/core/BigNum'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import {
-  STORAGE_LOCATIONS,
-  getUnlockedLocations,
   generateAuction,
   calculateBidderBehavior,
+  allBiddersDropped,
   AUCTION_CONFIG,
   APPRAISER_DEFS,
   type StorageAuction,
   type StorageItem,
-  type StorageLocation,
   type AuctionBidder,
   type AppraiserDef,
 } from '@renderer/data/storage'
+import {
+  type StorageLocation,
+  getUnlockedLocations,
+  findLocationInPool,
+} from '@renderer/data/storage/locations'
+import { generateLocationPool } from '@renderer/data/storage/locationGen'
+import { applySellTax } from '@renderer/data/storage/items'
+import {
+  SELL_TAX,
+  INVENTORY_SOFT_CAP,
+  STORAGE_FEE_PER_ITEM,
+  LOCATION_RESHUFFLE_TICKS,
+} from '@renderer/data/storage/balance'
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -44,6 +55,39 @@ export interface AuctionHistoryEntry {
   tick: number
 }
 
+/** Per-session profit & loss tracker (resets on page reload or manual reset). */
+export interface SessionPnL {
+  /** Total cash spent on entry fees */
+  entryFees: Decimal
+  /** Total cash spent on auction bids (won auctions) */
+  bidSpend: Decimal
+  /** Total cash spent on appraisals */
+  appraisalSpend: Decimal
+  /** Total cash spent on storage fees */
+  storageFees: Decimal
+  /** Total cash received from selling items */
+  saleRevenue: Decimal
+  /** Number of auctions entered */
+  auctionsEntered: number
+  /** Number of auctions won */
+  auctionsWon: number
+  /** Number of items sold */
+  itemsSold: number
+}
+
+function freshSessionPnL(): SessionPnL {
+  return {
+    entryFees: ZERO,
+    bidSpend: ZERO,
+    appraisalSpend: ZERO,
+    storageFees: ZERO,
+    saleRevenue: ZERO,
+    auctionsEntered: 0,
+    auctionsWon: 0,
+    itemsSold: 0,
+  }
+}
+
 // ─── Store ──────────────────────────────────────────────────────
 
 export const useStorageStore = defineStore('storage', () => {
@@ -51,14 +95,20 @@ export const useStorageStore = defineStore('storage', () => {
   const availableAuctions = ref<StorageAuction[]>([])
   const activeAuction = ref<StorageAuction | null>(null)
 
+  // ── Procedural Locations ───────────────────────────────────
+  const locationPool = ref<StorageLocation[]>(generateLocationPool())
+  const lastLocationReshuffle = ref(0)
+
   // ── Inventory ──────────────────────────────────────────────
   const inventory = ref<InventoryItem[]>([])
 
-  // ── Statistics ─────────────────────────────────────────────
+  // ── Lifetime Statistics ────────────────────────────────────
   const totalAuctionsWon = ref(0)
   const totalAuctionsLost = ref(0)
   const totalSpentOnAuctions = ref<Decimal>(ZERO)
   const totalSpentOnAppraisals = ref<Decimal>(ZERO)
+  const totalSpentOnEntryFees = ref<Decimal>(ZERO)
+  const totalSpentOnStorageFees = ref<Decimal>(ZERO)
   const totalItemsSold = ref(0)
   const totalSaleRevenue = ref<Decimal>(ZERO)
   const totalProfit = ref<Decimal>(ZERO)
@@ -66,13 +116,18 @@ export const useStorageStore = defineStore('storage', () => {
   const biggestFlip = ref<Decimal>(ZERO)
   const auctionHistory = ref<AuctionHistoryEntry[]>([])
 
+  // ── Session P&L ────────────────────────────────────────────
+  const session = ref<SessionPnL>(freshSessionPnL())
+
   // ── Timing ─────────────────────────────────────────────────
   const lastRefreshTick = ref(0)
 
   // ── Computed ───────────────────────────────────────────────
+
+  /** Locations the player can currently access (cash ≥ unlockAt). */
   const unlockedLocations = computed((): StorageLocation[] => {
     const player = usePlayerStore()
-    return getUnlockedLocations(player.cash)
+    return getUnlockedLocations(locationPool.value, player.cash)
   })
 
   const inventoryValue = computed((): Decimal => {
@@ -85,12 +140,48 @@ export const useStorageStore = defineStore('storage', () => {
 
   const inventoryCount = computed(() => inventory.value.length)
 
-  const netProfit = computed(() => sub(totalSaleRevenue.value, add(totalSpentOnAuctions.value, totalSpentOnAppraisals.value)))
+  const netProfit = computed(() =>
+    sub(
+      totalSaleRevenue.value,
+      add(add(totalSpentOnAuctions.value, totalSpentOnAppraisals.value),
+        add(totalSpentOnEntryFees.value, totalSpentOnStorageFees.value)),
+    ),
+  )
+
+  /** Session net P&L (revenue − all costs). */
+  const sessionNet = computed((): Decimal =>
+    sub(
+      session.value.saleRevenue,
+      add(add(session.value.entryFees, session.value.bidSpend),
+        add(session.value.appraisalSpend, session.value.storageFees)),
+    ),
+  )
+
+  /** Session total costs. */
+  const sessionTotalCost = computed((): Decimal =>
+    add(add(session.value.entryFees, session.value.bidSpend),
+      add(session.value.appraisalSpend, session.value.storageFees)),
+  )
 
   const unlockedAppraisers = computed((): AppraiserDef[] => {
     const player = usePlayerStore()
     return APPRAISER_DEFS.filter(a => player.level >= a.unlockLevel)
   })
+
+  /** Current sell tax rate as a display string. */
+  const sellTaxPercent = computed(() => Math.round(SELL_TAX * 100))
+
+  // ── Location Helpers ───────────────────────────────────────
+
+  /** Look up a location by id from the current pool. */
+  function getLocation(id: string): StorageLocation | undefined {
+    return findLocationInPool(locationPool.value, id)
+  }
+
+  /** Force-regenerate the entire location pool. */
+  function reshuffleLocations(): void {
+    locationPool.value = generateLocationPool()
+  }
 
   // ── Tick ───────────────────────────────────────────────────
 
@@ -99,6 +190,12 @@ export const useStorageStore = defineStore('storage', () => {
     if (currentTick - lastRefreshTick.value >= AUCTION_CONFIG.refreshTicks || availableAuctions.value.length === 0) {
       refreshAuctions(currentTick)
       lastRefreshTick.value = currentTick
+    }
+
+    // Reshuffle location pool periodically
+    if (currentTick - lastLocationReshuffle.value >= LOCATION_RESHUFFLE_TICKS) {
+      reshuffleLocations()
+      lastLocationReshuffle.value = currentTick
     }
 
     // Process active auction rounds
@@ -111,6 +208,24 @@ export const useStorageStore = defineStore('storage', () => {
     availableAuctions.value = availableAuctions.value.filter(
       a => a.status === 'available' && (currentTick - a.availableAtTick) < expireThreshold
     )
+
+    // Storage fees for over-capacity inventory (charged each refresh)
+    if (currentTick - lastRefreshTick.value === 0 && inventory.value.length > INVENTORY_SOFT_CAP) {
+      chargeStorageFees()
+    }
+  }
+
+  /** Charge storage fees for items exceeding soft cap. */
+  function chargeStorageFees(): void {
+    const excess = inventory.value.length - INVENTORY_SOFT_CAP
+    if (excess <= 0) return
+    const fee = D(excess * STORAGE_FEE_PER_ITEM)
+    const player = usePlayerStore()
+    if (player.cash.gte(fee)) {
+      player.spendCash(fee)
+      totalSpentOnStorageFees.value = add(totalSpentOnStorageFees.value, fee)
+      session.value.storageFees = add(session.value.storageFees, fee)
+    }
   }
 
   // ── Auction Refresh ────────────────────────────────────────
@@ -145,7 +260,7 @@ export const useStorageStore = defineStore('storage', () => {
     if (!auction || auction.status !== 'available') return false
 
     const player = usePlayerStore()
-    const location = STORAGE_LOCATIONS.find(l => l.id === auction.locationId)
+    const location = getLocation(auction.locationId)
     if (!location) return false
 
     // Check entry fee
@@ -153,6 +268,9 @@ export const useStorageStore = defineStore('storage', () => {
 
     // Pay entry fee
     player.spendCash(location.entryFee)
+    totalSpentOnEntryFees.value = add(totalSpentOnEntryFees.value, location.entryFee)
+    session.value.entryFees = add(session.value.entryFees, location.entryFee)
+    session.value.auctionsEntered++
 
     auction.status = 'active'
     auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
@@ -170,26 +288,47 @@ export const useStorageStore = defineStore('storage', () => {
   function placeBid(amount: Decimal): boolean {
     if (!activeAuction.value || activeAuction.value.status !== 'active') return false
     const player = usePlayerStore()
+    const auction = activeAuction.value
 
-    const minBid = activeAuction.value.currentBid.add(activeAuction.value.bidIncrement)
+    const minBid = auction.currentBid.add(auction.bidIncrement)
     if (amount.lt(minBid)) return false
     if (player.cash.lt(amount)) return false
 
-    activeAuction.value.currentBid = amount
-    activeAuction.value.currentBidder = 'player'
+    auction.currentBid = amount
+    auction.currentBidder = 'player'
 
     // Trigger NPC responses
-    processNpcBids()
+    const anyNpcBid = processNpcBids()
+    auction.roundsElapsed++
+
+    // If all NPCs out → enter going phases immediately
+    if (allBiddersDropped(auction.bidders)) {
+      auction.phase = 'going_once'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+    } else if (!anyNpcBid) {
+      // NPCs still active but none bid → stay in bidding, shorter timer
+      auction.phase = 'bidding'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
+    } else {
+      // NPCs responded → reset bidding round
+      auction.phase = 'bidding'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
+    }
 
     return true
   }
 
   // ── NPC Bidding ────────────────────────────────────────────
 
-  function processNpcBids(): void {
-    if (!activeAuction.value) return
+  /**
+   * Let each active NPC decide whether to bid or drop out.
+   * Returns true if any NPC placed a bid this round.
+   */
+  function processNpcBids(): boolean {
+    if (!activeAuction.value) return false
 
     const auction = activeAuction.value
+    let anyNpcBid = false
     let highestNpcBid: Decimal = ZERO
     let highestNpcBidder: AuctionBidder | null = null
 
@@ -208,6 +347,7 @@ export const useStorageStore = defineStore('storage', () => {
         continue
       }
 
+      anyNpcBid = true
       if (npcBid.gt(highestNpcBid)) {
         highestNpcBid = npcBid
         highestNpcBidder = bidder
@@ -221,8 +361,7 @@ export const useStorageStore = defineStore('storage', () => {
       highestNpcBidder.currentBid = highestNpcBid
     }
 
-    auction.roundsElapsed++
-    auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
+    return anyNpcBid
   }
 
   // ── Process Auction Tick (countdown) ───────────────────────
@@ -233,15 +372,80 @@ export const useStorageStore = defineStore('storage', () => {
 
     auction.roundTicksLeft--
 
-    // If timer expires for this round
+    // Phase timer expired
     if (auction.roundTicksLeft <= 0) {
-      // If nobody bid ever or max rounds reached → close
-      if (auction.roundsElapsed >= AUCTION_CONFIG.maxRounds || auction.currentBidder === '') {
-        closeAuction()
+      if (auction.phase === 'bidding') {
+        handleBiddingRoundEnd()
       } else {
-        // Auto-advance: NPCs may bid even without player
-        processNpcBids()
+        advanceGoingPhase()
       }
+    }
+  }
+
+  /**
+   * Handle the end of a normal bidding round.
+   * Transitions to going phases when no contest remains.
+   */
+  function handleBiddingRoundEnd(): void {
+    const auction = activeAuction.value!
+
+    // Nobody ever bid → close
+    if (auction.currentBidder === '') {
+      closeAuction()
+      return
+    }
+
+    // Max rounds reached → close
+    if (auction.roundsElapsed >= AUCTION_CONFIG.maxRounds) {
+      closeAuction()
+      return
+    }
+
+    // Let NPCs decide
+    const anyNpcBid = processNpcBids()
+    auction.roundsElapsed++
+
+    // All NPCs out and someone leads → going phases
+    if (allBiddersDropped(auction.bidders) && auction.currentBidder !== '') {
+      auction.phase = 'going_once'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+      return
+    }
+
+    // No NPC bid but some are still active → shorter wait
+    // (they might bid next round)
+    if (!anyNpcBid && auction.currentBidder !== '') {
+      // If player leads and NPCs passed, fast-track to going
+      const activeNpcs = auction.bidders.filter(b => !b.droppedOut)
+      if (activeNpcs.length === 0) {
+        auction.phase = 'going_once'
+        auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+        return
+      }
+    }
+
+    // Continue normal bidding
+    auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
+  }
+
+  /**
+   * Advance through going_once → going_twice → final_call → close.
+   */
+  function advanceGoingPhase(): void {
+    const auction = activeAuction.value!
+
+    switch (auction.phase) {
+      case 'going_once':
+        auction.phase = 'going_twice'
+        auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+        break
+      case 'going_twice':
+        auction.phase = 'final_call'
+        auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+        break
+      case 'final_call':
+        closeAuction()
+        break
     }
   }
 
@@ -259,6 +463,8 @@ export const useStorageStore = defineStore('storage', () => {
       auction.status = 'won'
       totalAuctionsWon.value++
       totalSpentOnAuctions.value = add(totalSpentOnAuctions.value, auction.currentBid)
+      session.value.bidSpend = add(session.value.bidSpend, auction.currentBid)
+      session.value.auctionsWon++
 
       // Add items to inventory
       for (const item of auction.items) {
@@ -333,6 +539,7 @@ export const useStorageStore = defineStore('storage', () => {
     // Pay appraisal fee
     player.spendCash(appraiser.costPerItem)
     totalSpentOnAppraisals.value = add(totalSpentOnAppraisals.value, appraiser.costPerItem)
+    session.value.appraisalSpend = add(session.value.appraisalSpend, appraiser.costPerItem)
 
     // Calculate appraised value based on accuracy
     const accuracyVariance = 1.0 - appraiser.accuracy
@@ -372,16 +579,21 @@ export const useStorageStore = defineStore('storage', () => {
     if (idx === -1) return null
 
     const item = inventory.value[idx]
-    const value = item.appraisedValue ?? item.baseValue
+    const rawValue = item.appraisedValue ?? item.baseValue
     const player = usePlayerStore()
+
+    // Apply sell tax (un-appraised items pay extra penalty)
+    const afterTax = applySellTax(rawValue, item.appraised)
 
     // Apply sell multiplier from upgrades
     const sellMul = getSellMultiplier()
-    const finalValue = mul(value, sellMul)
+    const finalValue = mul(afterTax, sellMul)
 
     player.earnCash(finalValue)
     totalItemsSold.value++
     totalSaleRevenue.value = add(totalSaleRevenue.value, finalValue)
+    session.value.saleRevenue = add(session.value.saleRevenue, finalValue)
+    session.value.itemsSold++
 
     // Track profit
     const profit = finalValue
@@ -425,16 +637,26 @@ export const useStorageStore = defineStore('storage', () => {
     return upgrades.getMultiplier('all_income')
   }
 
+  // ── Session Reset ───────────────────────────────────────────
+
+  function resetSession(): void {
+    session.value = freshSessionPnL()
+  }
+
   // ── Prestige Reset ─────────────────────────────────────────
 
   function prestigeReset(): void {
     availableAuctions.value = []
     activeAuction.value = null
     inventory.value = []
+    locationPool.value = generateLocationPool()
+    lastLocationReshuffle.value = 0
     totalAuctionsWon.value = 0
     totalAuctionsLost.value = 0
     totalSpentOnAuctions.value = ZERO
     totalSpentOnAppraisals.value = ZERO
+    totalSpentOnEntryFees.value = ZERO
+    totalSpentOnStorageFees.value = ZERO
     totalItemsSold.value = 0
     totalSaleRevenue.value = ZERO
     totalProfit.value = ZERO
@@ -442,6 +664,7 @@ export const useStorageStore = defineStore('storage', () => {
     biggestFlip.value = ZERO
     auctionHistory.value = []
     lastRefreshTick.value = 0
+    resetSession()
   }
 
   function fullReset(): void {
@@ -452,10 +675,13 @@ export const useStorageStore = defineStore('storage', () => {
 
   function loadFromSave(data: Record<string, any>): void {
     if (data.inventory) inventory.value = data.inventory
+    if (data.locationPool) locationPool.value = data.locationPool
     if (data.totalAuctionsWon !== undefined) totalAuctionsWon.value = data.totalAuctionsWon
     if (data.totalAuctionsLost !== undefined) totalAuctionsLost.value = data.totalAuctionsLost
     if (data.totalSpentOnAuctions !== undefined) totalSpentOnAuctions.value = data.totalSpentOnAuctions
     if (data.totalSpentOnAppraisals !== undefined) totalSpentOnAppraisals.value = data.totalSpentOnAppraisals
+    if (data.totalSpentOnEntryFees !== undefined) totalSpentOnEntryFees.value = data.totalSpentOnEntryFees
+    if (data.totalSpentOnStorageFees !== undefined) totalSpentOnStorageFees.value = data.totalSpentOnStorageFees
     if (data.totalItemsSold !== undefined) totalItemsSold.value = data.totalItemsSold
     if (data.totalSaleRevenue !== undefined) totalSaleRevenue.value = data.totalSaleRevenue
     if (data.totalProfit !== undefined) totalProfit.value = data.totalProfit
@@ -463,6 +689,8 @@ export const useStorageStore = defineStore('storage', () => {
     if (data.biggestFlip !== undefined) biggestFlip.value = data.biggestFlip
     if (data.auctionHistory !== undefined) auctionHistory.value = data.auctionHistory
     if (data.lastRefreshTick !== undefined) lastRefreshTick.value = data.lastRefreshTick
+    if (data.lastLocationReshuffle !== undefined) lastLocationReshuffle.value = data.lastLocationReshuffle
+    // Session is intentionally NOT loaded — it resets each page load
   }
 
   function exportState(): Record<string, unknown> {
@@ -481,10 +709,13 @@ export const useStorageStore = defineStore('storage', () => {
         auctionId: i.auctionId,
         acquiredAtTick: i.acquiredAtTick,
       })),
+      locationPool: locationPool.value,
       totalAuctionsWon: totalAuctionsWon.value,
       totalAuctionsLost: totalAuctionsLost.value,
       totalSpentOnAuctions: totalSpentOnAuctions.value,
       totalSpentOnAppraisals: totalSpentOnAppraisals.value,
+      totalSpentOnEntryFees: totalSpentOnEntryFees.value,
+      totalSpentOnStorageFees: totalSpentOnStorageFees.value,
       totalItemsSold: totalItemsSold.value,
       totalSaleRevenue: totalSaleRevenue.value,
       totalProfit: totalProfit.value,
@@ -492,6 +723,7 @@ export const useStorageStore = defineStore('storage', () => {
       biggestFlip: biggestFlip.value,
       auctionHistory: auctionHistory.value,
       lastRefreshTick: lastRefreshTick.value,
+      lastLocationReshuffle: lastLocationReshuffle.value,
     }
   }
 
@@ -500,10 +732,13 @@ export const useStorageStore = defineStore('storage', () => {
     availableAuctions,
     activeAuction,
     inventory,
+    locationPool,
     totalAuctionsWon,
     totalAuctionsLost,
     totalSpentOnAuctions,
     totalSpentOnAppraisals,
+    totalSpentOnEntryFees,
+    totalSpentOnStorageFees,
     totalItemsSold,
     totalSaleRevenue,
     totalProfit,
@@ -511,16 +746,22 @@ export const useStorageStore = defineStore('storage', () => {
     biggestFlip,
     auctionHistory,
     lastRefreshTick,
+    session,
 
     // Computed
     unlockedLocations,
     inventoryValue,
     inventoryCount,
     netProfit,
+    sessionNet,
+    sessionTotalCost,
     unlockedAppraisers,
+    sellTaxPercent,
 
     // Actions
     tick,
+    getLocation,
+    reshuffleLocations,
     refreshAuctions,
     startAuction,
     placeBid,
@@ -532,6 +773,7 @@ export const useStorageStore = defineStore('storage', () => {
     sellAll,
     getLuckBonus,
     getSellMultiplier,
+    resetSession,
     prestigeReset,
     fullReset,
     loadFromSave,

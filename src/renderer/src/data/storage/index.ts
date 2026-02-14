@@ -6,8 +6,7 @@
  */
 
 export {
-  STORAGE_LOCATIONS,
-  getLocation,
+  findLocationInPool,
   getUnlockedLocations,
   type StorageLocation,
   type LocationTier,
@@ -17,6 +16,7 @@ export {
   ITEM_POOL,
   generateUnitContents,
   calculateTotalItemsValue,
+  applySellTax,
   type StorageItem,
   type ItemCategory,
 } from './items'
@@ -33,8 +33,30 @@ export {
   generateAuction,
   generateAuctionBatch,
   calculateBidderBehavior,
+  allBiddersDropped,
   type StorageAuction,
   type AuctionStatus,
+  type AuctionPhase,
   type BidderPersonality,
   type AuctionBidder,
+  type LotTheme,
 } from './auctions'
+
+export {
+  generateLocationPool,
+  generateLocation,
+  regenerateTierLocations,
+  TIER_ORDER,
+  getTierUnlockAt,
+} from './locationGen'
+
+export {
+  SELL_TAX,
+  UNAPPRAISED_SELL_PENALTY,
+  JUNK_OVERRIDE_CHANCE,
+  DUD_UNIT_CHANCE,
+  NPC_AGGRESSION_MULT,
+  NPC_MIN_CEILING_FRAC,
+  INVENTORY_SOFT_CAP,
+  STORAGE_FEE_PER_ITEM,
+} from './balance'

@@ -8,7 +8,7 @@ import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
-import { AuctionCard, AuctionBidding, InventoryPanel, StorageStats } from '@renderer/components/storage'
+import { AuctionCard, AuctionBidding, InventoryPanel, StorageStats, SessionPnL } from '@renderer/components/storage'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -83,6 +83,9 @@ const infoSections = computed(() => [
 
             <!-- Stats Ribbon -->
             <StorageStats />
+
+            <!-- Session P&L -->
+            <SessionPnL />
 
             <!-- Tab Navigation -->
             <div class="tab-bar">

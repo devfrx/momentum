@@ -16,7 +16,9 @@ const stats = computed(() => [
     { label: t('storage.auctions_won'), value: formatNumber(storage.totalAuctionsWon), icon: 'mdi:trophy', colorClass: 'positive' },
     { label: t('storage.items_sold'), value: formatNumber(storage.totalItemsSold), icon: 'mdi:tag-check' },
     { label: t('storage.revenue'), value: formatCash(storage.totalSaleRevenue), icon: 'mdi:cash-multiple', colorClass: 'positive' },
+    { label: t('storage.total_spent'), value: formatCash(storage.totalSpentOnAuctions.add(storage.totalSpentOnAppraisals).add(storage.totalSpentOnEntryFees).add(storage.totalSpentOnStorageFees)), icon: 'mdi:cash-minus', colorClass: 'negative' },
     { label: t('storage.net_profit_label'), value: formatCash(storage.netProfit), icon: 'mdi:chart-line', colorClass: storage.netProfit.gte(0) ? 'positive' : 'negative' },
+    { label: t('storage.sell_tax_label'), value: `${storage.sellTaxPercent}%`, icon: 'mdi:percent' },
     { label: t('storage.biggest_flip'), value: formatCash(storage.biggestFlip), icon: 'mdi:star-shooting' },
 ])
 </script>

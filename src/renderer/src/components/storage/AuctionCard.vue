@@ -7,7 +7,7 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import { STORAGE_LOCATIONS } from '@renderer/data/storage'
+import { useStorageStore } from '@renderer/stores/useStorageStore'
 import type { StorageAuction } from '@renderer/data/storage'
 
 const props = defineProps<{
@@ -18,8 +18,9 @@ defineEmits<{ bid: [auctionId: string] }>()
 
 const { formatCash } = useFormat()
 const { t } = useI18n()
+const storage = useStorageStore()
 
-const location = STORAGE_LOCATIONS.find(l => l.id === props.auction.locationId)
+const location = storage.getLocation(props.auction.locationId)
 </script>
 
 <template>
@@ -70,6 +71,7 @@ const location = STORAGE_LOCATIONS.find(l => l.id === props.auction.locationId)
     --_accent: #f59e0b;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: var(--t-space-3);
     padding: var(--t-space-4);
     background: var(--t-bg-card);

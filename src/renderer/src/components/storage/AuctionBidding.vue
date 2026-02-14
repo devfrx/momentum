@@ -12,7 +12,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { D, add } from '@renderer/core/BigNum'
-import { STORAGE_LOCATIONS } from '@renderer/data/storage'
+import { AUCTION_CONFIG } from '@renderer/data/storage'
 import { rarityCssVar } from '@renderer/data/rarity'
 
 defineEmits<{ back: [] }>()
@@ -24,7 +24,7 @@ const { t } = useI18n()
 
 const auction = computed(() => storage.activeAuction)
 const location = computed(() =>
-    auction.value ? STORAGE_LOCATIONS.find(l => l.id === auction.value!.locationId) : null
+    auction.value ? storage.getLocation(auction.value.locationId) : null
 )
 
 const bidMultipliers = [1, 2, 5, 10]
@@ -43,7 +43,22 @@ const isPlayerLeading = computed(() => auction.value?.currentBidder === 'player'
 
 const roundProgress = computed(() => {
     if (!auction.value) return 0
-    return ((50 - auction.value.roundTicksLeft) / 50) * 100
+    const maxTicks = auction.value.phase === 'bidding'
+        ? AUCTION_CONFIG.ticksPerRound
+        : AUCTION_CONFIG.ticksPerGoing
+    return ((maxTicks - auction.value.roundTicksLeft) / maxTicks) * 100
+})
+
+/** Current auction phase label */
+const auctionPhase = computed(() => auction.value?.phase ?? 'bidding')
+const isGoingPhase = computed(() => auctionPhase.value !== 'bidding')
+const phaseLabel = computed(() => {
+    switch (auctionPhase.value) {
+        case 'going_once': return t('storage.going_once')
+        case 'going_twice': return t('storage.going_twice')
+        case 'final_call': return t('storage.final_call')
+        default: return ''
+    }
 })
 
 function placeBid(): void {
@@ -69,13 +84,21 @@ function leave(): void {
                 </div>
             </div>
             <div class="bidding-header__right">
-                <span class="bidding-round">{{ t('storage.round_n', { n: auction.roundsElapsed }) }}</span>
+                <span class="bidding-round">{{ t('storage.round_n', { n: auction.roundsElapsed }) }} / {{ 10 }}</span>
             </div>
         </div>
 
         <!-- Timer Bar -->
         <div class="timer-bar">
-            <div class="timer-bar__fill" :style="{ width: roundProgress + '%' }"></div>
+            <div class="timer-bar__fill" :class="{ 'timer-bar__fill--going': isGoingPhase }"
+                :style="{ width: roundProgress + '%' }"></div>
+        </div>
+
+        <!-- Going Phase Banner -->
+        <div v-if="isGoingPhase && auction.status === 'active'" class="going-phase-banner"
+            :class="`going-phase-banner--${auctionPhase}`">
+            <AppIcon icon="mdi:gavel" class="going-icon" />
+            <span class="going-text">{{ phaseLabel }}</span>
         </div>
 
         <!-- Two-column layout: Auction info + Bidding controls -->
@@ -106,7 +129,7 @@ function leave(): void {
                             <div class="bidder-info">
                                 <span class="bidder-name">{{ bidder.name }}</span>
                                 <span class="bidder-status" v-if="bidder.droppedOut">{{ t('storage.dropped_out')
-                                    }}</span>
+                                }}</span>
                                 <span class="bidder-status bidder-status--leading"
                                     v-else-if="auction.currentBidder === bidder.id">{{ t('storage.leading') }}</span>
                             </div>
@@ -144,7 +167,7 @@ function leave(): void {
                     <Button :label="t('storage.place_bid')" icon="pi pi-dollar" size="large" :disabled="!canBid"
                         class="bid-button" @click="placeBid" />
 
-                    <Button :label="t('storage.leave_auction')" severity="secondary" text size="small" @click="leave"
+                    <Button :label="t('storage.leave_auction')" severity="primary" text size="small" @click="leave"
                         class="leave-button" />
                 </div>
 
@@ -180,7 +203,7 @@ function leave(): void {
                     <AppIcon :icon="item.icon" class="found-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
                     <span class="found-item__name">{{ item.name }}</span>
                     <span class="found-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity
-                        }}</span>
+                    }}</span>
                 </div>
             </div>
             <Button :label="t('storage.collect_items')" icon="pi pi-check" @click="$emit('back')" />
@@ -243,8 +266,78 @@ function leave(): void {
 .timer-bar__fill {
     height: 100%;
     background: #f59e0b;
-    transition: width 0.5s linear;
+    transition: width 0.3s linear;
     border-radius: 2px;
+}
+
+.timer-bar__fill--going {
+    background: #ef4444;
+    animation: pulse-bar 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse-bar {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Going Phase Banner */
+.going-phase-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    border-radius: var(--t-radius-md);
+    font-weight: 800;
+    font-size: var(--t-font-size-lg);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    animation: phase-pulse 1s ease-in-out infinite;
+}
+
+.going-phase-banner--going_once {
+    background: #f59e0b20;
+    border: 2px solid #f59e0b;
+    color: #f59e0b;
+}
+
+.going-phase-banner--going_twice {
+    background: #f9731620;
+    border: 2px solid #f97316;
+    color: #f97316;
+}
+
+.going-phase-banner--final_call {
+    background: #ef444420;
+    border: 2px solid #ef4444;
+    color: #ef4444;
+}
+
+.going-icon {
+    font-size: 1.4rem;
+}
+
+.going-text {
+    white-space: nowrap;
+}
+
+@keyframes phase-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
 }
 
 /* Body */
