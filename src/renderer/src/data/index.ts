@@ -165,3 +165,31 @@ export type {
   ScoutPhaseData,
   PropertyOpportunity,
 } from './realestate'
+
+// ─── Storage Wars ───────────────────────────────────────────────
+export {
+  STORAGE_LOCATIONS,
+  getLocation,
+  getUnlockedLocations,
+  ITEM_POOL,
+  generateUnitContents,
+  calculateTotalItemsValue,
+  APPRAISER_DEFS,
+  getAppraiser,
+  AUCTION_CONFIG,
+  generateAuction,
+  generateAuctionBatch,
+  calculateBidderBehavior,
+} from './storage'
+export type {
+  StorageLocation,
+  LocationTier,
+  StorageItem,
+  ItemCategory,
+  AppraiserDef,
+  AppraiserTier,
+  StorageAuction,
+  AuctionStatus,
+  BidderPersonality,
+  AuctionBidder,
+} from './storage'

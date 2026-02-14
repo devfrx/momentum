@@ -31,7 +31,6 @@ const canAffordScout = computed(() => player.cash.gte(nextScoutCost.value))
 
 const showTraits = computed(() => currentScoutIdx.value >= 1)
 const showTrueValue = computed(() => currentScoutIdx.value >= 3)
-const showHiddenScores = computed(() => currentScoutIdx.value >= 2)
 
 const isGoodDeal = computed(() => {
     if (!showTrueValue.value) return null
@@ -161,29 +160,6 @@ function handleBuy(): void {
         <!-- ── Expandable Details ── -->
         <Transition name="slide">
             <div v-if="showDetails" class="details-panel">
-                <!-- Hidden scores (inspection+) -->
-                <div v-if="showHiddenScores" class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:clipboard-check-outline" /> {{ t('realestate.inspection_results') }}
-                    </h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.neighborhood') }}</span>
-                            <span class="d-value"
-                                :class="opportunity.hiddenNeighborhoodScore >= 70 ? 'success' : opportunity.hiddenNeighborhoodScore >= 40 ? 'warn' : 'danger'">
-                                {{ opportunity.hiddenNeighborhoodScore }}/100
-                            </span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.structural') }}</span>
-                            <span class="d-value"
-                                :class="opportunity.hiddenStructuralScore >= 70 ? 'success' : opportunity.hiddenStructuralScore >= 40 ? 'warn' : 'danger'">
-                                {{ opportunity.hiddenStructuralScore }}/100
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Property details -->
                 <div class="detail-section">
                     <h4 class="detail-title">
@@ -205,7 +181,7 @@ function handleBuy(): void {
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.appreciation') }}</span>
                             <span class="d-value success">{{ formatPercent(opportunity.baseAppreciationRate * 100)
-                            }}</span>
+                                }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.maintenance') }}</span>

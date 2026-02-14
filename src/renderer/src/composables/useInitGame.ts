@@ -20,6 +20,7 @@ import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { useEventStore } from '@renderer/stores/useEventStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
+import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { D, hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -65,6 +66,7 @@ export function useInitGame() {
       const events = useEventStore()
       const loanStore = useLoanStore()
       const depositStore = useDepositStore()
+      const storageStore = useStorageStore()
 
       // Initialize static data first (always refresh from source to pick up rebalances)
       // Note: businesses are no longer initialized from static defs — they are created by player action
@@ -250,6 +252,11 @@ export function useInitGame() {
         // Restore deposits state
         if (save.deposits) {
           depositStore.loadFromSave(save.deposits)
+        }
+
+        // Restore storage wars state
+        if (save.storage) {
+          storageStore.loadFromSave(save.storage)
         }
 
         // Restore event system state

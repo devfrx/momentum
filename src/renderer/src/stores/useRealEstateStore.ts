@@ -105,10 +105,6 @@ export interface Property {
   /** Ticks until next occupancy recalculation */
   occupancyRecalcIn: number
 
-  /** Hidden scores (revealed by scouting before purchase) */
-  neighborhoodScore: number
-  structuralScore: number
-
   /** Total rent collected over lifetime */
   totalRentCollected: Decimal
   /** Total maintenance paid over lifetime */
@@ -459,8 +455,6 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       purchasedAtTick: currentTick,
       occupancy: 0.7 + Math.random() * 0.25, // 70-95% initial occupancy
       occupancyRecalcIn: OCCUPANCY_RECALC_TICKS,
-      neighborhoodScore: opp.hiddenNeighborhoodScore,
-      structuralScore: opp.hiddenStructuralScore,
       totalRentCollected: ZERO,
       totalMaintenancePaid: ZERO,
     }
@@ -814,8 +808,6 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       purchasedAtTick: saved.purchasedAtTick ?? 0,
       occupancy: saved.occupancy ?? 0.85,
       occupancyRecalcIn: saved.occupancyRecalcIn ?? OCCUPANCY_RECALC_TICKS,
-      neighborhoodScore: saved.neighborhoodScore ?? saved.hiddenNeighborhoodScore ?? 5,
-      structuralScore: saved.structuralScore ?? saved.hiddenStructuralScore ?? 5,
       totalRentCollected: D(saved.totalRentCollected ?? 0),
       totalMaintenancePaid: D(saved.totalMaintenancePaid ?? 0),
     }

@@ -53,6 +53,7 @@ export default {
     loans: 'Loans',
     deposits: 'Deposits',
     casino: 'Casino',
+    storage: 'Storage Wars',
     skills: 'Skill Tree',
     prestige: 'Prestige',
     settings: 'Settings',
@@ -100,10 +101,10 @@ export default {
     multipliers_heading: 'Multipliers & Bonuses',
     jobs_heading: 'Jobs & Gigs',
     active_jobs: '{current}/{max} active',
-    available_unlock: 'Available to Unlock',
+    available_unlock: 'Available Jobs',
     exp_level: 'Exp Lv.{n}',
-    unlock_cost: 'Unlock ({cost})',
-    unlock_free: 'Unlock (Free)',
+    requires_level: 'Requires Lv.{n}',
+    apply: 'Apply',
   },
 
   // ─── Multipliers ──────────────────────────────────────────────
@@ -1688,6 +1689,102 @@ export default {
     plus_1000_ticks: '+1000 Ticks (100s)',
     section_log: 'Action Log',
     no_actions: 'No actions yet',
+  },
+
+  // ─── Storage Wars ─────────────────────────────────────────────
+  storage: {
+    title: 'Storage Wars',
+    subtitle: 'Bid on abandoned storage units and discover hidden treasures.',
+    balance: 'Balance',
+
+    // Tabs
+    tab_auctions: 'Auctions',
+    tab_inventory: 'Inventory',
+
+    // Auction cards
+    unknown_location: 'Unknown Location',
+    bidders: 'bidders',
+    starting_bid: 'Starting Bid',
+    items_inside: 'Items Inside',
+    unknown_items: '???',
+    enter_auction: 'Enter Auction',
+
+    // Bidding
+    auction_in_progress: 'Auction in progress',
+    round_n: 'Round {n}',
+    peek_inside: 'Peek Inside',
+    competitors: 'Competitors',
+    dropped_out: 'Dropped out',
+    leading: 'Leading!',
+    current_bid: 'Current Bid',
+    you_lead: 'You are leading!',
+    outbid: 'You have been outbid!',
+    your_bid: 'Your Bid',
+    place_bid: 'Place Bid',
+    leave_auction: 'Leave Auction',
+    you_won: 'You won the auction!',
+    auction_lost: 'You lost this auction.',
+    items_found: 'Items Found',
+    collect_items: 'Collect Items',
+
+    // Inventory
+    inventory: 'Inventory',
+    est_value: 'Est. Value',
+    not_appraised: 'Not appraised',
+    appraise: 'Appraise',
+    sell_item: 'Sell',
+    appraise_all: 'Appraise All ({n})',
+    appraise_all_title: 'Appraise All Items',
+    sell_all: 'Sell All',
+    inventory_empty: 'Your storage inventory is empty. Win auctions to collect items!',
+    choose_appraiser: 'Choose Appraiser',
+    appraiser_desc: 'A better appraiser reveals more accurate values and can discover hidden bonus value.',
+    cost: 'Cost',
+    per_item: 'item',
+    accuracy: 'Accuracy',
+    bonus_chance: 'Bonus',
+
+    // Stats
+    auctions_won: 'Won',
+    items_sold: 'Sold',
+    revenue: 'Revenue',
+    net_profit_label: 'Net Profit',
+    biggest_flip: 'Best Flip',
+
+    // Empty / loading
+    no_auctions: 'No auctions available right now.',
+    no_auctions_hint: 'New auctions appear periodically. Unlock more locations by increasing your cash.',
+
+    // Info panel
+    info_title: 'How Storage Wars Works',
+    info_desc: 'Bid on abandoned storage units without knowing what\'s inside. Collect items, appraise them to reveal their true value, and sell for profit!',
+    info_how_title: 'Auction Process',
+    info_browse: 'Browse',
+    info_browse_desc: 'View available storage units with peek hints about their contents.',
+    info_bid: 'Bid',
+    info_bid_desc: 'Compete against NPC bidders. Each has different personalities – some are aggressive, others cautious.',
+    info_win: 'Win',
+    info_win_desc: 'If you have the highest bid when time runs out, the unit is yours.',
+    info_appraise: 'Appraise',
+    info_appraise_desc: 'Hire appraisers to evaluate items. Better appraisers cost more but are more accurate and can discover hidden value.',
+    info_sell: 'Sell',
+    info_sell_desc: 'Sell items from your inventory for profit. Appraised items sell at their appraised value.',
+    info_tips_title: 'Pro Tips',
+    info_tip_peek: 'Read the Hints',
+    info_tip_peek_desc: 'Peek hints reveal categories of items inside. Learn to read them to estimate value.',
+    info_tip_bidders: 'Watch the Bidders',
+    info_tip_bidders_desc: 'Aggressive bidders push prices up. If many drop out early, the unit may not be worth much.',
+    info_tip_appraise: 'Invest in Appraisals',
+    info_tip_appraise_desc: 'Better appraisers can discover hidden bonus value, sometimes multiplying an item\'s worth significantly.',
+    info_tip_luck: 'Luck Matters',
+    info_tip_luck_desc: 'Gambling luck bonuses from the skill tree and prestige affect the quality of items in storage units.',
+
+    // Achievements
+    ach_first_win: 'Won your first storage auction.',
+    ach_treasure_hunter: 'Found a legendary or mythic item.',
+    ach_flipper: 'Sold 50 items from storage auctions.',
+    ach_storage_mogul: 'Won 25 storage auctions.',
+    ach_jackpot_unit: 'Found a unit worth 10x what you paid.',
   },
 
   // ─── Info Panel ───────────────────────────────────────────────

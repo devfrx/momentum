@@ -8,6 +8,9 @@ import type Decimal from 'break_infinity.js'
  *
  * Each job has a base pay-per-tick and optional scaling.
  * The player can run multiple jobs simultaneously (up to a concurrency cap).
+ *
+ * Jobs are "applied to" — you need to reach a certain player level to
+ * qualify, rather than buying them outright.
  */
 
 export interface JobDef {
@@ -17,8 +20,8 @@ export interface JobDef {
   icon: string
   /** Base income per game tick (10 ticks/s → multiply by 10 for $/s display) */
   basePayPerTick: Decimal
-  /** Minimum cash needed to "unlock" (buy equipment, etc.) — 0 = free */
-  unlockCost: Decimal
+  /** Minimum player level required to apply for this job (0 = available immediately) */
+  requiredLevel: number
   /** Efficiency scaling per "experience level" in this job (additive %) */
   experienceScaling: number
   /** Category for UI grouping */
@@ -31,9 +34,9 @@ export const JOBS: JobDef[] = [
     name: 'Delivery Driver',
     description: 'Pick up packages, drop them off. Simple and reliable.',
     icon: 'mdi:moped',
-    basePayPerTick: D(0.5),
-    unlockCost: D(0),
-    experienceScaling: 0.05,
+    basePayPerTick: D(0.04),
+    requiredLevel: 0,
+    experienceScaling: 0.03,
     category: 'Gig',
   },
   {
@@ -41,9 +44,9 @@ export const JOBS: JobDef[] = [
     name: 'Dog Walker',
     description: 'Good boys deserve good walks. Flexible hours.',
     icon: 'mdi:dog-side',
-    basePayPerTick: D(0.3),
-    unlockCost: D(0),
-    experienceScaling: 0.03,
+    basePayPerTick: D(0.025),
+    requiredLevel: 0,
+    experienceScaling: 0.02,
     category: 'Gig',
   },
   {
@@ -51,9 +54,9 @@ export const JOBS: JobDef[] = [
     name: 'Freelance Web Dev',
     description: 'Build websites for small businesses. Decent margins.',
     icon: 'mdi:language-html5',
-    basePayPerTick: D(1.5),
-    unlockCost: D(200),
-    experienceScaling: 0.08,
+    basePayPerTick: D(0.12),
+    requiredLevel: 3,
+    experienceScaling: 0.04,
     category: 'Freelance',
   },
   {
@@ -61,9 +64,9 @@ export const JOBS: JobDef[] = [
     name: 'Private Tutor',
     description: 'Share your knowledge, earn per session.',
     icon: 'mdi:school',
-    basePayPerTick: D(1.0),
-    unlockCost: D(100),
-    experienceScaling: 0.06,
+    basePayPerTick: D(0.08),
+    requiredLevel: 2,
+    experienceScaling: 0.03,
     category: 'Freelance',
   },
   {
@@ -71,9 +74,9 @@ export const JOBS: JobDef[] = [
     name: 'Handyman',
     description: 'Fix things around the house. Tools required.',
     icon: 'mdi:wrench',
-    basePayPerTick: D(2.0),
-    unlockCost: D(500),
-    experienceScaling: 0.07,
+    basePayPerTick: D(0.18),
+    requiredLevel: 5,
+    experienceScaling: 0.04,
     category: 'Skilled',
   },
   {
@@ -81,9 +84,9 @@ export const JOBS: JobDef[] = [
     name: 'Business Consultant',
     description: 'Advise small companies. High pay, requires reputation.',
     icon: 'mdi:briefcase-outline',
-    basePayPerTick: D(5.0),
-    unlockCost: D(5000),
-    experienceScaling: 0.10,
+    basePayPerTick: D(0.4),
+    requiredLevel: 10,
+    experienceScaling: 0.05,
     category: 'Skilled',
   },
 ]

@@ -25,7 +25,7 @@ const quickStats = computed(() => [
     { label: t('dashboard.level'), value: `${player.level}`, icon: 'mdi:shield-crown' },
 ])
 
-/** Jobs the player hasn't unlocked yet */
+/** Jobs the player hasn't unlocked yet but qualifies for */
 const availableJobs = computed(() =>
     JOBS.filter(j => !jobStore.unlockedJobs.find(uj => uj.defId === j.id))
 )
@@ -107,13 +107,11 @@ function toggleJob(defId: string): void {
                                 <span class="job-name">{{ job.name }}</span>
                                 <span class="job-meta">{{ job.description }}</span>
                             </div>
-                            <Button size="small" :disabled="!player.canAfford(job.unlockCost)"
+                            <Button size="small" :disabled="player.level < job.requiredLevel"
                                 @click="jobStore.unlockJob(job.id)">
-                                {{ job.unlockCost.gt(0) ? $t('dashboard.unlock_cost', {
-                                    cost: formatCash(job.unlockCost)
-                                })
-                                    : $t('dashboard.unlock_free') }}
-                            </Button>
+                                {{ job.requiredLevel > 0 && player.level < job.requiredLevel ?
+                                    $t('dashboard.requires_level', { n: job.requiredLevel }) : $t('dashboard.apply') }}
+                                    </Button>
                         </div>
                     </div>
                 </div>

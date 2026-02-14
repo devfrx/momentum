@@ -108,14 +108,14 @@ export const useJobStore = defineStore('jobs', () => {
 
   // ─── Actions ──────────────────────────────────────────────────
 
-  /** Unlock a job (pay unlock cost if any). Returns false if can't afford. */
+  /** Apply for a job (requires player level). Returns false if not qualified. */
   function unlockJob(defId: string): boolean {
     const def = getJobDef(defId)
     if (!def) return false
     // Already unlocked?
     if (unlockedJobs.value.find((j) => j.defId === defId)) return false
-    // Check cost
-    if (def.unlockCost.gt(ZERO) && !playerStore.spendCash(def.unlockCost)) {
+    // Check level requirement
+    if (playerStore.level < def.requiredLevel) {
       return false
     }
     unlockedJobs.value.push({
@@ -149,7 +149,7 @@ export const useJobStore = defineStore('jobs', () => {
    */
   function tick(): Decimal {
     let totalIncome = ZERO
-    const TICKS_PER_XP_LEVEL = 600 // ~60 seconds per experience level at 10 ticks/s
+    const TICKS_PER_XP_LEVEL = 3000 // ~5 minutes per experience level at 10 ticks/s
 
     // Get upgrade + prestige multipliers for job efficiency
     const upgrades = useUpgradeStore()
@@ -188,8 +188,8 @@ export const useJobStore = defineStore('jobs', () => {
 
     if (totalIncome.gt(ZERO)) {
       playerStore.earnCash(totalIncome)
-      // Jobs also give XP
-      playerStore.addXp(D(0.1))
+      // Jobs also give XP (slow drip)
+      playerStore.addXp(D(0.02))
     }
 
     return totalIncome

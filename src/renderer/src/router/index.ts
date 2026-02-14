@@ -61,6 +61,12 @@ const router = createRouter({
       meta: { titleKey: 'nav.casino', icon: 'mdi:cards-playing' }
     },
     {
+      path: '/storage',
+      name: 'storage',
+      component: () => import('@renderer/views/StorageWarsView.vue'),
+      meta: { titleKey: 'nav.storage', icon: 'mdi:warehouse' }
+    },
+    {
       path: '/skills',
       name: 'skills',
       component: () => import('@renderer/views/SkillTreeView.vue'),
@@ -105,6 +111,7 @@ export type RouteName =
   | 'loans'
   | 'deposits'
   | 'gambling'
+  | 'storage'
   | 'skills'
   | 'prestige'
   | 'settings'

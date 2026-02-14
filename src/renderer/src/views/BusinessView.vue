@@ -19,10 +19,8 @@ const { formatCash } = useFormat()
 // ── Tabs ──
 const activeTab = ref<'overview' | 'portfolio' | 'market' | 'advisors'>('overview')
 
-// ── Market ──
-const availableBusinesses = computed(() =>
-    BUSINESS_DEFS.filter(def => player.netWorth.gte(def.unlockAtNetWorth))
-)
+// ── Market ── (always show all businesses)
+const availableBusinesses = computed(() => [...BUSINESS_DEFS])
 
 // ── Overview KPIs ──
 const totalLevels = computed(() => business.totalLevels)

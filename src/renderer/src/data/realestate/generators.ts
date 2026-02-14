@@ -71,9 +71,6 @@ export interface PropertyOpportunity {
   scoutPhase: ScoutPhase
   scoutCosts: Record<ScoutPhase, number>
 
-  hiddenNeighborhoodScore: number
-  hiddenStructuralScore: number
-
   appearedAt: number
   isHotDeal: boolean
   /** Whether this opportunity was found via district scan */
@@ -206,8 +203,6 @@ export function generateOpportunity(
     traits,
     scoutPhase: 'none',
     scoutCosts,
-    hiddenNeighborhoodScore: Math.round(rand(10, 100)),
-    hiddenStructuralScore: Math.round(rand(10, 100)),
     appearedAt: currentTime,
     isHotDeal,
     isScanned,

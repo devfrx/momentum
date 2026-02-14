@@ -19,7 +19,7 @@ interface NavGroup {
 }
 
 /** Route ordering for consistent sort */
-const ROUTE_ORDER = ['/', '/business', '/stocks', '/crypto', '/realestate', '/investments', '/loans', '/deposits', '/gambling', '/skills', '/prestige', '/settings', '/dev']
+const ROUTE_ORDER = ['/', '/business', '/stocks', '/crypto', '/realestate', '/investments', '/loans', '/deposits', '/gambling', '/storage', '/skills', '/prestige', '/settings', '/dev']
 
 /** Logical grouping of routes */
 const GROUP_DEFS = [
@@ -27,7 +27,7 @@ const GROUP_DEFS = [
     { labelKey: 'nav.group_earn', paths: ['/business', '/stocks', '/crypto'] },
     { labelKey: 'nav.group_invest', paths: ['/realestate', '/investments', '/deposits'] },
     { labelKey: 'nav.group_finance', paths: ['/loans'] },
-    { labelKey: 'nav.group_fun', paths: ['/gambling'] },
+    { labelKey: 'nav.group_fun', paths: ['/gambling', '/storage'] },
     { labelKey: 'nav.group_progress', paths: ['/skills', '/prestige'] },
 ]
 

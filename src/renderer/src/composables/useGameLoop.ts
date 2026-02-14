@@ -21,6 +21,7 @@ import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
+import { useStorageStore } from '@renderer/stores/useStorageStore'
 
 
 // Data imports
@@ -55,6 +56,7 @@ export function useGameLoop() {
     const gambling = useGamblingStore()
     const loans = useLoanStore()
     const deposits = useDepositStore()
+    const storage = useStorageStore()
 
     // ─── Initialize game data from static definitions ───────────
     if (stocks.assets.length === 0) {
@@ -126,6 +128,11 @@ export function useGameLoop() {
       // Resolve matured investments (sets status to 'succeeded' or 'failed')
       // Players must manually collect returns via the UI
       startups.tick(ctx.tick)
+    })
+
+    // ─── Storage Wars auctions ────────────────────────────────────
+    gameEngine.subscribe('storage', (ctx: TickContext) => {
+      storage.tick(ctx.tick)
     })
 
     // ─── Random events ──────────────────────────────────────────
@@ -206,6 +213,12 @@ export function useGameLoop() {
             met = purchasedCount >= (condition.value as number)
             break
           }
+          case 'storageWins':
+            met = storage.totalAuctionsWon >= (condition.value as number)
+            break
+          case 'storageItemsSold':
+            met = storage.totalItemsSold >= (condition.value as number)
+            break
         }
 
         if (met) {

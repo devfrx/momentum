@@ -15,7 +15,7 @@ import Tag from 'primevue/tag'
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
-const { formatCash, formatPercent, formatRate } = useFormat()
+const { formatCash, formatPercent } = useFormat()
 
 const props = defineProps<{ district: District }>()
 const emit = defineEmits<{
@@ -91,10 +91,6 @@ const tierColors: Record<string, string> = {
             <div class="dp-stat">
                 <span class="dp-stat__label">{{ t('realestate.district.appreciation') }}</span>
                 <span class="dp-stat__value">{{ district.appreciationMultiplier }}×</span>
-            </div>
-            <div class="dp-stat">
-                <span class="dp-stat__label">{{ t('realestate.district.volatility') }}</span>
-                <span class="dp-stat__value">{{ formatRate(district.volatility * 100) }}</span>
             </div>
             <div class="dp-stat">
                 <span class="dp-stat__label">{{ t('realestate.district.owned') }}</span>
