@@ -23,6 +23,7 @@ import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
+import { useShopStore } from '@renderer/stores/useShopStore'
 
 
 // Data imports
@@ -59,6 +60,7 @@ export function useGameLoop() {
     const deposits = useDepositStore()
     const storage = useStorageStore()
     const blackmarket = useBlackMarketStore()
+    const shop = useShopStore()
 
     // ─── Initialize game data from static definitions ───────────
     if (stocks.assets.length === 0) {
@@ -145,7 +147,10 @@ export function useGameLoop() {
     gameEngine.subscribe('blackmarket', (ctx: TickContext) => {
       blackmarket.tick(ctx.tick)
     })
-
+    // ─── Online Shop ──────────────────────────────────────────
+    gameEngine.subscribe('shop', (ctx: TickContext) => {
+      shop.tick(ctx.tick)
+    })
     // ─── Random events ──────────────────────────────────────────
     gameEngine.subscribe('events', () => {
       events.tick()

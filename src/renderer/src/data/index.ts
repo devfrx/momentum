@@ -199,6 +199,36 @@ export type {
   AuctionBidder,
 } from './storage'
 
+// ─── Online Shop ────────────────────────────────────────────────
+export {
+  SHOP_ITEM_POOL,
+  UNIQUE_ITEM_POOL,
+  generateShopItem,
+  generateShopBatch,
+  refreshShopPartial,
+  SHOP_CATEGORIES,
+  SHOP_CATEGORY_ICONS,
+} from './shop'
+export type { ShopCategory, ShopListing } from './shop'
+export {
+  SHOP_LISTING_COUNT,
+  SHOP_PAGE_SIZE,
+  SHOP_REFRESH_TICKS,
+  SHOP_REFRESH_FRACTION,
+  SHOP_FULL_RESTOCK_TICKS,
+  SHOP_BUY_MARKUP,
+  SHOP_SELL_FRACTION,
+  VAULT_SELL_TAX,
+  VAULT_BASE_CAPACITY,
+  VAULT_SLOT_COST_BASE,
+  VAULT_SLOT_COST_GROWTH,
+  VAULT_UPGRADE_SLOTS,
+  UNIQUE_ITEM_CHANCE,
+  FLASH_SALE_CHANCE,
+  FLASH_SALE_DISCOUNT,
+  SHOP_RARITY_WEIGHTS,
+} from './shop'
+
 export {
   type BlackMarketDealDef,
   type BlackMarketDeal,

@@ -15,6 +15,7 @@ import { useEventStore } from './useEventStore'
 import { useStockStore } from './useStockStore'
 import { useCryptoStore } from './useCryptoStore'
 import { useStorageStore } from './useStorageStore'
+import { useVaultStore } from './useVaultStore'
 import { STOCKS } from '@renderer/data/stocks'
 import { CRYPTOS } from '@renderer/data/cryptos'
 import {
@@ -578,7 +579,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (abilityId === 'hacker_manipulate_crypto' && useCryptoStore().assets.length === 0) {
       return { success: false, message: 'no_assets' }
     }
-    if ((abilityId === 'fence_sell_premium' || abilityId === 'fence_bulk_deal') && useStorageStore().inventory.length === 0) {
+    if ((abilityId === 'fence_sell_premium' || abilityId === 'fence_bulk_deal') && useStorageStore().inventory.length === 0 && useVaultStore().items.length === 0) {
       return { success: false, message: 'no_items' }
     }
     if (abilityId === 'fence_sell_premium' && state.dailyUses >= FENCE_DAILY_LIMIT) {
@@ -790,51 +791,85 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           return { type: 'fence', sold: false, reason: 'daily_limit' }
         }
         const storage = useStorageStore()
-        const inv = storage.inventory
-        if (inv.length === 0) {
+        const vault = useVaultStore()
+        const storageInv = storage.inventory
+        const vaultInv = vault.items
+        if (storageInv.length === 0 && vaultInv.length === 0) {
           addLogEntry('warning', 'mdi:package-variant-remove', 'blackmarket.log_fence_no_items', {}, 'contact')
           return { type: 'fence', sold: false, reason: 'no_items' }
         }
         const premiumMul = FENCE_SELL_MULTIPLIER + (state.loyalty / 200)
-        let bestIdx = 0
+        // Find best item across both warehouses
         let bestVal = ZERO
-        for (let i = 0; i < inv.length; i++) {
-          const val = inv[i].appraisedValue ?? inv[i].baseValue
-          if (val.gt(bestVal)) { bestVal = val; bestIdx = i }
+        let bestSource: 'storage' | 'vault' = 'storage'
+        let bestIdx = 0
+        for (let i = 0; i < storageInv.length; i++) {
+          const val = storageInv[i].appraisedValue ?? storageInv[i].baseValue
+          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'storage' }
         }
-        const item = inv[bestIdx]
-        const rawVal = item.appraisedValue ?? item.baseValue
-        const finalVal = mul(rawVal, D(premiumMul))
-        player.earnCash(finalVal)
-        totalCashEarned.value = add(totalCashEarned.value, finalVal)
-        storage.totalItemsSold++
-        storage.totalSaleRevenue = add(storage.totalSaleRevenue, finalVal)
-        const itemName = item.name
-        const premPct = Math.round((premiumMul - 1) * 100)
-        inv.splice(bestIdx, 1)
-        addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
-          item: itemName, premium: premPct,
-        }, 'contact', 'blackmarket.log_fence_sold_detail', {
-          value: formatCashStandalone(finalVal), remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
-        })
-        return {
-          type: 'fence', sold: true, itemName, value: finalVal.toNumber(),
-          premiumPercent: premPct, dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+        for (let i = 0; i < vaultInv.length; i++) {
+          const val = vaultInv[i].appraisedValue ?? vaultInv[i].baseValue
+          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'vault' }
+        }
+        let item: { name: string; appraisedValue?: unknown; baseValue?: unknown; value?: unknown }
+        if (bestSource === 'storage') {
+          item = storageInv[bestIdx]
+          const rawVal = (item as any).appraisedValue ?? (item as any).baseValue
+          const finalVal = mul(rawVal, D(premiumMul))
+          player.earnCash(finalVal)
+          totalCashEarned.value = add(totalCashEarned.value, finalVal)
+          storage.totalItemsSold++
+          storage.totalSaleRevenue = add(storage.totalSaleRevenue, finalVal)
+          const itemName = item.name
+          const premPct = Math.round((premiumMul - 1) * 100)
+          storageInv.splice(bestIdx, 1)
+          addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
+            item: itemName, premium: premPct,
+          }, 'contact', 'blackmarket.log_fence_sold_detail', {
+            value: formatCashStandalone(finalVal), remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+          })
+          return {
+            type: 'fence', sold: true, itemName, value: finalVal.toNumber(),
+            premiumPercent: premPct, dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+          }
+        } else {
+          item = vaultInv[bestIdx]
+          const rawVal = (item as any).appraisedValue ?? (item as any).baseValue
+          const finalVal = mul(rawVal, D(premiumMul))
+          player.earnCash(finalVal)
+          totalCashEarned.value = add(totalCashEarned.value, finalVal)
+          vault.totalItemsSold++
+          vault.totalSaleRevenue = add(vault.totalSaleRevenue, finalVal)
+          const itemName = item.name
+          const premPct = Math.round((premiumMul - 1) * 100)
+          vault.removeItem(vaultInv[bestIdx].id)
+          addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
+            item: itemName, premium: premPct,
+          }, 'contact', 'blackmarket.log_fence_sold_detail', {
+            value: formatCashStandalone(finalVal), remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+          })
+          return {
+            type: 'fence', sold: true, itemName, value: finalVal.toNumber(),
+            premiumPercent: premPct, dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+          }
         }
       }
 
       case 'fence_bulk_deal': {
         const storage = useStorageStore()
-        const inv = storage.inventory
-        if (inv.length === 0) {
+        const vault = useVaultStore()
+        const storageInv = storage.inventory
+        const vaultInv = vault.items
+        if (storageInv.length === 0 && vaultInv.length === 0) {
           addLogEntry('warning', 'mdi:package-variant-remove', 'blackmarket.log_fence_no_items', {}, 'contact')
           return { type: 'fence_bulk', sold: false, reason: 'no_items' }
         }
         const premiumMul = FENCE_SELL_MULTIPLIER + (state.loyalty / 200)
         let totalSold = ZERO
         let count = 0
-        while (inv.length > 0) {
-          const item = inv[0]
+        // Sell all storage items
+        while (storageInv.length > 0) {
+          const item = storageInv[0]
           const rawVal = item.appraisedValue ?? item.baseValue
           const finalVal = mul(rawVal, D(premiumMul))
           player.earnCash(finalVal)
@@ -843,7 +878,22 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           storage.totalSaleRevenue = add(storage.totalSaleRevenue, finalVal)
           totalSold = add(totalSold, finalVal)
           count++
-          inv.splice(0, 1)
+          storageInv.splice(0, 1)
+        }
+        // Sell all vault items
+        const vaultIds = vaultInv.map(i => i.id)
+        for (const id of vaultIds) {
+          const item = vault.items.find(i => i.id === id)
+          if (!item) continue
+          const rawVal = item.appraisedValue ?? item.baseValue
+          const finalVal = mul(rawVal, D(premiumMul))
+          player.earnCash(finalVal)
+          totalCashEarned.value = add(totalCashEarned.value, finalVal)
+          vault.totalItemsSold++
+          vault.totalSaleRevenue = add(vault.totalSaleRevenue, finalVal)
+          totalSold = add(totalSold, finalVal)
+          count++
+          vault.removeItem(id)
         }
         const premPct = Math.round((premiumMul - 1) * 100)
         addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_bulk', {

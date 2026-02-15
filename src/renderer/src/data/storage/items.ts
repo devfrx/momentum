@@ -23,6 +23,10 @@ export type ItemCategory =
   | 'collectibles' | 'art' | 'jewelry' | 'antiques'
   | 'sports' | 'instruments' | 'vehicles' | 'documents'
   | 'junk'
+  // Shop-extended categories (items may flow into storage/vault)
+  | 'luxury' | 'tech' | 'memorabilia' | 'gems'
+  | 'watches' | 'wine' | 'sneakers' | 'cards'
+  | 'coins' | 'maps' | 'manuscripts'
 
 export interface StorageItem {
   id: string

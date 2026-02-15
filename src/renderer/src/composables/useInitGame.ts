@@ -22,6 +22,8 @@ import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
+import { useVaultStore } from '@renderer/stores/useVaultStore'
+import { useShopStore } from '@renderer/stores/useShopStore'
 import { hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -69,6 +71,8 @@ export function useInitGame() {
       const depositStore = useDepositStore()
       const storageStore = useStorageStore()
       const blackmarketStore = useBlackMarketStore()
+      const vaultStore = useVaultStore()
+      const shopStore = useShopStore()
 
       // Initialize static data first (always refresh from source to pick up rebalances)
       // Note: businesses are no longer initialized from static defs — they are created by player action
@@ -191,6 +195,16 @@ export function useInitGame() {
         // Restore black market state
         if (save.blackmarket) {
           blackmarketStore.loadFromSave(save.blackmarket as Record<string, unknown>)
+        }
+
+        // Restore vault state
+        if (save.vault) {
+          vaultStore.loadFromSave(save.vault as Record<string, unknown>)
+        }
+
+        // Restore shop state
+        if (save.shop) {
+          shopStore.loadFromSave(save.shop as Record<string, unknown>)
         }
 
         // Restore event system state
