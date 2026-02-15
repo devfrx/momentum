@@ -93,8 +93,8 @@ function clearLog(): void {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--t-bg-elevated);
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
     max-height: 320px;
@@ -160,17 +160,17 @@ function clearLog(): void {
     gap: 0.5rem;
     padding: 0.45rem 0.6rem;
     border-radius: var(--t-radius-md);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--t-bg-card);
     border-left: 3px solid transparent;
     transition: background 0.2s;
 }
 
 .log-entry:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--t-bg-card-hover);
 }
 
 /* Severity variants */
-.log-entry--success {
+/* .log-entry--success {
     border-left-color: var(--t-success);
 }
 
@@ -188,7 +188,7 @@ function clearLog(): void {
 
 .log-entry--neutral {
     border-left-color: var(--t-text-muted);
-}
+} */
 
 .log-entry__badge {
     font-size: 0.7rem;
@@ -296,11 +296,11 @@ function clearLog(): void {
 }
 
 .activity-log__scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--t-scrollbar);
     border-radius: 2px;
 }
 
 .activity-log__scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--t-scrollbar-hover);
 }
 </style>
