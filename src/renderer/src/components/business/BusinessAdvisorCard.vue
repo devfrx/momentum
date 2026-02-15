@@ -17,14 +17,6 @@ function getAdvisorState(type: AdvisorType) {
     return props.business.advisors.find(a => a.type === type)
 }
 
-function getLevel(type: AdvisorType): number {
-    return getAdvisorState(type)?.level ?? 0
-}
-
-function isHired(type: AdvisorType): boolean {
-    return getAdvisorState(type)?.hired ?? false
-}
-
 const advisorItems = computed(() =>
     ADVISOR_DEFS.map(def => {
         const state = getAdvisorState(def.type)
@@ -65,7 +57,7 @@ const advisorItems = computed(() =>
                     </div>
                     <div class="stat-row">
                         <span class="stat-lbl">{{ adv.hired ? $t('business.upgrade_cost') : $t('business.hire_cost')
-                        }}</span>
+                            }}</span>
                         <span class="stat-val cost">{{ formatCash(adv.cost) }}</span>
                     </div>
                     <div class="stat-row" v-if="!adv.hired || adv.lvl > 0">

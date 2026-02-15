@@ -4,7 +4,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
-import { D, ZERO, mul, gte } from '@renderer/core/BigNum'
+import { D, ZERO, gte } from '@renderer/core/BigNum'
 import { upgradeCost, upgradeEffect } from '@renderer/core/Formulas'
 import type { UpgradeDef, UpgradeTarget } from '@renderer/data/upgrades'
 import { usePlayerStore } from './usePlayerStore'
@@ -74,6 +74,10 @@ export interface UpgradeNode extends UpgradeNodeDef {
 
 export const useUpgradeStore = defineStore('upgrades', () => {
   const nodes = ref<UpgradeNode[]>([])
+  /** Per-target multiplier cache — invalidated when nodes change */
+  const _multiplierCache = new Map<UpgradeEffectTarget, Decimal>()
+  let _cacheVersion = 0
+  let _lastCacheVersion = -1
 
   // ─── Computed ─────────────────────────────────────────────────
 
@@ -87,15 +91,32 @@ export const useUpgradeStore = defineStore('upgrades', () => {
     })
   )
 
-  /** Get the combined multiplier for a target category */
-  function getMultiplier(target: UpgradeEffectTarget): Decimal {
-    let result = D(1)
+  /** Invalidate the multiplier cache (call after any level/purchased change) */
+  function _invalidateCache(): void {
+    _cacheVersion++
+  }
+
+  /** Rebuild cache from nodes if stale */
+  function _ensureCache(): void {
+    if (_lastCacheVersion === _cacheVersion) return
+    _multiplierCache.clear()
+
     for (const node of nodes.value) {
-      if (node.level <= 0 || node.effectTarget !== target) continue
+      if (node.level <= 0) continue
+      const target = node.effectTarget
       const effect = upgradeEffect(node.baseEffect, node.level, node.effectScaling)
-      result = mul(result, effect.add(1))
+      const effectMul = effect.add(1)
+      const current = _multiplierCache.get(target) ?? D(1)
+      _multiplierCache.set(target, current.mul(effectMul))
     }
-    return result
+
+    _lastCacheVersion = _cacheVersion
+  }
+
+  /** Get the combined multiplier for a target category (cached) */
+  function getMultiplier(target: UpgradeEffectTarget): Decimal {
+    _ensureCache()
+    return _multiplierCache.get(target) ?? D(1)
   }
 
   function getNodeCost(nodeId: string): Decimal {
@@ -127,6 +148,7 @@ export const useUpgradeStore = defineStore('upgrades', () => {
       level: 0,
       purchased: false
     }))
+    _invalidateCache()
   }
 
   /** Purchase/level up an upgrade. Returns cost, or null if can't. */
@@ -151,6 +173,7 @@ export const useUpgradeStore = defineStore('upgrades', () => {
     
     node.level++
     node.purchased = true
+    _invalidateCache()
 
     // XP for purchasing upgrades
     player.addXp(D(10))
@@ -163,11 +186,25 @@ export const useUpgradeStore = defineStore('upgrades', () => {
       node.level = 0
       node.purchased = false
     }
+    _invalidateCache()
+  }
+
+  /** Restore upgrade state from a save */
+  function loadFromSave(savedUpgrades: Array<{ id: string; level?: number; purchased?: boolean }>): void {
+    if (!Array.isArray(savedUpgrades)) return
+    for (const saved of savedUpgrades) {
+      const node = nodes.value.find((n) => n.id === saved.id)
+      if (node) {
+        node.purchased = saved.purchased ?? false
+        node.level = saved.level ?? (saved.purchased ? 1 : 0)
+      }
+    }
+    _invalidateCache()
   }
 
   return {
     nodes,
     availableUpgrades, getMultiplier, getNodeCost,
-    initUpgrades, purchaseUpgrade, prestigeReset
+    initUpgrades, purchaseUpgrade, prestigeReset, loadFromSave
   }
 })

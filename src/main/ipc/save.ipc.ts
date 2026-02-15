@@ -16,6 +16,17 @@ import {
 import type { GameSave } from '../database/schema'
 
 export function registerSaveIpc(): void {
+  // ─── Synchronous save (for beforeunload — cannot wait for async) ───
+  ipcMain.on('save:sync', (event) => {
+    try {
+      saveGame()
+      event.returnValue = { success: true }
+    } catch (error) {
+      console.error('[IPC save:sync]', error)
+      event.returnValue = { success: false, error: String(error) }
+    }
+  })
+
   // ─── Save game locally ──────────────────────────────────────────
   ipcMain.handle('save:local', async (_event, partialState?: Partial<GameSave>) => {
     try {

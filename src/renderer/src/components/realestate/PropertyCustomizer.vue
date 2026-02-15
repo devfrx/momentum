@@ -17,7 +17,7 @@ import Tag from 'primevue/tag'
 
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
-const { formatPercent, formatRate } = useFormat()
+const { formatPercent } = useFormat()
 
 const props = defineProps<{
     property: Property
@@ -72,7 +72,7 @@ function apply(): void {
                     <p class="trait-desc">{{ t(tr.descriptionKey) }}</p>
                     <div class="trait-mods">
                         <span v-if="tr.rentMod !== 0">Rent: {{ formatPercent(tr.rentMod * 100)
-                        }}</span>
+                            }}</span>
                         <span v-if="tr.occupancyMod !== 0">Occ: {{
                             formatPercent(tr.occupancyMod * 100) }}</span>
                         <span v-if="tr.wearMod !== 1">Wear: {{ tr.wearMod }}×</span>

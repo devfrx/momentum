@@ -2,18 +2,17 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { BusinessCard, BusinessPurchaseCard } from '@renderer/components/business'
 import { BusinessAdvisorCard } from '@renderer/components/business'
+import { EventImpactBanner } from '@renderer/components/events'
 import { BUSINESS_DEFS } from '@renderer/data/businesses'
 
 const { t } = useI18n()
 const business = useBusinessStore()
-const player = usePlayerStore()
 const { formatCash } = useFormat()
 
 // ── Tabs ──
@@ -110,6 +109,9 @@ const businessInfoSections = computed<InfoSection[]>(() => [
                 </span>
             </div>
         </div>
+
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="business" />
 
         <!-- Stats Bar -->
         <div class="stats-bar">

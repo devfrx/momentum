@@ -8,7 +8,7 @@
  */
 import { ref, computed, onMounted, watch } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { RARITY_COLORS, type LotteryDrawResult, type LotteryTicketDef } from '@renderer/data/lottery'
+import { type LotteryDrawResult, type LotteryTicketDef } from '@renderer/data/lottery'
 import { rarityColor } from '@renderer/data/rarity'
 import { useFormat } from '@renderer/composables/useFormat'
 
@@ -272,7 +272,7 @@ watch(() => props.result, () => startReveal())
                                 :icon="jackpotTier === 'cosmic' ? 'mdi:creation' : jackpotTier === 'mega' ? 'mdi:fire' : jackpotTier === 'grand' ? 'mdi:crown' : isJackpot ? 'mdi:trophy' : 'mdi:party-popper'"
                                 class="win-trophy" :class="`trophy-${jackpotTier}`" />
                             <span class="win-tier" :class="`tier-text-${jackpotTier}`">{{ activeResult.prizeTier.label
-                                }}</span>
+                            }}</span>
                             <span class="win-rarity-tag">{{ activeResult.prizeTier.rarity.toUpperCase() }}</span>
                         </div>
                         <div class="win-details">
@@ -282,7 +282,7 @@ watch(() => props.result, () => startReveal())
                                 <template v-if="activeResult.bonusMatched"> {{ $t('gambling.lt_bonus') }}</template>
                             </span>
                             <span class="win-payout" :class="`payout-${jackpotTier}`">{{ formatCash(activeResult.payout)
-                                }}</span>
+                            }}</span>
                             <span class="win-multi">{{ $t('gambling.lt_payout_multi', {
                                 n:
                                     activeResult.prizeTier.payoutMultiplier.toLocaleString()

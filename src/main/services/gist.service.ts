@@ -8,7 +8,7 @@
 import { safeStorage } from 'electron'
 import { app } from 'electron'
 import { join } from 'path'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs'
 
 const GIST_API_BASE = 'https://api.github.com'
 const TOKEN_FILE = 'cloud-token.enc'
@@ -66,7 +66,7 @@ export function getToken(): string | null {
 export function deleteToken(): void {
   const path = getTokenPath()
   if (existsSync(path)) {
-    writeFileSync(path, '')
+    unlinkSync(path)
   }
 }
 

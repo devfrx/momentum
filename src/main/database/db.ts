@@ -127,11 +127,26 @@ export function updateGameState(partial: Partial<GameSave>): void {
  */
 function runMigrations(saveData: GameSave): void {
   const migrations: Record<number, (data: GameSave) => void> = {
-    // Example: version 1 → 2
-    // 1: (data) => {
-    //   // Add new field, restructure, etc.
-    //   data.version = 2
-    // }
+    // Version 1 → 2: Add loans, deposits, storage, and ensure all new fields exist
+    1: (data) => {
+      // Ensure loans structure exists
+      if (!data.loans || typeof data.loans !== 'object') {
+        (data as unknown as Record<string, unknown>).loans = { loans: [], creditScore: 50, creditScoreFactors: { paymentHistory: 10, creditUtilization: 30, creditAge: 0, creditMix: 0, newCredit: 10 }, loanHistory: [], totalTicksWithCredit: 0, recentApplications: [], totalLoansTaken: 0, totalLoansRepaidOnTime: 0, totalLoansDefaulted: 0, totalInterestPaidEver: { m: 0, e: 0 } }
+      }
+      // Ensure deposits structure exists
+      if (!data.deposits || typeof data.deposits !== 'object') {
+        (data as unknown as Record<string, unknown>).deposits = { deposits: [], depositHistory: [], totalDeposited: { m: 0, e: 0 }, totalInterestEarnedEver: { m: 0, e: 0 }, totalDepositsOpened: 0, totalDepositsMatured: 0, totalEarlyWithdrawals: 0 }
+      }
+      // Ensure event state exists
+      if (!data.eventState) {
+        data.eventState = { activeEvents: [], cooldowns: {}, pendingChoices: [], totalTicks: 0 }
+      }
+      // Ensure totalPlayTime exists
+      if (typeof data.totalPlayTime !== 'number') {
+        data.totalPlayTime = 0
+      }
+      data.version = 2
+    }
   }
 
   while (saveData.version < CURRENT_SAVE_VERSION) {

@@ -10,6 +10,7 @@ import { useOnTick } from '@renderer/composables/useGameLoop'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import { EventImpactBanner } from '@renderer/components/events'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -199,6 +200,9 @@ const investInfoSections = computed<InfoSection[]>(() => [
                 <p class="page-subtitle">{{ $t('investments.subtitle') }}</p>
             </div>
         </div>
+
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="investments" />
 
         <!-- Stats Bar -->
         <div class="stats-bar">
@@ -435,7 +439,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                         <Button v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1" :label="$t('investments.research_phase', {
                             phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
                             cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
-                        })" icon="pi pi-search" severity="secondary" size="small"
+                        })" icon="pi pi-search" severity="primary" outlined size="small"
                             :disabled="!gte(player.cash, D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))"
                             @click="doResearch(opp.id)" class="opp-card__btn" />
                         <span v-else class="opp-card__research-complete">

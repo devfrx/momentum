@@ -4,7 +4,6 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
-import { BUSINESS_UPGRADES } from '@renderer/data/businesses'
 
 const props = defineProps<{
     business: OwnedBusiness

@@ -99,9 +99,12 @@ export class EconomySimulator {
     // At 10 ticks/s: 216,000 ticks per 6h period
     const ticksPerPeriod = 10 * 3600 * 6
     this.state.inflationIndex *= (1 + this.state.inflationRate / ticksPerPeriod)
+    // Cap inflation index to prevent runaway costs over very long sessions
+    this.state.inflationIndex = Math.min(this.state.inflationIndex, 5.0)
 
-    // Wage index tracks inflation with a lag
+    // Wage index tracks inflation with a lag (capped to match inflation ceiling)
     this.state.wageIndex = this.lerp(this.state.wageIndex, this.state.inflationIndex, 0.00001)
+    this.state.wageIndex = Math.min(this.state.wageIndex, 5.0)
 
     // Phase transition check
     if (this.state.cycleTicksElapsed >= this.state.cyclePhaseDuration) {

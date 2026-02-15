@@ -13,6 +13,7 @@ import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { useJobStore } from '@renderer/stores/useJobStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
+import { EventImpactBanner } from '@renderer/components/events'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -28,7 +29,7 @@ import {
     PrestigeStats
 } from '@renderer/components/prestige'
 import { UPGRADE_CATEGORY_INFO, type PrestigeUpgradeDef } from '@renderer/data/prestige'
-import { RARITY_COLORS, rarityCssVar } from '@renderer/data/rarity'
+import { rarityCssVar } from '@renderer/data/rarity'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
@@ -270,6 +271,9 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
                 <p class="page-subtitle">{{ $t('prestige.subtitle') }}</p>
             </div>
         </div>
+
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="prestige" />
 
         <!-- Era Progress -->
         <EraProgress :current-era="prestige.currentEra" :next-era="prestige.nextEra" :progress="prestige.eraProgress"

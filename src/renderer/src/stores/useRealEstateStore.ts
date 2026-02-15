@@ -14,23 +14,19 @@ import Decimal from 'break_infinity.js'
 import { D, ZERO, add, mul, sub } from '@renderer/core/BigNum'
 import { Formulas } from '@renderer/core'
 import {
-  type District,
   type PropertyDistrictCategory,
   type ImprovementId,
   type ManagementStyle,
   type PropertyTrait,
   type PropertyOpportunity,
   type ScoutPhase,
-  DISTRICTS,
   getDistrict,
   getUnlockedDistricts,
   getCombinedSynergyBonus,
   getManagementStyle,
   getImprovement,
-  getAvailableImprovements,
   getTrait,
   SCOUT_PHASES,
-  SCOUT_PHASE_DATA,
   APPRAISAL_DISCOUNT,
   generateOpportunity,
   generateScanOpportunity,

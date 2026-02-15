@@ -338,14 +338,19 @@ export const useDepositStore = defineStore('deposits', () => {
       const interest = depositInterestPerTick(dep.currentBalance, currentAPY, ticksPerSecond)
 
       if (interest.gt(0)) {
+        // Track total interest earned each tick
         dep.totalInterestEarned = add(dep.totalInterestEarned, interest)
         totalInterestEarnedEver.value = add(totalInterestEarnedEver.value, interest)
 
-        // Compound check
+        // Compound check — add all accrued interest since last compound to balance
         const compoundInterval = getCompoundIntervalTicks(def.compoundFrequency)
+        dep.ticksSinceLastCompound++
         if (dep.ticksSinceLastCompound >= compoundInterval) {
-          // Compound: add accrued interest to balance
-          dep.currentBalance = add(dep.currentBalance, interest.mul(compoundInterval))
+          // Compound: add accumulated per-tick interest over the interval
+          // Each tick accrued `interest` (calculated on current balance),
+          // so total accrued ≈ interest × compoundInterval
+          const accruedInterest = interest.mul(dep.ticksSinceLastCompound)
+          dep.currentBalance = add(dep.currentBalance, accruedInterest)
           dep.ticksSinceLastCompound = 0
           dep.totalCompounds++
         }

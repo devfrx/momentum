@@ -119,7 +119,7 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
     category: 'Finance', prerequisites: ['f_realestate'],
   },
   {
-    id: 'f_propflip', name: 'Property Flipping', row: 4, col: 3,
+    id: 'f_propflip', name: 'Property Flipping', row: 4, col: 2,
     description: 'Buy low, renovate, sell high, repeat.',
     effectDescription: '+4% real estate rent', icon: 'mdi:hammer-wrench',
     cost: D(450_000), target: 'realEstateRent', multiplier: 0.04,
@@ -193,7 +193,7 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
     category: 'Finance', prerequisites: ['f_savings', 'f_reit'],
   },
   {
-    id: 'f_landlord', name: 'Mega Landlord', row: 6, col: 3,
+    id: 'f_landlord', name: 'Mega Landlord', row: 6, col: 2,
     description: 'Thousands of tenants across the region.',
     effectDescription: '+5% real estate rent', icon: 'mdi:home-group',
     cost: D(4_500_000), target: 'realEstateRent', multiplier: 0.05,
@@ -334,7 +334,7 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
     category: 'Finance', prerequisites: ['f_deposit_mogul', 'f_dao'],
   },
   {
-    id: 'f_metaverse', name: 'Metaverse Real Estate', row: 10, col: 4,
+    id: 'f_metaverse', name: 'Metaverse Real Estate', row: 10, col: 3,
     description: 'Own virtual land worth more than physical.',
     effectDescription: '+7% real estate rent', icon: 'mdi:virtual-reality',
     cost: D(500_000_000), target: 'realEstateRent', multiplier: 0.07,

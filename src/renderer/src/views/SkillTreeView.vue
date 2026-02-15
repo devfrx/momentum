@@ -7,6 +7,7 @@ import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import { EventImpactBanner } from '@renderer/components/events'
 import { SKILL_TREE_META } from '@renderer/data/upgrades'
 import { SkillTreeGraph, SkillTreePanel } from '@renderer/components/skilltree'
 import type { GraphNode } from '@renderer/components/skilltree/SkillTreeGraph.vue'
@@ -143,6 +144,9 @@ function buySelected(): void {
                 <p class="page-subtitle">{{ $t('skilltree.subtitle') }}</p>
             </div>
         </div>
+
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="skills" />
 
         <!-- Stats Bar -->
         <div class="stats-bar">

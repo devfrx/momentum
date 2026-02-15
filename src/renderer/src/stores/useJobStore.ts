@@ -76,12 +76,7 @@ export const useJobStore = defineStore('jobs', () => {
     const jobEfficiencyMul = upgrades.getMultiplier('job_efficiency')
     const allIncomeMul = upgrades.getMultiplier('all_income')
     const prestigeGlobalMul = prestige.globalMultiplier
-    let prestigeJobMul = 1
-    for (const upg of prestige.upgrades) {
-      if (upg.level > 0 && upg.effectType === 'job_efficiency') {
-        prestigeJobMul += upg.effectValue * upg.level
-      }
-    }
+    const prestigeJobMul = 1 + prestige.getTotalEffect('job_efficiency')
 
     let total = ZERO
     for (const job of unlockedJobs.value) {
@@ -158,12 +153,7 @@ export const useJobStore = defineStore('jobs', () => {
     const allIncomeMul = upgrades.getMultiplier('all_income')
     const prestigeGlobalMul = prestige.globalMultiplier
     // Prestige job-efficiency bonus
-    let prestigeJobMul = 1
-    for (const upg of prestige.upgrades) {
-      if (upg.level > 0 && upg.effectType === 'job_efficiency') {
-        prestigeJobMul += upg.effectValue * upg.level
-      }
-    }
+    const prestigeJobMul = 1 + prestige.getTotalEffect('job_efficiency')
 
     for (const job of unlockedJobs.value) {
       if (!job.active) continue

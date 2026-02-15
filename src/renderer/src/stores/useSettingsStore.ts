@@ -9,7 +9,7 @@ export type SupportedLocale = 'en' | 'it'
 export type BuyAmount = 1 | 10 | 25 | 100 | 'max'
 
 export const useSettingsStore = defineStore('settings', () => {
-  const locale = ref<SupportedLocale>('it')
+  const locale = ref<SupportedLocale>('en')
   const autoSaveInterval = ref(30)
   const offlineEfficiency = ref(0.5)
   const offlineMaxHours = ref(24)

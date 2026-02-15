@@ -18,6 +18,7 @@ import { useI18n } from 'vue-i18n'
 import { useOnTick } from '@renderer/composables/useGameLoop'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { D } from '@renderer/core/BigNum'
+import { EventImpactBanner } from '@renderer/components/events'
 import {
     DEPOSITS,
     DEPOSIT_CATEGORY_META,
@@ -179,6 +180,9 @@ const depositInfoSections = computed<InfoSection[]>(() => [
             </div>
         </div>
 
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="deposits" />
+
         <!-- Stats Bar -->
         <div class="stats-bar">
             <div class="stat-chip bonus-chip">
@@ -268,9 +272,9 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                                 <span>{{ $t('deposits.apy_label') }} {{ (entry.effectiveAPY * 100).toFixed(1) }}%</span>
                                 <span v-if="entry.earlyWithdrawal" class="text-warning">{{
                                     $t('deposits.early_withdrawal', { penalty: formatCash(entry.penaltyPaid) })
-                                }}</span>
-                                <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
                                     }}</span>
+                                <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -332,7 +336,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                     <div class="term-row">
                         <span>{{ $t('deposits.effective_apy') }}</span>
                         <strong class="text-success">{{ (depositStore.getModifiedAPY(selectedDeposit) * 100).toFixed(2)
-                            }}%</strong>
+                        }}%</strong>
                     </div>
                     <div class="term-row">
                         <span>{{ $t('deposits.term') }}</span>

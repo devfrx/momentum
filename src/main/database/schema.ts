@@ -15,6 +15,8 @@
 // ─── Serialized Decimal (for JSON persistence) ─────────────────────
 
 export interface SD {
+  /** Discriminant tag — distinguishes Decimals from arbitrary {m, e} objects */
+  __d?: 1
   m: number
   e: number
 }
@@ -130,7 +132,107 @@ export interface CryptoSave {
   totalRealizedProfit: SD
 }
 
-// ─── Real Estate ────────────────────────────────────────────────────
+// ─── Loans ──────────────────────────────────────────────────────────
+
+export interface ActiveLoanSave {
+  id: string
+  loanDefId: string
+  principal: SD
+  remaining: SD
+  effectiveRate: number
+  minPaymentPerTick: SD
+  totalPaid: SD
+  totalInterestPaid: SD
+  principalPaid: SD
+  startTick: number
+  ticksActive: number
+  termTicks: number
+  collateralType: string | null
+  collateralId?: string | null
+  collateralLocked: SD
+  ticksSinceLastPayment: number
+  ticksLate: number
+  isDefaulted: boolean
+  onTimePayments: number
+  latePayments: number
+  missedPayments: number
+}
+
+export interface CreditScoreFactorsSave {
+  paymentHistory: number
+  creditUtilization: number
+  creditAge: number
+  creditMix: number
+  newCredit: number
+}
+
+export interface LoanHistoryEntrySave {
+  loanDefId: string
+  principal: SD
+  totalInterestPaid: SD
+  startTick: number
+  endTick: number
+  status: 'repaid' | 'defaulted' | 'refinanced'
+  onTimePayments: number
+  latePayments: number
+}
+
+export interface LoansSave {
+  loans: ActiveLoanSave[]
+  creditScore: number
+  creditScoreFactors: CreditScoreFactorsSave
+  loanHistory: LoanHistoryEntrySave[]
+  totalTicksWithCredit: number
+  recentApplications: number[]
+  totalLoansTaken: number
+  totalLoansRepaidOnTime: number
+  totalLoansDefaulted: number
+  totalInterestPaidEver: SD
+}
+
+// ─── Deposits ───────────────────────────────────────────────────────
+
+export interface ActiveDepositSave {
+  id: string
+  depositDefId: string
+  principal: SD
+  currentBalance: SD
+  totalInterestEarned: SD
+  effectiveAPY: number
+  startTick: number
+  termTicks: number
+  ticksActive: number
+  matured: boolean
+  loyaltyActive: boolean
+  ticksSinceLastCompound: number
+  totalCompounds: number
+  closed: boolean
+  loyaltyTicks: number
+}
+
+export interface DepositHistoryEntrySave {
+  depositDefId: string
+  principal: SD
+  totalInterestEarned: SD
+  effectiveAPY: number
+  ticksHeld: number
+  matured: boolean
+  earlyWithdrawal: boolean
+  penaltyPaid: SD
+  status: 'completed' | 'withdrawn_early' | 'closed_at_maturity'
+}
+
+export interface DepositsSave {
+  deposits: ActiveDepositSave[]
+  depositHistory: DepositHistoryEntrySave[]
+  totalDeposited: SD
+  totalInterestEarnedEver: SD
+  totalDepositsOpened: number
+  totalDepositsMatured: number
+  totalEarlyWithdrawals: number
+}
+
+// ─── Real Estate (export state) ─────────────────────────────────────
 
 export interface PropertySave {
   id: string
@@ -143,13 +245,20 @@ export interface PropertySave {
   totalRentEarned: SD
 }
 
-export interface RealEstateSave {
+export interface RealEstateStateSave {
   properties: PropertySave[]
+  opportunities: Array<Record<string, unknown>>
+  lastRefreshTick: number
+  scannedDistricts?: Array<{ districtId: string; cooldownUntilTick: number }>
+  totalPropertiesBought: number
+  totalPropertiesSold: number
   totalRentEarned: SD
-  totalPropertyValue: SD
+  totalMaintenancePaid: SD
+  totalSaleProfit: SD
+  totalImprovementsInstalled: number
 }
 
-// ─── Startups ───────────────────────────────────────────────────────
+// ─── Startups (export state) ────────────────────────────────────────
 
 export interface StartupInvestmentSave {
   id: string
@@ -163,10 +272,23 @@ export interface StartupInvestmentSave {
   returnMultiplier: number
 }
 
-export interface StartupSave {
+export interface StartupStateSave {
+  opportunities: Array<Record<string, unknown>>
   investments: StartupInvestmentSave[]
+  lastRefreshTick: number
   totalInvested: SD
   totalReturned: SD
+  sectorBonuses: Record<string, number>
+  globalSuccessBonus: number
+  globalReturnBonus: number
+  successfulCount: number
+  failedCount: number
+}
+
+// ─── Storage Wars (export state) ────────────────────────────────────
+
+export interface StorageStateSave {
+  [key: string]: unknown
 }
 
 // ─── Gambling ───────────────────────────────────────────────────────
@@ -330,9 +452,9 @@ export interface GameSave {
   cryptoMarketState: unknown
 
   // Real estate — uses exportState() which returns a full state object
-  realEstate: unknown
+  realEstate: RealEstateStateSave | PropertySave[]
   // Startups — uses exportState() which returns a full state object
-  startups: unknown
+  startups: StartupStateSave
 
   gambling: GamblingSave
   upgrades: UpgradeNodeSave[]
@@ -343,9 +465,12 @@ export interface GameSave {
   eventState: EventsSave
 
   /** Loan system state */
-  loans: unknown
+  loans: LoansSave
   /** Deposit system state */
-  deposits: unknown
+  deposits: DepositsSave
+
+  /** Storage Wars state */
+  storage?: StorageStateSave
 
   settings: SettingsSave
 }
@@ -408,9 +533,31 @@ export function createDefaultSave(): GameSave {
     },
     cryptoMarketState: null,
 
-    realEstate: { properties: [], opportunities: [] },
+    realEstate: {
+      properties: [],
+      opportunities: [],
+      lastRefreshTick: 0,
+      scannedDistricts: [],
+      totalPropertiesBought: 0,
+      totalPropertiesSold: 0,
+      totalRentEarned: ZERO_SD,
+      totalMaintenancePaid: ZERO_SD,
+      totalSaleProfit: ZERO_SD,
+      totalImprovementsInstalled: 0
+    },
 
-    startups: { investments: [], opportunities: [], lastRefreshTick: 0 },
+    startups: {
+      investments: [],
+      opportunities: [],
+      lastRefreshTick: 0,
+      totalInvested: ZERO_SD,
+      totalReturned: ZERO_SD,
+      sectorBonuses: {},
+      globalSuccessBonus: 0,
+      globalReturnBonus: 0,
+      successfulCount: 0,
+      failedCount: 0
+    },
 
     gambling: {
       totalBet: ZERO_SD,
@@ -444,8 +591,27 @@ export function createDefaultSave(): GameSave {
       totalTicks: 0
     },
 
-    loans: { loans: [], creditScore: 50, loanHistory: [] },
-    deposits: { deposits: [], depositHistory: [] },
+    loans: {
+      loans: [],
+      creditScore: 50,
+      creditScoreFactors: { paymentHistory: 10, creditUtilization: 30, creditAge: 0, creditMix: 0, newCredit: 10 },
+      loanHistory: [],
+      totalTicksWithCredit: 0,
+      recentApplications: [],
+      totalLoansTaken: 0,
+      totalLoansRepaidOnTime: 0,
+      totalLoansDefaulted: 0,
+      totalInterestPaidEver: ZERO_SD
+    },
+    deposits: {
+      deposits: [],
+      depositHistory: [],
+      totalDeposited: ZERO_SD,
+      totalInterestEarnedEver: ZERO_SD,
+      totalDepositsOpened: 0,
+      totalDepositsMatured: 0,
+      totalEarlyWithdrawals: 0
+    },
 
     settings: {
       locale: 'en',

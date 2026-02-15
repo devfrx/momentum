@@ -107,6 +107,8 @@ export function ceil(value: Decimal): Decimal {
 
 /** Portable shape for JSON serialization of a Decimal */
 export interface SerializedDecimal {
+  /** Discriminant tag — distinguishes from arbitrary {m, e} objects */
+  __d: 1
   /** mantissa */
   m: number
   /** exponent */
@@ -115,7 +117,7 @@ export interface SerializedDecimal {
 
 /** Serialize a Decimal for JSON storage */
 export function serializeDecimal(d: Decimal): SerializedDecimal {
-  return { m: d.mantissa, e: d.exponent }
+  return { __d: 1, m: d.mantissa, e: d.exponent }
 }
 
 /** Deserialize a SerializedDecimal back to a Decimal */
@@ -134,9 +136,9 @@ export function hydrateDecimals<T>(obj: T): T {
   // Check if this object itself is a SerializedDecimal
   const raw = obj as Record<string, unknown>
   if (
-    typeof raw.m === 'number' &&
-    typeof raw.e === 'number' &&
-    Object.keys(raw).length === 2
+    (raw.__d === 1 && typeof raw.m === 'number' && typeof raw.e === 'number') ||
+    // Backward compat: legacy saves without __d discriminant (exactly 2 keys: m, e)
+    (typeof raw.m === 'number' && typeof raw.e === 'number' && Object.keys(raw).length === 2)
   ) {
     return deserializeDecimal(raw as unknown as SerializedDecimal) as unknown as T
   }

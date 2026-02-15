@@ -33,8 +33,15 @@ function createWindow(): void {
   // Ensure the renderer saves state before the window actually closes
   mainWindow.on('close', (e) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      // Send a signal to the renderer to trigger a save
+      e.preventDefault()
+      // Send a signal to the renderer to trigger a save, then close
       mainWindow.webContents.send('app:before-close')
+      // Give the renderer time to save, then force close
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.destroy()
+        }
+      }, 1500)
     }
   })
 
@@ -87,8 +94,10 @@ app.whenReady().then(async () => {
   })
 
   // Initialize database
+  let dbReady = false
   try {
     await initDatabase()
+    dbReady = true
     console.log('[DB] Database initialized')
   } catch (err) {
     console.error('[DB] Failed to initialize database:', err)
@@ -96,8 +105,12 @@ app.whenReady().then(async () => {
 
   // Register all IPC handlers
   registerWindowIpc()
-  registerSaveIpc()
-  registerCloudIpc()
+  if (dbReady) {
+    registerSaveIpc()
+    registerCloudIpc()
+  } else {
+    console.error('[DB] Save/Cloud IPC handlers not registered due to DB init failure')
+  }
 
   createWindow()
 

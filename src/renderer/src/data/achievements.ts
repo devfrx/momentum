@@ -51,7 +51,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   // Business milestones
   { id: 'biz_1', name: 'Entrepreneur', description: 'Own 1 business.', icon: 'mdi:store', category: 'Business', condition: { type: 'businesses', value: 1 } },
   { id: 'biz_2', name: 'Business Mogul', description: 'Own 5 businesses.', icon: 'mdi:domain', category: 'Business', condition: { type: 'businesses', value: 5 } },
-  { id: 'biz_3', name: 'Tycoon', description: 'Own all businesses.', icon: 'mdi:city', category: 'Business', condition: { type: 'businesses', value: 12 }, reward: { type: 'multiplier', target: 'all_income', value: 2 } },
+  { id: 'biz_3', name: 'Tycoon', description: 'Own all businesses.', icon: 'mdi:city', category: 'Business', condition: { type: 'businesses', value: 13 }, reward: { type: 'multiplier', target: 'all_income', value: 2 } },
 
   // Prestige milestones
   { id: 'pres_1', name: 'New Era', description: 'Expand to a new era for the first time.', icon: 'mdi:refresh', category: 'Prestige', condition: { type: 'prestige', value: 1 } },

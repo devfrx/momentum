@@ -14,6 +14,7 @@ import TradePanel from '@renderer/components/market/TradePanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import { EventImpactBanner } from '@renderer/components/events'
 import { useI18n } from 'vue-i18n'
 
 const stocks = useStockStore()
@@ -150,6 +151,9 @@ const stockInfoSections = computed<InfoSection[]>(() => [
                     size="small" outlined @click="showCharts = !showCharts" />
             </div>
         </div>
+
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="stocks" />
 
         <!-- Stats Bar -->
         <MarketStats :portfolio-value="stocks.totalPortfolioValue" :unrealized-profit="stocks.unrealizedProfit"

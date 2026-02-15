@@ -13,6 +13,7 @@ import ImprovementShop from '@renderer/components/realestate/ImprovementShop.vue
 import PropertyCustomizer from '@renderer/components/realestate/PropertyCustomizer.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import Dialog from 'primevue/dialog'
+import { EventImpactBanner } from '@renderer/components/events'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 
@@ -151,6 +152,9 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
             </div>
         </div>
 
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="realestate" />
+
         <!-- Stats Bar -->
         <div class="stats-bar">
             <div class="stat-chip">
@@ -192,7 +196,7 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
                 <AppIcon icon="mdi:briefcase-outline" />
                 <span>{{ t('realestate.tab.portfolio') }}</span>
                 <span v-if="realEstate.properties.length > 0" class="tab-badge">{{ realEstate.properties.length
-                    }}</span>
+                }}</span>
             </button>
         </div>
 

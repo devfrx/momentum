@@ -76,9 +76,21 @@ export const useAchievementStore = defineStore('achievements', () => {
 
   // Achievements persist across prestige (never reset)
 
+  /** Restore achievement state from a save */
+  function loadFromSave(savedAchievements: Array<{ id: string; unlocked?: boolean; unlockedAtTick?: number | null }>): void {
+    if (!Array.isArray(savedAchievements)) return
+    for (const saved of savedAchievements) {
+      const ach = achievements.value.find((a) => a.id === saved.id)
+      if (ach) {
+        ach.unlocked = saved.unlocked ?? false
+        ach.unlockedAtTick = saved.unlockedAtTick ?? null
+      }
+    }
+  }
+
   return {
     achievements, recentUnlocks,
     unlockedCount, totalCount, completionPercent,
-    initAchievements, unlock, popRecentUnlock, isUnlocked
+    initAchievements, unlock, popRecentUnlock, isUnlocked, loadFromSave
   }
 })

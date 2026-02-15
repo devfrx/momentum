@@ -65,10 +65,21 @@ export const useEventStore = defineStore('events', () => {
     return eventSystem
   }
 
+  /** Restore event state from a save */
+  function loadFromSave(savedState: unknown): void {
+    if (!savedState || typeof savedState !== 'object') return
+    try {
+      eventSystem.setState(savedState as Parameters<EventSystem['setState']>[0])
+      syncState()
+    } catch (e) {
+      console.warn('[EventStore] Failed to restore event state:', e)
+    }
+  }
+
   return {
     activeEvents, pendingChoices, recentEvents,
     hasActiveEvents, hasPendingChoices,
     initEvents, tick, acceptChoice, declineChoice,
-    getMultiplier, popRecentEvent, getSystem
+    getMultiplier, popRecentEvent, getSystem, loadFromSave
   }
 })

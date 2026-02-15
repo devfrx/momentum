@@ -18,6 +18,7 @@ import { useI18n } from 'vue-i18n'
 import { useOnTick } from '@renderer/composables/useGameLoop'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { D } from '@renderer/core/BigNum'
+import { EventImpactBanner } from '@renderer/components/events'
 import {
     LOANS,
     LOAN_CATEGORY_META,
@@ -251,6 +252,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
             </div>
         </div>
 
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="loans" />
+
         <!-- Stats Bar -->
         <div class="stats-bar">
             <div class="stat-chip bonus-chip">
@@ -311,7 +315,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                         <div class="sidebar-stat">
                             <span class="sidebar-stat-label">{{ $t('loans.total_interest_paid') }}</span>
                             <span class="sidebar-stat-value text-warning">{{ formatCash(loanStore.totalInterestPaidEver)
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
@@ -374,9 +378,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                                     </div>
                                     <div class="history-details">
                                         <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                            }}</span>
+                                        }}</span>
                                         <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                            }} {{ entry.latePayments
+                                        }} {{ entry.latePayments
                                             }}</span>
                                         <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                     </div>

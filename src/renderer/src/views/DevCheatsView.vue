@@ -15,7 +15,7 @@ import { useEventStore } from '@renderer/stores/useEventStore'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useFormat } from '@renderer/composables/useFormat'
-import { D, ZERO } from '@renderer/core/BigNum'
+import { D } from '@renderer/core/BigNum'
 import { BUSINESS_DEFS } from '@renderer/data/businesses'
 import { SECTORS, STAGES, TRAITS } from '@renderer/data/startups'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -366,7 +366,6 @@ function clearAllDeposits() {
 function repairAllProperties() {
     for (const prop of realEstate.properties) {
         prop.condition = 100
-        prop.repairCost = ZERO
     }
     addLog(`Repaired ${realEstate.properties.length} properties`)
 }
@@ -374,7 +373,6 @@ function repairAllProperties() {
 function maxOccupancyAll() {
     for (const prop of realEstate.properties) {
         prop.occupancy = 1.0
-        prop.occupiedUnits = prop.units
     }
     addLog('All properties at 100% occupancy')
 }
@@ -608,9 +606,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                                }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                         }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                                }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -628,7 +626,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                        }}%</span>
+                            }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -751,7 +749,7 @@ const multiplierInfo = computed(() => {
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                            }}</span>
+                        }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
                 </div>

@@ -614,11 +614,6 @@ export const useLoanStore = defineStore('loans', () => {
       loan.ticksActive++
       loan.ticksSinceLastPayment++
 
-      // Track credit history age
-      if (loans.value.length > 0) {
-        totalTicksWithCredit.value++
-      }
-
       // Check for missed payment (if amortized loan)
       const def = LOANS.find(l => l.id === loan.loanDefId)
       if (def && def.termTicks > 0) {
@@ -660,6 +655,11 @@ export const useLoanStore = defineStore('loans', () => {
           handleMarginCall(loan)
         }
       }
+    }
+
+    // Track credit history age (once per tick, not per loan)
+    if (loans.value.length > 0) {
+      totalTicksWithCredit.value++
     }
 
     // Update credit factors periodically

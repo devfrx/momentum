@@ -8,6 +8,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   // ─── Local Save/Load ────────────────────────────────────────────
   saveLocal: (partialState?: unknown) => ipcRenderer.invoke('save:local', partialState),
+  saveLocalSync: () => ipcRenderer.sendSync('save:sync') as { success: boolean; error?: string },
   loadLocal: () => ipcRenderer.invoke('save:load'),
   resetSave: () => ipcRenderer.invoke('save:reset'),
   exportFile: () => ipcRenderer.invoke('save:exportFile'),
@@ -32,7 +33,9 @@ const api = {
 
   // ─── App lifecycle ────────────────────────────────────────────
   onBeforeClose: (callback: () => void) => {
-    ipcRenderer.on('app:before-close', () => callback())
+    // Remove any previous listener to prevent accumulation on re-mount
+    ipcRenderer.removeAllListeners('app:before-close')
+    ipcRenderer.once('app:before-close', () => callback())
   }
 }
 

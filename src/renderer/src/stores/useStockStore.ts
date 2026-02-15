@@ -159,10 +159,13 @@ export const useStockStore = defineStore('stocks', () => {
     const player = usePlayerStore()
     const upgrades = useUpgradeStore()
     const baseRevenue = D(asset.currentPrice * shareCount)
-    // Apply stock_returns skill multiplier to revenue
-    const revenue = mul(baseRevenue, upgrades.getMultiplier('stock_returns'))
     const costBasis = D(pos.averageBuyPrice * shareCount)
-    const profit = sub(revenue, costBasis)
+    const baseProfit = baseRevenue.sub(costBasis)
+    // Apply stock_returns skill multiplier to profit only (not gross revenue)
+    // If profit is positive, multiply it; if negative, leave unchanged
+    const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, upgrades.getMultiplier('stock_returns')) : baseProfit
+    const revenue = baseRevenue.add(multipliedProfit.sub(baseProfit))
+    const profit = multipliedProfit
     totalRealizedProfit.value = add(totalRealizedProfit.value, profit)
     
     // Add revenue to player cash
@@ -195,6 +198,50 @@ export const useStockStore = defineStore('stocks', () => {
     return simulator
   }
 
+  /** Restore stock state from saved data */
+  function loadFromSave(saved: {
+    stockPortfolio?: Array<{ assetId: string; shares: number; averageBuyPrice: number; totalInvested: Decimal }>
+    stockStats?: { totalRealizedProfit?: Decimal; totalDividendsEarned?: Decimal }
+    stockMarketState?: unknown
+  }): void {
+    // Restore portfolio positions
+    if (saved.stockPortfolio && Array.isArray(saved.stockPortfolio)) {
+      for (const savedPos of saved.stockPortfolio) {
+        const existingPos = portfolio.value.find((p) => p.assetId === savedPos.assetId)
+        if (existingPos) {
+          existingPos.shares = savedPos.shares ?? 0
+          existingPos.averageBuyPrice = savedPos.averageBuyPrice ?? 0
+          existingPos.totalInvested = savedPos.totalInvested ?? existingPos.totalInvested
+        } else if (savedPos.shares > 0) {
+          portfolio.value.push({
+            assetId: savedPos.assetId,
+            shares: savedPos.shares,
+            averageBuyPrice: savedPos.averageBuyPrice,
+            totalInvested: savedPos.totalInvested
+          })
+        }
+      }
+    }
+    // Restore stats
+    if (saved.stockStats) {
+      if (saved.stockStats.totalRealizedProfit !== undefined) {
+        totalRealizedProfit.value = saved.stockStats.totalRealizedProfit
+      }
+      if (saved.stockStats.totalDividendsEarned !== undefined) {
+        totalDividendsEarned.value = saved.stockStats.totalDividendsEarned
+      }
+    }
+    // Restore market simulator state
+    if (saved.stockMarketState) {
+      try {
+        simulator.deserialize(saved.stockMarketState as Parameters<MarketSimulator['deserialize']>[0])
+        assets.value = [...simulator.getAllAssets()]
+      } catch (e) {
+        console.warn('[StockStore] Failed to restore market state:', e)
+      }
+    }
+  }
+
   return {
     configs,
     portfolio,
@@ -211,6 +258,7 @@ export const useStockStore = defineStore('stocks', () => {
     sellShares,
     getPosition,
     prestigeReset,
-    getSimulator
+    getSimulator,
+    loadFromSave
   }
 })

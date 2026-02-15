@@ -12,7 +12,7 @@ import BusinessMilestoneList from './BusinessMilestoneList.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 import { mul } from '@renderer/core/BigNum'
-import { MEGA_CORP_REQUIREMENTS, getGeoTier } from '@renderer/data/businesses'
+import { getGeoTier } from '@renderer/data/businesses'
 
 const props = defineProps<{
     business: OwnedBusiness
@@ -318,7 +318,7 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.wages') }}</span>
                                 <span class="d-value">${{ (business.employees * business.baseSalary).toFixed(2)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.rent') }}</span>
@@ -327,7 +327,7 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.supplies') }}</span>
                                 <span class="d-value">${{ (business.supplyCostPerUnit * business.unitsSold).toFixed(2)
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                     </div>

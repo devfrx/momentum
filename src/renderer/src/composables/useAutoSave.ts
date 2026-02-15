@@ -328,7 +328,21 @@ export function useAutoSave() {
   }
 
   function handleBeforeUnload(): void {
-    save()
+    // Use synchronous IPC to guarantee the save completes before the page unloads.
+    // Async save() cannot finish in time because the browser may abort it.
+    if (_resetting || !window.api?.saveLocalSync) {
+      // Fallback: attempt async save (best-effort)
+      save()
+      return
+    }
+    try {
+      // Collect and persist state synchronously via the main process
+      const state = collectGameState()
+      window.api.saveLocal(state) // queue the state update (async, but data is serialized now)
+      window.api.saveLocalSync()  // synchronous disk write
+    } catch (e) {
+      console.error('[AutoSave] Sync save on beforeunload failed:', e)
+    }
   }
 
   onMounted(() => {

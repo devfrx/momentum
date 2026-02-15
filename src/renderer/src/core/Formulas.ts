@@ -214,15 +214,26 @@ export function loanPaymentPerTick(
     return div(principal, n)
   }
 
-  // Standard amortization formula
+  // Standard amortization formula — use logarithms to avoid overflow for large n
   const onePlusR = 1 + r
-  const onePlusRtoN = Math.pow(onePlusR, n)
+  const logOnePlusR = Math.log(onePlusR)
+  const nLogOnePlusR = n * logOnePlusR
+
+  // For very large exponents (>700), Math.exp overflows to Infinity
+  // In that case, the payment approaches r × principal (interest-only)
+  if (nLogOnePlusR > 700) {
+    return mul(principal, r)
+  }
+
+  const onePlusRtoN = Math.exp(nLogOnePlusR)
   const numerator = r * onePlusRtoN
   const denominator = onePlusRtoN - 1
 
-  if (denominator <= 0) return div(principal, n)
+  if (!Number.isFinite(denominator) || denominator <= 0) return div(principal, n)
 
   const paymentFactor = numerator / denominator
+  if (!Number.isFinite(paymentFactor)) return mul(principal, r)
+
   return mul(principal, paymentFactor)
 }
 

@@ -74,7 +74,7 @@ function drawCard(hidden = false): CardData {
  * Draw a card with luck - if the card would bust the player, luck gives a chance to redraw.
  * Luck can only trigger once per hand.
  */
-function drawCardWithLuck(currentScore: number): CardData {
+function drawCardWithLuck(): CardData {
     const card = drawCard()
     // Check if this card would ACTUALLY bust (accounting for soft aces)
     const wouldBustScore = calcScore([...playerCards, card])
@@ -182,8 +182,8 @@ function deal(): void {
     if (isPlayerBlackjack.value) {
         revealDealer()
         if (isDealerBlackjack.value) {
-            // Dealer blackjack beats player blackjack
-            settleRound('dealer')
+            // Both have blackjack — push (tie)
+            settleRound('push')
         } else {
             settleRound('blackjack')
         }
@@ -193,8 +193,7 @@ function deal(): void {
 // ─── Player actions ──────────────────────────────────────────
 function hit(): void {
     if (!canHit.value) return
-    const currentScore = calcScore(playerCards)
-    playerCards.push(drawCardWithLuck(currentScore))
+    playerCards.push(drawCardWithLuck())
     if (playerBust.value) {
         revealDealer()
         settleRound('bust')
@@ -212,8 +211,7 @@ function doubleDown(): void {
     if (!player.spendCash(currentBet.value)) return
     currentBet.value = add(currentBet.value, currentBet.value)
     doubled.value = true
-    const currentScore = calcScore(playerCards)
-    playerCards.push(drawCardWithLuck(currentScore))
+    playerCards.push(drawCardWithLuck())
     if (playerBust.value) {
         revealDealer()
         settleRound('bust')

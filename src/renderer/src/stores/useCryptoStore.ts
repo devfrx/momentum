@@ -104,10 +104,12 @@ export const useCryptoStore = defineStore('crypto', () => {
     const player = usePlayerStore()
     const upgrades = useUpgradeStore()
     const baseRevenue = D(asset.currentPrice * amount)
-    // Apply crypto_returns skill multiplier to revenue
-    const revenue = mul(baseRevenue, upgrades.getMultiplier('crypto_returns'))
     const costBasis = D(holding.averageBuyPrice * amount)
-    totalRealizedProfit.value = add(totalRealizedProfit.value, sub(revenue, costBasis))
+    const baseProfit = baseRevenue.sub(costBasis)
+    // Apply crypto_returns skill multiplier to profit only (not gross revenue)
+    const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, upgrades.getMultiplier('crypto_returns')) : baseProfit
+    const revenue = baseRevenue.add(multipliedProfit.sub(baseProfit))
+    totalRealizedProfit.value = add(totalRealizedProfit.value, multipliedProfit)
     
     // Add revenue to player cash
     player.earnCash(revenue)
@@ -120,7 +122,7 @@ export const useCryptoStore = defineStore('crypto', () => {
     }
 
     // XP for selling crypto (more if profitable)
-    const profit = sub(revenue, costBasis)
+    const profit = multipliedProfit
     player.addXp(profit.gt(0) ? D(15) : D(3))
 
     return revenue
@@ -137,8 +139,49 @@ export const useCryptoStore = defineStore('crypto', () => {
 
   function getSimulator(): MarketSimulator { return simulator }
 
+  /** Restore crypto state from saved data */
+  function loadFromSave(saved: {
+    cryptoWallet?: Array<{ assetId: string; amount: number; averageBuyPrice: number; totalInvested: Decimal }>
+    cryptoStats?: { totalRealizedProfit?: Decimal }
+    cryptoMarketState?: unknown
+  }): void {
+    // Restore wallet holdings
+    if (saved.cryptoWallet && Array.isArray(saved.cryptoWallet)) {
+      for (const savedHolding of saved.cryptoWallet) {
+        const existing = wallet.value.find((h) => h.assetId === savedHolding.assetId)
+        if (existing) {
+          existing.amount = savedHolding.amount ?? 0
+          existing.averageBuyPrice = savedHolding.averageBuyPrice ?? 0
+          existing.totalInvested = savedHolding.totalInvested ?? existing.totalInvested
+        } else if (savedHolding.amount > 0) {
+          wallet.value.push({
+            assetId: savedHolding.assetId,
+            amount: savedHolding.amount,
+            averageBuyPrice: savedHolding.averageBuyPrice,
+            totalInvested: savedHolding.totalInvested
+          })
+        }
+      }
+    }
+    // Restore stats
+    if (saved.cryptoStats) {
+      if (saved.cryptoStats.totalRealizedProfit !== undefined) {
+        totalRealizedProfit.value = saved.cryptoStats.totalRealizedProfit
+      }
+    }
+    // Restore market simulator state
+    if (saved.cryptoMarketState) {
+      try {
+        simulator.deserialize(saved.cryptoMarketState as Parameters<MarketSimulator['deserialize']>[0])
+        assets.value = [...simulator.getAllAssets()]
+      } catch (e) {
+        console.warn('[CryptoStore] Failed to restore market state:', e)
+      }
+    }
+  }
+
   return {
     wallet, assets, totalRealizedProfit, totalWalletValue, unrealizedProfit,
-    initCryptos, tick, buyCrypto, sellCrypto, getHolding, prestigeReset, getSimulator
+    initCryptos, tick, buyCrypto, sellCrypto, getHolding, prestigeReset, getSimulator, loadFromSave
   }
 })

@@ -3,6 +3,7 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 interface GameAPI {
   // Local save/load
   saveLocal: (partialState?: unknown) => Promise<{ success: boolean; error?: string }>
+  saveLocalSync: () => { success: boolean; error?: string }
   loadLocal: () => Promise<{ success: boolean; data?: unknown; error?: string }>
   resetSave: () => Promise<{ success: boolean; data?: unknown; error?: string }>
   exportFile: () => Promise<{ success: boolean; path?: string; error?: string }>

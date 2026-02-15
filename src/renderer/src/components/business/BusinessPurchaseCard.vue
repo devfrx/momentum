@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, withDefaults } from 'vue'
+import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'

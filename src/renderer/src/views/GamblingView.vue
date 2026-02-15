@@ -9,6 +9,7 @@ import { GameCard, SlotMachine, RouletteGame, CoinFlip, BlackjackGame, DiceGame,
 import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
+import { EventImpactBanner } from '@renderer/components/events'
 
 const gambling = useGamblingStore()
 const player = usePlayerStore()
@@ -202,6 +203,9 @@ const gamblingInfoSections = computed<InfoSection[]>(() => [
                 </div>
                 <CashDisplay :label="$t('gambling.balance')" :value="formatCash(player.cash)" />
             </div>
+
+            <!-- Event Impact -->
+            <EventImpactBanner route-name="gambling" />
 
             <!-- Stats Ribbon -->
             <div class="stats-bar">

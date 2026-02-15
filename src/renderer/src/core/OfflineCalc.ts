@@ -142,7 +142,7 @@ function formatDuration(seconds: number): string {
   const secs = Math.floor(seconds % 60)
 
   const parts: string[] = []
-  if (days > 0) parts.push(`${days}g`)
+  if (days > 0) parts.push(`${days}d`)
   if (hours > 0) parts.push(`${hours}h`)
   if (minutes > 0) parts.push(`${minutes}m`)
   if (parts.length === 0) parts.push(`${secs}s`)

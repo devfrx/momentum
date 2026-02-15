@@ -13,6 +13,7 @@ import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import { EventImpactBanner } from '@renderer/components/events'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useI18n } from 'vue-i18n'
 
@@ -139,6 +140,9 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
                     size="small" outlined @click="showCharts = !showCharts" />
             </div>
         </div>
+
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="crypto" />
 
         <!-- Volatility Warning -->
         <div class="alert-box alert-box-warning">

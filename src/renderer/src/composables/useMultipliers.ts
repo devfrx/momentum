@@ -292,7 +292,7 @@ export function useMultipliers() {
             raw: D(1 + eraBonus),
           })
         }
-        const basePM = D(1).add(mul(prestige.points, 0.0003))
+        const basePM = D(1).add(mul(prestige.points, 0.1))
         if (basePM.gt(1)) {
           sources.push({
             sourceKey: 'multipliers.source_prestige_points',

@@ -626,7 +626,8 @@ export const useBusinessStore = defineStore('business', () => {
       )
       const costRedTotal = costReductionMul.toNumber() * upgCostRedMult * (1 + msBonus.cost_reduction)
       const afterCostRed = costRedTotal > 1 ? div(baseCosts, D(costRedTotal)) : baseCosts
-      const costs = advCostReduction > 0 ? mul(afterCostRed, D(1 - Math.min(0.9, advCostReduction))) : afterCostRed
+      const afterEventCosts = mul(afterCostRed, bizEventCostMul)
+      const costs = advCostReduction > 0 ? mul(afterEventCosts, D(1 - Math.min(0.9, advCostReduction))) : afterEventCosts
 
       // ── Profit ──
       const profit = sub(revenue, costs)

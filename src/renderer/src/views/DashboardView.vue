@@ -9,6 +9,7 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import MultiplierStats from '@renderer/components/dashboard/MultiplierStats.vue'
 import { JOBS } from '@renderer/data/jobs'
 import Button from 'primevue/button'
+import { EventImpactBanner } from '@renderer/components/events'
 
 const player = usePlayerStore()
 const jobStore = useJobStore()
@@ -43,6 +44,9 @@ function toggleJob(defId: string): void {
 
 <template>
     <div class="dashboard">
+        <!-- Event Impact -->
+        <EventImpactBanner route-name="dashboard" />
+
         <!-- ═══ Hero Section ═══ -->
         <section class="hero-section">
             <div class="hero-left">

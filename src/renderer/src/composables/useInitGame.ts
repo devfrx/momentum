@@ -21,7 +21,7 @@ import { useEventStore } from '@renderer/stores/useEventStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
-import { D, hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
+import { hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { calculateOfflineProgress, type OfflineSummary } from '@renderer/core/OfflineCalc'
@@ -118,80 +118,19 @@ export function useInitGame() {
           economySim.deserialize(save.economy)
         }
 
-        // Restore stock portfolio
-        if (save.stockPortfolio && Array.isArray(save.stockPortfolio)) {
-          for (const savedPos of save.stockPortfolio) {
-            const existingPos = stocks.portfolio.find((p) => p.assetId === savedPos.assetId)
-            if (existingPos) {
-              existingPos.shares = savedPos.shares ?? 0
-              existingPos.averageBuyPrice = savedPos.averageBuyPrice ?? 0
-              existingPos.totalInvested = savedPos.totalInvested ?? existingPos.totalInvested
-            } else if (savedPos.shares > 0) {
-              stocks.portfolio.push({
-                assetId: savedPos.assetId,
-                shares: savedPos.shares,
-                averageBuyPrice: savedPos.averageBuyPrice,
-                totalInvested: savedPos.totalInvested
-              })
-            }
-          }
-        }
+        // Restore stock state (portfolio, stats, market simulator)
+        stocks.loadFromSave({
+          stockPortfolio: save.stockPortfolio,
+          stockStats: save.stockStats,
+          stockMarketState: save.stockMarketState
+        })
 
-        // Restore stock stats
-        if (save.stockStats) {
-          if (save.stockStats.totalRealizedProfit !== undefined) {
-            stocks.totalRealizedProfit = save.stockStats.totalRealizedProfit
-          }
-          if (save.stockStats.totalDividendsEarned !== undefined) {
-            stocks.totalDividendsEarned = save.stockStats.totalDividendsEarned
-          }
-        }
-
-        // Restore stock market state
-        if (save.stockMarketState) {
-          try {
-            stocks.getSimulator().deserialize(save.stockMarketState)
-            stocks.assets = [...stocks.getSimulator().getAllAssets()]
-          } catch (e) {
-            console.warn('[Init] Failed to restore stock market state:', e)
-          }
-        }
-
-        // Restore crypto wallet
-        if (save.cryptoWallet && Array.isArray(save.cryptoWallet)) {
-          for (const savedHolding of save.cryptoWallet) {
-            const existingHolding = crypto.wallet.find((h) => h.assetId === savedHolding.assetId)
-            if (existingHolding) {
-              existingHolding.amount = savedHolding.amount ?? 0
-              existingHolding.averageBuyPrice = savedHolding.averageBuyPrice ?? 0
-              existingHolding.totalInvested = savedHolding.totalInvested ?? existingHolding.totalInvested
-            } else if (savedHolding.amount > 0) {
-              crypto.wallet.push({
-                assetId: savedHolding.assetId,
-                amount: savedHolding.amount,
-                averageBuyPrice: savedHolding.averageBuyPrice,
-                totalInvested: savedHolding.totalInvested
-              })
-            }
-          }
-        }
-
-        // Restore crypto stats
-        if (save.cryptoStats) {
-          if (save.cryptoStats.totalRealizedProfit !== undefined) {
-            crypto.totalRealizedProfit = save.cryptoStats.totalRealizedProfit
-          }
-        }
-
-        // Restore crypto market state
-        if (save.cryptoMarketState) {
-          try {
-            crypto.getSimulator().deserialize(save.cryptoMarketState)
-            crypto.assets = [...crypto.getSimulator().getAllAssets()]
-          } catch (e) {
-            console.warn('[Init] Failed to restore crypto market state:', e)
-          }
-        }
+        // Restore crypto state (wallet, stats, market simulator)
+        crypto.loadFromSave({
+          cryptoWallet: save.cryptoWallet,
+          cryptoStats: save.cryptoStats,
+          cryptoMarketState: save.cryptoMarketState
+        })
 
         // Restore real estate (handles both old array format and new object format)
         if (save.realEstate) {
@@ -214,13 +153,7 @@ export function useInitGame() {
 
         // Restore upgrades
         if (save.upgrades && Array.isArray(save.upgrades)) {
-          for (const savedUpgrade of save.upgrades) {
-            const upgrade = upgrades.nodes.find((u) => u.id === savedUpgrade.id)
-            if (upgrade) {
-              upgrade.purchased = savedUpgrade.purchased ?? false
-              upgrade.level = savedUpgrade.level ?? (savedUpgrade.purchased ? 1 : 0)
-            }
-          }
+          upgrades.loadFromSave(save.upgrades)
         }
 
         // Restore settings
@@ -230,13 +163,7 @@ export function useInitGame() {
 
         // Restore achievements
         if (save.achievements && Array.isArray(save.achievements)) {
-          for (const savedAch of save.achievements) {
-            const ach = achievements.achievements.find((a) => a.id === savedAch.id)
-            if (ach) {
-              ach.unlocked = savedAch.unlocked ?? false
-              ach.unlockedAtTick = savedAch.unlockedAtTick ?? null
-            }
-          }
+          achievements.loadFromSave(save.achievements)
         }
 
         // Restore gambling stats
@@ -261,11 +188,7 @@ export function useInitGame() {
 
         // Restore event system state
         if (save.eventState) {
-          try {
-            events.getSystem().setState(save.eventState)
-          } catch (e) {
-            console.warn('[Init] Failed to restore event state:', e)
-          }
+          events.loadFromSave(save.eventState)
         }
 
         // Calculate offline progress
@@ -276,11 +199,7 @@ export function useInitGame() {
             // Apply offline_efficiency skill tree multiplier
             offlineEff *= upgrades.getMultiplier('offline_efficiency').toNumber()
             // Apply prestige offline_bonus (additive per level)
-            for (const upg of prestige.upgrades) {
-              if (upg.level > 0 && upg.effectType === 'offline_bonus') {
-                offlineEff += upg.effectValue * upg.level
-              }
-            }
+            offlineEff += prestige.getTotalEffect('offline_bonus')
             // Cap at 100%
             offlineEff = Math.min(offlineEff, 1.0)
 
@@ -312,23 +231,37 @@ export function useInitGame() {
                 player.earnCash(summary.cashEarned)
               }
 
-              // Apply deposit interest (add to deposit balances)
+              // Apply deposit interest (add to deposit balances, weighted by balance × APY)
               if (summary.depositInterest.gt(0)) {
+                let totalWeight = ZERO
                 for (const dep of depositStore.deposits) {
-                  const ratio = dep.currentBalance.div(depositStore.totalLockedBalance.gt(0) ? depositStore.totalLockedBalance : D(1))
-                  const share = mul(summary.depositInterest, ratio)
-                  dep.currentBalance = add(dep.currentBalance, share)
-                  dep.totalInterestEarned = add(dep.totalInterestEarned, share)
+                  totalWeight = add(totalWeight, mul(dep.currentBalance, dep.effectiveAPY))
+                }
+                if (totalWeight.gt(0)) {
+                  for (const dep of depositStore.deposits) {
+                    const weight = mul(dep.currentBalance, dep.effectiveAPY)
+                    const ratio = weight.div(totalWeight)
+                    const share = mul(summary.depositInterest, ratio)
+                    dep.currentBalance = add(dep.currentBalance, share)
+                    dep.totalInterestEarned = add(dep.totalInterestEarned, share)
+                  }
                 }
               }
 
-              // Apply loan interest (add to loan remaining balances)
+              // Apply loan interest (add to loan remaining balances, weighted by remaining × rate)
               if (summary.loanInterestPaid.gt(0)) {
+                let totalWeight = ZERO
                 for (const loan of loanStore.loans) {
-                  const ratio = loan.remaining.div(loanStore.totalDebt.gt(0) ? loanStore.totalDebt : D(1))
-                  const share = mul(summary.loanInterestPaid, ratio)
-                  loan.remaining = add(loan.remaining, share)
-                  loan.totalInterestPaid = add(loan.totalInterestPaid, share)
+                  totalWeight = add(totalWeight, mul(loan.remaining, loan.effectiveRate))
+                }
+                if (totalWeight.gt(0)) {
+                  for (const loan of loanStore.loans) {
+                    const weight = mul(loan.remaining, loan.effectiveRate)
+                    const ratio = weight.div(totalWeight)
+                    const share = mul(summary.loanInterestPaid, ratio)
+                    loan.remaining = add(loan.remaining, share)
+                    loan.totalInterestPaid = add(loan.totalInterestPaid, share)
+                  }
                 }
               }
 

@@ -31,18 +31,23 @@ export interface GameEngineOptions {
 // ─── Engine ─────────────────────────────────────────────────────────
 
 export class GameEngine {
-  private intervalId: ReturnType<typeof setInterval> | null = null
+  private intervalId: ReturnType<typeof setTimeout> | null = null
   private callbacks: Map<string, TickCallback> = new Map()
   private tick = 0
   private totalTime = 0
   private lastTimestamp = 0
+  /** Accumulated real time not yet consumed by ticks (for catch-up) */
+  private accumulator = 0
   private readonly tickIntervalMs: number
   private readonly maxDelta: number
+  /** Maximum number of catch-up ticks per frame to prevent spiral of death */
+  private readonly maxCatchUpTicks: number
   private _running = false
 
   constructor(options: GameEngineOptions = {}) {
     this.tickIntervalMs = options.tickIntervalMs ?? 100
     this.maxDelta = options.maxDelta ?? 1.0 // 1 second max to prevent freezes
+    this.maxCatchUpTicks = Math.max(1, Math.floor(this.maxDelta * 1000 / this.tickIntervalMs))
   }
 
   // ─── Lifecycle ──────────────────────────────────────────────────
@@ -52,9 +57,22 @@ export class GameEngine {
     if (this._running) return
     this._running = true
     this.lastTimestamp = performance.now()
+    this.accumulator = 0
 
-    this.intervalId = setInterval(() => {
-      this.processTick()
+    this.scheduleNext()
+  }
+
+  /**
+   * Schedule the next tick using setTimeout + drift compensation.
+   * Unlike setInterval, this approach:
+   * 1. Won't silently skip ticks when the browser throttles the tab
+   * 2. Catches up missed ticks (up to maxCatchUpTicks) when returning from background
+   */
+  private scheduleNext(): void {
+    if (!this._running) return
+    this.intervalId = setTimeout(() => {
+      this.processFrame()
+      this.scheduleNext()
     }, this.tickIntervalMs)
   }
 
@@ -64,7 +82,7 @@ export class GameEngine {
     this._running = false
 
     if (this.intervalId !== null) {
-      clearInterval(this.intervalId)
+      clearTimeout(this.intervalId)
       this.intervalId = null
     }
   }
@@ -75,6 +93,7 @@ export class GameEngine {
     this.tick = 0
     this.totalTime = 0
     this.lastTimestamp = 0
+    this.accumulator = 0
   }
 
   /** Check if the engine is currently running */
@@ -130,38 +149,51 @@ export class GameEngine {
 
   // ─── Internal ───────────────────────────────────────────────────
 
-  private processTick(): void {
+  /**
+   * Process a frame: accumulate real elapsed time and run as many
+   * fixed-step ticks as needed. This catches up missed ticks when
+   * the browser throttled setTimeout (e.g. background tabs).
+   */
+  private processFrame(): void {
     const now = performance.now()
-    let delta = (now - this.lastTimestamp) / 1000 // Convert ms to seconds
+    let elapsed = (now - this.lastTimestamp) / 1000 // seconds
     this.lastTimestamp = now
 
-    // Clamp delta to prevent spiral of death
-    if (delta > this.maxDelta) {
-      delta = this.maxDelta
-    }
+    // Prevent negative deltas (system clock adjustments)
+    if (elapsed < 0) elapsed = this.tickIntervalMs / 1000
 
-    // Prevent negative deltas (can happen with system clock adjustments)
-    if (delta < 0) {
-      delta = this.tickIntervalMs / 1000
-    }
+    // Accumulate real time
+    this.accumulator += elapsed
 
-    this.tick++
-    this.totalTime += delta
+    const tickStepSeconds = this.tickIntervalMs / 1000
+    let ticksProcessed = 0
 
-    const ctx: TickContext = {
-      delta,
-      tick: this.tick,
-      totalTime: this.totalTime,
-      timestamp: now
-    }
+    // Consume accumulated time in fixed-size steps
+    while (this.accumulator >= tickStepSeconds && ticksProcessed < this.maxCatchUpTicks) {
+      this.accumulator -= tickStepSeconds
+      this.tick++
+      this.totalTime += tickStepSeconds
+      ticksProcessed++
 
-    // Call all subscribers (order determined by insertion order)
-    for (const [, callback] of this.callbacks) {
-      try {
-        callback(ctx)
-      } catch (error) {
-        console.error('[GameEngine] Error in tick callback:', error)
+      const ctx: TickContext = {
+        delta: tickStepSeconds,
+        tick: this.tick,
+        totalTime: this.totalTime,
+        timestamp: now
       }
+
+      for (const [, callback] of this.callbacks) {
+        try {
+          callback(ctx)
+        } catch (error) {
+          console.error('[GameEngine] Error in tick callback:', error)
+        }
+      }
+    }
+
+    // If we hit the catch-up cap, drain excess accumulator to prevent infinite growth
+    if (this.accumulator > tickStepSeconds * this.maxCatchUpTicks) {
+      this.accumulator = 0
     }
   }
 
