@@ -21,6 +21,7 @@ import { useEventStore } from '@renderer/stores/useEventStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
+import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { economySim } from '@renderer/core/EconomySim'
 import { dehydrateDecimals } from '@renderer/core/BigNum'
@@ -85,6 +86,7 @@ export function useAutoSave() {
     const loanStore = useLoanStore()
     const depositStore = useDepositStore()
     const storageStore = useStorageStore()
+    const blackmarketStore = useBlackMarketStore()
 
     return dehydrateDecimals({
       version: 2,
@@ -263,6 +265,9 @@ export function useAutoSave() {
 
       // Storage Wars state
       storage: storageStore.exportState(),
+
+      // Black Market state
+      blackmarket: blackmarketStore.exportState(),
 
       // Settings
       settings: {

@@ -22,6 +22,7 @@ import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
+import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 
 
 // Data imports
@@ -57,6 +58,7 @@ export function useGameLoop() {
     const loans = useLoanStore()
     const deposits = useDepositStore()
     const storage = useStorageStore()
+    const blackmarket = useBlackMarketStore()
 
     // ─── Initialize game data from static definitions ───────────
     if (stocks.assets.length === 0) {
@@ -139,6 +141,11 @@ export function useGameLoop() {
       storage.tick(ctx.tick)
     })
 
+    // ─── Black Market ────────────────────────────────────────────
+    gameEngine.subscribe('blackmarket', (ctx: TickContext) => {
+      blackmarket.tick(ctx.tick)
+    })
+
     // ─── Random events ──────────────────────────────────────────
     gameEngine.subscribe('events', () => {
       events.tick()
@@ -171,7 +178,9 @@ export function useGameLoop() {
       const reUpgradeMul = upgrades.getMultiplier('real_estate_rent')
       const allIncomeMul = upgrades.getMultiplier('all_income')
       const prestigeMul = prestige.globalMultiplier
-      realEstate.globalRentMultiplier = allIncomeMul.mul(reUpgradeMul).mul(prestigeMul).mul(reEventMul)
+      const bmIncomeBoost = D(blackmarket.getEffectMultiplier('income_boost'))
+      const bmHeatPenalty = D(blackmarket.getHeatIncomePenalty())
+      realEstate.globalRentMultiplier = allIncomeMul.mul(reUpgradeMul).mul(prestigeMul).mul(reEventMul).mul(bmIncomeBoost).mul(bmHeatPenalty)
     })
 
     // ─── Achievements (every 5 seconds) ──────────────────────────

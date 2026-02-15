@@ -13,6 +13,7 @@ import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { useJobStore } from '@renderer/stores/useJobStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
+import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { EventImpactBanner } from '@renderer/components/events'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -48,6 +49,7 @@ const gambling = useGamblingStore()
 const jobs = useJobStore()
 const loans = useLoanStore()
 const deposits = useDepositStore()
+const blackmarket = useBlackMarketStore()
 const achievementStore = useAchievementStore()
 const { formatNumber, formatMultiplier } = useFormat()
 const { t } = useI18n()
@@ -211,6 +213,7 @@ function doPrestige(): void {
     gambling.prestigeReset()
     loans.prestigeReset()
     deposits.prestigeReset()
+    blackmarket.prestigeReset()
 
     // Apply starting bonuses
     const startingCash = prestige.getStartingCash()

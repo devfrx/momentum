@@ -198,3 +198,22 @@ export type {
   BidderPersonality,
   AuctionBidder,
 } from './storage'
+
+export {
+  type BlackMarketDealDef,
+  type BlackMarketDeal,
+  type ContactDef,
+  type ContactId,
+  type ContactState,
+  type ReputationTier,
+  type HeatLevel,
+  type DealCategory,
+  type DealEffectType,
+  type ActiveBlackMarketEffect,
+  type Investigation,
+  DEAL_DEFS as BLACK_MARKET_DEALS,
+  CONTACTS as BLACK_MARKET_CONTACTS,
+  REPUTATION_TIERS,
+  HEAT_THRESHOLDS,
+  MAX_HEAT,
+} from './blackmarket'

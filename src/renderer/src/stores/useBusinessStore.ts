@@ -51,6 +51,7 @@ import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
 import { useEventStore } from './useEventStore'
+import { useBlackMarketStore } from './useBlackMarketStore'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -495,6 +496,7 @@ export const useBusinessStore = defineStore('business', () => {
     const upgrades = useUpgradeStore()
     const prestige = usePrestigeStore()
     const events = useEventStore()
+    const blackmarket = useBlackMarketStore()
 
     // Global multipliers
     const bizRevenueMul = upgrades.getMultiplier('business_revenue')
@@ -507,6 +509,13 @@ export const useBusinessStore = defineStore('business', () => {
     const bizEventRevMul = D(events.getMultiplier('income_multiplier', 'business'))
     const bizEventCostMul = D(events.getMultiplier('cost_multiplier'))
     const generalEventIncomeMul = D(events.getMultiplier('income_multiplier'))
+
+    // Black market timed effects
+    const bmBusinessBoost = D(blackmarket.getEffectMultiplier('business_boost'))
+    const bmCostReduction = D(blackmarket.getEffectMultiplier('cost_reduction'))
+    const bmIncomeBoost = D(blackmarket.getEffectMultiplier('income_boost'))
+    // Heat penalty — high heat reduces all business income
+    const bmHeatPenalty = D(blackmarket.getHeatIncomePenalty())
 
     let totalNet = ZERO
 
@@ -610,7 +619,7 @@ export const useBusinessStore = defineStore('business', () => {
       const revMultTotal = D(geoMult * synergyMult * corpMult * upgRevMult * policyEffects.revenueMult * (1 + msBonus.revenue_mult))
       const revenue = mul(
         mul(mul(mul(mul(baseRevenue, bizRevenueMul), allIncomeMul), prestigeGlobalMul), revMultTotal),
-        mul(bizEventRevMul, generalEventIncomeMul)
+        mul(mul(bizEventRevMul, generalEventIncomeMul), mul(mul(bmBusinessBoost, bmIncomeBoost), bmHeatPenalty))
       )
 
       // ── Costs ──
@@ -624,7 +633,7 @@ export const useBusinessStore = defineStore('business', () => {
         biz.marketingBudget,
         ecoState.inflationIndex
       )
-      const costRedTotal = costReductionMul.toNumber() * upgCostRedMult * (1 + msBonus.cost_reduction)
+      const costRedTotal = costReductionMul.toNumber() * upgCostRedMult * (1 + msBonus.cost_reduction) * bmCostReduction.toNumber()
       const afterCostRed = costRedTotal > 1 ? div(baseCosts, D(costRedTotal)) : baseCosts
       const afterEventCosts = mul(afterCostRed, bizEventCostMul)
       const costs = advCostReduction > 0 ? mul(afterEventCosts, D(1 - Math.min(0.9, advCostReduction))) : afterEventCosts

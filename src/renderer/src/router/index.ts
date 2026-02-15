@@ -67,6 +67,12 @@ const router = createRouter({
       meta: { titleKey: 'nav.storage', icon: 'mdi:warehouse' }
     },
     {
+      path: '/blackmarket',
+      name: 'blackmarket',
+      component: () => import('@renderer/views/BlackMarketView.vue'),
+      meta: { titleKey: 'nav.blackmarket', icon: 'mdi:skull-crossbones' }
+    },
+    {
       path: '/skills',
       name: 'skills',
       component: () => import('@renderer/views/SkillTreeView.vue'),
@@ -112,6 +118,7 @@ export type RouteName =
   | 'deposits'
   | 'gambling'
   | 'storage'
+  | 'blackmarket'
   | 'skills'
   | 'prestige'
   | 'settings'

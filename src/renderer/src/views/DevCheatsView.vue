@@ -11,6 +11,7 @@ import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useEventStore } from '@renderer/stores/useEventStore'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
@@ -24,6 +25,7 @@ import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { LOTTERY_TICKETS } from '@renderer/data/lottery'
 import { DIVINE_ABILITIES } from '@renderer/data/lottery'
+import { REPUTATION_TIERS, MAX_HEAT } from '@renderer/data/blackmarket'
 
 const player = usePlayerStore()
 const business = useBusinessStore()
@@ -35,6 +37,7 @@ const upgrades = useUpgradeStore()
 const loans = useLoanStore()
 const deposits = useDepositStore()
 const gambling = useGamblingStore()
+const blackmarket = useBlackMarketStore()
 const events = useEventStore()
 const realEstate = useRealEstateStore()
 const achievements = useAchievementStore()
@@ -341,6 +344,77 @@ function resetDivineAbilities() {
     addLog('Divine abilities & lottery wins reset')
 }
 
+// ─── Black Market ─────────────────────
+
+const bmHeatAmount = ref(50)
+const bmDealsAmount = ref(50)
+
+function bmSetTier(tier: number) {
+    const tierDef = REPUTATION_TIERS[tier]
+    if (!tierDef) return
+    blackmarket.totalDealsCompleted = tierDef.dealsRequired
+    blackmarket.reputationPoints = tierDef.dealsRequired * 10
+    addLog(`Black market reputation set to tier ${tier} (${tierDef.dealsRequired} deals)`)
+}
+
+function bmAddDeals() {
+    blackmarket.totalDealsCompleted += bmDealsAmount.value
+    blackmarket.reputationPoints += bmDealsAmount.value * 10
+    addLog(`+${bmDealsAmount.value} completed deals (total: ${blackmarket.totalDealsCompleted})`)
+}
+
+function bmSetHeat(amount: number) {
+    blackmarket.heat = Math.max(0, Math.min(MAX_HEAT, amount))
+    addLog(`Heat set to ${blackmarket.heat}`)
+}
+
+function bmMaxHeat() {
+    blackmarket.heat = MAX_HEAT
+    addLog(`Heat maxed to ${MAX_HEAT}`)
+}
+
+function bmClearHeat() {
+    blackmarket.heat = 0
+    addLog('Heat cleared to 0')
+}
+
+function bmForceRotation() {
+    blackmarket.generateDeals(gameEngine.currentTick)
+    addLog(`Forced deal rotation (${blackmarket.availableDeals.length} deals available)`)
+}
+
+function bmClearInvestigations() {
+    blackmarket.investigations.splice(0, blackmarket.investigations.length)
+    addLog('All investigations cleared')
+}
+
+function bmClearEffects() {
+    blackmarket.activeEffects.splice(0, blackmarket.activeEffects.length)
+    addLog('All active effects cleared')
+}
+
+function bmMaxLoyalty() {
+    for (const cs of blackmarket.contactStates) {
+        cs.loyalty = 100
+        cs.missionsCompleted = 50
+    }
+    addLog(`All contacts set to max loyalty`)
+}
+
+function bmResetContacts() {
+    for (const cs of blackmarket.contactStates) {
+        cs.loyalty = 0
+        cs.missionsCompleted = 0
+        cs.abilityCooldowns = {}
+    }
+    addLog('All contacts reset')
+}
+
+function bmFullReset() {
+    blackmarket.fullReset()
+    addLog('Black market fully reset')
+}
+
 // ─── Deposits ──────────────────────────
 
 function matureAllDeposits() {
@@ -606,9 +680,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                        }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                                 }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                        }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -626,7 +700,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                            }}%</span>
+                        }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -749,9 +823,63 @@ const multiplierInfo = computed(() => {
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                        }}</span>
+                            }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
+                </div>
+            </section>
+
+            <!-- Black Market Section -->
+            <section class="cheat-section cheat-section-wide">
+                <h2 class="section-header">
+                    <AppIcon icon="mdi:skull-crossbones" class="section-icon text-red" /> {{
+                        t('dev.section_blackmarket') }}
+                </h2>
+                <div class="cheat-row">
+                    <div class="input-group">
+                        <input v-model.number="bmDealsAmount" type="number" class="cheat-input" min="1" />
+                        <Button :label="t('dev.bm_add_deals')" icon="pi pi-plus" size="small" @click="bmAddDeals" />
+                    </div>
+                    <div class="input-group">
+                        <input v-model.number="bmHeatAmount" type="number" class="cheat-input" min="0"
+                            :max="MAX_HEAT" />
+                        <Button :label="t('dev.bm_set_heat')" icon="pi pi-check" size="small"
+                            @click="bmSetHeat(bmHeatAmount)" />
+                    </div>
+                </div>
+                <div class="cheat-buttons">
+                    <Button v-for="tier in 6" :key="tier - 1" :label="`Tier ${tier - 1}`" size="small"
+                        :severity="blackmarket.currentTier === tier - 1 ? 'success' : 'secondary'"
+                        @click="bmSetTier(tier - 1)" />
+                </div>
+                <div class="cheat-buttons">
+                    <Button :label="t('dev.bm_rotate_deals')" icon="pi pi-refresh" severity="warn" size="small"
+                        @click="bmForceRotation" />
+                    <Button :label="t('dev.bm_max_heat')" severity="danger" size="small" @click="bmMaxHeat" />
+                    <Button :label="t('dev.bm_clear_heat')" severity="secondary" size="small" @click="bmClearHeat" />
+                    <Button :label="t('dev.bm_clear_investigations')" severity="secondary" size="small"
+                        @click="bmClearInvestigations" />
+                    <Button :label="t('dev.bm_clear_effects')" severity="secondary" size="small"
+                        @click="bmClearEffects" />
+                    <Button :label="t('dev.bm_max_loyalty')" severity="warn" size="small" @click="bmMaxLoyalty" />
+                    <Button :label="t('dev.bm_reset_contacts')" severity="secondary" size="small"
+                        @click="bmResetContacts" />
+                    <Button :label="t('dev.bm_full_reset')" icon="pi pi-trash" severity="danger" size="small"
+                        @click="bmFullReset" />
+                </div>
+                <div class="debug-row">
+                    <span>{{ t('dev.bm_tier') }} <strong :class="`text-tier-${blackmarket.currentTier}`">{{
+                            blackmarket.currentTier }}</strong> ({{ blackmarket.totalDealsCompleted }} {{
+                                t('dev.bm_deals_done') }})</span>
+                    <span>{{ t('dev.bm_heat_label') }} <strong
+                            :class="blackmarket.heat > 60 ? 'text-red' : blackmarket.heat > 30 ? 'text-gold' : 'text-emerald'">{{
+                            blackmarket.heat.toFixed(1) }}</strong>/{{ MAX_HEAT }}</span>
+                    <span>{{ t('dev.bm_effects_label') }} <strong>{{ blackmarket.activeEffects.length }}</strong></span>
+                    <span>{{ t('dev.bm_investigations_label') }} <strong
+                            :class="blackmarket.activeInvestigations.length > 0 ? 'text-red' : ''">{{
+                                blackmarket.activeInvestigations.length }}</strong></span>
+                    <span>{{ t('dev.bm_contacts_label') }} <strong>{{ blackmarket.unlockedContacts.length
+                            }}</strong></span>
                 </div>
             </section>
 
