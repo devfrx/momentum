@@ -5,7 +5,6 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import InventoryItem from './InventoryItem.vue'
 import AppraiseDialog from './AppraiseDialog.vue'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -64,16 +63,16 @@ function sellAllItems(): void {
         <!-- Toolbar -->
         <div class="inventory-toolbar" v-if="storage.inventoryCount > 0">
             <div class="filter-row">
-                <Button v-for="cat in categories" :key="cat" :label="cat === 'all' ? t('common.all') : cat"
-                    :severity="filterCategory === cat ? undefined : 'secondary'" :outlined="filterCategory !== cat"
-                    size="small" @click="filterCategory = cat" />
+                <button v-for="cat in categories" :key="cat" class="btn btn-sm"
+                    :class="{ 'btn-primary': filterCategory === cat, 'btn-ghost': filterCategory !== cat }"
+                    @click="filterCategory = cat">{{ cat === 'all' ? t('common.all') : cat }}</button>
             </div>
             <div class="bulk-actions">
-                <Button v-if="unappraisedCount > 0" :label="t('storage.appraise_all', { n: unappraisedCount })"
-                    icon="pi pi-search" size="small" severity="primary" outlined
-                    @click="showAppraiseDialog = true; appraiseTargetId = null" />
-                <Button :label="t('storage.sell_all')" icon="pi pi-dollar" size="small" severity="warning"
-                    @click="sellAllItems" />
+                <button v-if="unappraisedCount > 0" class="btn btn-ghost btn-sm"
+                    @click="showAppraiseDialog = true; appraiseTargetId = null"><i class="pi pi-search"></i> {{
+                        t('storage.appraise_all', { n: unappraisedCount }) }}</button>
+                <button class="btn btn-warning btn-sm" @click="sellAllItems"><i class="pi pi-dollar"></i> {{
+                    t('storage.sell_all') }}</button>
             </div>
         </div>
 

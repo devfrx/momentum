@@ -7,7 +7,6 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -91,15 +90,15 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 
         <!-- ── Buy actions ─────────────────────────────────── -->
         <div class="card__actions">
-            <Button class="card__buy-btn" size="small" @click="$emit('buy', listing.id, 'vault')">
+            <button class="btn btn-primary btn-sm card__buy-btn" @click="$emit('buy', listing.id, 'vault')">
                 <AppIcon icon="mdi:safe-square-outline" />
                 <span>{{ t('shop.buy_to_vault') }}</span>
-            </Button>
-            <Button class="card__buy-btn card__buy-btn--secondary" size="small" severity="secondary" text
+            </button>
+            <button class="btn btn-text btn-sm card__buy-btn card__buy-btn--secondary"
                 @click="$emit('buy', listing.id, 'storage')">
                 <AppIcon icon="mdi:package-variant" />
                 <span>{{ t('shop.buy_to_storage') }}</span>
-            </Button>
+            </button>
         </div>
     </div>
 </template>

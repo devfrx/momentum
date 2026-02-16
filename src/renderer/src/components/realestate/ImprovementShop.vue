@@ -10,7 +10,6 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getAvailableImprovements, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
@@ -101,7 +100,7 @@ function handleInstall(imp: ImprovementDef): void {
                     <div class="imp-stat" v-if="imp.appreciationMod > 1">
                         <AppIcon icon="mdi:trending-up" size="0.7rem" />
                         <span>{{ formatPercent((imp.appreciationMod - 1) * 100) }} {{ t('realestate.appreciation')
-                            }}</span>
+                        }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.valueFraction > 0">
                         <AppIcon icon="mdi:home-plus" size="0.7rem" />
@@ -111,8 +110,8 @@ function handleInstall(imp: ImprovementDef): void {
 
                 <div class="imp-footer">
                     <span class="imp-cost">{{ formatCash(getCost(imp)) }}</span>
-                    <Button :label="t('realestate.install')" icon="pi pi-plus" :disabled="!canAfford(imp)"
-                        severity="success" size="small" @click="handleInstall(imp)" />
+                    <button class="btn btn-success btn-sm" :disabled="!canAfford(imp)" @click="handleInstall(imp)"><i
+                            class="pi pi-plus"></i> {{ t('realestate.install') }}</button>
                 </div>
             </div>
         </div>

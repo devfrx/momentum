@@ -3,7 +3,6 @@ import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import { useAutoSave } from '@renderer/composables/useAutoSave'
 import { useNotify } from '@renderer/composables/useNotify'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import ToggleSwitch from 'primevue/toggleswitch'
 import Select from 'primevue/select'
@@ -160,11 +159,12 @@ async function handleSetToken(): Promise<void> {
                     option-value="value" class="setting-input-sm" />
             </SettingRow>
             <div class="setting-actions">
-                <Button :label="$t('settings.save_now')" icon="pi pi-save" @click="handleSave" />
-                <Button :label="$t('settings.export_save')" icon="pi pi-download" severity="secondary" outlined
-                    @click="handleExport" />
-                <Button :label="$t('settings.import_save')" icon="pi pi-upload" severity="secondary" outlined
-                    @click="handleImport" />
+                <button class="btn btn-primary" @click="handleSave"><i class="pi pi-save"></i> {{
+                    $t('settings.save_now') }}</button>
+                <button class="btn btn-ghost" @click="handleExport"><i class="pi pi-download"></i> {{
+                    $t('settings.export_save') }}</button>
+                <button class="btn btn-ghost" @click="handleImport"><i class="pi pi-upload"></i> {{
+                    $t('settings.import_save') }}</button>
             </div>
         </SettingsSection>
 
@@ -173,13 +173,14 @@ async function handleSetToken(): Promise<void> {
             <SettingRow :label="$t('settings.github_pat')" :description="$t('settings.github_pat_desc')">
                 <div class="token-input-group">
                     <InputText v-model="cloudToken" type="password" placeholder="ghp_..." class="token-input" />
-                    <Button :label="$t('common.save')" size="small" @click="handleSetToken" />
+                    <button class="btn btn-primary btn-sm" @click="handleSetToken">{{ $t('common.save') }}</button>
                 </div>
             </SettingRow>
             <div class="setting-actions">
-                <Button :label="$t('settings.cloud_save_btn')" icon="pi pi-cloud-upload" @click="handleCloudSave" />
-                <Button :label="$t('settings.cloud_load_btn')" icon="pi pi-cloud-download" severity="secondary" outlined
-                    @click="handleCloudLoad" />
+                <button class="btn btn-primary" @click="handleCloudSave"><i class="pi pi-cloud-upload"></i> {{
+                    $t('settings.cloud_save_btn') }}</button>
+                <button class="btn btn-ghost" @click="handleCloudLoad"><i class="pi pi-cloud-download"></i> {{
+                    $t('settings.cloud_load_btn') }}</button>
             </div>
         </SettingsSection>
 

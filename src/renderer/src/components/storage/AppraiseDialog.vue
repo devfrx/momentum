@@ -5,7 +5,6 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -41,7 +40,7 @@ function selectAppraiser(appraiserId: string): void {
                     <AppIcon icon="mdi:magnify" />
                     {{ itemId ? t('storage.choose_appraiser') : t('storage.appraise_all_title') }}
                 </h3>
-                <Button icon="pi pi-times" text severity="secondary" size="small" @click="$emit('close')" />
+                <button class="btn btn-text btn-sm" @click="$emit('close')"><i class="pi pi-times"></i></button>
             </div>
 
             <p class="dialog-desc">{{ t('storage.appraiser_desc') }}</p>
@@ -59,7 +58,7 @@ function selectAppraiser(appraiserId: string): void {
                         <div class="stat-row">
                             <span class="stat-label">{{ t('storage.cost') }}</span>
                             <span class="stat-value">{{ formatCash(appraiser.costPerItem) }}/{{ t('storage.per_item')
-                            }}</span>
+                                }}</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">{{ t('storage.accuracy') }}</span>

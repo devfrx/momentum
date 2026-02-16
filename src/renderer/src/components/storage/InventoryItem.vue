@@ -4,7 +4,6 @@
  * Shows rarity-colored border, appraisal status, value, and action buttons.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -61,9 +60,10 @@ const { t } = useI18n()
         </div>
 
         <div class="inv-item__actions">
-            <Button v-if="!item.appraised" :label="t('storage.appraise')" icon="pi pi-search" size="small"
-                severity="primary" outlined @click="$emit('appraise', item.id)" />
-            <Button :label="t('storage.sell_item')" icon="pi pi-dollar" size="small" @click="$emit('sell', item.id)" />
+            <button v-if="!item.appraised" class="btn btn-ghost btn-sm" @click="$emit('appraise', item.id)"><i
+                    class="pi pi-search"></i> {{ t('storage.appraise') }}</button>
+            <button class="btn btn-primary btn-sm" @click="$emit('sell', item.id)"><i class="pi pi-dollar"></i> {{
+                t('storage.sell_item') }}</button>
         </div>
     </div>
 </template>

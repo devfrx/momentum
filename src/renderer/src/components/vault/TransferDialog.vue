@@ -4,7 +4,6 @@
  */
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -126,8 +125,8 @@ function getRarityClass(rarity: string): string {
                     <span>{{ sourceItems.length }} {{ t('vault.available') }}</span>
                     <span>{{ selectedIds.size }} {{ t('vault.selected') }}</span>
                     <div class="selection-btns">
-                        <Button :label="t('vault.select_all')" size="small" text @click="selectAll" />
-                        <Button :label="t('vault.deselect_all')" size="small" text @click="deselectAll" />
+                        <button class="btn btn-text btn-sm" @click="selectAll">{{ t('vault.select_all') }}</button>
+                        <button class="btn btn-text btn-sm" @click="deselectAll">{{ t('vault.deselect_all') }}</button>
                     </div>
                 </div>
 
@@ -151,8 +150,11 @@ function getRarityClass(rarity: string): string {
                 </div>
 
                 <div class="transfer-footer">
-                    <Button :label="t('vault.transfer_action', { count: selectedIds.size })"
-                        icon="pi pi-arrow-right-arrow-left" @click="transfer" :disabled="!canTransfer" />
+                    <button class="btn btn-primary" @click="transfer" :disabled="!canTransfer">
+                        <i class="pi pi-arrow-right-arrow-left"></i> {{ t('vault.transfer_action', {
+                            count:
+                        selectedIds.size }) }}
+                    </button>
                 </div>
             </div>
         </div>

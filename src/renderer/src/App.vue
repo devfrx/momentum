@@ -160,14 +160,6 @@ body {
   transition: width var(--t-transition-normal);
 }
 
-/* PrimeVue overrides — clean, flat, near-zero radius */
-.p-button {
-  font-weight: 600;
-  border-radius: var(--t-radius-md) !important;
-  transition: all var(--t-transition-fast) !important;
-  box-shadow: none !important;
-}
-
 .p-inputnumber,
 .p-inputtext {
   border-radius: var(--t-radius-md) !important;

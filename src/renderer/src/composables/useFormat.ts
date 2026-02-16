@@ -83,7 +83,31 @@ export function useFormat() {
     return `×${formatNumber(d, 2)}`
   }
 
-  return { formatNumber, formatCash, formatPercent, formatRate, formatTime, formatMultiplier }
+  /**
+   * Full cash value with thousand separators, no suffix abbreviation.
+   * e.g. $1,234,567,890.12 — useful for tooltips.
+   */
+  function formatCashFull(value: Decimal | number, decimals: number = 2): string {
+    const raw = toRaw(value)
+    const d = raw instanceof Decimal ? raw : new Decimal(raw)
+    if (d.eq(0)) return '$0'
+    const neg = d.lt(0)
+    const abs = neg ? d.abs() : d
+    // If the number is beyond safe integer range, show scientific notation
+    if (abs.exponent > 15) {
+      const mantissa = abs.mantissa.toFixed(decimals)
+      const exp = abs.exponent
+      return `${neg ? '-' : ''}$${mantissa} × 10^${exp}`
+    }
+    const n = abs.toNumber()
+    const formatted = n.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    })
+    return neg ? `-$${formatted}` : `$${formatted}`
+  }
+
+  return { formatNumber, formatCash, formatCashFull, formatPercent, formatRate, formatTime, formatMultiplier }
 }
 
 // ─── Internal formatters ────────────────────────────────────────────

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 
 defineProps<{
@@ -22,13 +21,10 @@ function updateBet(value: number): void {
         <InputNumber :modelValue="modelValue" @update:modelValue="(v: number) => updateBet(v)" :min="1" mode="currency"
             currency="USD" locale="en-US" class="bet-input" />
         <div class="bet-multipliers">
-            <Button :label="$t('gambling.double')" size="small" severity="secondary" outlined
-                @click="updateBet(modelValue * 2)" />
-            <Button :label="$t('gambling.x5')" size="small" severity="secondary" outlined
-                @click="updateBet(modelValue * 5)" />
-            <Button :label="$t('gambling.x10')" size="small" severity="secondary" outlined
-                @click="updateBet(modelValue * 10)" />
-            <Button :label="$t('gambling.max')" size="small" severity="secondary" @click="updateBet(maxBet)" />
+            <button class="btn btn-ghost btn-sm" @click="updateBet(modelValue * 2)">{{ $t('gambling.double') }}</button>
+            <button class="btn btn-ghost btn-sm" @click="updateBet(modelValue * 5)">{{ $t('gambling.x5') }}</button>
+            <button class="btn btn-ghost btn-sm" @click="updateBet(modelValue * 10)">{{ $t('gambling.x10') }}</button>
+            <button class="btn btn-ghost btn-sm" @click="updateBet(maxBet)">{{ $t('gambling.max') }}</button>
         </div>
     </div>
 </template>

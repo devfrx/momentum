@@ -4,7 +4,6 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { CashDisplay } from '@renderer/components/dashboard'
 import { VaultPanel, VaultCashPanel, VaultStats, TransferDialog } from '@renderer/components/vault'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
@@ -49,10 +48,13 @@ const tabs = computed(() => [
                 <p class="page-subtitle">{{ t('vault.subtitle') }}</p>
             </div>
             <div class="header-actions">
-                <Button :label="t('vault.transfer_title')" icon="pi pi-arrow-right-arrow-left" size="small"
-                    severity="primary" @click="showTransfer = true" />
-                <Button :label="t('vault.upgrade_capacity')" icon="pi pi-plus" size="small" severity="primary" outlined
-                    @click="vault.upgradeCapacity()" :disabled="player.cash.lt(vault.nextUpgradeCost)" />
+                <button class="btn btn-primary btn-sm" @click="showTransfer = true">
+                    <i class="pi pi-arrow-right-arrow-left"></i> {{ t('vault.transfer_title') }}
+                </button>
+                <button class="btn btn-ghost btn-sm" @click="vault.upgradeCapacity()"
+                    :disabled="player.cash.lt(vault.nextUpgradeCost)">
+                    <i class="pi pi-plus"></i> {{ t('vault.upgrade_capacity') }}
+                </button>
                 <CashDisplay :label="t('storage.balance')" :value="formatCash(player.cash)" />
             </div>
         </div>

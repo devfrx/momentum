@@ -4,7 +4,6 @@
  * cost, effects, and accept action.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import type { BlackMarketDeal } from '@renderer/data/blackmarket'
@@ -105,8 +104,9 @@ function categoryIcon(category: string): string {
 
         <!-- Action -->
         <div class="deal-card__actions">
-            <Button :label="t('blackmarket.accept_deal')" icon="pi pi-check" size="small" class="deal-card__btn"
-                :disabled="disabled" @click="$emit('accept', deal.id)" />
+            <button class="btn btn-primary btn-sm deal-card__btn" :disabled="disabled"
+                @click="$emit('accept', deal.id)"><i class="pi pi-check"></i> {{ t('blackmarket.accept_deal')
+                }}</button>
         </div>
     </div>
 </template>

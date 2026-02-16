@@ -5,7 +5,6 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -185,11 +184,11 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
                     <span v-if="abilityBlockReason(ability)" class="ability__block-reason">
                         <AppIcon icon="mdi:information-outline" /> {{ abilityBlockReason(ability) }}
                     </span>
-                    <Button :label="t('blackmarket.use')" size="small" severity="secondary" :disabled="!isAbilityReady(ability.id) ||
+                    <button class="btn btn-ghost btn-sm" :disabled="!isAbilityReady(ability.id) ||
                         (state?.loyalty ?? 0) < ability.minLoyalty ||
                         blackmarket.currentTier < ability.minTier ||
                         !!abilityBlockReason(ability)
-                        " @click="handleAbility(ability.id)" />
+                        " @click="handleAbility(ability.id)">{{ t('blackmarket.use') }}</button>
                 </div>
             </div>
         </div>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import { ref } from 'vue'
 
@@ -64,8 +63,9 @@ function confirmPrestige(): void {
                     <span class="pending-value">+{{ pendingPoints }}</span>
                     <span class="pending-suffix">{{ $t('prestige.points') }}</span>
                 </div>
-                <Button :label="$t('prestige.rebirth_btn')" icon="pi pi-replay" severity="contrast"
-                    :disabled="!canPrestige" class="rebirth-btn" @click="handlePrestige" />
+                <button class="btn btn-contrast rebirth-btn" :disabled="!canPrestige" @click="handlePrestige">
+                    <i class="pi pi-replay"></i> {{ $t('prestige.rebirth_btn') }}
+                </button>
             </div>
 
             <!-- Rebirth Count -->
@@ -93,8 +93,8 @@ function confirmPrestige(): void {
             <p class="confirm-warning">{{ $t('prestige.confirm_warning') }}</p>
         </div>
         <template #footer>
-            <Button :label="$t('common.cancel')" severity="secondary" @click="showConfirm = false" />
-            <Button :label="$t('prestige.confirm_rebirth')" severity="contrast" @click="confirmPrestige" />
+            <button class="btn btn-ghost" @click="showConfirm = false">{{ $t('common.cancel') }}</button>
+            <button class="btn btn-contrast" @click="confirmPrestige">{{ $t('prestige.confirm_rebirth') }}</button>
         </template>
     </Dialog>
 </template>

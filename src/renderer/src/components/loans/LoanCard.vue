@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
 import { RISK_LEVEL_META, type LoanDef } from '@renderer/data/loans'
@@ -79,7 +78,7 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
         <div v-if="loan.collateralType !== 'none'" class="loan-collateral">
             <AppIcon icon="mdi:lock" class="collateral-icon" />
             <span>{{ $t('loans.requires_collateral', { pct: loan.collateralRatio * 100, type: loan.collateralType })
-                }}</span>
+            }}</span>
         </div>
 
         <div v-if="!approved && reason" class="loan-rejection">
@@ -88,8 +87,8 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
         </div>
 
         <div class="item-card-actions">
-            <Button :label="$t('loans.apply_loan')" icon="pi pi-send" size="small" :disabled="!approved || disabled"
-                @click="$emit('apply')" />
+            <button class="btn btn-primary btn-sm" :disabled="!approved || disabled" @click="$emit('apply')"><i
+                    class="pi pi-send"></i> {{ $t('loans.apply_loan') }}</button>
         </div>
     </div>
 </template>

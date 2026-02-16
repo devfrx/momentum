@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Tag from 'primevue/tag'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 
 const props = defineProps<{
@@ -81,9 +80,10 @@ const remainingTime = computed(() => {
         <div v-if="status === 'succeeded'" class="result-section success-result">
             <p class="result-text">{{ $t('investments.succeeded') }}</p>
             <p v-if="returnAmount" class="result-amount">{{ $t('investments.returns') }} <strong>{{ returnAmount
-            }}</strong></p>
-            <Button :label="$t('investments.collect_returns')" severity="success" icon="pi pi-wallet" size="small"
-                @click="$emit('collect')" class="collect-btn" />
+                    }}</strong></p>
+            <button class="btn btn-success btn-sm collect-btn" @click="$emit('collect')">
+                <i class="pi pi-wallet"></i> {{ $t('investments.collect_returns') }}
+            </button>
         </div>
 
         <!-- Result for failed investments -->

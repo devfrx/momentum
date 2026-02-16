@@ -4,7 +4,6 @@
  */
 import { ref } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -65,16 +64,20 @@ function withdrawAll(): void {
             <input type="number" class="cash-input" :placeholder="t('vault.enter_amount')" v-model="amount" min="0"
                 step="any" />
             <div class="cash-buttons">
-                <Button :label="t('vault.deposit')" icon="pi pi-arrow-down" size="small" @click="deposit"
-                    :disabled="!amount.trim()" />
-                <Button :label="t('vault.withdraw')" icon="pi pi-arrow-up" size="small" severity="secondary"
-                    @click="withdraw" :disabled="!amount.trim()" />
+                <button class="btn btn-primary btn-sm" @click="deposit" :disabled="!amount.trim()">
+                    <i class="pi pi-arrow-down"></i> {{ t('vault.deposit') }}
+                </button>
+                <button class="btn btn-ghost btn-sm" @click="withdraw" :disabled="!amount.trim()">
+                    <i class="pi pi-arrow-up"></i> {{ t('vault.withdraw') }}
+                </button>
             </div>
             <div class="cash-buttons">
-                <Button :label="t('vault.deposit_all')" icon="pi pi-arrow-down" size="small" severity="primary" outlined
-                    @click="depositAll" :disabled="player.cash.lte(0)" />
-                <Button :label="t('vault.withdraw_all')" icon="pi pi-arrow-up" size="small" severity="secondary"
-                    @click="withdrawAll" :disabled="vault.storedCash.lte(0)" />
+                <button class="btn btn-ghost btn-sm" @click="depositAll" :disabled="player.cash.lte(0)">
+                    <i class="pi pi-arrow-down"></i> {{ t('vault.deposit_all') }}
+                </button>
+                <button class="btn btn-ghost btn-sm" @click="withdrawAll" :disabled="vault.storedCash.lte(0)">
+                    <i class="pi pi-arrow-up"></i> {{ t('vault.withdraw_all') }}
+                </button>
             </div>
         </div>
 

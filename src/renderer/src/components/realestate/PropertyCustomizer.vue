@@ -10,7 +10,6 @@ import { useRealEstateStore, type Property } from '@renderer/stores/useRealEstat
 import { useFormat } from '@renderer/composables/useFormat'
 import { getTrait, MANAGEMENT_STYLES } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Slider from 'primevue/slider'
 import Tag from 'primevue/tag'
@@ -49,7 +48,7 @@ function apply(): void {
     <div class="property-customizer">
         <div class="customizer-header">
             <h3>{{ t('realestate.customize') }}</h3>
-            <Button icon="pi pi-times" text rounded size="small" @click="emit('close')" />
+            <button class="btn btn-icon btn-sm" @click="emit('close')"><i class="pi pi-times"></i></button>
         </div>
 
         <!-- Name -->
@@ -72,7 +71,7 @@ function apply(): void {
                     <p class="trait-desc">{{ t(tr.descriptionKey) }}</p>
                     <div class="trait-mods">
                         <span v-if="tr.rentMod !== 0">Rent: {{ formatPercent(tr.rentMod * 100)
-                            }}</span>
+                        }}</span>
                         <span v-if="tr.occupancyMod !== 0">Occ: {{
                             formatPercent(tr.occupancyMod * 100) }}</span>
                         <span v-if="tr.wearMod !== 1">Wear: {{ tr.wearMod }}×</span>
@@ -115,7 +114,8 @@ function apply(): void {
         </div>
 
         <!-- Apply -->
-        <Button :label="t('realestate.apply')" icon="pi pi-check" severity="success" class="apply-btn" @click="apply" />
+        <button class="btn btn-success apply-btn" @click="apply"><i class="pi pi-check"></i> {{ t('realestate.apply')
+            }}</button>
     </div>
 </template>
 

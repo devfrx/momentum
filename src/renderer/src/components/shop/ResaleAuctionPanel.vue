@@ -5,7 +5,6 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -164,8 +163,10 @@ function auctionTimeLeft(auction: any): string {
                     </div>
                 </div>
 
-                <Button :label="t('shop.auction_cancel')" icon="pi pi-times" size="small" severity="primary" outlined
-                    text @click="shop.cancelAuction(auction.id)" />
+                <button class="btn btn-text btn-sm" @click="shop.cancelAuction(auction.id)">
+                    <i class="pi pi-times"></i>
+                    {{ t('shop.auction_cancel') }}
+                </button>
             </div>
         </div>
 
@@ -193,8 +194,10 @@ function auctionTimeLeft(auction: any): string {
                 </div>
                 <div class="auctionable-item__footer">
                     <span class="auctionable-item__value">{{ formatCash(item.appraisedValue ?? item.baseValue) }}</span>
-                    <Button :label="t('shop.auction_list')" icon="pi pi-tag" size="small"
-                        @click="openListDialog(item.id, source)" />
+                    <button class="btn btn-primary btn-sm" @click="openListDialog(item.id, source)">
+                        <i class="pi pi-tag"></i>
+                        {{ t('shop.auction_list') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -263,11 +266,15 @@ function auctionTimeLeft(auction: any): string {
                     </div>
 
                     <div class="dialog-actions">
-                        <Button :label="t('common.cancel')" severity="secondary" outlined
-                            @click="showListDialog = false" />
-                        <Button :label="t('shop.auction_confirm')" icon="pi pi-check"
+                        <button class="btn btn-ghost" @click="showListDialog = false">
+                            {{ t('common.cancel') }}
+                        </button>
+                        <button class="btn btn-primary"
                             :disabled="parseFloat(startingPriceInput) <= 0 || player.cash.lt(estimatedListingFee)"
-                            @click="confirmListing" />
+                            @click="confirmListing">
+                            <i class="pi pi-check"></i>
+                            {{ t('shop.auction_confirm') }}
+                        </button>
                     </div>
                 </div>
             </div>

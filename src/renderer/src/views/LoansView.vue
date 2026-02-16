@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Slider from 'primevue/slider'
 import Select from 'primevue/select'
@@ -315,7 +314,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                         <div class="sidebar-stat">
                             <span class="sidebar-stat-label">{{ $t('loans.total_interest_paid') }}</span>
                             <span class="sidebar-stat-value text-warning">{{ formatCash(loanStore.totalInterestPaidEver)
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -378,9 +377,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                                     </div>
                                     <div class="history-details">
                                         <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                        }}</span>
+                                            }}</span>
                                         <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                        }} {{ entry.latePayments
+                                            }} {{ entry.latePayments
                                             }}</span>
                                         <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                     </div>
@@ -440,8 +439,8 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                 </div>
 
                 <div class="dialog-actions">
-                    <Button :label="$t('common.cancel')" severity="secondary" @click="showApplyDialog = false" />
-                    <Button :label="$t('loans.confirm_loan')" severity="success" @click="confirmLoan" />
+                    <button class="btn btn-ghost" @click="showApplyDialog = false">{{ $t('common.cancel') }}</button>
+                    <button class="btn btn-success" @click="confirmLoan">{{ $t('loans.confirm_loan') }}</button>
                 </div>
             </div>
         </Dialog>
@@ -456,9 +455,10 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                     :placeholder="$t('loans.select_new_type')" class="w-full" />
 
                 <div class="dialog-actions">
-                    <Button :label="$t('common.cancel')" severity="secondary" @click="showRefinanceDialog = false" />
-                    <Button :label="$t('loans.refinance')" severity="secondary" :disabled="!refinanceTarget"
-                        @click="confirmRefinance" />
+                    <button class="btn btn-ghost" @click="showRefinanceDialog = false">{{ $t('common.cancel')
+                        }}</button>
+                    <button class="btn btn-ghost" :disabled="!refinanceTarget" @click="confirmRefinance">{{
+                        $t('loans.refinance') }}</button>
                 </div>
             </div>
         </Dialog>

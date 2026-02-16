@@ -4,7 +4,6 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import { smartDecimals } from '@renderer/composables/useFormat'
 
@@ -27,8 +26,6 @@ const mode = ref<'qty' | 'pct'>('qty')
 const percentValue = ref<number>(10)
 
 const percentPresets = [10, 25, 50, 100]
-
-const buySeverity = computed(() => 'contrast' as const)
 
 const costEstimate = computed(() => {
     if (mode.value === 'qty') {
@@ -90,10 +87,12 @@ function formatCost(v: number): string {
         <!-- Quantity mode -->
         <div v-if="mode === 'qty'" class="trade-row">
             <InputNumber v-model="quantity" :min="1" :max="999999" size="small" class="qty-input" placeholder="1" />
-            <Button :label="$t('market.buy')" icon="pi pi-plus" :severity="buySeverity" size="small"
-                :disabled="!canAffordAny" @click="handleBuy" />
-            <Button :label="$t('market.sell')" icon="pi pi-minus" severity="danger" size="small" outlined
-                :disabled="!hasPosition" @click="handleSell" />
+            <button class="btn btn-primary btn-sm" :disabled="!canAffordAny" @click="handleBuy">
+                <i class="pi pi-plus"></i> {{ $t('market.buy') }}
+            </button>
+            <button class="btn btn-danger btn-sm" :disabled="!hasPosition" @click="handleSell">
+                <i class="pi pi-minus"></i> {{ $t('market.sell') }}
+            </button>
         </div>
 
         <!-- Percent mode -->
@@ -110,10 +109,12 @@ function formatCost(v: number): string {
                 <span class="pct-cost">{{ formatCost(costEstimate) }}</span>
             </div>
             <div class="pct-actions">
-                <Button :label="$t('market.buy_pct', { pct: percentValue })" icon="pi pi-plus" :severity="buySeverity"
-                    size="small" :disabled="qtyFromPercent <= 0" @click="handleBuy" />
-                <Button v-if="hasPosition" :label="$t('market.sell_all')" icon="pi pi-minus" severity="danger"
-                    size="small" outlined @click="sellAll" />
+                <button class="btn btn-primary btn-sm" :disabled="qtyFromPercent <= 0" @click="handleBuy">
+                    <i class="pi pi-plus"></i> {{ $t('market.buy_pct', { pct: percentValue }) }}
+                </button>
+                <button v-if="hasPosition" class="btn btn-danger btn-sm" @click="sellAll">
+                    <i class="pi pi-minus"></i> {{ $t('market.sell_all') }}
+                </button>
             </div>
         </div>
 

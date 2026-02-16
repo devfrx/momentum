@@ -6,7 +6,6 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore, type SellSource } from '@renderer/stores/useShopStore'
@@ -76,9 +75,12 @@ function sellAllFromSource(): void {
 
         <!-- Bulk Actions -->
         <div v-if="currentItems.length > 0" class="sell-actions">
-            <Button
-                :label="t('shop.sell_all_from', { source: activeSource === 'vault' ? t('shop.vault') : t('shop.storage_wars') })"
-                icon="pi pi-dollar" size="small" severity="danger" @click="sellAllFromSource" />
+            <button class="btn btn-danger btn-sm" @click="sellAllFromSource">
+                <i class="pi pi-dollar"></i>
+                {{ t('shop.sell_all_from', {
+                    source: activeSource === 'vault' ? t('shop.vault') : t('shop.storage_wars')
+                }) }}
+            </button>
         </div>
 
         <!-- Item Grid -->
@@ -108,8 +110,10 @@ function sellAllFromSource(): void {
                             <AppIcon icon="mdi:trending-up" /> {{ t('shop.demand_trending') }}
                         </span>
                     </div>
-                    <Button :label="t('shop.sell_item')" icon="pi pi-dollar" size="small"
-                        @click="sellSingle(item.id)" />
+                    <button class="btn btn-primary btn-sm" @click="sellSingle(item.id)">
+                        <i class="pi pi-dollar"></i>
+                        {{ t('shop.sell_item') }}
+                    </button>
                 </div>
             </div>
         </div>

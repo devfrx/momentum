@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
 import { DEPOSIT_RISK_META, type DepositDef, type CompoundFrequency } from '@renderer/data/deposits'
@@ -86,7 +85,7 @@ const apyClass = computed(() => {
         <div v-if="deposit.earlyWithdrawalPenalty > 0" class="deposit-info-badge">
             <AppIcon icon="mdi:alert-outline" class="info-badge-icon" />
             <span>{{ $t('deposits.early_penalty_badge', { pct: (deposit.earlyWithdrawalPenalty * 100).toFixed(0) })
-                }}</span>
+            }}</span>
         </div>
 
         <div v-if="deposit.loyaltyBonusAPY > 0" class="deposit-info-badge loyalty">
@@ -100,8 +99,9 @@ const apyClass = computed(() => {
         </div>
 
         <div class="item-card-actions">
-            <Button :label="$t('deposits.open_account')" icon="pi pi-plus" size="small" :disabled="!eligible"
-                @click="$emit('open')" />
+            <button class="btn btn-primary btn-sm" :disabled="!eligible" @click="$emit('open')">
+                <i class="pi pi-plus"></i> {{ $t('deposits.open_account') }}
+            </button>
         </div>
     </div>
 </template>

@@ -4,7 +4,6 @@
  * Shows name, description, effect, cost, prerequisites, and a buy button.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 
 defineProps<{
     name: string
@@ -84,10 +83,12 @@ defineEmits<{ buy: [] }>()
 
         <!-- Action -->
         <div class="panel-action">
-            <Button v-if="!purchased" :label="available ? $t('skilltree.unlock_skill') : $t('common.locked')"
-                :icon="available ? 'pi pi-lock-open' : 'pi pi-lock'"
-                :severity="available && canAfford ? undefined : 'secondary'" :disabled="!available || !canAfford"
-                class="w-full" @click="$emit('buy')" />
+            <button v-if="!purchased" class="btn btn-block"
+                :class="available && canAfford ? 'btn-primary' : 'btn-ghost'" :disabled="!available || !canAfford"
+                @click="$emit('buy')">
+                <i :class="available ? 'pi pi-lock-open' : 'pi pi-lock'"></i>
+                {{ available ? $t('skilltree.unlock_skill') : $t('common.locked') }}
+            </button>
             <div v-else class="panel-owned-indicator">
                 <AppIcon icon="mdi:check-decagram" />
                 <span>{{ $t('skilltree.purchased') }}</span>

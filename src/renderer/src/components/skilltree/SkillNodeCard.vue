@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 
 defineProps<{
     name: string
@@ -51,9 +50,11 @@ defineEmits<{
         </div>
 
         <div class="upgrade-action">
-            <Button v-if="!purchased" :label="unlocked ? cost : $t('common.locked')"
-                :icon="unlocked ? 'pi pi-shopping-cart' : 'pi pi-lock'" :severity="unlocked ? undefined : 'secondary'"
-                size="small" :disabled="!unlocked || !canAfford" class="w-full" @click="$emit('buy')" />
+            <button v-if="!purchased" class="btn btn-sm btn-block" :class="unlocked ? 'btn-primary' : 'btn-ghost'"
+                :disabled="!unlocked || !canAfford" @click="$emit('buy')">
+                <i :class="unlocked ? 'pi pi-shopping-cart' : 'pi pi-lock'"></i>
+                {{ unlocked ? cost : $t('common.locked') }}
+            </button>
             <div v-else class="purchased-badge">
                 <AppIcon icon="mdi:check-circle" />
                 <span>{{ $t('skilltree.purchased') }}</span>

@@ -10,7 +10,6 @@ import {
 } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { THEME } from '@renderer/assets/theme/colors'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 
 const { t } = useI18n()
@@ -127,9 +126,10 @@ const tierColors: Record<string, string> = {
                 <AppIcon icon="mdi:radar" /> {{ t('realestate.scan.title') }}
             </h4>
             <p class="dp-hint">{{ t('realestate.scan.desc') }}</p>
-            <Button v-if="!isCooldown" :label="t('realestate.scan.action', { cost: scanCostFormatted })"
-                icon="pi pi-search" :disabled="!canAffordScan" severity="info" size="small" class="dp-scan-btn"
-                @click="handleScan" />
+            <button v-if="!isCooldown" class="btn btn-info btn-sm dp-scan-btn" :disabled="!canAffordScan"
+                @click="handleScan"><i class="pi pi-search"></i> {{ t('realestate.scan.action', {
+                    cost:
+                scanCostFormatted }) }}</button>
             <div v-else class="dp-cooldown">
                 <AppIcon icon="mdi:timer-sand" />
                 <span>{{ t('realestate.scan.cooldown', { time: scanCooldownFormatted }) }}</span>

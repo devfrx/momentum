@@ -21,7 +21,6 @@ import { BUSINESS_DEFS } from '@renderer/data/businesses'
 import { SECTORS, STAGES, TRAITS } from '@renderer/data/startups'
 import { gameEngine } from '@renderer/core/GameEngine'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { LOTTERY_TICKETS } from '@renderer/data/lottery'
 import { DIVINE_ABILITIES } from '@renderer/data/lottery'
@@ -586,13 +585,14 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="cashAmount" type="number" class="cheat-input" min="1" />
-                        <Button :label="t('dev.give_cash')" icon="pi pi-plus" size="small" @click="giveCash" />
+                        <button class="btn btn-primary btn-sm" @click="giveCash"><i class="pi pi-plus"></i> {{
+                            t('dev.give_cash') }}</button>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <Button :label="t('dev.plus_1b')" severity="warn" size="small" @click="giveMegaCash" />
-                    <Button :label="t('dev.plus_1qa')" severity="danger" size="small" @click="giveInfiniteCash" />
-                    <Button :label="t('dev.set_zero')" severity="secondary" size="small" @click="setCashZero" />
+                    <button class="btn btn-warning btn-sm" @click="giveMegaCash">{{ t('dev.plus_1b') }}</button>
+                    <button class="btn btn-danger btn-sm" @click="giveInfiniteCash">{{ t('dev.plus_1qa') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="setCashZero">{{ t('dev.set_zero') }}</button>
                 </div>
             </section>
 
@@ -604,13 +604,14 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="xpAmount" type="number" class="cheat-input" min="1" />
-                        <Button :label="t('dev.give_xp')" icon="pi pi-plus" size="small" @click="giveXp" />
+                        <button class="btn btn-primary btn-sm" @click="giveXp"><i class="pi pi-plus"></i> {{
+                            t('dev.give_xp') }}</button>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <Button label="Lv 10" severity="secondary" size="small" @click="setLevel(10)" />
-                    <Button label="Lv 50" severity="secondary" size="small" @click="setLevel(50)" />
-                    <Button label="Lv 100" severity="warn" size="small" @click="setLevel(100)" />
+                    <button class="btn btn-ghost btn-sm" @click="setLevel(10)">Lv 10</button>
+                    <button class="btn btn-ghost btn-sm" @click="setLevel(50)">Lv 50</button>
+                    <button class="btn btn-warning btn-sm" @click="setLevel(100)">Lv 100</button>
                 </div>
             </section>
 
@@ -622,7 +623,8 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="prestigeAmount" type="number" class="cheat-input" min="1" />
-                        <Button :label="t('dev.give_pp')" icon="pi pi-plus" size="small" @click="givePrestigePoints" />
+                        <button class="btn btn-primary btn-sm" @click="givePrestigePoints"><i class="pi pi-plus"></i> {{
+                            t('dev.give_pp') }}</button>
                     </div>
                 </div>
             </section>
@@ -633,8 +635,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:domain" class="section-icon" /> {{ t('dev.section_business') }}
                 </h2>
                 <div class="cheat-buttons">
-                    <Button :label="t('dev.buy_all')" icon="pi pi-shopping-cart" severity="warn" size="small"
-                        @click="buyAllBusinesses" />
+                    <button class="btn btn-warning btn-sm" @click="buyAllBusinesses"><i class="pi pi-shopping-cart"></i>
+                        {{ t('dev.buy_all') }}</button>
                 </div>
             </section>
 
@@ -656,23 +658,23 @@ const multiplierInfo = computed(() => {
                             <option :value="10000000000">$10B</option>
                             <option :value="1000000000000">$1T</option>
                         </select>
-                        <Button :label="t('dev.gen_nw')" icon="pi pi-refresh" severity="warn" size="small"
-                            @click="refreshWithCustomNW" />
+                        <button class="btn btn-warning btn-sm" @click="refreshWithCustomNW"><i
+                                class="pi pi-refresh"></i> {{ t('dev.gen_nw') }}</button>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <Button :label="t('dev.refresh_opps')" icon="pi pi-refresh" size="small"
-                        @click="refreshStartupOpps" />
-                    <Button :label="t('dev.research_all')" icon="pi pi-search" severity="secondary" size="small"
-                        @click="dueDiligenceAll" />
-                    <Button :label="t('dev.invest_min')" icon="pi pi-send" severity="warn" size="small"
-                        @click="investInAll" />
-                    <Button :label="t('dev.force_resolve')" icon="pi pi-bolt" severity="warn" size="small"
-                        @click="resolveAllStartups" />
-                    <Button :label="t('dev.collect_all')" icon="pi pi-wallet" severity="success" size="small"
-                        @click="collectAllPending" />
-                    <Button :label="t('dev.reset_startups')" icon="pi pi-trash" severity="danger" size="small"
-                        @click="clearStartups" />
+                    <button class="btn btn-primary btn-sm" @click="refreshStartupOpps"><i class="pi pi-refresh"></i> {{
+                        t('dev.refresh_opps') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="dueDiligenceAll"><i class="pi pi-search"></i> {{
+                        t('dev.research_all') }}</button>
+                    <button class="btn btn-warning btn-sm" @click="investInAll"><i class="pi pi-send"></i> {{
+                        t('dev.invest_min') }}</button>
+                    <button class="btn btn-warning btn-sm" @click="resolveAllStartups"><i class="pi pi-bolt"></i> {{
+                        t('dev.force_resolve') }}</button>
+                    <button class="btn btn-success btn-sm" @click="collectAllPending"><i class="pi pi-wallet"></i> {{
+                        t('dev.collect_all') }}</button>
+                    <button class="btn btn-danger btn-sm" @click="clearStartups"><i class="pi pi-trash"></i> {{
+                        t('dev.reset_startups') }}</button>
                 </div>
 
                 <!-- Live Startup Info -->
@@ -680,9 +682,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                        }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                                 }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                        }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -700,7 +702,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                            }}%</span>
+                        }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -720,12 +722,13 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:chart-line" class="section-icon" /> {{ t('dev.section_market') }}
                 </h2>
                 <div class="cheat-buttons">
-                    <Button :label="t('dev.tick_markets')" severity="secondary" size="small" @click="tickMarket100" />
-                    <Button :label="t('dev.clear_loans')" severity="secondary" size="small" @click="clearAllLoans" />
-                    <Button :label="t('dev.plus_100_ticks')" severity="secondary" size="small"
-                        @click="fastForward(100)" />
-                    <Button :label="t('dev.plus_1000_ticks')" severity="warn" size="small" @click="fastForward(1000)" />
-                    <Button label="+10K ticks" severity="danger" size="small" @click="fastForward(10000)" />
+                    <button class="btn btn-ghost btn-sm" @click="tickMarket100">{{ t('dev.tick_markets') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="clearAllLoans">{{ t('dev.clear_loans') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="fastForward(100)">{{ t('dev.plus_100_ticks')
+                        }}</button>
+                    <button class="btn btn-warning btn-sm" @click="fastForward(1000)">{{ t('dev.plus_1000_ticks')
+                        }}</button>
+                    <button class="btn btn-danger btn-sm" @click="fastForward(10000)">+10K ticks</button>
                 </div>
             </section>
 
@@ -737,14 +740,14 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="creditScoreAmount" type="number" class="cheat-input" min="0" max="100" />
-                        <Button label="Set Score" icon="pi pi-check" size="small"
-                            @click="setCreditScore(creditScoreAmount)" />
+                        <button class="btn btn-primary btn-sm" @click="setCreditScore(creditScoreAmount)"><i
+                                class="pi pi-check"></i> Set Score</button>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <Button label="Max (100)" severity="success" size="small" @click="maxCreditScore" />
-                    <Button label="Min (0)" severity="danger" size="small" @click="minCreditScore" />
-                    <Button label="Fair (50)" severity="secondary" size="small" @click="setCreditScore(50)" />
+                    <button class="btn btn-success btn-sm" @click="maxCreditScore">Max (100)</button>
+                    <button class="btn btn-danger btn-sm" @click="minCreditScore">Min (0)</button>
+                    <button class="btn btn-ghost btn-sm" @click="setCreditScore(50)">Fair (50)</button>
                 </div>
                 <div class="debug-row">
                     <span>Current: <strong
@@ -759,9 +762,9 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:graph" class="section-icon text-purple" /> Skill Tree
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Unlock All" severity="secondary" size="small" @click="unlockAllSkills" />
-                    <Button label="Max All" severity="warn" size="small" @click="maxAllSkills" />
-                    <Button label="Reset All" severity="danger" size="small" @click="resetAllSkills" />
+                    <button class="btn btn-ghost btn-sm" @click="unlockAllSkills">Unlock All</button>
+                    <button class="btn btn-warning btn-sm" @click="maxAllSkills">Max All</button>
+                    <button class="btn btn-danger btn-sm" @click="resetAllSkills">Reset All</button>
                 </div>
                 <div class="debug-row">
                     <span>Purchased: <strong>{{upgrades.nodes.filter(n => n.purchased).length}}</strong>/{{
@@ -775,8 +778,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:lightning-bolt" class="section-icon text-gold" /> Events
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Trigger Random" severity="warn" size="small" @click="triggerRandomEvent" />
-                    <Button label="Clear Events" severity="secondary" size="small" @click="clearAllEvents" />
+                    <button class="btn btn-warning btn-sm" @click="triggerRandomEvent">Trigger Random</button>
+                    <button class="btn btn-ghost btn-sm" @click="clearAllEvents">Clear Events</button>
                 </div>
                 <div class="debug-row">
                     <span>Active: <strong>{{ events.activeEvents?.length ?? 0 }}</strong></span>
@@ -789,8 +792,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:dice-multiple" class="section-icon text-emerald" /> Gambling
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Reset Stats" severity="secondary" size="small" @click="resetGamblingStats" />
-                    <Button label="Win Streak" severity="success" size="small" @click="setGamblingWinStreak" />
+                    <button class="btn btn-ghost btn-sm" @click="resetGamblingStats">Reset Stats</button>
+                    <button class="btn btn-success btn-sm" @click="setGamblingWinStreak">Win Streak</button>
                 </div>
                 <div class="debug-row">
                     <span>Games: <strong>{{ gambling.gamesPlayed }}</strong></span>
@@ -807,12 +810,12 @@ const multiplierInfo = computed(() => {
                     Abilities
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="All Lottery Jackpots" severity="warn" size="small" icon="pi pi-star"
-                        @click="unlockAllLotteryJackpots" />
-                    <Button label="All Divine Abilities" severity="warn" size="small" icon="pi pi-bolt"
-                        @click="unlockAllDivineAbilities" />
-                    <Button label="Reset Divine" severity="danger" size="small" icon="pi pi-trash"
-                        @click="resetDivineAbilities" />
+                    <button class="btn btn-warning btn-sm" @click="unlockAllLotteryJackpots"><i class="pi pi-star"></i>
+                        All Lottery Jackpots</button>
+                    <button class="btn btn-warning btn-sm" @click="unlockAllDivineAbilities"><i class="pi pi-bolt"></i>
+                        All Divine Abilities</button>
+                    <button class="btn btn-danger btn-sm" @click="resetDivineAbilities"><i class="pi pi-trash"></i>
+                        Reset Divine</button>
                 </div>
                 <div class="debug-row">
                     <span>Divine Abilities: <strong class="text-gold">{{ gambling.divineAbilities.length }} / {{
@@ -823,7 +826,7 @@ const multiplierInfo = computed(() => {
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                        }}</span>
+                            }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
                 </div>
@@ -838,34 +841,35 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="bmDealsAmount" type="number" class="cheat-input" min="1" />
-                        <Button :label="t('dev.bm_add_deals')" icon="pi pi-plus" size="small" @click="bmAddDeals" />
+                        <button class="btn btn-primary btn-sm" @click="bmAddDeals"><i class="pi pi-plus"></i> {{
+                            t('dev.bm_add_deals') }}</button>
                     </div>
                     <div class="input-group">
                         <input v-model.number="bmHeatAmount" type="number" class="cheat-input" min="0"
                             :max="MAX_HEAT" />
-                        <Button :label="t('dev.bm_set_heat')" icon="pi pi-check" size="small"
-                            @click="bmSetHeat(bmHeatAmount)" />
+                        <button class="btn btn-primary btn-sm" @click="bmSetHeat(bmHeatAmount)"><i
+                                class="pi pi-check"></i> {{ t('dev.bm_set_heat') }}</button>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <Button v-for="tier in 6" :key="tier - 1" :label="`Tier ${tier - 1}`" size="small"
-                        :severity="blackmarket.currentTier === tier - 1 ? 'success' : 'secondary'"
-                        @click="bmSetTier(tier - 1)" />
+                    <button v-for="tier in 6" :key="tier - 1" class="btn btn-sm"
+                        :class="blackmarket.currentTier === tier - 1 ? 'btn-success' : 'btn-ghost'"
+                        @click="bmSetTier(tier - 1)">{{ `Tier ${tier - 1}` }}</button>
                 </div>
                 <div class="cheat-buttons">
-                    <Button :label="t('dev.bm_rotate_deals')" icon="pi pi-refresh" severity="warn" size="small"
-                        @click="bmForceRotation" />
-                    <Button :label="t('dev.bm_max_heat')" severity="danger" size="small" @click="bmMaxHeat" />
-                    <Button :label="t('dev.bm_clear_heat')" severity="secondary" size="small" @click="bmClearHeat" />
-                    <Button :label="t('dev.bm_clear_investigations')" severity="secondary" size="small"
-                        @click="bmClearInvestigations" />
-                    <Button :label="t('dev.bm_clear_effects')" severity="secondary" size="small"
-                        @click="bmClearEffects" />
-                    <Button :label="t('dev.bm_max_loyalty')" severity="warn" size="small" @click="bmMaxLoyalty" />
-                    <Button :label="t('dev.bm_reset_contacts')" severity="secondary" size="small"
-                        @click="bmResetContacts" />
-                    <Button :label="t('dev.bm_full_reset')" icon="pi pi-trash" severity="danger" size="small"
-                        @click="bmFullReset" />
+                    <button class="btn btn-warning btn-sm" @click="bmForceRotation"><i class="pi pi-refresh"></i> {{
+                        t('dev.bm_rotate_deals') }}</button>
+                    <button class="btn btn-danger btn-sm" @click="bmMaxHeat">{{ t('dev.bm_max_heat') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="bmClearHeat">{{ t('dev.bm_clear_heat') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="bmClearInvestigations">{{
+                        t('dev.bm_clear_investigations') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="bmClearEffects">{{ t('dev.bm_clear_effects')
+                        }}</button>
+                    <button class="btn btn-warning btn-sm" @click="bmMaxLoyalty">{{ t('dev.bm_max_loyalty') }}</button>
+                    <button class="btn btn-ghost btn-sm" @click="bmResetContacts">{{ t('dev.bm_reset_contacts')
+                        }}</button>
+                    <button class="btn btn-danger btn-sm" @click="bmFullReset"><i class="pi pi-trash"></i> {{
+                        t('dev.bm_full_reset') }}</button>
                 </div>
                 <div class="debug-row">
                     <span>{{ t('dev.bm_tier') }} <strong :class="`text-tier-${blackmarket.currentTier}`">{{
@@ -879,7 +883,7 @@ const multiplierInfo = computed(() => {
                             :class="blackmarket.activeInvestigations.length > 0 ? 'text-red' : ''">{{
                                 blackmarket.activeInvestigations.length }}</strong></span>
                     <span>{{ t('dev.bm_contacts_label') }} <strong>{{ blackmarket.unlockedContacts.length
-                    }}</strong></span>
+                            }}</strong></span>
                 </div>
             </section>
 
@@ -889,8 +893,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:piggy-bank" class="section-icon text-pink" /> Deposits
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Mature All" severity="warn" size="small" @click="matureAllDeposits" />
-                    <Button label="Clear All" severity="danger" size="small" @click="clearAllDeposits" />
+                    <button class="btn btn-warning btn-sm" @click="matureAllDeposits">Mature All</button>
+                    <button class="btn btn-danger btn-sm" @click="clearAllDeposits">Clear All</button>
                 </div>
                 <div class="debug-row">
                     <span>Active: <strong>{{ deposits.deposits?.length ?? 0 }}</strong></span>
@@ -903,8 +907,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:home-city" class="section-icon text-sky" /> Real Estate
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Repair All" severity="secondary" size="small" @click="repairAllProperties" />
-                    <Button label="100% Occupancy" severity="success" size="small" @click="maxOccupancyAll" />
+                    <button class="btn btn-ghost btn-sm" @click="repairAllProperties">Repair All</button>
+                    <button class="btn btn-success btn-sm" @click="maxOccupancyAll">100% Occupancy</button>
                 </div>
                 <div class="debug-row">
                     <span>Properties: <strong>{{ realEstate.properties.length }}</strong></span>
@@ -917,8 +921,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:trophy" class="section-icon text-gold" /> Achievements
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Unlock All" severity="warn" size="small" @click="unlockAllAchievements" />
-                    <Button label="Reset All" severity="danger" size="small" @click="resetAchievements" />
+                    <button class="btn btn-warning btn-sm" @click="unlockAllAchievements">Unlock All</button>
+                    <button class="btn btn-danger btn-sm" @click="resetAchievements">Reset All</button>
                 </div>
                 <div class="debug-row">
                     <span>Unlocked: <strong>{{achievements.achievements.filter(a => a.unlocked).length}}</strong>/{{
@@ -932,10 +936,10 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:star-circle" class="section-icon text-purple" /> Prestige Advanced
                 </h2>
                 <div class="cheat-buttons">
-                    <Button label="Max Upgrades" severity="warn" size="small" @click="unlockAllPrestigeUpgrades" />
-                    <Button label="Unlock Milestones" severity="warn" size="small" @click="unlockAllMilestones" />
-                    <Button label="Buy All Perks" severity="warn" size="small" @click="purchaseAllPerks" />
-                    <Button label="Next Era" severity="success" size="small" @click="advanceEra" />
+                    <button class="btn btn-warning btn-sm" @click="unlockAllPrestigeUpgrades">Max Upgrades</button>
+                    <button class="btn btn-warning btn-sm" @click="unlockAllMilestones">Unlock Milestones</button>
+                    <button class="btn btn-warning btn-sm" @click="purchaseAllPerks">Buy All Perks</button>
+                    <button class="btn btn-success btn-sm" @click="advanceEra">Next Era</button>
                 </div>
                 <div class="debug-row">
                     <span>Era: <strong>{{ prestige.currentEra?.name ?? 'None' }}</strong></span>

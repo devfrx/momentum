@@ -8,7 +8,6 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -42,8 +41,8 @@ const hasActivity = computed(() =>
                 <AppIcon icon="mdi:chart-box" />
                 <span>{{ t('storage.session_pnl_title') }}</span>
             </div>
-            <Button v-if="hasActivity" icon="pi pi-refresh" :label="t('storage.session_reset')" text size="small"
-                severity="primary" @click="storage.resetSession()" />
+            <button v-if="hasActivity" class="btn btn-text btn-sm" @click="storage.resetSession()"><i
+                    class="pi pi-refresh"></i> {{ t('storage.session_reset') }}</button>
         </div>
 
         <template v-if="hasActivity">

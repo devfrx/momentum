@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
 import type { PerkEffect } from '@renderer/data/prestige'
 import { THEME } from '@renderer/assets/theme/colors'
@@ -101,8 +100,9 @@ function formatEffect(effect: PerkEffect): string {
                 <AppIcon icon="mdi:check-circle" />
                 <span>{{ $t('common.owned') }}</span>
             </div>
-            <Button v-else :label="$t('prestige.cost_pp', { n: cost })" icon="pi pi-shopping-cart" size="small"
-                :disabled="!canBuy" class="w-full" @click="$emit('buy')" />
+            <button v-else class="btn btn-primary btn-sm btn-block" :disabled="!canBuy" @click="$emit('buy')">
+                <i class="pi pi-shopping-cart"></i> {{ $t('prestige.cost_pp', { n: cost }) }}
+            </button>
         </div>
     </div>
 </template>

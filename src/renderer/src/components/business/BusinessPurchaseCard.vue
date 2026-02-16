@@ -4,7 +4,6 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { type BusinessDef } from '@renderer/data/businesses'
-import Button from 'primevue/button'
 
 const props = withDefaults(defineProps<{
     def: BusinessDef
@@ -51,11 +50,11 @@ const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth
             </div>
         </div>
 
-        <Button class="buy-button" :disabled="!canAfford || owned" @click="emit('buy', def.id)" severity="success">
+        <button class="btn btn-success buy-button" :disabled="!canAfford || owned" @click="emit('buy', def.id)">
             <AppIcon icon="mdi:cart-plus" />
             <span v-if="owned">{{ $t('business.already_owned') }}</span>
             <span v-else>{{ $t('common.buy') }} — {{ formatCash(def.purchasePrice) }}</span>
-        </Button>
+        </button>
     </div>
 </template>
 

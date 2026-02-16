@@ -5,7 +5,6 @@
  * win/loss record, and a play button.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 
 defineProps<{
     name: string
@@ -87,8 +86,8 @@ defineEmits<{ play: [] }>()
 
         <!-- Actions -->
         <div class="game-card__actions">
-            <Button :label="$t('gambling.play')" size="small" class="game-card__btn game-card__btn--primary"
-                @click="$emit('play')" />
+            <button class="btn btn-primary btn-sm game-card__btn game-card__btn--primary" @click="$emit('play')">{{
+                $t('gambling.play') }}</button>
         </div>
     </div>
 </template>

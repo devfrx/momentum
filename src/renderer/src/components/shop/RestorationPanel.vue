@@ -5,7 +5,6 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -120,10 +119,11 @@ function showRestoreMax(item: any): boolean {
                 <span class="slot-info">
                     {{ t('shop.workshop_slots', { used: shop.activeRestorations, total: shop.restorationSlotCount }) }}
                 </span>
-                <Button v-if="shop.canUpgradeSlots"
-                    :label="t('shop.workshop_upgrade_slot', { cost: formatCash(shop.nextSlotUpgradeCost) })"
-                    icon="pi pi-plus" size="small" severity="primary" outlined
-                    :disabled="player.cash.lt(shop.nextSlotUpgradeCost)" @click="shop.upgradeRestorationSlots()" />
+                <button v-if="shop.canUpgradeSlots" class="btn btn-ghost btn-sm"
+                    :disabled="player.cash.lt(shop.nextSlotUpgradeCost)" @click="shop.upgradeRestorationSlots()">
+                    <i class="pi pi-plus"></i>
+                    {{ t('shop.workshop_upgrade_slot', { cost: formatCash(shop.nextSlotUpgradeCost) }) }}
+                </button>
             </div>
         </div>
 
@@ -157,8 +157,10 @@ function showRestoreMax(item: any): boolean {
                         {{ t('shop.workshop_step', { current: slot.currentStep + 1, total: slot.totalSteps }) }}
                     </div>
 
-                    <Button :label="t('shop.workshop_cancel')" icon="pi pi-times" size="small" severity="primary"
-                        @click="shop.cancelRestoration(idx)" />
+                    <button class="btn btn-primary btn-sm" @click="shop.cancelRestoration(idx)">
+                        <i class="pi pi-times"></i>
+                        {{ t('shop.workshop_cancel') }}
+                    </button>
                 </template>
 
                 <template v-else>
@@ -208,11 +210,16 @@ function showRestoreMax(item: any): boolean {
                 </div>
 
                 <div class="restorable-item__actions">
-                    <Button v-if="nextCond(item)" :label="t('shop.workshop_restore_1')" icon="pi pi-wrench" size="small"
-                        outlined :disabled="shop.freeRestorationSlots === 0" @click="handleRestore(item.id, source)" />
-                    <Button v-if="showRestoreMax(item)" :label="t('shop.workshop_restore_max')" icon="pi pi-star"
-                        size="small" severity="primary" :disabled="shop.freeRestorationSlots === 0"
-                        @click="handleRestoreToMax(item.id, source)" />
+                    <button v-if="nextCond(item)" class="btn btn-ghost btn-sm"
+                        :disabled="shop.freeRestorationSlots === 0" @click="handleRestore(item.id, source)">
+                        <i class="pi pi-wrench"></i>
+                        {{ t('shop.workshop_restore_1') }}
+                    </button>
+                    <button v-if="showRestoreMax(item)" class="btn btn-primary btn-sm"
+                        :disabled="shop.freeRestorationSlots === 0" @click="handleRestoreToMax(item.id, source)">
+                        <i class="pi pi-star"></i>
+                        {{ t('shop.workshop_restore_max') }}
+                    </button>
                 </div>
             </div>
         </div>

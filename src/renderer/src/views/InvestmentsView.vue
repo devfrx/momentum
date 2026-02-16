@@ -11,7 +11,6 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
 import Dialog from 'primevue/dialog'
@@ -260,13 +259,14 @@ const investInfoSections = computed<InfoSection[]>(() => [
                         <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
                             formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                        }}x</strong></span>
+                                }}x</strong></span>
                     </div>
                     <div class="success-result">
                         <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
                             formatCash(mul(inv.investedAmount, inv.returnMultiplier)) }}</strong></p>
-                        <Button :label="$t('investments.collect_returns')" icon="pi pi-wallet" severity="success"
-                            @click="collectReturns(inv.id)" />
+                        <button class="btn btn-success" @click="collectReturns(inv.id)">
+                            <i class="pi pi-wallet"></i> {{ $t('investments.collect_returns') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -340,7 +340,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                             <span class="opp-card__tagline">{{ opp.tagline }}</span>
                         </div>
                         <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">{{ STAGES[opp.stage].name
-                            }}</span>
+                        }}</span>
                     </div>
 
                     <!-- Meta row: sector + timer -->
@@ -436,19 +436,23 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
                     <!-- Actions -->
                     <div class="opp-card__actions">
-                        <Button v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1" :label="$t('investments.research_phase', {
-                            phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
-                            cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
-                        })" icon="pi pi-search" severity="primary" outlined size="small"
+                        <button v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1"
+                            class="btn btn-ghost btn-sm opp-card__btn"
                             :disabled="!gte(player.cash, D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))"
-                            @click="doResearch(opp.id)" class="opp-card__btn" />
+                            @click="doResearch(opp.id)">
+                            <i class="pi pi-search"></i> {{ $t('investments.research_phase', {
+                                phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
+                                cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
+                            }) }}
+                        </button>
                         <span v-else class="opp-card__research-complete">
                             <AppIcon icon="mdi:check-decagram" />
                             {{ $t('investments.fully_researched') }}
                         </span>
-                        <Button :label="$t('investments.invest')" icon="pi pi-send" size="small"
-                            :disabled="!gte(player.cash, D(opp.minInvestment))" @click="openInvestDialog(opp)"
-                            class="opp-card__btn opp-card__btn--primary" />
+                        <button class="btn btn-primary btn-sm opp-card__btn opp-card__btn--primary"
+                            :disabled="!gte(player.cash, D(opp.minInvestment))" @click="openInvestDialog(opp)">
+                            <i class="pi pi-send"></i> {{ $t('investments.invest') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -516,13 +520,15 @@ const investInfoSections = computed<InfoSection[]>(() => [
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                    }}</strong>
+                        }}</strong>
                 </div>
             </div>
 
             <template #footer>
-                <Button :label="$t('common.cancel')" severity="secondary" @click="showInvestDialog = false" />
-                <Button :label="$t('investments.confirm_investment')" icon="pi pi-check" @click="confirmInvest" />
+                <button class="btn btn-ghost" @click="showInvestDialog = false">{{ $t('common.cancel') }}</button>
+                <button class="btn btn-primary" @click="confirmInvest">
+                    <i class="pi pi-check"></i> {{ $t('investments.confirm_investment') }}
+                </button>
             </template>
         </Dialog>
 

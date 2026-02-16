@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 
 defineProps<{
     name: string
@@ -32,12 +31,13 @@ defineEmits<{
             <span>{{ $t('investments.min_label') }} <strong class="text-gold">{{ minInvestment }}</strong></span>
             <span>{{ $t('investments.success') }} <strong class="text-sky">{{ successChance }}</strong></span>
             <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ returnMultiplier
-                    }}x</strong></span>
+            }}x</strong></span>
         </div>
 
         <div class="item-card-actions">
-            <Button :label="$t('investments.invest_amount', { amount: minInvestment })" icon="pi pi-send" size="small"
-                :disabled="disabled" @click="$emit('invest')" />
+            <button class="btn btn-primary btn-sm" :disabled="disabled" @click="$emit('invest')">
+                <i class="pi pi-send"></i> {{ $t('investments.invest_amount', { amount: minInvestment }) }}
+            </button>
         </div>
     </div>
 </template>

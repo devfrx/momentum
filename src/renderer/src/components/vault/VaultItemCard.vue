@@ -4,7 +4,6 @@
  * Shows rarity border, value, source badge, and action buttons.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -63,9 +62,12 @@ const SOURCE_ICONS: Record<string, string> = {
         </div>
 
         <div class="vault-item__actions">
-            <Button :label="t('vault.transfer_out')" icon="pi pi-arrow-right" size="small" severity="primary" outlined
-                @click="$emit('transfer', item.id)" />
-            <Button :label="t('storage.sell_item')" icon="pi pi-dollar" size="small" @click="$emit('sell', item.id)" />
+            <button class="btn btn-ghost btn-sm" @click="$emit('transfer', item.id)">
+                <i class="pi pi-arrow-right"></i> {{ t('vault.transfer_out') }}
+            </button>
+            <button class="btn btn-primary btn-sm" @click="$emit('sell', item.id)">
+                <i class="pi pi-dollar"></i> {{ t('storage.sell_item') }}
+            </button>
         </div>
     </div>
 </template>

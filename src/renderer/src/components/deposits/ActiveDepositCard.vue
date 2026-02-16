@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import ProgressBar from 'primevue/progressbar'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -139,9 +138,11 @@ const isEarlyWithdrawal = computed(() => {
 
         <!-- Actions -->
         <div class="item-card-actions">
-            <Button :label="isEarlyWithdrawal ? $t('deposits.withdraw_early') : $t('deposits.withdraw_all')"
-                icon="pi pi-wallet" size="small" :severity="isEarlyWithdrawal ? 'warn' : 'success'"
-                @click="$emit('withdraw')" />
+            <button class="btn btn-sm" :class="isEarlyWithdrawal ? 'btn-warning' : 'btn-success'"
+                @click="$emit('withdraw')">
+                <i class="pi pi-wallet"></i> {{ isEarlyWithdrawal ? $t('deposits.withdraw_early') :
+                    $t('deposits.withdraw_all') }}
+            </button>
         </div>
     </div>
 </template>

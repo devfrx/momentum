@@ -7,7 +7,6 @@ import { useFormat } from '@renderer/composables/useFormat'
 import { getDistrict, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { THEME } from '@renderer/assets/theme/colors'
-import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
 import InputText from 'primevue/inputtext'
@@ -91,8 +90,9 @@ function handleRentSlider(val: number | number[]): void {
                     <div v-else class="prop-card__rename">
                         <InputText v-model="newName" size="small" class="prop-card__rename-input"
                             @keyup.enter="handleRename" />
-                        <Button icon="pi pi-check" text rounded size="small" @click="handleRename" />
-                        <Button icon="pi pi-times" text rounded size="small" @click="showRename = false" />
+                        <button class="btn btn-icon btn-sm" @click="handleRename"><i class="pi pi-check"></i></button>
+                        <button class="btn btn-icon btn-sm" @click="showRename = false"><i
+                                class="pi pi-times"></i></button>
                     </div>
                 </div>
                 <div class="prop-card__meta">
@@ -232,7 +232,7 @@ function handleRentSlider(val: number | number[]): void {
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.roi') }}</span>
                             <span class="d-value" :class="roi > 0 ? 'success' : 'danger'">{{ formatPercent(roi)
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
@@ -250,7 +250,7 @@ function handleRentSlider(val: number | number[]): void {
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.appreciation') }}</span>
                             <span class="d-value success">{{ formatPercent(property.baseAppreciationRate * 100)
-                                }}/{{ t('common.cycle') }}</span>
+                            }}/{{ t('common.cycle') }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.rent_multiplier') }}</span>
@@ -298,7 +298,7 @@ function handleRentSlider(val: number | number[]): void {
                     <h4 class="detail-title">
                         <AppIcon icon="mdi:puzzle" /> {{ t('realestate.improvements_label') }}
                         <span class="detail-count">{{ property.improvements.length }}/{{ property.maxImprovements
-                            }}</span>
+                        }}</span>
                     </h4>
                     <div v-if="improvements.length > 0" class="prop-card__improvements">
                         <span v-for="im in improvements" :key="im.id" class="imp-badge">

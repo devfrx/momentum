@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PrestigeEffectType } from '@renderer/data/prestige'
@@ -94,8 +93,10 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
                 <span class="level-max">/{{ maxLevel }}</span>
             </div>
             <div class="upgrade-action">
-                <Button v-if="level < maxLevel" :label="$t('prestige.cost_pp', { n: cost })" icon="pi pi-plus"
-                    size="small" :disabled="!canAfford" @click="$emit('buy')" />
+                <button v-if="level < maxLevel" class="btn btn-primary btn-sm" :disabled="!canAfford"
+                    @click="$emit('buy')">
+                    <i class="pi pi-plus"></i> {{ $t('prestige.cost_pp', { n: cost }) }}
+                </button>
                 <div v-else class="maxed-badge">
                     <AppIcon icon="mdi:check-circle" />
                     {{ $t('common.max') }}

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, nextTick } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import BusinessUpgradePanel from './BusinessUpgradePanel.vue'
 import BusinessStaffPanel from './BusinessStaffPanel.vue'
 import BusinessPolicySlider from './BusinessPolicySlider.vue'
@@ -302,10 +301,10 @@ function adjustMarketing(delta: number): void {
                                     <span v-if="isQualityMaxed" class="quality-max-badge">
                                         <AppIcon icon="mdi:check-decagram" /> {{ $t('common.max') }}
                                     </span>
-                                    <Button v-else size="small" severity="secondary"
+                                    <button v-else class="btn btn-ghost btn-sm"
                                         @click="store.upgradeQuality(business.id)">
                                         {{ formatCash(business.qualityUpgradeCost) }}
-                                    </Button>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -318,7 +317,7 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.wages') }}</span>
                                 <span class="d-value">${{ (business.employees * business.baseSalary).toFixed(2)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.rent') }}</span>
@@ -327,7 +326,7 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.supplies') }}</span>
                                 <span class="d-value">${{ (business.supplyCostPerUnit * business.unitsSold).toFixed(2)
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -365,10 +364,10 @@ function adjustMarketing(delta: number): void {
                     {{ $t('business.value_label', { value: formatCash(business.purchasePrice) }) }}
                 </span>
             </div>
-            <Button size="small" severity="danger" text @click="store.sellBusiness(business.id)">
+            <button class="btn btn-text btn-sm" @click="store.sellBusiness(business.id)">
                 <AppIcon icon="mdi:store-remove" />
                 {{ $t('common.sell') }}
-            </Button>
+            </button>
         </div>
     </div>
 </template>

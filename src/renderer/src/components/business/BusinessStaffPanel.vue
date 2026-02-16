@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 
@@ -49,9 +48,9 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
             </div>
             <div class="sr-actions">
                 <span class="sr-value">Lv.{{ business.trainingLevel }}</span>
-                <Button size="small" severity="secondary" @click="store.trainStaff(business.id)">
+                <button class="btn btn-ghost btn-sm" @click="store.trainStaff(business.id)">
                     {{ $t('business.train') }} — {{ formatCash(trainingCost) }}
-                </Button>
+                </button>
             </div>
         </div>
 

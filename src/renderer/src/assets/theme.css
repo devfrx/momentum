@@ -272,6 +272,45 @@
 }
 .btn-muted:hover { background: var(--t-border); color: var(--t-text); }
 
+/* Info */
+.btn-info {
+  background: var(--t-info);
+  color: #fff;
+  border-color: var(--t-info);
+}
+.btn-info:hover { background: var(--t-info-hover); border-color: var(--t-info-hover); }
+
+/* Contrast — inverted fg/bg */
+.btn-contrast {
+  background: var(--t-text);
+  color: var(--t-bg-base);
+  border-color: var(--t-text);
+}
+.btn-contrast:hover { opacity: 0.85; }
+
+/* Text — no background, no border, just text + optional icon */
+.btn-text {
+  background: transparent;
+  color: var(--t-text-secondary);
+  border-color: transparent;
+  padding: var(--t-space-1) var(--t-space-2);
+}
+.btn-text:hover { color: var(--t-text); background: var(--t-bg-muted); }
+
+/* Icon-only — circular, compact */
+.btn-icon {
+  background: transparent;
+  color: var(--t-text-secondary);
+  border-color: transparent;
+  padding: var(--t-space-1);
+  border-radius: 50%;
+  line-height: 1;
+}
+.btn-icon:hover { color: var(--t-text); background: var(--t-bg-muted); }
+
+/* Full-width utility */
+.btn-block { width: 100%; }
+
 /* ── Win/Lose result overlays ─────────────────────────────────────────── */
 .result-win {
   background: var(--t-success-muted);

@@ -4,7 +4,6 @@
  * Shows location, peek hints, bidder count, starting bid.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -60,8 +59,8 @@ const location = storage.getLocation(props.auction.locationId)
 
         <!-- Actions -->
         <div class="auction-card__actions">
-            <Button :label="t('storage.enter_auction')" icon="pi pi-sign-in" size="small" class="auction-card__btn"
-                @click="$emit('bid', auction.id)" />
+            <button class="btn btn-primary btn-sm auction-card__btn" @click="$emit('bid', auction.id)"><i
+                    class="pi pi-sign-in"></i> {{ t('storage.enter_auction') }}</button>
         </div>
     </div>
 </template>

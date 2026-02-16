@@ -25,7 +25,7 @@ const loans = useLoanStore()
 const prestige = usePrestigeStore()
 const settings = useSettingsStore()
 const upgrades = useUpgradeStore()
-const { formatCash, formatNumber, formatMultiplier } = useFormat()
+const { formatCash, formatCashFull, formatNumber, formatMultiplier } = useFormat()
 
 const showMultiplierPanel = ref(false)
 
@@ -96,8 +96,10 @@ function handleClose(): void {
 
         <!-- Hero: Primary Cash -->
         <div class="hero-stat">
-            <span class="hero-value">{{ formatCash(player.cash) }}</span>
-            <span class="hero-profit" :class="{ negative: totalIncomePerSecond.lt(0) }">
+            <span class="hero-value tip-wrap" :data-tip="formatCashFull(player.cash)">{{ formatCash(player.cash)
+                }}</span>
+            <span class="hero-profit tip-wrap" :class="{ negative: totalIncomePerSecond.lt(0) }"
+                :data-tip="formatCashFull(totalIncomePerSecond) + $t('common.per_second')">
                 <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
                 {{ formatCash(totalIncomePerSecond) }}{{ $t('common.per_second') }}
             </span>
@@ -105,7 +107,7 @@ function handleClose(): void {
 
         <!-- Secondary Stats -->
         <div class="hud-stats">
-            <div class="hud-chip" :title="$t('header.net_worth')">
+            <div class="hud-chip tip-wrap" :data-tip="$t('header.net_worth') + ': ' + formatCashFull(player.netWorth)">
                 <span class="hud-chip-label">{{ $t('header.net_worth') }}</span>
                 <span class="hud-chip-value">{{ formatCash(player.netWorth, 2) }}</span>
             </div>
@@ -119,7 +121,7 @@ function handleClose(): void {
             <div v-if="routeMultiplier" class="hud-chip" :class="{ 'has-bonus': routeMultiplier.hasBonus }">
                 <AppIcon :icon="routeMultiplier.icon" class="hud-route-icon" />
                 <span class="hud-chip-value" :class="{ accent: routeMultiplier.hasBonus }">{{ routeMultiplier.formatted
-                }}</span>
+                    }}</span>
             </div>
 
             <div class="hud-chip clickable" @click="showMultiplierPanel = !showMultiplierPanel"
@@ -370,5 +372,37 @@ function handleClose(): void {
 .icon-btn.close:hover {
     background: var(--t-danger-hover);
     color: var(--t-text);
+}
+
+/* ─── CSS Tooltip (no flicker on reactive updates) ─── */
+.tip-wrap {
+    position: relative;
+    cursor: default;
+}
+
+.tip-wrap::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.3rem 0.55rem;
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--t-text);
+    background: var(--t-bg-elevated);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-sm);
+    box-shadow: var(--t-shadow-md);
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.tip-wrap:hover::after {
+    opacity: 1;
 }
 </style>

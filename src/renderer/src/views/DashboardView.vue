@@ -8,7 +8,6 @@ import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import MultiplierStats from '@renderer/components/dashboard/MultiplierStats.vue'
 import { JOBS } from '@renderer/data/jobs'
-import Button from 'primevue/button'
 import { EventImpactBanner } from '@renderer/components/events'
 
 const player = usePlayerStore()
@@ -95,9 +94,10 @@ function toggleJob(defId: string): void {
                             <span class="job-name">{{JOBS.find(j => j.id === uj.defId)?.name}}</span>
                             <span class="job-meta">{{ $t('dashboard.exp_level', { n: uj.experienceLevel }) }}</span>
                         </div>
-                        <Button size="small" :severity="uj.active ? 'danger' : 'success'" @click="toggleJob(uj.defId)">
+                        <button class="btn btn-sm" :class="uj.active ? 'btn-danger' : 'btn-success'"
+                            @click="toggleJob(uj.defId)">
                             {{ uj.active ? $t('common.stop') : $t('common.start') }}
-                        </Button>
+                        </button>
                     </div>
                 </div>
 
@@ -111,11 +111,11 @@ function toggleJob(defId: string): void {
                                 <span class="job-name">{{ job.name }}</span>
                                 <span class="job-meta">{{ job.description }}</span>
                             </div>
-                            <Button size="small" :disabled="player.level < job.requiredLevel"
+                            <button class="btn btn-primary btn-sm" :disabled="player.level < job.requiredLevel"
                                 @click="jobStore.unlockJob(job.id)">
                                 {{ job.requiredLevel > 0 && player.level < job.requiredLevel ?
                                     $t('dashboard.requires_level', { n: job.requiredLevel }) : $t('dashboard.apply') }}
-                                    </Button>
+                                    </button>
                         </div>
                     </div>
                 </div>

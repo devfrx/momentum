@@ -4,7 +4,6 @@ import { useStockStore } from '@renderer/stores/useStockStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import AssetCard from '@renderer/components/market/AssetCard.vue'
 import MarketStats from '@renderer/components/market/MarketStats.vue'
 import MarketSettings from '@renderer/components/market/MarketSettings.vue'
@@ -146,9 +145,10 @@ const stockInfoSections = computed<InfoSection[]>(() => [
             </div>
             <div class="header-actions">
                 <MarketSettings />
-                <Button :icon="showCharts ? 'pi pi-eye-slash' : 'pi pi-eye'"
-                    :label="showCharts ? $t('stocks.hide_charts') : $t('stocks.show_charts')" severity="secondary"
-                    size="small" outlined @click="showCharts = !showCharts" />
+                <button class="btn btn-ghost btn-sm" @click="showCharts = !showCharts">
+                    <i :class="showCharts ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                    {{ showCharts ? $t('stocks.hide_charts') : $t('stocks.show_charts') }}
+                </button>
             </div>
         </div>
 

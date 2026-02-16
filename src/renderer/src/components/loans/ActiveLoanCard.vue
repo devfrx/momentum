@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import ProgressBar from 'primevue/progressbar'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -111,12 +110,12 @@ const hasEarlyPenalty = computed(() => {
             <div class="loan-stat-mini">
                 <span class="stat-label">{{ $t('loans.late_stat') }}</span>
                 <span class="stat-value" :class="{ 'text-danger': loan.latePayments > 0 }">{{ loan.latePayments
-                    }}</span>
+                }}</span>
             </div>
             <div class="loan-stat-mini">
                 <span class="stat-label">{{ $t('loans.missed_stat') }}</span>
                 <span class="stat-value" :class="{ 'text-danger': loan.missedPayments > 0 }">{{ loan.missedPayments
-                    }}</span>
+                }}</span>
             </div>
         </div>
 
@@ -129,16 +128,16 @@ const hasEarlyPenalty = computed(() => {
             <AppIcon icon="mdi:information" />
             <span>{{ $t('loans.early_repay_penalty_pct', {
                 pct: ((loanDef?.earlyRepaymentPenalty ?? 0) * 100).toFixed(0)
-                }) }}</span>
+            }) }}</span>
         </div>
 
         <div class="item-card-actions">
-            <Button :label="$t('loans.pay_amount', { amount: '$100' })" icon="pi pi-minus" size="small"
-                severity="secondary" :disabled="loan.isDefaulted" @click="$emit('repay', 100)" />
-            <Button :label="$t('loans.pay_off', { amount: formatCash(payoffAmount) })" icon="pi pi-check" size="small"
-                severity="success" :disabled="loan.isDefaulted" @click="$emit('repayFull')" />
-            <Button v-if="loanDef?.canRefinance && !loan.isDefaulted" :label="$t('loans.refinance')"
-                icon="pi pi-refresh" size="small" severity="secondary" @click="$emit('refinance')" />
+            <button class="btn btn-ghost btn-sm" :disabled="loan.isDefaulted" @click="$emit('repay', 100)"><i
+                    class="pi pi-minus"></i> {{ $t('loans.pay_amount', { amount: '$100' }) }}</button>
+            <button class="btn btn-success btn-sm" :disabled="loan.isDefaulted" @click="$emit('repayFull')"><i
+                    class="pi pi-check"></i> {{ $t('loans.pay_off', { amount: formatCash(payoffAmount) }) }}</button>
+            <button v-if="loanDef?.canRefinance && !loan.isDefaulted" class="btn btn-ghost btn-sm"
+                @click="$emit('refinance')"><i class="pi pi-refresh"></i> {{ $t('loans.refinance') }}</button>
         </div>
     </div>
 </template>

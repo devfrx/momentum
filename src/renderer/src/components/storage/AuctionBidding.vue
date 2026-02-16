@@ -6,7 +6,6 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -77,7 +76,7 @@ function leave(): void {
         <!-- Header -->
         <div class="bidding-header">
             <div class="bidding-header__left">
-                <Button icon="pi pi-arrow-left" text severity="secondary" size="small" @click="leave" />
+                <button class="btn btn-text btn-sm" @click="leave"><i class="pi pi-arrow-left"></i></button>
                 <AppIcon :icon="location?.icon ?? 'mdi:warehouse'" class="bidding-location-icon" />
                 <div>
                     <h2 class="bidding-title">{{ location?.name }}</h2>
@@ -130,7 +129,7 @@ function leave(): void {
                             <div class="bidder-info">
                                 <span class="bidder-name">{{ bidder.name }}</span>
                                 <span class="bidder-status" v-if="bidder.droppedOut">{{ t('storage.dropped_out')
-                                }}</span>
+                                    }}</span>
                                 <span class="bidder-status bidder-status--leading"
                                     v-else-if="auction.currentBidder === bidder.id">{{ t('storage.leading') }}</span>
                             </div>
@@ -155,9 +154,9 @@ function leave(): void {
                 <!-- Bid Controls -->
                 <div class="bid-controls" v-if="auction.status === 'active'">
                     <div class="bid-multiplier-row">
-                        <Button v-for="m in bidMultipliers" :key="m" :label="`${m}×`"
-                            :severity="selectedMultiplier === m ? undefined : 'secondary'" size="small"
-                            :outlined="selectedMultiplier !== m" @click="selectedMultiplier = m" />
+                        <button v-for="m in bidMultipliers" :key="m" class="btn btn-sm"
+                            :class="{ 'btn-primary': selectedMultiplier === m, 'btn-ghost': selectedMultiplier !== m }"
+                            @click="selectedMultiplier = m">{{ m }}×</button>
                     </div>
 
                     <div class="bid-preview">
@@ -165,11 +164,11 @@ function leave(): void {
                         <span class="bid-preview-value">{{ formatCash(bidAmount) }}</span>
                     </div>
 
-                    <Button :label="t('storage.place_bid')" icon="pi pi-dollar" size="large" :disabled="!canBid"
-                        class="bid-button" @click="placeBid" />
+                    <button class="btn btn-primary btn-lg bid-button" :disabled="!canBid" @click="placeBid"><i
+                            class="pi pi-dollar"></i> {{ t('storage.place_bid') }}</button>
 
-                    <Button :label="t('storage.leave_auction')" severity="primary" text size="small" @click="leave"
-                        class="leave-button" />
+                    <button class="btn btn-text btn-sm leave-button" @click="leave">{{ t('storage.leave_auction')
+                        }}</button>
                 </div>
 
                 <!-- Auction Result -->
@@ -204,10 +203,11 @@ function leave(): void {
                     <AppIcon :icon="item.icon" class="found-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
                     <span class="found-item__name">{{ resolveItemName(item, t) }}</span>
                     <span class="found-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity
-                    }}</span>
+                        }}</span>
                 </div>
             </div>
-            <Button :label="t('storage.collect_items')" icon="pi pi-check" @click="$emit('back')" />
+            <button class="btn btn-primary" @click="$emit('back')"><i class="pi pi-check"></i> {{
+                t('storage.collect_items') }}</button>
         </div>
     </div>
 </template>

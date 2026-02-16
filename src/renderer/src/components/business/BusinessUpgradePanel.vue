@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 
@@ -60,10 +59,9 @@ function getNextBonus(upgradeId: string): number {
                     </span>
                 </div>
 
-                <Button size="small" severity="secondary" class="upg-buy-btn"
-                    @click="store.purchaseUpgrade(business.id, upgDef.id)">
+                <button class="btn btn-ghost btn-sm upg-buy-btn" @click="store.purchaseUpgrade(business.id, upgDef.id)">
                     {{ $t('business.upgrade_cost', { cost: formatCash(store.getUpgradeCost(business, upgDef.id)) }) }}
-                </Button>
+                </button>
             </div>
         </div>
     </div>
