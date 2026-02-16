@@ -52,7 +52,7 @@ export const FENCE_DAILY_LIMIT = 3
 export const FENCE_SELL_MULTIPLIER = 1.2
 
 /** Hacker: stock/crypto manipulation range (±%) */
-export const HACKER_MANIPULATION_RANGE = 0.30
+export const HACKER_MANIPULATION_RANGE = 0.50
 
 /** Hacker: manipulation duration (ticks) */
 export const HACKER_MANIPULATION_TICKS = 600  // 1 minute

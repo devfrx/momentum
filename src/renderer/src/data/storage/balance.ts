@@ -28,6 +28,8 @@ export const JUNK_OVERRIDE_CHANCE = 0.28
 /**
  * Chance that an entire unit is a "dud" — filled mostly with junk.
  * Dud units override rarity weights to heavily favour common/junk.
+ * Dud means a unit with very low total value, often containing no rare items at all.
+ * This adds risk to every auction and prevents players from consistently profiting by only going for high-rarity items.
  */
 export const DUD_UNIT_CHANCE = 0.18
 

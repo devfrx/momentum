@@ -80,7 +80,8 @@ function categoryIcon(category: string): string {
                 <AppIcon icon="mdi:arrow-up-bold" class="deal-card__effect-icon" />
                 <span>{{ t(`blackmarket.effect_${eff.type}`, {
                     value: eff.value, duration: Math.round(eff.durationTicks
-                    / 10) }) }}</span>
+                        / 10)
+                }) }}</span>
             </div>
         </div>
 
@@ -112,6 +113,7 @@ function categoryIcon(category: string): string {
 .deal-card {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: var(--t-space-3);
     padding: var(--t-space-4);
     background: var(--t-bg-card);

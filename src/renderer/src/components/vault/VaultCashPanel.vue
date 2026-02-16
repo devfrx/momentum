@@ -71,10 +71,10 @@ function withdrawAll(): void {
                     @click="withdraw" :disabled="!amount.trim()" />
             </div>
             <div class="cash-buttons">
-                <Button :label="t('vault.deposit_all')" icon="pi pi-arrow-down" size="small" severity="info" outlined
+                <Button :label="t('vault.deposit_all')" icon="pi pi-arrow-down" size="small" severity="primary" outlined
                     @click="depositAll" :disabled="player.cash.lte(0)" />
                 <Button :label="t('vault.withdraw_all')" icon="pi pi-arrow-up" size="small" severity="secondary"
-                    outlined @click="withdrawAll" :disabled="vault.storedCash.lte(0)" />
+                    @click="withdrawAll" :disabled="vault.storedCash.lte(0)" />
             </div>
         </div>
 

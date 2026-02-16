@@ -178,6 +178,7 @@ export function useAutoSave() {
       upgrades: upgrades.nodes.map(u => ({
         id: u.id,
         level: u.level,
+        maxLevel: u.maxLevel,
         purchased: u.purchased
       })),
 
@@ -351,10 +352,13 @@ export function useAutoSave() {
       return
     }
     try {
-      // Collect and persist state synchronously via the main process
+      // Collect state and write synchronously — a single sendSync call
+      // ensures the main process updates + writes atomically before the
+      // page is torn down.  The previous two-step approach (async invoke
+      // followed by sendSync) was racy: sendSync could fire before the
+      // async invoke handler ran updateGameState(), writing stale data.
       const state = collectGameState()
-      window.api.saveLocal(state) // queue the state update (async, but data is serialized now)
-      window.api.saveLocalSync()  // synchronous disk write
+      window.api.saveLocalSync(state)
     } catch (e) {
       console.error('[AutoSave] Sync save on beforeunload failed:', e)
     }

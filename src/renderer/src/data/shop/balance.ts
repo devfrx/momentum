@@ -77,7 +77,7 @@ export const VAULT_UPGRADE_SLOTS = 10
 export const DEMAND_CYCLE_MIN_TICKS = 1200 // ~2 minutes
 
 /** Maximum ticks before a category's demand target re-rolls. */
-export const DEMAND_CYCLE_MAX_TICKS = 6000 // ~10 minutes
+export const DEMAND_CYCLE_MAX_TICKS = 9000 // ~15 minutes
 
 /** Minimum demand multiplier (cold category). */
 export const DEMAND_MIN_MULT = 0.6
@@ -112,13 +112,13 @@ export const DEMAND_TICK_INTERVAL = 10
 export const RESTORATION_SLOT_BASE = 1
 
 /** Maximum restoration workshop slots. */
-export const RESTORATION_SLOT_MAX = 4
+export const RESTORATION_SLOT_MAX = 8
 
 /** Base cost for upgrading workshop slots. */
 export const RESTORATION_SLOT_UPGRADE_COST_BASE = 2000
 
 /** Cost growth exponent per slot upgrade. */
-export const RESTORATION_SLOT_UPGRADE_COST_GROWTH = 2.5
+export const RESTORATION_SLOT_UPGRADE_COST_GROWTH = 50
 
 /** Restoration cost as a fraction of item's base value (per step). */
 export const RESTORATION_BASE_COST_FRACTION = 0.06

@@ -111,7 +111,7 @@ function sellAllFiltered(): void {
                     {{ t('vault.total_value') }}: {{ formatCash(totalValue) }}
                 </span>
                 <Button v-if="filteredItems.length > 0" :label="t('vault.sell_all_filtered')" icon="pi pi-dollar"
-                    size="small" severity="danger" outlined @click="sellAllFiltered()" />
+                    size="small" severity="danger" @click="sellAllFiltered()" />
             </div>
         </div>
 

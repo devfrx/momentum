@@ -128,7 +128,7 @@ export function updateGameState(partial: Partial<GameSave>): void {
 function runMigrations(saveData: GameSave): void {
   const migrations: Record<number, (data: GameSave) => void> = {
     // Version 1 → 2: Add loans, deposits, storage, and ensure all new fields exist
-    1: (data) => {
+    1: (data: GameSave) => {
       // Ensure loans structure exists
       if (!data.loans || typeof data.loans !== 'object') {
         (data as unknown as Record<string, unknown>).loans = { loans: [], creditScore: 50, creditScoreFactors: { paymentHistory: 10, creditUtilization: 30, creditAge: 0, creditMix: 0, newCredit: 10 }, loanHistory: [], totalTicksWithCredit: 0, recentApplications: [], totalLoansTaken: 0, totalLoansRepaidOnTime: 0, totalLoansDefaulted: 0, totalInterestPaidEver: { m: 0, e: 0 } }
@@ -146,7 +146,42 @@ function runMigrations(saveData: GameSave): void {
         data.totalPlayTime = 0
       }
       data.version = 2
-    }
+    },
+
+    // Version 2 → 3: Add blackmarket, vault, shop state
+    2: (data: GameSave) => {
+      const d = data as unknown as Record<string, unknown>
+      if (!d.blackmarket) {
+        d.blackmarket = {
+          totalDealsCompleted: 0, totalDealsFailed: 0, reputationPoints: 0, heat: 0,
+          dealCooldowns: {}, lastDealRotationTick: 0, nextRotationTick: 0,
+          contactStates: [], activeEffects: [], investigations: [],
+          totalCashSpent: { m: 0, e: 0 }, totalCashEarned: { m: 0, e: 0 },
+          totalHeatAccumulated: 0, totalInvestigations: 0, totalFinesPaid: { m: 0, e: 0 },
+          lastTickProcessed: 0, activityLog: [], availableDeals: [],
+        }
+      }
+      if (!d.vault) {
+        d.vault = {
+          items: [], storedCash: { m: 0, e: 0 }, capacityUpgrades: 0,
+          totalItemsStored: 0, totalItemsSold: 0, totalSaleRevenue: { m: 0, e: 0 },
+          totalCashDeposited: { m: 0, e: 0 }, totalCashWithdrawn: { m: 0, e: 0 },
+        }
+      }
+      if (!d.shop) {
+        d.shop = {
+          listings: [], purchasedUniqueIds: [], lastRefreshTick: 0, lastFullRestockTick: 0,
+          totalItemsBought: 0, totalCashSpentOnPurchases: { m: 0, e: 0 },
+          totalItemsSoldToShop: 0, totalCashFromSales: { m: 0, e: 0 },
+          uniqueItemsBought: 0, bestDeal: { m: 0, e: 0 },
+          totalItemsRestored: 0, totalRestorationCashSpent: { m: 0, e: 0 },
+          totalAuctionRevenue: { m: 0, e: 0 }, totalAuctionsCompleted: 0,
+          demands: [], lastDemandTick: 0, restorationSlotCount: 1,
+          restorationSlots: [null], activeAuctions: [], auctionHistory: [],
+        }
+      }
+      data.version = 3
+    },
   }
 
   while (saveData.version < CURRENT_SAVE_VERSION) {

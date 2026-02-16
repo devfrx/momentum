@@ -56,7 +56,7 @@ const SOURCE_ICONS: Record<string, string> = {
         </div>
 
         <div class="vault-item__actions">
-            <Button :label="t('vault.transfer_out')" icon="pi pi-arrow-right" size="small" severity="secondary" outlined
+            <Button :label="t('vault.transfer_out')" icon="pi pi-arrow-right" size="small" severity="primary" outlined
                 @click="$emit('transfer', item.id)" />
             <Button :label="t('storage.sell_item')" icon="pi pi-dollar" size="small" @click="$emit('sell', item.id)" />
         </div>

@@ -8,7 +8,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   // ─── Local Save/Load ────────────────────────────────────────────
   saveLocal: (partialState?: unknown) => ipcRenderer.invoke('save:local', partialState),
-  saveLocalSync: () => ipcRenderer.sendSync('save:sync') as { success: boolean; error?: string },
+  saveLocalSync: (partialState?: unknown) => ipcRenderer.sendSync('save:sync', partialState) as { success: boolean; error?: string },
   loadLocal: () => ipcRenderer.invoke('save:load'),
   resetSave: () => ipcRenderer.invoke('save:reset'),
   exportFile: () => ipcRenderer.invoke('save:exportFile'),

@@ -50,9 +50,9 @@ const tabs = computed(() => [
             </div>
             <div class="header-actions">
                 <Button :label="t('vault.transfer_title')" icon="pi pi-arrow-right-arrow-left" size="small"
-                    severity="info" outlined @click="showTransfer = true" />
-                <Button :label="t('vault.upgrade_capacity')" icon="pi pi-plus" size="small" severity="secondary"
-                    outlined @click="vault.upgradeCapacity()" :disabled="player.cash.lt(vault.nextUpgradeCost)" />
+                    severity="primary" @click="showTransfer = true" />
+                <Button :label="t('vault.upgrade_capacity')" icon="pi pi-plus" size="small" severity="primary" outlined
+                    @click="vault.upgradeCapacity()" :disabled="player.cash.lt(vault.nextUpgradeCost)" />
                 <CashDisplay :label="t('storage.balance')" :value="formatCash(player.cash)" />
             </div>
         </div>

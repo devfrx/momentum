@@ -17,8 +17,11 @@ import type { GameSave } from '../database/schema'
 
 export function registerSaveIpc(): void {
   // ─── Synchronous save (for beforeunload — cannot wait for async) ───
-  ipcMain.on('save:sync', (event) => {
+  ipcMain.on('save:sync', (event, partialState?: Partial<GameSave>) => {
     try {
+      if (partialState) {
+        updateGameState(partialState)
+      }
       saveGame()
       event.returnValue = { success: true }
     } catch (error) {

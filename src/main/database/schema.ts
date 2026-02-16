@@ -424,6 +424,128 @@ export interface SettingsSave {
   pinnedCryptoId: string | null
 }
 
+// ─── Black Market (export state) ────────────────────────────────────
+
+export interface BlackMarketEffectSave {
+  id: string
+  sourceId: string
+  type: string
+  value: number
+  ticksRemaining: number
+  totalDuration: number
+  target?: string
+}
+
+export interface BlackMarketInvestigationSave {
+  id: string
+  nameKey: string
+  severity: number
+  ticksRemaining: number
+  totalDuration: number
+  fineAmount: SD
+  catchChance: number
+  resolved: boolean
+  caught: boolean
+}
+
+export interface BlackMarketSave {
+  totalDealsCompleted: number
+  totalDealsFailed: number
+  reputationPoints: number
+  heat: number
+  dealCooldowns: Record<string, number>
+  lastDealRotationTick: number
+  nextRotationTick: number
+  contactStates: Array<Record<string, unknown>>
+  activeEffects: BlackMarketEffectSave[]
+  investigations: BlackMarketInvestigationSave[]
+  totalCashSpent: SD
+  totalCashEarned: SD
+  totalHeatAccumulated: number
+  totalInvestigations: number
+  totalFinesPaid: SD
+  lastTickProcessed: number
+  activityLog: Array<Record<string, unknown>>
+  availableDeals: Array<Record<string, unknown>>
+}
+
+// ─── Vault (export state) ───────────────────────────────────────────
+
+export interface VaultItemSave {
+  id: string
+  name: string
+  icon: string
+  category: string
+  rarity: string
+  baseValue: SD
+  description: string
+  appraised: boolean
+  appraisedValue: SD | null
+  weight: number
+  source: string
+  vaultedAtTick: number
+}
+
+export interface VaultSave {
+  items: VaultItemSave[]
+  storedCash: SD
+  capacityUpgrades: number
+  totalItemsStored: number
+  totalItemsSold: number
+  totalSaleRevenue: SD
+  totalCashDeposited: SD
+  totalCashWithdrawn: SD
+}
+
+// ─── Shop (export state) ────────────────────────────────────────────
+
+export interface ShopListingSave {
+  id: string
+  item: {
+    id: string
+    name: string
+    icon: string
+    category: string
+    rarity: string
+    baseValue: SD
+    description: string
+    appraised: boolean
+    appraisedValue: SD | null
+    weight: number
+    condition?: string
+  }
+  price: SD
+  basePrice: SD
+  flashSale: boolean
+  discount: number
+  unique: boolean
+  listedAtTick: number
+  views: number
+}
+
+export interface ShopSave {
+  listings: ShopListingSave[]
+  purchasedUniqueIds: string[]
+  lastRefreshTick: number
+  lastFullRestockTick: number
+  totalItemsBought: number
+  totalCashSpentOnPurchases: SD
+  totalItemsSoldToShop: number
+  totalCashFromSales: SD
+  uniqueItemsBought: number
+  bestDeal: SD
+  totalItemsRestored: number
+  totalRestorationCashSpent: SD
+  totalAuctionRevenue: SD
+  totalAuctionsCompleted: number
+  demands: Array<Record<string, unknown>>
+  lastDemandTick: number
+  restorationSlotCount: number
+  restorationSlots: Array<Record<string, unknown> | null>
+  activeAuctions: Array<Record<string, unknown>>
+  auctionHistory: Array<Record<string, unknown>>
+}
+
 // ─── Root Save Schema ───────────────────────────────────────────────
 
 export interface GameSave {
@@ -472,11 +594,20 @@ export interface GameSave {
   /** Storage Wars state */
   storage?: StorageStateSave
 
+  /** Black Market state */
+  blackmarket?: BlackMarketSave
+
+  /** Vault state */
+  vault?: VaultSave
+
+  /** Shop state */
+  shop?: ShopSave
+
   settings: SettingsSave
 }
 
 /** Current schema version. Increment when making breaking changes. */
-export const CURRENT_SAVE_VERSION = 2
+export const CURRENT_SAVE_VERSION = 3
 
 // ─── Default / factory ──────────────────────────────────────────────
 
@@ -611,6 +742,61 @@ export function createDefaultSave(): GameSave {
       totalDepositsOpened: 0,
       totalDepositsMatured: 0,
       totalEarlyWithdrawals: 0
+    },
+
+    blackmarket: {
+      totalDealsCompleted: 0,
+      totalDealsFailed: 0,
+      reputationPoints: 0,
+      heat: 0,
+      dealCooldowns: {},
+      lastDealRotationTick: 0,
+      nextRotationTick: 0,
+      contactStates: [],
+      activeEffects: [],
+      investigations: [],
+      totalCashSpent: ZERO_SD,
+      totalCashEarned: ZERO_SD,
+      totalHeatAccumulated: 0,
+      totalInvestigations: 0,
+      totalFinesPaid: ZERO_SD,
+      lastTickProcessed: 0,
+      activityLog: [],
+      availableDeals: [],
+    },
+
+    vault: {
+      items: [],
+      storedCash: ZERO_SD,
+      capacityUpgrades: 0,
+      totalItemsStored: 0,
+      totalItemsSold: 0,
+      totalSaleRevenue: ZERO_SD,
+      totalCashDeposited: ZERO_SD,
+      totalCashWithdrawn: ZERO_SD,
+    },
+
+    shop: {
+      listings: [],
+      purchasedUniqueIds: [],
+      lastRefreshTick: 0,
+      lastFullRestockTick: 0,
+      totalItemsBought: 0,
+      totalCashSpentOnPurchases: ZERO_SD,
+      totalItemsSoldToShop: 0,
+      totalCashFromSales: ZERO_SD,
+      uniqueItemsBought: 0,
+      bestDeal: ZERO_SD,
+      totalItemsRestored: 0,
+      totalRestorationCashSpent: ZERO_SD,
+      totalAuctionRevenue: ZERO_SD,
+      totalAuctionsCompleted: 0,
+      demands: [],
+      lastDemandTick: 0,
+      restorationSlotCount: 1,
+      restorationSlots: [null],
+      activeAuctions: [],
+      auctionHistory: [],
     },
 
     settings: {

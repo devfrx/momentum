@@ -163,8 +163,8 @@ function auctionTimeLeft(auction: any): string {
                     </div>
                 </div>
 
-                <Button :label="t('shop.auction_cancel')" icon="pi pi-times" size="small" severity="secondary" text
-                    @click="shop.cancelAuction(auction.id)" />
+                <Button :label="t('shop.auction_cancel')" icon="pi pi-times" size="small" severity="primary" outlined
+                    text @click="shop.cancelAuction(auction.id)" />
             </div>
         </div>
 
@@ -240,7 +240,7 @@ function auctionTimeLeft(auction: any): string {
                             <span class="dialog-item-name">{{ selectedItem.item.name }}</span>
                             <span class="dialog-item-val">
                                 {{ t('shop.auction_value') }}: {{ formatCash(selectedItem.item.appraisedValue ??
-                                selectedItem.item.baseValue) }}
+                                    selectedItem.item.baseValue) }}
                             </span>
                         </div>
                     </div>

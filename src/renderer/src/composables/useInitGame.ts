@@ -82,6 +82,7 @@ export function useInitGame() {
       upgrades.initUpgrades(UPGRADES)
       prestige.initPrestige()
       if (EVENTS.length > 0) events.initEvents(EVENTS)
+      shopStore.initShop(gameEngine.currentTick)
 
       // Try to load saved game from disk
       if (!window.api) {

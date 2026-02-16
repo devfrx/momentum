@@ -87,8 +87,8 @@ defineEmits<{ play: [] }>()
 
         <!-- Actions -->
         <div class="game-card__actions">
-            <Button :label="$t('gambling.play')" icon="pi pi-play" size="small"
-                class="game-card__btn game-card__btn--primary" @click="$emit('play')" />
+            <Button :label="$t('gambling.play')" size="small" class="game-card__btn game-card__btn--primary"
+                @click="$emit('play')" />
         </div>
     </div>
 </template>
