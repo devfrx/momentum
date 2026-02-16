@@ -70,15 +70,15 @@ defineProps<{
 }
 
 .hand-score.bust {
-    background: rgba(231, 76, 60, 0.15);
-    border-color: #e74c3c;
-    color: #e74c3c;
+    background: color-mix(in srgb, var(--t-danger) 15%, transparent);
+    border-color: var(--t-danger);
+    color: var(--t-danger);
 }
 
 .hand-score.blackjack {
-    background: rgba(46, 204, 113, 0.15);
-    border-color: #2ecc71;
-    color: #2ecc71;
+    background: color-mix(in srgb, var(--t-success) 15%, transparent);
+    border-color: var(--t-success);
+    color: var(--t-success);
 }
 
 .cards-row {

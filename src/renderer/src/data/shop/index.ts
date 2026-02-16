@@ -21,7 +21,6 @@ export {
 } from './balance'
 
 export {
-  SHOP_ITEM_POOL,
   UNIQUE_ITEM_POOL,
   SHOP_CATEGORIES,
   SHOP_CATEGORY_ICONS,
@@ -55,6 +54,7 @@ export {
   getSlotUpgradeCost,
   getNextCondition,
   getConditionAdjustedValue,
+  getRestoredValue,
 } from './restoration'
 export type { RestorationSlot } from './restoration'
 

@@ -187,3 +187,27 @@ export function getConditionAdjustedValue(
 ): Decimal {
   return mul(baseValue, D(CONDITION_MULTIPLIERS[condition]))
 }
+
+/**
+ * Calculate the value of an item after restoration, preserving the appraisal
+ * variance factor. If the item was appraised, the restored value scales the
+ * appraised value by the ratio of (newCondMult / oldCondMult) so that lucky
+ * / unlucky appraisal rolls are not lost during restoration.
+ *
+ * Falls back to plain `baseValue * newCondMult` for un-appraised items.
+ */
+export function getRestoredValue(
+  item: { baseValue: Decimal; appraisedValue: Decimal | null; condition?: ItemCondition },
+  newCondition: ItemCondition,
+): Decimal {
+  const oldCond: ItemCondition = item.condition ?? 'good'
+  const oldMult = CONDITION_MULTIPLIERS[oldCond] ?? 1.0
+  const newMult = CONDITION_MULTIPLIERS[newCondition] ?? 1.0
+
+  if (item.appraisedValue && oldMult > 0) {
+    // Scale the appraised value proportionally
+    return item.appraisedValue.mul(newMult / oldMult)
+  }
+  // Fallback for un-appraised items
+  return mul(item.baseValue, D(newMult))
+}

@@ -79,7 +79,7 @@ function toggleCategory(id: string): void {
 .mp-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--t-overlay);
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -97,7 +97,7 @@ function toggleCategory(id: string): void {
     max-height: calc(100vh - var(--t-header-height, 40px) - 32px);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 16px 48px var(--t-overlay-light);
 }
 
 .mp-header {
@@ -201,9 +201,9 @@ function toggleCategory(id: string): void {
     font-weight: 600;
     padding: 0.05rem 0.35rem;
     border-radius: var(--t-radius-sm);
-    background: color-mix(in srgb, #a855f7 12%, transparent);
-    color: #a855f7;
-    border: 1px solid color-mix(in srgb, #a855f7 20%, transparent);
+    background: color-mix(in srgb, var(--t-purple) 12%, transparent);
+    color: var(--t-purple);
+    border: 1px solid color-mix(in srgb, var(--t-purple) 20%, transparent);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     white-space: nowrap;

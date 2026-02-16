@@ -119,7 +119,7 @@ function placeBet(type: RouletteBetType, number?: number): void {
             </div>
             <div class="outside-bet" :class="{ active: isActive('even') }" @click="placeBet('even')">{{
                 $t('gambling.rl_even')
-                }}</div>
+            }}</div>
             <div class="outside-bet color-bet red-bet" :class="{ active: isActive('red') }" @click="placeBet('red')">
                 <AppIcon icon="mdi:diamond" />
             </div>
@@ -132,16 +132,16 @@ function placeBet(type: RouletteBetType, number?: number): void {
             </div>
             <div class="outside-bet" :class="{ active: isActive('high') }" @click="placeBet('high')">{{
                 $t('gambling.rl_high')
-                }}</div>
+            }}</div>
         </div>
     </div>
 </template>
 
 <style scoped>
 .roulette-board {
-    --roulette-red: #c0392b;
-    --roulette-black: #1a1a2e;
-    --roulette-green: #27ae60;
+    --roulette-red: var(--t-gamble-roulette-red);
+    --roulette-black: var(--t-gamble-roulette-black);
+    --roulette-green: var(--t-gamble-roulette-green);
 
     display: flex;
     flex-direction: column;

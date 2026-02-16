@@ -201,7 +201,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                 <div v-if="showResult" class="result-badge" :class="won ? 'badge-win' : 'badge-lose'">
                     <AppIcon :icon="won ? 'mdi:trophy' : 'mdi:emoticon-sad'" class="badge-icon" />
                     <span class="badge-side">{{ result === 'heads' ? $t('gambling.cf_heads') : $t('gambling.cf_tails')
-                    }}</span>
+                        }}</span>
                     <span v-if="won" class="badge-payout">{{ formatCash(payout) }}</span>
                     <span v-else class="badge-text">{{ $t('gambling.cf_you_lose') }}</span>
                 </div>
@@ -249,7 +249,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                         {{ pct }}%
                     </button>
                     <button class="preset-btn preset-max" @click="maxBet" :disabled="flipping">{{ $t('gambling.max')
-                    }}</button>
+                        }}</button>
                 </div>
             </div>
 
@@ -421,20 +421,20 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     justify-content: center;
     gap: 4px;
     backface-visibility: hidden;
-    border: 4px solid rgba(255, 255, 255, 0.15);
+    border: 4px solid color-mix(in srgb, var(--t-text) 15%, transparent);
     box-shadow:
-        0 4px 20px rgba(0, 0, 0, 0.3),
-        inset 0 2px 10px rgba(255, 255, 255, 0.1);
+        0 4px 20px var(--t-overlay-light),
+        inset 0 2px 10px color-mix(in srgb, var(--t-text) 10%, transparent);
 }
 
 .coin-heads {
-    background: linear-gradient(145deg, #f5c842, #d4a017);
-    color: #5a3e00;
+    background: linear-gradient(145deg, var(--t-gold), var(--t-gold-hover));
+    color: var(--t-text-inverse);
 }
 
 .coin-tails {
-    background: linear-gradient(145deg, #b0b8c8, #7a8599);
-    color: #2c3444;
+    background: linear-gradient(145deg, var(--t-info), var(--t-info));
+    color: var(--t-text-inverse);
     transform: rotateX(180deg);
 }
 
@@ -540,7 +540,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 
 .side-btn.active {
     background: var(--t-accent);
-    color: #fff;
+    color: var(--t-text);
     box-shadow: 0 0 16px rgba(var(--t-accent-rgb, 99 102 241), 0.35);
 }
 
@@ -680,7 +680,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-2);
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-accent);
-    color: #fff;
+    color: var(--t-text);
     border: none;
     border-radius: var(--t-radius-md);
     font-size: 1rem;
@@ -770,7 +770,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 }
 
 .danger {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 /* ── Transitions ── */
@@ -798,34 +798,34 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    box-shadow: 0 0 24px rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg, var(--t-success-muted), color-mix(in srgb, var(--t-success) 5%, transparent));
+    border: 1px solid var(--t-success);
+    box-shadow: 0 0 24px var(--t-success-muted);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
 .lucky-icon {
     font-size: 2rem;
-    color: #22c55e;
+    color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    filter: drop-shadow(0 0 6px var(--t-success-muted));
 }
 
 .lucky-text {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #22c55e;
+    color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    text-shadow: 0 0 8px var(--t-success-muted);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 16px var(--t-success-muted);
     }
 
     to {
-        box-shadow: 0 0 32px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 0 32px var(--t-success-muted);
     }
 }
 

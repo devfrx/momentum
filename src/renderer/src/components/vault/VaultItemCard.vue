@@ -8,6 +8,8 @@ import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
+import { resolveItemName, resolveItemDescription } from '@renderer/data/storage/items'
+import { CONDITION_ICONS, CONDITION_COLORS } from '@renderer/data/shop/restoration'
 import type { VaultItem } from '@renderer/stores/useVaultStore'
 
 defineProps<{
@@ -35,7 +37,7 @@ const SOURCE_ICONS: Record<string, string> = {
         <div class="vault-item__header">
             <AppIcon :icon="item.icon" class="vault-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
             <div class="vault-item__info">
-                <span class="vault-item__name">{{ item.name }}</span>
+                <span class="vault-item__name">{{ resolveItemName(item, t) }}</span>
                 <div class="vault-item__badges">
                     <span class="vault-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">
                         {{ item.rarity }}
@@ -48,10 +50,15 @@ const SOURCE_ICONS: Record<string, string> = {
             </div>
         </div>
 
-        <p class="vault-item__desc">{{ item.description }}</p>
+        <p class="vault-item__desc">{{ resolveItemDescription(item, t) }}</p>
 
         <div class="vault-item__value-row">
             <span class="vault-item__category">{{ item.category }}</span>
+            <div v-if="item.condition" class="vault-item__condition"
+                :style="{ color: CONDITION_COLORS[item.condition] }">
+                <AppIcon :icon="CONDITION_ICONS[item.condition]" />
+                {{ t(`items.condition.${item.condition}`) }}
+            </div>
             <span class="vault-item__value">{{ formatCash(item.appraisedValue ?? item.baseValue) }}</span>
         </div>
 
@@ -67,6 +74,7 @@ const SOURCE_ICONS: Record<string, string> = {
 .vault-item {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: var(--t-space-2);
     padding: var(--t-space-3);
     background: var(--t-bg-card);
@@ -138,6 +146,17 @@ const SOURCE_ICONS: Record<string, string> = {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
+}
+
+.vault-item__condition {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
+    text-transform: capitalize;
 }
 
 .vault-item__category {
@@ -152,7 +171,7 @@ const SOURCE_ICONS: Record<string, string> = {
 .vault-item__value {
     font-size: var(--t-font-size-sm);
     font-weight: 600;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .vault-item__actions {

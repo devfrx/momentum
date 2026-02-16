@@ -133,11 +133,13 @@ onBeforeUnmount(() => { currentAnim?.cancel(); currentAnim = null })
 }
 
 .face {
+    --dice-face-light: #fafafa;
+    --dice-face-dark: #e0e0e0;
     position: absolute;
     width: 100px;
     height: 100px;
-    background: linear-gradient(145deg, #fafafa, #e0e0e0);
-    border: 2px solid #bbb;
+    background: linear-gradient(145deg, var(--dice-face-light), var(--dice-face-dark));
+    border: 2px solid var(--t-border);
     border-radius: var(--t-radius-xl);
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -150,8 +152,8 @@ onBeforeUnmount(() => { currentAnim?.cancel(); currentAnim = null })
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #444, #1a1a1a);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    background: radial-gradient(circle at 35% 35%, var(--t-text-inverse), var(--t-text-inverse));
+    box-shadow: 0 1px 3px var(--t-overlay-light);
 }
 
 /* pip placement via grid */

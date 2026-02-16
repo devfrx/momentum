@@ -2,15 +2,16 @@
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
+import { THEME } from '@renderer/assets/theme/colors'
 
 const loanStore = useLoanStore()
 
 const scoreColor = computed(() => {
     const score = loanStore.creditScore
     if (score >= 80) return 'var(--t-success)'
-    if (score >= 60) return '#22d3ee'
+    if (score >= 60) return THEME.cyan
     if (score >= 40) return 'var(--t-warning)'
-    if (score >= 20) return '#f97316'
+    if (score >= 20) return THEME.orange
     return 'var(--t-danger)'
 })
 
@@ -27,9 +28,9 @@ const healthColor = computed(() => {
     const health = loanStore.portfolioHealth
     switch (health) {
         case 'excellent': return 'var(--t-success)'
-        case 'good': return '#22d3ee'
+        case 'good': return THEME.cyan
         case 'fair': return 'var(--t-warning)'
-        case 'poor': return '#f97316'
+        case 'poor': return THEME.orange
         case 'critical': return 'var(--t-danger)'
     }
 })
@@ -91,7 +92,7 @@ const utilColor = computed(() => {
                     <AppIcon :icon="f.icon" class="csw-factor-icon" />
                     <span class="csw-factor-name">{{ $t(f.label) }}</span>
                     <span class="csw-factor-val">{{ Math.round(f.value) }}<span class="csw-factor-max">/{{ f.max
-                    }}</span></span>
+                            }}</span></span>
                 </div>
                 <div class="csw-factor-track">
                     <div class="csw-factor-fill" :style="{ width: (f.value / f.max * 100) + '%' }" />
@@ -105,7 +106,7 @@ const utilColor = computed(() => {
                 <div class="csw-util-header">
                     <span class="csw-util-label">{{ $t('loans.debt_ratio') }}</span>
                     <span class="csw-util-pct" :style="{ color: utilColor }">{{ Math.round(loanStore.creditUtilization)
-                    }}%</span>
+                        }}%</span>
                 </div>
                 <div class="csw-util-track">
                     <div class="csw-util-fill"

@@ -119,7 +119,7 @@ function handleClose(): void {
             <div v-if="routeMultiplier" class="hud-chip" :class="{ 'has-bonus': routeMultiplier.hasBonus }">
                 <AppIcon :icon="routeMultiplier.icon" class="hud-route-icon" />
                 <span class="hud-chip-value" :class="{ accent: routeMultiplier.hasBonus }">{{ routeMultiplier.formatted
-                    }}</span>
+                }}</span>
             </div>
 
             <div class="hud-chip clickable" @click="showMultiplierPanel = !showMultiplierPanel"
@@ -243,7 +243,7 @@ function handleClose(): void {
 }
 
 .hero-profit.negative {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 .hero-profit-icon {
@@ -368,7 +368,7 @@ function handleClose(): void {
 }
 
 .icon-btn.close:hover {
-    background: #dc2626;
-    color: white;
+    background: var(--t-danger-hover);
+    color: var(--t-text);
 }
 </style>

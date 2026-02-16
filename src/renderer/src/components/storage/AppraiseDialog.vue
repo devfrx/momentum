@@ -59,7 +59,7 @@ function selectAppraiser(appraiserId: string): void {
                         <div class="stat-row">
                             <span class="stat-label">{{ t('storage.cost') }}</span>
                             <span class="stat-value">{{ formatCash(appraiser.costPerItem) }}/{{ t('storage.per_item')
-                                }}</span>
+                            }}</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">{{ t('storage.accuracy') }}</span>
@@ -81,7 +81,7 @@ function selectAppraiser(appraiserId: string): void {
     position: fixed;
     inset: 0;
     z-index: 100;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--t-overlay);
     display: flex;
     align-items: center;
     justify-content: center;

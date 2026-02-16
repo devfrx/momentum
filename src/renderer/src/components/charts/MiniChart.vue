@@ -4,6 +4,7 @@
  * Pure canvas drawing, no Chart.js. Zero layout side-effects.
  */
 import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
+import { THEME } from '@renderer/assets/theme/colors'
 
 const props = withDefaults(defineProps<{
     data: number[]
@@ -21,11 +22,11 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 let raf = 0
 
 const palette: Record<string, { line: string; fill: string; buy: string }> = {
-    gold: { line: '#f59e0b', fill: 'rgba(245,158,11,0.15)', buy: '#71717a' },
-    emerald: { line: '#10b981', fill: 'rgba(16,185,129,0.15)', buy: '#71717a' },
-    sky: { line: '#64748b', fill: 'rgba(100,116,139,0.15)', buy: '#f59e0b' },
-    purple: { line: '#a855f7', fill: 'rgba(168,85,247,0.15)', buy: '#71717a' },
-    red: { line: '#ef4444', fill: 'rgba(239,68,68,0.15)', buy: '#71717a' }
+    gold: { line: THEME.warning, fill: 'rgba(245,158,11,0.15)', buy: THEME.info },
+    emerald: { line: THEME.success, fill: 'rgba(16,185,129,0.15)', buy: THEME.info },
+    sky: { line: THEME.info, fill: 'rgba(100,116,139,0.15)', buy: THEME.warning },
+    purple: { line: THEME.purple, fill: 'rgba(168,85,247,0.15)', buy: THEME.info },
+    red: { line: THEME.danger, fill: 'rgba(239,68,68,0.15)', buy: THEME.info }
 }
 
 /** Downsample an array to at most `maxPts` using LTTB algorithm */

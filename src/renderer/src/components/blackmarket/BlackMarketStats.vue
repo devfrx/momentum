@@ -75,10 +75,10 @@ const stats = computed(() => [
 }
 
 .stat-chip-value.positive {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .stat-chip-value.negative {
-    color: #ef4444;
+    color: var(--t-danger);
 }
 </style>

@@ -24,7 +24,7 @@ const location = storage.getLocation(props.auction.locationId)
 </script>
 
 <template>
-    <div class="auction-card" :style="{ '--_accent': '#f59e0b' }">
+    <div class="auction-card" :style="{ '--_accent': 'var(--t-warning)' }">
         <!-- Head -->
         <div class="auction-card__head">
             <AppIcon :icon="location?.icon ?? 'mdi:warehouse'" class="auction-card__icon" />
@@ -68,7 +68,7 @@ const location = storage.getLocation(props.auction.locationId)
 
 <style scoped>
 .auction-card {
-    --_accent: #f59e0b;
+    --_accent: var(--t-warning);
     display: flex;
     flex-direction: column;
     justify-content: space-between;

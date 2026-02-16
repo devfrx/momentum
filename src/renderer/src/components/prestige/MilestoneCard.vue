@@ -91,7 +91,7 @@ function formatReward(reward: MilestoneReward): string {
 }
 
 .milestone-icon-wrap.unlocked {
-    background: rgba(34, 197, 94, 0.15);
+    background: color-mix(in srgb, var(--t-success) 15%, transparent);
 }
 
 .milestone-icon {
@@ -100,7 +100,7 @@ function formatReward(reward: MilestoneReward): string {
 }
 
 .milestone-icon-wrap.unlocked .milestone-icon {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .check-icon {
@@ -108,7 +108,7 @@ function formatReward(reward: MilestoneReward): string {
     bottom: -4px;
     right: -4px;
     font-size: 1rem;
-    color: #22c55e;
+    color: var(--t-success);
     background: var(--t-bg-card);
     border-radius: 50%;
 }
@@ -152,7 +152,7 @@ function formatReward(reward: MilestoneReward): string {
 }
 
 .milestone-card.unlocked .reward-tag {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
+    background: color-mix(in srgb, var(--t-success) 15%, transparent);
+    color: var(--t-success);
 }
 </style>

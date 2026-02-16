@@ -84,9 +84,6 @@ const infoSections = computed(() => [
             <!-- Stats Ribbon -->
             <StorageStats />
 
-            <!-- Session P&L -->
-            <SessionPnL />
-
             <!-- Tab Navigation -->
             <div class="tab-bar">
                 <button v-for="tab in tabs" :key="tab.id" class="tab-btn" :class="{ active: activeTab === tab.id }"
@@ -114,6 +111,9 @@ const infoSections = computed(() => [
             <template v-if="activeTab === 'inventory'">
                 <InventoryPanel />
             </template>
+
+            <!-- Session P&L -->
+            <SessionPnL />
 
             <!-- Info Panel -->
             <InfoPanel :title="t('storage.info_title')" :description="t('storage.info_desc')"

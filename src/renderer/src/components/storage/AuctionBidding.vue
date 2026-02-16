@@ -14,6 +14,7 @@ import { useI18n } from 'vue-i18n'
 import { D, add } from '@renderer/core/BigNum'
 import { AUCTION_CONFIG } from '@renderer/data/storage'
 import { rarityCssVar } from '@renderer/data/rarity'
+import { resolveItemName } from '@renderer/data/storage/items'
 
 defineEmits<{ back: [] }>()
 
@@ -201,7 +202,7 @@ function leave(): void {
                 <div v-for="item in auction.items" :key="item.id" class="found-item"
                     :style="{ borderColor: rarityCssVar(item.rarity) }">
                     <AppIcon :icon="item.icon" class="found-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
-                    <span class="found-item__name">{{ item.name }}</span>
+                    <span class="found-item__name">{{ resolveItemName(item, t) }}</span>
                     <span class="found-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity
                     }}</span>
                 </div>
@@ -232,7 +233,7 @@ function leave(): void {
 
 .bidding-location-icon {
     font-size: 1.5rem;
-    color: #f59e0b;
+    color: var(--t-warning);
 }
 
 .bidding-title {
@@ -265,13 +266,13 @@ function leave(): void {
 
 .timer-bar__fill {
     height: 100%;
-    background: #f59e0b;
+    background: var(--t-warning);
     transition: width 0.3s linear;
     border-radius: 2px;
 }
 
 .timer-bar__fill--going {
-    background: #ef4444;
+    background: var(--t-danger);
     animation: pulse-bar 0.8s ease-in-out infinite;
 }
 
@@ -303,21 +304,21 @@ function leave(): void {
 }
 
 .going-phase-banner--going_once {
-    background: #f59e0b20;
-    border: 2px solid #f59e0b;
-    color: #f59e0b;
+    background: color-mix(in srgb, var(--t-warning) 13%, transparent);
+    border: 2px solid var(--t-warning);
+    color: var(--t-warning);
 }
 
 .going-phase-banner--going_twice {
-    background: #f9731620;
-    border: 2px solid #f97316;
-    color: #f97316;
+    background: color-mix(in srgb, var(--t-orange) 13%, transparent);
+    border: 2px solid var(--t-orange);
+    color: var(--t-orange);
 }
 
 .going-phase-banner--final_call {
-    background: #ef444420;
-    border: 2px solid #ef4444;
-    color: #ef4444;
+    background: color-mix(in srgb, var(--t-danger) 13%, transparent);
+    border: 2px solid var(--t-danger);
+    color: var(--t-danger);
 }
 
 .going-icon {
@@ -378,7 +379,7 @@ function leave(): void {
     font-style: italic;
     margin: 0;
     padding-left: var(--t-space-2);
-    border-left: 2px solid #f59e0b33;
+    border-left: 2px solid color-mix(in srgb, var(--t-warning) 20%, transparent);
 }
 
 /* Bidders */
@@ -403,8 +404,8 @@ function leave(): void {
 }
 
 .bidder-chip--leading {
-    border: 1px solid #ef4444;
-    background: #ef444410;
+    border: 1px solid var(--t-danger);
+    background: color-mix(in srgb, var(--t-danger) 6%, transparent);
 }
 
 .bidder-avatar {
@@ -429,7 +430,7 @@ function leave(): void {
 }
 
 .bidder-status--leading {
-    color: #ef4444;
+    color: var(--t-danger);
     font-weight: 600;
 }
 
@@ -472,17 +473,17 @@ function leave(): void {
 }
 
 .bid-amount--player {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .bid-holder {
     font-size: var(--t-font-size-sm);
-    color: #ef4444;
+    color: var(--t-danger);
     font-weight: 600;
 }
 
 .bid-holder.positive {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 /* Bid controls */
@@ -538,15 +539,15 @@ function leave(): void {
 }
 
 .result-banner--won {
-    background: #22c55e15;
-    border: 1px solid #22c55e;
-    color: #22c55e;
+    background: color-mix(in srgb, var(--t-success) 8%, transparent);
+    border: 1px solid var(--t-success);
+    color: var(--t-success);
 }
 
 .result-banner--lost {
-    background: #ef444415;
-    border: 1px solid #ef4444;
-    color: #ef4444;
+    background: color-mix(in srgb, var(--t-danger) 8%, transparent);
+    border: 1px solid var(--t-danger);
+    color: var(--t-danger);
 }
 
 .result-icon {

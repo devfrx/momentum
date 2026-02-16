@@ -153,11 +153,11 @@ const scrollDuration = computed(() => Math.max(20, shop.demands.length * 2.5))
 }
 
 .ticker-chip--hot {
-    background: rgba(34, 197, 94, 0.08);
+    background: color-mix(in srgb, var(--t-success) 8%, transparent);
 }
 
 .ticker-chip--warm {
-    background: rgba(34, 197, 94, 0.03);
+    background: color-mix(in srgb, var(--t-success) 3%, transparent);
 }
 
 .ticker-chip--cold {

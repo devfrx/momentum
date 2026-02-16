@@ -20,6 +20,7 @@ import {
     CONDITION_COLORS,
 } from '@renderer/data/shop/restoration'
 import type { ItemCondition } from '@renderer/data/storage/items'
+import { resolveItemName } from '@renderer/data/storage/items'
 
 const shop = useShopStore()
 const vault = useVaultStore()
@@ -125,7 +126,7 @@ function auctionTimeLeft(auction: any): string {
                     <AppIcon :icon="auction.item.icon" class="auction-card__icon"
                         :style="{ color: rarityCssVar(auction.item.rarity) }" />
                     <div class="auction-card__info">
-                        <span class="auction-card__name">{{ auction.item.name }}</span>
+                        <span class="auction-card__name">{{ resolveItemName(auction.item, t) }}</span>
                         <span class="auction-card__rarity" :style="{ color: rarityCssVar(auction.item.rarity) }">
                             {{ auction.item.rarity }}
                             <template v-if="auction.item.condition">
@@ -183,7 +184,7 @@ function auctionTimeLeft(auction: any): string {
                     <AppIcon :icon="item.icon" class="auctionable-item__icon"
                         :style="{ color: rarityCssVar(item.rarity) }" />
                     <div class="auctionable-item__info">
-                        <span class="auctionable-item__name">{{ item.name }}</span>
+                        <span class="auctionable-item__name">{{ resolveItemName(item, t) }}</span>
                         <span class="auctionable-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">
                             {{ item.rarity }}
                         </span>
@@ -215,7 +216,7 @@ function auctionTimeLeft(auction: any): string {
                 <div v-for="ah in shop.auctionHistory" :key="ah.id" class="history-item"
                     :class="`history-item--${ah.status}`">
                     <AppIcon :icon="ah.item.icon" class="history-item__icon" />
-                    <span class="history-item__name">{{ ah.item.name }}</span>
+                    <span class="history-item__name">{{ resolveItemName(ah.item, t) }}</span>
                     <span class="history-item__status">{{ t(`shop.auction_status_${ah.status}`) }}</span>
                     <span v-if="ah.status === 'sold'" class="history-item__price">
                         {{ formatCash(ah.currentBid) }}
@@ -237,7 +238,7 @@ function auctionTimeLeft(auction: any): string {
                         <AppIcon :icon="selectedItem.item.icon" class="dialog-item-icon"
                             :style="{ color: rarityCssVar(selectedItem.item.rarity) }" />
                         <div>
-                            <span class="dialog-item-name">{{ selectedItem.item.name }}</span>
+                            <span class="dialog-item-name">{{ resolveItemName(selectedItem.item, t) }}</span>
                             <span class="dialog-item-val">
                                 {{ t('shop.auction_value') }}: {{ formatCash(selectedItem.item.appraisedValue ??
                                     selectedItem.item.baseValue) }}
@@ -320,7 +321,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .auction-card--has-bids {
-    border-left: 3px solid #22c55e;
+    border-left: 3px solid var(--t-success);
 }
 
 .auction-card__header {
@@ -388,7 +389,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .bid-value--highlight {
-    color: #22c55e;
+    color: var(--t-success);
     font-size: var(--t-font-size-sm);
 }
 
@@ -472,7 +473,7 @@ function auctionTimeLeft(auction: any): string {
 .auctionable-item__value {
     font-size: var(--t-font-size-sm);
     font-weight: 600;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .max-auctions-msg {
@@ -538,11 +539,11 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .history-item--sold .history-item__status {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .history-item--expired .history-item__status {
-    color: #ef4444;
+    color: var(--t-danger);
 }
 
 .history-item--cancelled .history-item__status {
@@ -551,7 +552,7 @@ function auctionTimeLeft(auction: any): string {
 
 .history-item__price {
     font-weight: 600;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 /* ── Dialog ─────────────────────────────────────────────────── */
@@ -562,7 +563,7 @@ function auctionTimeLeft(auction: any): string {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--t-overlay);
     z-index: 1000;
 }
 
@@ -576,7 +577,7 @@ function auctionTimeLeft(auction: any): string {
     border-radius: var(--t-radius-md);
     max-width: 420px;
     width: 100%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px var(--t-overlay-light);
 }
 
 .dialog-title {

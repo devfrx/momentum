@@ -128,7 +128,7 @@ function withdrawAll(): void {
 .cash-value {
     font-size: var(--t-font-size-lg);
     font-weight: 700;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .cash-value--wallet {

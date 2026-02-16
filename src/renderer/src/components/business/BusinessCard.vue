@@ -318,7 +318,7 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.wages') }}</span>
                                 <span class="d-value">${{ (business.employees * business.baseSalary).toFixed(2)
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.rent') }}</span>
@@ -327,7 +327,7 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.supplies') }}</span>
                                 <span class="d-value">${{ (business.supplyCostPerUnit * business.unitsSold).toFixed(2)
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -740,7 +740,7 @@ function adjustMarketing(delta: number): void {
 
 .action-btn.gold:hover {
     background: goldenrod;
-    color: #1a1a1a;
+    color: var(--t-text-inverse);
 }
 
 .action-cost {

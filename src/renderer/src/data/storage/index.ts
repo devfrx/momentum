@@ -13,12 +13,17 @@ export {
 } from './locations'
 
 export {
-  ITEM_POOL,
   generateUnitContents,
+  generateItem,
   calculateTotalItemsValue,
   applySellTax,
+  resolveItemName,
+  resolveItemDescription,
+  decodeItemParts,
   type StorageItem,
   type ItemCategory,
+  type ItemCondition,
+  type GeneratedItemParts,
 } from './items'
 
 export {

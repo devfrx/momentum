@@ -82,14 +82,54 @@
   /* Semantic accent colors — green accent, neutral base */
   --t-accent: #3ecf71;
   --t-accent-hover: #2db85e;
+  --t-accent-muted: rgba(62, 207, 113, 0.10);
   --t-success: #22c55e;
+  --t-success-hover: #16a34a;
   --t-success-muted: rgba(34, 197, 94, 0.12);
   --t-warning: #f5a524;
+  --t-warning-hover: #d97706;
   --t-warning-muted: rgba(245, 165, 36, 0.10);
   --t-danger: #ef4444;
+  --t-danger-hover: #dc2626;
   --t-danger-muted: rgba(239, 68, 68, 0.10);
   --t-info: #64748b;
+  --t-info-hover: #475569;
   --t-info-muted: rgba(100, 116, 139, 0.10);
+
+  /* Extended semantic palette */
+  --t-purple: #a855f7;
+  --t-purple-hover: #9333ea;
+  --t-purple-muted: rgba(168, 85, 247, 0.12);
+  --t-orange: #f97316;
+  --t-orange-hover: #ea580c;
+  --t-orange-muted: rgba(249, 115, 22, 0.10);
+  --t-cyan: #06b6d4;
+  --t-cyan-hover: #0891b2;
+  --t-cyan-muted: rgba(6, 182, 212, 0.10);
+  --t-blue: #3b82f6;
+  --t-blue-hover: #2563eb;
+  --t-blue-muted: rgba(59, 130, 246, 0.10);
+  --t-pink: #ec4899;
+  --t-pink-hover: #db2777;
+  --t-pink-muted: rgba(236, 72, 153, 0.10);
+  --t-gold: #facc15;
+  --t-gold-hover: #eab308;
+  --t-gold-muted: rgba(250, 204, 21, 0.10);
+
+  /* Gambling-specific tokens (table felt, cards, etc.) */
+  --t-gamble-felt: #0e3a24;
+  --t-gamble-felt-light: #1a5c3a;
+  --t-gamble-felt-border: #2a7a4a;
+  --t-gamble-win: var(--t-success);
+  --t-gamble-lose: var(--t-danger);
+  --t-gamble-push: var(--t-gold);
+  --t-gamble-roulette-red: #c0392b;
+  --t-gamble-roulette-black: #1a1a2e;
+  --t-gamble-roulette-green: #27ae60;
+
+  /* Overlay / backdrop */
+  --t-overlay: rgba(0, 0, 0, 0.6);
+  --t-overlay-light: rgba(0, 0, 0, 0.35);
 
   /* Spacing scale */
   --t-space-1: 0.25rem;
@@ -147,6 +187,107 @@
 .text-info { color: var(--t-info) !important; }
 .text-muted { color: var(--t-text-muted) !important; }
 .text-secondary { color: var(--t-text-secondary) !important; }
+.text-purple { color: var(--t-purple) !important; }
+.text-orange { color: var(--t-orange) !important; }
+.text-cyan { color: var(--t-cyan) !important; }
+.text-blue { color: var(--t-blue) !important; }
+.text-pink { color: var(--t-pink) !important; }
+.text-gold { color: var(--t-gold) !important; }
+.text-accent { color: var(--t-accent) !important; }
+
+.bg-success-muted { background: var(--t-success-muted) !important; }
+.bg-warning-muted { background: var(--t-warning-muted) !important; }
+.bg-danger-muted  { background: var(--t-danger-muted) !important; }
+.bg-info-muted    { background: var(--t-info-muted) !important; }
+.bg-purple-muted  { background: var(--t-purple-muted) !important; }
+.bg-blue-muted    { background: var(--t-blue-muted) !important; }
+
+/* ── CTA Button Hierarchy ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--t-space-2);
+  padding: var(--t-space-2) var(--t-space-4);
+  font-size: var(--t-font-size-sm);
+  font-weight: 600;
+  font-family: var(--t-font-sans);
+  border-radius: var(--t-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--t-transition-fast), border-color var(--t-transition-fast),
+              color var(--t-transition-fast), box-shadow var(--t-transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+.btn:disabled { opacity: 0.45; pointer-events: none; }
+.btn-sm { padding: var(--t-space-1) var(--t-space-3); font-size: var(--t-font-size-xs); }
+.btn-lg { padding: var(--t-space-3) var(--t-space-6); font-size: var(--t-font-size-base); }
+
+/* Primary (accent green) */
+.btn-primary {
+  background: var(--t-accent);
+  color: var(--t-text-inverse);
+  border-color: var(--t-accent);
+}
+.btn-primary:hover { background: var(--t-accent-hover); border-color: var(--t-accent-hover); }
+
+/* Success */
+.btn-success {
+  background: var(--t-success);
+  color: var(--t-text-inverse);
+  border-color: var(--t-success);
+}
+.btn-success:hover { background: var(--t-success-hover); border-color: var(--t-success-hover); }
+
+/* Danger */
+.btn-danger {
+  background: var(--t-danger);
+  color: var(--t-text-inverse);
+  border-color: var(--t-danger);
+}
+.btn-danger:hover { background: var(--t-danger-hover); border-color: var(--t-danger-hover); }
+
+/* Warning */
+.btn-warning {
+  background: var(--t-warning);
+  color: var(--t-text-inverse);
+  border-color: var(--t-warning);
+}
+.btn-warning:hover { background: var(--t-warning-hover); border-color: var(--t-warning-hover); }
+
+/* Ghost / Secondary — transparent bg, border visible */
+.btn-ghost {
+  background: transparent;
+  color: var(--t-text);
+  border-color: var(--t-border);
+}
+.btn-ghost:hover { background: var(--t-bg-muted); border-color: var(--t-border-hover); }
+
+/* Muted — subtle bg, no border */
+.btn-muted {
+  background: var(--t-bg-muted);
+  color: var(--t-text-secondary);
+  border-color: transparent;
+}
+.btn-muted:hover { background: var(--t-border); color: var(--t-text); }
+
+/* ── Win/Lose result overlays ─────────────────────────────────────────── */
+.result-win {
+  background: var(--t-success-muted);
+  border: 1px solid var(--t-success);
+  color: var(--t-success);
+}
+.result-lose {
+  background: var(--t-danger-muted);
+  border: 1px solid var(--t-danger);
+  color: var(--t-danger);
+}
+.result-push {
+  background: var(--t-gold-muted);
+  border: 1px solid var(--t-gold);
+  color: var(--t-gold);
+}
 
 .positive { color: var(--t-success) !important; }
 .negative { color: var(--t-danger) !important; }

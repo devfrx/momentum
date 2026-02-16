@@ -181,11 +181,11 @@ const hasActivity = computed(() =>
 }
 
 .cost-value.negative {
-    color: #ef4444;
+    color: var(--t-danger);
 }
 
 .cost-value.positive {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .session-pnl__revenue {
@@ -208,13 +208,13 @@ const hasActivity = computed(() =>
 }
 
 .session-pnl__net.positive {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+    background: color-mix(in srgb, var(--t-success) 10%, transparent);
+    color: var(--t-success);
 }
 
 .session-pnl__net.negative {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    background: color-mix(in srgb, var(--t-danger) 10%, transparent);
+    color: var(--t-danger);
 }
 
 .net-label {

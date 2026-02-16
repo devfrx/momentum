@@ -6,6 +6,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getDistrict, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { THEME } from '@renderer/assets/theme/colors'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -51,7 +52,7 @@ const canAffordRenovate = computed(() => player.cash.gte(renovateCost.value) && 
 const conditionColor = computed(() => {
     if (props.property.condition >= 80) return 'var(--t-success)'
     if (props.property.condition >= 50) return 'var(--t-warning)'
-    if (props.property.condition >= 25) return '#f97316'
+    if (props.property.condition >= 25) return THEME.orange
     return 'var(--t-danger)'
 })
 
@@ -231,7 +232,7 @@ function handleRentSlider(val: number | number[]): void {
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.roi') }}</span>
                             <span class="d-value" :class="roi > 0 ? 'success' : 'danger'">{{ formatPercent(roi)
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -249,7 +250,7 @@ function handleRentSlider(val: number | number[]): void {
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.appreciation') }}</span>
                             <span class="d-value success">{{ formatPercent(property.baseAppreciationRate * 100)
-                            }}/{{ t('common.cycle') }}</span>
+                                }}/{{ t('common.cycle') }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="d-label">{{ t('realestate.rent_multiplier') }}</span>
@@ -297,7 +298,7 @@ function handleRentSlider(val: number | number[]): void {
                     <h4 class="detail-title">
                         <AppIcon icon="mdi:puzzle" /> {{ t('realestate.improvements_label') }}
                         <span class="detail-count">{{ property.improvements.length }}/{{ property.maxImprovements
-                        }}</span>
+                            }}</span>
                     </h4>
                     <div v-if="improvements.length > 0" class="prop-card__improvements">
                         <span v-for="im in improvements" :key="im.id" class="imp-badge">

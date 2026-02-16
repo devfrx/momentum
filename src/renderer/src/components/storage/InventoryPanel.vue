@@ -70,7 +70,7 @@ function sellAllItems(): void {
             </div>
             <div class="bulk-actions">
                 <Button v-if="unappraisedCount > 0" :label="t('storage.appraise_all', { n: unappraisedCount })"
-                    icon="pi pi-search" size="small" severity="info" outlined
+                    icon="pi pi-search" size="small" severity="primary" outlined
                     @click="showAppraiseDialog = true; appraiseTargetId = null" />
                 <Button :label="t('storage.sell_all')" icon="pi pi-dollar" size="small" severity="warning"
                     @click="sellAllItems" />
@@ -139,7 +139,7 @@ function sellAllItems(): void {
 
 .inv-val-amount {
     font-weight: 700;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .inventory-toolbar {

@@ -216,9 +216,6 @@ const infoSections = computed(() => [
         <!-- Active effects -->
         <ActiveEffects />
 
-        <!-- Activity log — persistent feed -->
-        <ActivityLog />
-
         <!-- Tab Navigation -->
         <div class="tab-bar">
             <button v-for="tab in tabs" :key="tab.id" class="tab-btn" :class="{ active: activeTab === tab.id }"
@@ -251,6 +248,9 @@ const infoSections = computed(() => [
         <template v-if="activeTab === 'stats'">
             <BlackMarketStats />
         </template>
+
+        <!-- Activity log — persistent feed -->
+        <ActivityLog />
 
         <!-- Info Panel -->
         <InfoPanel :title="t('blackmarket.info_title')" :description="t('blackmarket.info_desc')"

@@ -57,6 +57,12 @@ export {
   MAX_INVESTIGATIONS,
   FENCE_DAILY_LIMIT,
   FENCE_SELL_MULTIPLIER,
+  FENCE_FORGE_MIN_BONUS,
+  FENCE_FORGE_MAX_BONUS,
+  FENCE_FORGE_HEAT,
+  FENCE_FORGE_COST_FRACTION,
+  FENCE_NETWORK_SELL_BOOST,
+  FENCE_NETWORK_DURATION_TICKS,
   HACKER_MANIPULATION_RANGE,
   HACKER_MANIPULATION_TICKS,
   FIXER_COST_PER_SEVERITY,
@@ -68,8 +74,9 @@ export {
 
 // Scaling utilities
 export {
-  wealthMultiplier,
-  scaleByWealth,
+  type ImpactTier,
+  scalePercentageCost,
+  scaleCashReward,
   scaleDealCost,
   scaleDealEffect,
   scaleDealConsequence,

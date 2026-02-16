@@ -545,7 +545,7 @@ const multiplierInfo = computed(() => {
         <div class="page-header">
             <div>
                 <h1 class="page-title">
-                    <AppIcon icon="mdi:bug" class="page-title-icon" style="color: #ef4444;" />
+                    <AppIcon icon="mdi:bug" class="page-title-icon text-danger" />
                     {{ t('dev.title') }}
                 </h1>
                 <p class="page-subtitle">{{ t('dev.subtitle') }}</p>
@@ -680,9 +680,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                                }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                         }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                                }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -700,7 +700,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                        }}%</span>
+                            }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -803,7 +803,7 @@ const multiplierInfo = computed(() => {
             <!-- Lottery & Divine Abilities Section -->
             <section class="cheat-section cheat-section-wide">
                 <h2 class="section-header">
-                    <AppIcon icon="mdi:shimmer" class="section-icon" style="color: #facc15;" /> Lottery & Divine
+                    <AppIcon icon="mdi:shimmer" class="section-icon text-gold" /> Lottery & Divine
                     Abilities
                 </h2>
                 <div class="cheat-buttons">
@@ -823,7 +823,7 @@ const multiplierInfo = computed(() => {
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                            }}</span>
+                        }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
                 </div>
@@ -869,17 +869,17 @@ const multiplierInfo = computed(() => {
                 </div>
                 <div class="debug-row">
                     <span>{{ t('dev.bm_tier') }} <strong :class="`text-tier-${blackmarket.currentTier}`">{{
-                            blackmarket.currentTier }}</strong> ({{ blackmarket.totalDealsCompleted }} {{
+                        blackmarket.currentTier }}</strong> ({{ blackmarket.totalDealsCompleted }} {{
                                 t('dev.bm_deals_done') }})</span>
                     <span>{{ t('dev.bm_heat_label') }} <strong
                             :class="blackmarket.heat > 60 ? 'text-red' : blackmarket.heat > 30 ? 'text-gold' : 'text-emerald'">{{
-                            blackmarket.heat.toFixed(1) }}</strong>/{{ MAX_HEAT }}</span>
+                                blackmarket.heat.toFixed(1) }}</strong>/{{ MAX_HEAT }}</span>
                     <span>{{ t('dev.bm_effects_label') }} <strong>{{ blackmarket.activeEffects.length }}</strong></span>
                     <span>{{ t('dev.bm_investigations_label') }} <strong
                             :class="blackmarket.activeInvestigations.length > 0 ? 'text-red' : ''">{{
                                 blackmarket.activeInvestigations.length }}</strong></span>
                     <span>{{ t('dev.bm_contacts_label') }} <strong>{{ blackmarket.unlockedContacts.length
-                            }}</strong></span>
+                    }}</strong></span>
                 </div>
             </section>
 
@@ -974,7 +974,7 @@ const multiplierInfo = computed(() => {
 
 <style scoped>
 .dev-badge {
-    background: #ef4444;
+    background: var(--t-danger);
     color: white;
     font-size: 0.7rem;
     font-weight: 700;
@@ -1037,19 +1037,19 @@ const multiplierInfo = computed(() => {
 }
 
 .text-gold {
-    color: var(--t-warning, #f59e0b);
+    color: var(--t-warning);
 }
 
 .text-sky {
-    color: var(--t-info, #71717a);
+    color: var(--t-info);
 }
 
 .text-purple {
-    color: #a855f7;
+    color: var(--t-purple);
 }
 
 .text-emerald {
-    color: var(--t-success, #10b981);
+    color: var(--t-success);
 }
 
 .cheat-log-section {
@@ -1077,7 +1077,7 @@ const multiplierInfo = computed(() => {
 .log-entry {
     padding: 0.15rem 0;
     color: var(--t-text-secondary);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid color-mix(in srgb, var(--t-text) 3%, transparent);
 }
 
 .log-entry:first-child {
@@ -1085,11 +1085,15 @@ const multiplierInfo = computed(() => {
 }
 
 .text-orange {
-    color: #f97316;
+    color: var(--t-orange);
 }
 
 .text-red {
-    color: #ef4444;
+    color: var(--t-danger);
+}
+
+.text-danger {
+    color: var(--t-danger);
 }
 
 .text-muted {
@@ -1135,7 +1139,7 @@ const multiplierInfo = computed(() => {
     padding: 3px 0;
     font-size: var(--t-font-size-xs);
     font-family: var(--t-font-mono);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid color-mix(in srgb, var(--t-text) 3%, transparent);
     flex-wrap: wrap;
 }
 
@@ -1153,16 +1157,16 @@ const multiplierInfo = computed(() => {
 .debug-trait {
     padding: 0 4px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--t-text) 5%, transparent);
 }
 
 /* Additional color classes */
 .text-cyan {
-    color: #22d3ee;
+    color: var(--t-cyan);
 }
 
 .text-pink {
-    color: #ec4899;
+    color: var(--t-pink);
 }
 
 /* Multiplier Grid */

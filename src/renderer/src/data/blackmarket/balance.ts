@@ -51,6 +51,24 @@ export const FENCE_DAILY_LIMIT = 3
 /** Fence: sell price multiplier (vs base value) */
 export const FENCE_SELL_MULTIPLIER = 1.2
 
+/** Fence forge: min value boost (fraction, e.g. 0.25 = +25%) */
+export const FENCE_FORGE_MIN_BONUS = 0.25
+
+/** Fence forge: max value boost (fraction, e.g. 0.60 = +60%) */
+export const FENCE_FORGE_MAX_BONUS = 0.60
+
+/** Fence forge: heat added per forge */
+export const FENCE_FORGE_HEAT = 5
+
+/** Fence forge: cost as fraction of item's current value */
+export const FENCE_FORGE_COST_FRACTION = 0.10
+
+/** Fence network: sell multiplier applied to ALL sell channels */
+export const FENCE_NETWORK_SELL_BOOST = 1.35
+
+/** Fence network: duration in ticks */
+export const FENCE_NETWORK_DURATION_TICKS = 3000  // 5 min
+
 /** Hacker: stock/crypto manipulation range (±%) */
 export const HACKER_MANIPULATION_RANGE = 0.50
 

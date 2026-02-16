@@ -31,7 +31,7 @@ function confirmPrestige(): void {
 </script>
 
 <template>
-    <div class="prestige-panel" :style="{ '--era-color': eraColor || '#a855f7' }">
+    <div class="prestige-panel" :style="{ '--era-color': eraColor || 'var(--t-purple)' }">
         <div class="panel-grid">
             <!-- Current Points -->
             <div class="panel-section">
@@ -173,14 +173,14 @@ function confirmPrestige(): void {
 
 .multiplier-icon {
     font-size: 1.5rem;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .multiplier-value {
     font-family: var(--t-font-mono);
     font-size: 1.75rem;
     font-weight: 700;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .multiplier-desc {
@@ -216,7 +216,7 @@ function confirmPrestige(): void {
 }
 
 .pending-display.active {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .pending-value {
@@ -276,7 +276,7 @@ function confirmPrestige(): void {
 
 .confirm-icon {
     font-size: 3rem;
-    color: #f59e0b;
+    color: var(--t-warning);
 }
 
 .confirm-gain {
@@ -284,7 +284,7 @@ function confirmPrestige(): void {
 }
 
 .confirm-gain strong {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .confirm-warning {

@@ -9,8 +9,12 @@ import Button from 'primevue/button'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import { type ContactDef, type ContactState, getContactDef, scaleContactCost } from '@renderer/data/blackmarket'
+import { type ContactDef, type ContactState, getContactDef, scaleContactCost, FENCE_DAILY_LIMIT } from '@renderer/data/blackmarket'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
+import { useStorageStore } from '@renderer/stores/useStorageStore'
+import { useVaultStore } from '@renderer/stores/useVaultStore'
+import { useStockStore } from '@renderer/stores/useStockStore'
+import { useCryptoStore } from '@renderer/stores/useCryptoStore'
 
 const props = defineProps<{
     contactId: string
@@ -20,6 +24,10 @@ const emit = defineEmits<{ abilityUsed: [contactId: string, abilityId: string, r
 
 const blackmarket = useBlackMarketStore()
 const player = usePlayerStore()
+const storage = useStorageStore()
+const vault = useVaultStore()
+const stocks = useStockStore()
+const crypto = useCryptoStore()
 const { formatCash } = useFormat()
 const { t } = useI18n()
 
@@ -47,9 +55,9 @@ function riskSeverity(pct: number): string {
     return 'high'
 }
 
-function scaledAbilityCost(baseCost: number): string {
-    if (baseCost <= 0) return ''
-    const scaled = scaleContactCost(baseCost, player.cash.toNumber())
+function scaledAbilityCost(ability: import('@renderer/data/blackmarket').ContactAbility): string {
+    if (ability.cost <= 0) return ''
+    const scaled = scaleContactCost(ability.cost, player.cash.toNumber(), ability.impactTier ?? 'minor', ability.costWeight ?? 0.5)
     return formatCash(scaled)
 }
 
@@ -78,6 +86,44 @@ function handleAbility(abilityId: string): void {
         abilityId,
     )
     emit('abilityUsed', props.contactId, abilityId, result)
+}
+
+/**
+ * Returns a translated reason string if the ability cannot be used, or '' if ready.
+ * Checks: cooldown, loyalty, tier, context (no items / no assets / daily limit / no events).
+ */
+function abilityBlockReason(ability: import('@renderer/data/blackmarket').ContactAbility): string {
+    if (!state.value) return ''
+    const loyalty = state.value.loyalty
+    const tier = blackmarket.currentTier
+
+    // Tier gate
+    if (tier < ability.minTier) {
+        return t('blackmarket.block_tier', { tier: ability.minTier })
+    }
+    // Loyalty gate
+    if (loyalty < ability.minLoyalty) {
+        return t('blackmarket.block_loyalty', { needed: ability.minLoyalty, current: Math.floor(loyalty) })
+    }
+    // Cooldown
+    if (!isAbilityReady(ability.id)) {
+        return t('blackmarket.block_cooldown')
+    }
+    // Context-specific gates
+    const id = ability.id
+    if ((id === 'fence_sell_premium' || id === 'fence_bulk_deal' || id === 'fence_forge') && storage.inventory.length === 0 && vault.items.length === 0) {
+        return t('blackmarket.block_no_items')
+    }
+    if (id === 'fence_sell_premium' && state.value.dailyUses >= FENCE_DAILY_LIMIT) {
+        return t('blackmarket.block_daily_limit', { limit: FENCE_DAILY_LIMIT })
+    }
+    if ((id === 'broker_stock_tip' || id === 'broker_insider_trade' || id === 'hacker_manipulate_stock') && stocks.assets.length === 0) {
+        return t('blackmarket.block_no_stocks')
+    }
+    if ((id === 'broker_crypto_tip' || id === 'hacker_manipulate_crypto') && crypto.assets.length === 0) {
+        return t('blackmarket.block_no_crypto')
+    }
+    return ''
 }
 </script>
 
@@ -132,13 +178,17 @@ function handleAbility(abilityId: string): void {
                     </div>
                 </div>
                 <div class="ability__footer">
-                    <span v-if="ability.cost > 0" class="ability__cost">{{ scaledAbilityCost(ability.cost) }}</span>
+                    <span v-if="ability.cost > 0" class="ability__cost">{{ scaledAbilityCost(ability) }}</span>
                     <span v-if="!isAbilityReady(ability.id)" class="ability__cd">
                         <AppIcon icon="mdi:timer-sand" /> {{ cooldownRemaining(ability.id) }}
                     </span>
+                    <span v-if="abilityBlockReason(ability)" class="ability__block-reason">
+                        <AppIcon icon="mdi:information-outline" /> {{ abilityBlockReason(ability) }}
+                    </span>
                     <Button :label="t('blackmarket.use')" size="small" severity="secondary" :disabled="!isAbilityReady(ability.id) ||
                         (state?.loyalty ?? 0) < ability.minLoyalty ||
-                        blackmarket.currentTier < ability.minTier
+                        blackmarket.currentTier < ability.minTier ||
+                        !!abilityBlockReason(ability)
                         " @click="handleAbility(ability.id)" />
                 </div>
             </div>
@@ -337,5 +387,15 @@ function handleAbility(abilityId: string): void {
     gap: 0.2rem;
     font-size: var(--t-font-size-xs);
     color: var(--t-warning);
+}
+
+.ability__block-reason {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    font-style: italic;
+    margin-right: auto;
 }
 </style>

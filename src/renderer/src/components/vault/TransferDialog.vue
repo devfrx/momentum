@@ -10,6 +10,7 @@ import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import type { StorageItem } from '@renderer/data/storage/items'
+import { resolveItemName } from '@renderer/data/storage/items'
 
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -80,6 +81,7 @@ function transfer(): void {
                     appraised: item.appraised,
                     description: item.description,
                     weight: item.weight,
+                    condition: item.condition,
                     auctionId: 'vault_transfer',
                     acquiredAtTick: Date.now(),
                 } as any)
@@ -141,7 +143,7 @@ function getRarityClass(rarity: string): string {
                             <span v-else>☐</span>
                         </div>
                         <div class="item-info">
-                            <span class="item-name">{{ item.name }}</span>
+                            <span class="item-name">{{ resolveItemName(item, t) }}</span>
                             <span class="item-meta" style="text-transform: capitalize">{{ item.rarity }} · {{
                                 formatCash(item.appraisedValue ?? item.baseValue) }}</span>
                         </div>
@@ -161,7 +163,7 @@ function getRarityClass(rarity: string): string {
 .transfer-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--t-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -284,31 +286,31 @@ function getRarityClass(rarity: string): string {
 }
 
 .transfer-item.rarity-common {
-    border-left-color: #9ca3af;
+    border-left-color: var(--t-rarity-common);
 }
 
 .transfer-item.rarity-uncommon {
-    border-left-color: #22c55e;
+    border-left-color: var(--t-rarity-uncommon);
 }
 
 .transfer-item.rarity-rare {
-    border-left-color: #3b82f6;
+    border-left-color: var(--t-rarity-rare);
 }
 
 .transfer-item.rarity-epic {
-    border-left-color: #a855f7;
+    border-left-color: var(--t-rarity-epic);
 }
 
 .transfer-item.rarity-legendary {
-    border-left-color: #f59e0b;
+    border-left-color: var(--t-rarity-legendary);
 }
 
 .transfer-item.rarity-jackpot {
-    border-left-color: #ef4444;
+    border-left-color: var(--t-rarity-jackpot);
 }
 
 .transfer-item.rarity-mythic {
-    border-left-color: #ec4899;
+    border-left-color: var(--t-pink);
 }
 
 .item-check {

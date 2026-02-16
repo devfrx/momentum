@@ -321,7 +321,7 @@ function confirmPlay(): void {
 .number-ball.selected {
     background: var(--ticket-accent);
     border-color: var(--ticket-accent);
-    color: #fff;
+    color: var(--t-text);
     box-shadow: 0 0 8px color-mix(in srgb, var(--ticket-accent) 40%, transparent);
 }
 
@@ -363,10 +363,10 @@ function confirmPlay(): void {
 }
 
 .bonus-ball.selected {
-    background: #f59e0b;
-    border-color: #f59e0b;
-    color: #fff;
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    background: var(--t-warning);
+    border-color: var(--t-warning);
+    color: var(--t-text);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--t-warning) 40%, transparent);
 }
 
 /* ── Play button ── */
@@ -379,7 +379,7 @@ function confirmPlay(): void {
     background: var(--ticket-accent);
     border: none;
     border-radius: var(--t-radius-md);
-    color: #fff;
+    color: var(--t-text);
     font-size: var(--t-font-size-sm);
     font-weight: 700;
     cursor: pointer;

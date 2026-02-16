@@ -13,6 +13,7 @@ import { useShopStore, type SellSource } from '@renderer/stores/useShopStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
+import { resolveItemName } from '@renderer/data/storage/items'
 import {
     CONDITION_ICONS,
     CONDITION_COLORS,
@@ -87,7 +88,7 @@ function sellAllFromSource(): void {
                 <div class="sell-item__header">
                     <AppIcon :icon="item.icon" class="sell-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
                     <div class="sell-item__info">
-                        <span class="sell-item__name">{{ item.name }}</span>
+                        <span class="sell-item__name">{{ resolveItemName(item, t) }}</span>
                         <span class="sell-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">
                             {{ item.rarity }}
                         </span>
@@ -262,7 +263,7 @@ function sellAllFromSource(): void {
 .sell-item__value {
     font-size: var(--t-font-size-sm);
     font-weight: 600;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .sell-item__demand-hint {
@@ -272,7 +273,7 @@ function sellAllFromSource(): void {
     font-size: 0.55rem;
     font-weight: 700;
     text-transform: uppercase;
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .sell-empty {

@@ -117,8 +117,8 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .upgrade-card.maxed {
-    border-color: #22c55e;
-    background: rgba(34, 197, 94, 0.05);
+    border-color: var(--t-success);
+    background: color-mix(in srgb, var(--t-success) 5%, transparent);
 }
 
 .upgrade-header {
@@ -138,7 +138,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .upgrade-icon-wrap.owned {
-    background: rgba(168, 85, 247, 0.15);
+    background: color-mix(in srgb, var(--t-purple) 15%, transparent);
 }
 
 .upgrade-icon {
@@ -147,7 +147,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .upgrade-icon-wrap.owned .upgrade-icon {
-    color: #a855f7;
+    color: var(--t-purple);
 }
 
 .upgrade-info {
@@ -195,11 +195,11 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .current-effect .effect-value {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .next-effect .effect-value {
-    color: var(--t-text-secondary, #71717a);
+    color: var(--t-text-secondary);
 }
 
 .upgrade-footer {
@@ -233,9 +233,9 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
     justify-content: center;
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
-    background: rgba(34, 197, 94, 0.15);
+    background: color-mix(in srgb, var(--t-success) 15%, transparent);
     border-radius: var(--t-radius-sm);
-    color: #22c55e;
+    color: var(--t-success);
     font-weight: 700;
     font-size: 0.8rem;
 }

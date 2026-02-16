@@ -11,6 +11,7 @@ import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
+import { resolveItemName, resolveItemDescription } from '@renderer/data/storage/items'
 import type { ShopListing } from '@renderer/data/shop/items'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import {
@@ -68,14 +69,14 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 
         <!-- ── Title + Rarity ──────────────────────────────── -->
         <div class="card__title-block">
-            <span class="card__name">{{ listing.item.name }}</span>
+            <span class="card__name">{{ resolveItemName(listing.item, t) }}</span>
             <span class="card__rarity" :style="{ color: rarityCssVar(listing.item.rarity) }">
                 {{ listing.item.rarity }}
             </span>
         </div>
 
         <!-- ── Description ─────────────────────────────────── -->
-        <p class="card__desc">{{ listing.item.description }}</p>
+        <p class="card__desc">{{ resolveItemDescription(listing.item, t) }}</p>
 
         <!-- ── Category pill ───────────────────────────────── -->
         <span class="card__category">{{ listing.item.category }}</span>
@@ -124,11 +125,11 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 }
 
 .card--flash {
-    border-color: rgba(239, 68, 68, 0.25);
+    border-color: color-mix(in srgb, var(--t-danger) 25%, transparent);
 }
 
 .card--unique {
-    border-color: rgba(250, 204, 21, 0.25);
+    border-color: color-mix(in srgb, var(--t-gold) 25%, transparent);
 }
 
 /* ── Visual area (icon centered) ─────────────────────────── */
@@ -144,7 +145,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 
 .card__icon {
     font-size: 2.5rem;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 2px 4px var(--t-overlay-light));
 }
 
 .card__ribbon {
@@ -158,8 +159,8 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
     font-size: 0.6rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: #fff;
-    background: #ef4444;
+    color: var(--t-text);
+    background: var(--t-danger);
     border-radius: var(--t-radius-sm);
     letter-spacing: 0.04em;
 }
@@ -186,23 +187,23 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 }
 
 .tag--condition {
-    background: rgba(128, 128, 128, 0.08);
+    background: color-mix(in srgb, var(--t-info) 8%, transparent);
     border: 1px solid;
 }
 
 .tag--unique {
-    background: rgba(250, 204, 21, 0.1);
-    color: #facc15;
+    background: color-mix(in srgb, var(--t-gold) 10%, transparent);
+    color: var(--t-gold);
 }
 
 .tag--trending {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+    background: color-mix(in srgb, var(--t-success) 10%, transparent);
+    color: var(--t-success);
 }
 
 .tag--cold {
-    background: rgba(148, 163, 184, 0.08);
-    color: #94a3b8;
+    background: color-mix(in srgb, var(--t-info) 8%, transparent);
+    color: var(--t-info);
 }
 
 /* ── Title block ─────────────────────────────────────────── */
@@ -282,7 +283,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 }
 
 .price-main--sale {
-    color: #ef4444;
+    color: var(--t-danger);
 }
 
 /* ── Actions ─────────────────────────────────────────────── */

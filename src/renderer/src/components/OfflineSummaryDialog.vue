@@ -95,7 +95,7 @@ const incomeLines = computed(() => {
 .offline-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--t-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -110,7 +110,7 @@ const incomeLines = computed(() => {
     padding: 1.5rem;
     width: 380px;
     max-width: 95vw;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 20px 60px var(--t-overlay-light);
 }
 
 .offline-header {
@@ -215,7 +215,7 @@ const incomeLines = computed(() => {
 }
 
 .line-value.danger {
-    color: var(--t-danger, #ef4444);
+    color: var(--t-danger);
 }
 
 .offline-total {

@@ -42,7 +42,7 @@ defineProps<{
             <div class="progress-header">
                 <span class="progress-label">{{ $t('prestige.progress_next_era') }}</span>
                 <span class="progress-value">{{ totalPoints }} / {{ nextEra.pointsRequired.toNumber().toLocaleString()
-                }} PP</span>
+                    }} PP</span>
             </div>
             <ProgressBar :value="progress" :showValue="false" class="era-progress-bar" />
             <!-- <div class="era-next">
@@ -171,7 +171,7 @@ defineProps<{
     padding: var(--t-space-4);
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-lg);
-    color: #f59e0b;
+    color: var(--t-warning);
     font-weight: 600;
 }
 

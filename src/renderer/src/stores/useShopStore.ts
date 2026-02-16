@@ -34,6 +34,8 @@ import {
   type ShopCategory,
 } from '@renderer/data/shop/items'
 import type { StorageItem, ItemCondition } from '@renderer/data/storage/items'
+import { resolveItemName } from '@renderer/data/storage/items'
+import i18n from '@renderer/locales'
 import {
   SHOP_LISTING_COUNT,
   SHOP_REFRESH_TICKS,
@@ -58,6 +60,7 @@ import {
   getStepsBetween,
   getSlotUpgradeCost,
   getConditionAdjustedValue,
+  getRestoredValue,
   type RestorationSlot,
 } from '@renderer/data/shop/restoration'
 import {
@@ -143,8 +146,7 @@ export const useShopStore = defineStore('shop', () => {
     if (searchQuery.value.trim()) {
       const q = searchQuery.value.toLowerCase().trim()
       result = result.filter(l =>
-        l.item.name.toLowerCase().includes(q) ||
-        l.item.description.toLowerCase().includes(q) ||
+        resolveItemName(l.item, i18n.global.t).toLowerCase().includes(q) ||
         l.item.category.toLowerCase().includes(q),
       )
     }
@@ -182,7 +184,7 @@ export const useShopStore = defineStore('shop', () => {
         result.sort((a, b) => b.listedAtTick - a.listedAtTick)
         break
       case 'name':
-        result.sort((a, b) => a.item.name.localeCompare(b.item.name))
+        result.sort((a, b) => resolveItemName(a.item, i18n.global.t).localeCompare(resolveItemName(b.item, i18n.global.t)))
         break
     }
 
@@ -563,7 +565,7 @@ export const useShopStore = defineStore('shop', () => {
     const restoredItem: StorageItem = {
       ...slot.item,
       condition: slot.targetCondition as StorageItem['condition'],
-      appraisedValue: getConditionAdjustedValue(slot.item.baseValue, slot.targetCondition),
+      appraisedValue: getRestoredValue(slot.item, slot.targetCondition),
     }
 
     // Return to vault (always goes to vault after restoration)
@@ -593,7 +595,7 @@ export const useShopStore = defineStore('shop', () => {
     const partialItem: StorageItem = {
       ...slot.item,
       condition: currentCond as StorageItem['condition'],
-      appraisedValue: getConditionAdjustedValue(slot.item.baseValue, currentCond),
+      appraisedValue: getRestoredValue(slot.item, currentCond),
     }
 
     vault.addItem(partialItem, 'shop')

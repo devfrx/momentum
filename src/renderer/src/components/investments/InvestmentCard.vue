@@ -81,7 +81,7 @@ const remainingTime = computed(() => {
         <div v-if="status === 'succeeded'" class="result-section success-result">
             <p class="result-text">{{ $t('investments.succeeded') }}</p>
             <p v-if="returnAmount" class="result-amount">{{ $t('investments.returns') }} <strong>{{ returnAmount
-                    }}</strong></p>
+            }}</strong></p>
             <Button :label="$t('investments.collect_returns')" severity="success" icon="pi pi-wallet" size="small"
                 @click="$emit('collect')" class="collect-btn" />
         </div>
@@ -158,13 +158,13 @@ const remainingTime = computed(() => {
 }
 
 .success-result {
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: color-mix(in srgb, var(--t-success) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--t-success) 20%, transparent);
 }
 
 .failed-result {
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: color-mix(in srgb, var(--t-danger) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--t-danger) 20%, transparent);
 }
 
 .exited-result {

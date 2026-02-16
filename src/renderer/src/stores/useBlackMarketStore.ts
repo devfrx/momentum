@@ -16,6 +16,8 @@ import { useStockStore } from './useStockStore'
 import { useCryptoStore } from './useCryptoStore'
 import { useStorageStore } from './useStorageStore'
 import { useVaultStore } from './useVaultStore'
+import { resolveItemName } from '@renderer/data/storage/items'
+import i18n from '@renderer/locales'
 import { STOCKS } from '@renderer/data/stocks'
 import { CRYPTOS } from '@renderer/data/cryptos'
 import {
@@ -48,6 +50,12 @@ import {
   MAX_INVESTIGATIONS,
   FENCE_DAILY_LIMIT,
   FENCE_SELL_MULTIPLIER,
+  FENCE_FORGE_MIN_BONUS,
+  FENCE_FORGE_MAX_BONUS,
+  FENCE_FORGE_HEAT,
+  FENCE_FORGE_COST_FRACTION,
+  FENCE_NETWORK_SELL_BOOST,
+  FENCE_NETWORK_DURATION_TICKS,
   HACKER_MANIPULATION_RANGE,
   FIXER_COST_PER_SEVERITY,
   BROKER_BASE_ACCURACY,
@@ -251,8 +259,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           const heatPenalty = getHeatPenalty(heat.value, 'deal_cost_increase')
           const heatRiskIncrease = getHeatPenalty(heat.value, 'risk_increase')
 
-          // Scale cost by player wealth
-          const scaledBaseCost = scaleDealCost(def.baseCost, wealth)
+          // Scale cost by player wealth (percentage model)
+          const scaledBaseCost = scaleDealCost(def.baseCost, wealth, def.impactTier, def.costWeight)
           const adjustedCost = D(scaledBaseCost * (1 - priceDiscount) * (1 + heatPenalty))
 
           // Risk: base + random variance (-5 to +15) + heat — ensures variety
@@ -262,14 +270,14 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             1, 95,
           )
 
-          // Scale cash-based effects by wealth
+          // Scale cash-based effects by wealth (ROI model)
           const scaledEffects = def.successEffects.map(e => ({
             ...e,
-            value: scaleDealEffect(e.type, e.value, wealth),
+            value: scaleDealEffect(e.type, e.value, wealth, scaledBaseCost, def.roiRatio),
           }))
           const scaledConsequences = def.failConsequences.map(c => ({
             ...c,
-            value: scaleDealConsequence(c.type, c.value, wealth),
+            value: scaleDealConsequence(c.type, c.value, wealth, scaledBaseCost),
           }))
 
           // Deal expires at next rotation
@@ -430,7 +438,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         if (gte(player.cash, loss)) {
           player.spendCash(loss)
         }
-        addLogEntry('danger', 'mdi:cash-minus', 'blackmarket.log_cash_loss', { amount: value }, 'deal')
+        addLogEntry('danger', 'mdi:cash-minus', 'blackmarket.log_cash_loss', { amount: formatCashStandalone(loss) }, 'deal')
         break
       }
       case 'heat_spike':
@@ -526,7 +534,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       // Heat spike on getting caught
       addHeat(inv.severity * 5)
       addLogEntry('danger', 'mdi:gavel', 'blackmarket.log_investigation_caught', {
-        fine: fine.toNumber(), severity: inv.severity,
+        fine: formatCashStandalone(fine), severity: inv.severity,
       }, 'investigation')
     } else {
       // Dodged it — small heat reduction
@@ -579,7 +587,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (abilityId === 'hacker_manipulate_crypto' && useCryptoStore().assets.length === 0) {
       return { success: false, message: 'no_assets' }
     }
-    if ((abilityId === 'fence_sell_premium' || abilityId === 'fence_bulk_deal') && useStorageStore().inventory.length === 0 && useVaultStore().items.length === 0) {
+    if ((abilityId === 'fence_sell_premium' || abilityId === 'fence_bulk_deal' || abilityId === 'fence_forge') && useStorageStore().inventory.length === 0 && useVaultStore().items.length === 0) {
       return { success: false, message: 'no_items' }
     }
     if (abilityId === 'fence_sell_premium' && state.dailyUses >= FENCE_DAILY_LIMIT) {
@@ -600,7 +608,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
     const player = usePlayerStore()
     const scaledCost = ability.cost > 0
-      ? D(scaleContactCost(ability.cost, player.cash.toNumber()))
+      ? D(scaleContactCost(ability.cost, player.cash.toNumber(), ability.impactTier ?? 'minor', ability.costWeight ?? 0.5))
       : ZERO
 
     // Check and pay cost
@@ -633,7 +641,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       state.totalInteractions++
       state.abilityCooldowns[abilityId] = lastTickProcessed.value + ability.cooldownTicks
       addLogEntry('warning', 'mdi:account-cancel', 'blackmarket.log_scam', {
-        contact: def.nameKey, ability: ability.id, cost: scaledCost.toNumber(),
+        contact: def.nameKey, ability: ability.id, cost: formatCashStandalone(scaledCost),
       }, 'contact', 'blackmarket.log_scam_detail')
       return { success: false, message: 'scammed', result: { type: 'scam', contact: def.nameKey, cost: scaledCost.toNumber() } }
     }
@@ -820,7 +828,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           totalCashEarned.value = add(totalCashEarned.value, finalVal)
           storage.totalItemsSold++
           storage.totalSaleRevenue = add(storage.totalSaleRevenue, finalVal)
-          const itemName = item.name
+          const itemName = resolveItemName(item as any, i18n.global.t)
           const premPct = Math.round((premiumMul - 1) * 100)
           storageInv.splice(bestIdx, 1)
           addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
@@ -840,7 +848,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           totalCashEarned.value = add(totalCashEarned.value, finalVal)
           vault.totalItemsSold++
           vault.totalSaleRevenue = add(vault.totalSaleRevenue, finalVal)
-          const itemName = item.name
+          const itemName = resolveItemName(item as any, i18n.global.t)
           const premPct = Math.round((premiumMul - 1) * 100)
           vault.removeItem(vaultInv[bestIdx].id)
           addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
@@ -907,11 +915,85 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         }
       }
 
+      case 'fence_forge': {
+        // Find the most valuable item across storage + vault
+        const storage = useStorageStore()
+        const vault = useVaultStore()
+        const storageInv = storage.inventory
+        const vaultInv = vault.items
+        if (storageInv.length === 0 && vaultInv.length === 0) {
+          addLogEntry('warning', 'mdi:package-variant-remove', 'blackmarket.log_fence_no_items', {}, 'contact')
+          return { type: 'fence_forge', forged: false, reason: 'no_items' }
+        }
+        let bestVal = ZERO
+        let bestSource: 'storage' | 'vault' = 'storage'
+        let bestIdx = 0
+        for (let i = 0; i < storageInv.length; i++) {
+          const val = storageInv[i].appraisedValue ?? storageInv[i].baseValue
+          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'storage' }
+        }
+        for (let i = 0; i < vaultInv.length; i++) {
+          const val = vaultInv[i].appraisedValue ?? vaultInv[i].baseValue
+          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'vault' }
+        }
+        // Dynamic cost: fraction of item value
+        const forgeCost = bestVal.mul(FENCE_FORGE_COST_FRACTION).round().max(D(1))
+        if (!gte(player.cash, forgeCost)) {
+          addLogEntry('warning', 'mdi:cash-remove', 'blackmarket.log_fence_forge_no_cash', {
+            cost: formatCashStandalone(forgeCost),
+          }, 'contact')
+          return { type: 'fence_forge', forged: false, reason: 'insufficient_cash' }
+        }
+        player.spendCash(forgeCost)
+        totalCashSpent.value = add(totalCashSpent.value, forgeCost)
+
+        // Loyalty-scaled bonus: higher loyalty → closer to max bonus
+        const loyaltyFactor = state.loyalty / 100
+        const bonusRange = FENCE_FORGE_MAX_BONUS - FENCE_FORGE_MIN_BONUS
+        const bonus = FENCE_FORGE_MIN_BONUS + (loyaltyFactor * 0.5 + Math.random() * 0.5) * bonusRange
+        const boostMul = 1 + bonus
+
+        const item = bestSource === 'storage' ? storageInv[bestIdx] : vaultInv[bestIdx]
+        const oldVal = item.appraisedValue ?? item.baseValue
+        const newVal = oldVal.mul(boostMul).round()
+        item.appraisedValue = newVal
+        item.appraised = true
+
+        // Heat penalty
+        addHeat(FENCE_FORGE_HEAT)
+
+        const itemName = resolveItemName(item as any, i18n.global.t)
+        const boostPct = Math.round(bonus * 100)
+        addLogEntry('success', 'mdi:file-certificate', 'blackmarket.log_fence_forged', {
+          item: itemName, boost: boostPct,
+        }, 'contact', 'blackmarket.log_fence_forged_detail', {
+          oldValue: formatCashStandalone(oldVal), newValue: formatCashStandalone(newVal),
+          cost: formatCashStandalone(forgeCost),
+        })
+        return {
+          type: 'fence_forge', forged: true, itemName, boostPercent: boostPct,
+          oldValue: oldVal.toNumber(), newValue: newVal.toNumber(),
+        }
+      }
+
+      case 'fence_network': {
+        applyDealEffect('income_boost', FENCE_NETWORK_SELL_BOOST, FENCE_NETWORK_DURATION_TICKS, 'fence_network')
+        addHeat(3)
+        const boostPct = Math.round((FENCE_NETWORK_SELL_BOOST - 1) * 100)
+        addLogEntry('info', 'mdi:web', 'blackmarket.log_fence_network', {
+          boost: boostPct, duration: Math.round(FENCE_NETWORK_DURATION_TICKS / 10),
+        }, 'contact', 'blackmarket.log_fence_network_detail', {})
+        return { type: 'fence_network', applied: true, boostPercent: boostPct }
+      }
+
       // ─── Smuggler abilities ───────────────────────────
       case 'smuggler_contraband': {
+        const abilityDef = getContactDef('smuggler')?.abilities.find(a => a.id === 'smuggler_contraband')
+        const roiRatio = abilityDef?.roiRatio ?? 2.0
         const valueRoll = SMUGGLER_VALUE_MIN + Math.random() * (SMUGGLER_VALUE_MAX - SMUGGLER_VALUE_MIN)
-        const baseValue = Math.round(2000 * valueRoll)
-        const scaledValue = scaleContactReward(baseValue, player.cash.toNumber())
+        // Scaled cost was already paid; reward = scaledCost × ROI × random variance
+        const sCost = scaleContactCost(abilityDef?.cost ?? 2000, player.cash.toNumber(), abilityDef?.impactTier ?? 'standard', abilityDef?.costWeight ?? 0.4)
+        const scaledValue = scaleContactReward(sCost, roiRatio * valueRoll)
         const cashGrant = D(scaledValue)
         player.earnCash(cashGrant)
         totalCashEarned.value = add(totalCashEarned.value, cashGrant)

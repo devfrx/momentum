@@ -8,6 +8,8 @@ import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
+import { resolveItemName, resolveItemDescription } from '@renderer/data/storage/items'
+import { CONDITION_ICONS, CONDITION_COLORS } from '@renderer/data/shop/restoration'
 import type { InventoryItem as InventoryItemType } from '@renderer/stores/useStorageStore'
 
 defineProps<{
@@ -28,15 +30,24 @@ const { t } = useI18n()
         <div class="inv-item__header">
             <AppIcon :icon="item.icon" class="inv-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
             <div class="inv-item__info">
-                <span class="inv-item__name">{{ item.name }}</span>
+                <span class="inv-item__name">{{ resolveItemName(item, t) }}</span>
                 <span class="inv-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity }}</span>
             </div>
         </div>
 
-        <p class="inv-item__desc">{{ item.description }}</p>
+        <p class="inv-item__desc">{{ resolveItemDescription(item, t) }}</p>
 
         <div class="inv-item__value-row">
             <span class="inv-item__category">{{ item.category }}</span>
+            <div v-if="item.appraised && item.condition" class="inv-item__condition"
+                :style="{ color: CONDITION_COLORS[item.condition] }">
+                <AppIcon :icon="CONDITION_ICONS[item.condition]" />
+                {{ t(`items.condition.${item.condition}`) }}
+            </div>
+            <div v-else-if="!item.appraised && item.condition" class="inv-item__condition inv-item__condition--hidden">
+                <AppIcon icon="mdi:help-circle-outline" />
+                {{ t('storage.condition_unknown') }}
+            </div>
             <div class="inv-item__value">
                 <template v-if="item.appraised">
                     <AppIcon icon="mdi:check-circle" class="appraised-icon" />
@@ -51,7 +62,7 @@ const { t } = useI18n()
 
         <div class="inv-item__actions">
             <Button v-if="!item.appraised" :label="t('storage.appraise')" icon="pi pi-search" size="small"
-                severity="secondary" outlined @click="$emit('appraise', item.id)" />
+                severity="primary" outlined @click="$emit('appraise', item.id)" />
             <Button :label="t('storage.sell_item')" icon="pi pi-dollar" size="small" @click="$emit('sell', item.id)" />
         </div>
     </div>
@@ -114,6 +125,22 @@ const { t } = useI18n()
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
+}
+
+.inv-item__condition {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--t-font-size-xs);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.inv-item__condition--hidden {
+    color: var(--t-text-muted);
+    font-style: italic;
 }
 
 .inv-item__category {
@@ -132,7 +159,7 @@ const { t } = useI18n()
 }
 
 .appraised-icon {
-    color: #22c55e;
+    color: var(--t-success);
     font-size: 0.9rem;
 }
 
@@ -147,7 +174,7 @@ const { t } = useI18n()
 }
 
 .value-text--appraised {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .value-text--unknown {

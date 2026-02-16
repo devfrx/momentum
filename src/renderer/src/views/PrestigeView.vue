@@ -33,6 +33,7 @@ import {
 } from '@renderer/components/prestige'
 import { UPGRADE_CATEGORY_INFO, type PrestigeUpgradeDef } from '@renderer/data/prestige'
 import { rarityCssVar } from '@renderer/data/rarity'
+import { THEME } from '@renderer/assets/theme/colors'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
@@ -130,7 +131,7 @@ const upgradeCategories = computed(() => {
     return Object.entries(grouped).map(([category, upgrades]) => ({
         category,
         upgrades,
-        info: UPGRADE_CATEGORY_INFO[category as keyof typeof UPGRADE_CATEGORY_INFO] || { label: category, icon: 'mdi:star', color: '#888' }
+        info: UPGRADE_CATEGORY_INFO[category as keyof typeof UPGRADE_CATEGORY_INFO] || { label: category, icon: 'mdi:star', color: THEME.textMuted }
     }))
 })
 
@@ -146,31 +147,31 @@ const prestigeStats = computed(() => [
         label: t('prestige.rebirths'),
         value: prestige.rebirthCount.toString(),
         icon: 'mdi:reload',
-        color: '#71717a'
+        color: THEME.info
     },
     {
         label: t('prestige.milestones'),
         value: `${prestige.unlockedMilestones}/${prestige.milestones.length}`,
         icon: 'mdi:flag-checkered',
-        color: '#22c55e'
+        color: THEME.success
     },
     {
         label: t('prestige.perks'),
         value: `${prestige.purchasedPerks}/${prestige.perks.length}`,
         icon: 'mdi:diamond',
-        color: '#a855f7'
+        color: THEME.purple
     },
     {
         label: t('prestige.upgrade_levels'),
         value: prestige.totalUpgradeLevels.toString(),
         icon: 'mdi:arrow-up-bold-circle',
-        color: '#f59e0b'
+        color: THEME.warning
     },
     {
         label: t('prestige.global_multi'),
         value: formatMultiplier(prestige.globalMultiplier),
         icon: 'mdi:trending-up',
-        color: '#22c55e'
+        color: THEME.success
     },
 ])
 
@@ -533,7 +534,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 
 .ach-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #22c55e, #facc15);
+    background: linear-gradient(90deg, var(--t-success), var(--t-gold));
     border-radius: 3px;
     transition: width 0.5s ease;
 }
@@ -570,8 +571,8 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 
 .ach-card.ach-unlocked {
     opacity: 1;
-    border-left-color: var(--ach-color, #22c55e);
-    background: color-mix(in srgb, var(--ach-color, #22c55e) 5%, var(--t-bg-card));
+    border-left-color: var(--ach-color);
+    background: color-mix(in srgb, var(--ach-color) 5%, var(--t-bg-card));
 }
 
 .ach-card.ach-hidden {
@@ -591,7 +592,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 }
 
 .ach-unlocked .ach-icon-wrap {
-    background: color-mix(in srgb, var(--ach-color, #22c55e) 15%, transparent);
+    background: color-mix(in srgb, var(--ach-color) 15%, transparent);
 }
 
 .ach-icon {
@@ -600,7 +601,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 }
 
 .ach-unlocked .ach-icon {
-    color: var(--ach-color, #22c55e);
+    color: var(--ach-color);
 }
 
 .ach-info {
@@ -628,13 +629,13 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
     gap: 4px;
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--ach-color, #22c55e);
+    color: var(--ach-color);
     margin-top: 2px;
 }
 
 .ach-check {
     font-size: 1.2rem;
-    color: var(--ach-color, #22c55e);
+    color: var(--ach-color);
     flex-shrink: 0;
 }
 
@@ -644,7 +645,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 }
 
 .divine-header {
-    color: #facc15;
+    color: var(--t-gold);
 }
 
 .divine-grid {

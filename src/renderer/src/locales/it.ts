@@ -2,7 +2,12 @@
  * Italian locale — traduzione completa
  * Organizzato per dominio funzionale.
  */
+import itemsIt from './items-it'
+
 export default {
+  // ─── Nomi Oggetti Procedurali / Descrizioni ───────────────────
+  items: itemsIt,
+
   // ─── Comuni / Condivisi ───────────────────────────────────────
   common: {
     buy: 'Compra',
@@ -2088,6 +2093,7 @@ export default {
     inventory: 'Inventario',
     est_value: 'Val. stimato',
     not_appraised: 'Non valutato',
+    condition_unknown: 'Condizione sconosciuta',
     appraise: 'Valuta',
     sell_item: 'Vendi',
     appraise_all: 'Valuta tutti ({n})',
@@ -2416,6 +2422,13 @@ export default {
     interactions: '{count} interazioni',
     daily_uses: '{count} usi giornalieri',
     use: 'Usa',
+    block_cooldown: 'In ricarica…',
+    block_loyalty: 'Richiede {needed} lealtà (hai {current})',
+    block_tier: 'Richiede grado di reputazione {tier}',
+    block_no_items: 'Nessun oggetto nell\'inventario',
+    block_daily_limit: 'Limite giornaliero raggiunto ({limit}/{limit})',
+    block_no_stocks: 'Nessuna azione posseduta',
+    block_no_crypto: 'Nessuna crypto posseduta',
     time_remaining: 'Tempo Rimasto',
     potential_fine: 'Multa Potenziale',
     catch_chance: 'Probabilità Cattura',
@@ -2556,6 +2569,10 @@ export default {
     ability_fence_sell_desc: 'Vendi oggetti a prezzi superiori al mercato attraverso canali sotterranei.',
     ability_fence_bulk: 'Vendita all\'Ingrosso',
     ability_fence_bulk_desc: 'Liquida tutti gli oggetti del magazzino a un prezzo premium in una transazione.',
+    ability_fence_forge: 'Falsifica Provenienza',
+    ability_fence_forge_desc: 'Falsifica documenti di provenienza per aumentare permanentemente il valore di un oggetto. Genera calore.',
+    ability_fence_network: 'Rete Sotterranea',
+    ability_fence_network_desc: 'Attiva rete di acquirenti sotterranei: tutti i prezzi di vendita aumentati per 5 minuti.',
     ability_contraband: 'Corsa Contrabbando',
     ability_contraband_desc: 'Ricevi merci di contrabbando ad alto valore convertite in contanti.',
     ability_supply_run: 'Rifornimento',
@@ -2615,6 +2632,11 @@ export default {
     log_fence_bulk_detail: 'Totale guadagnato: {total}',
     log_fence_no_items: 'Nessun oggetto nell\'inventario da vendere',
     log_fence_daily_limit: 'Limite giornaliero vendite raggiunto',
+    log_fence_forged: 'Provenienza falsificata per "{item}" — +{boost}% valore',
+    log_fence_forged_detail: 'Valore: {oldValue} → {newValue} (costo: {cost})',
+    log_fence_forge_no_cash: 'Contanti insufficienti per la falsificazione (servono {cost})',
+    log_fence_network: 'Rete sotterranea attivata: +{boost}% prezzi di vendita per {duration}s',
+    log_fence_network_detail: 'Tutti i canali di vendita potenziati',
 
     // Voci log — Contrabbandiere
     log_contraband: 'Corsa al contrabbando: guadagnati {value}',

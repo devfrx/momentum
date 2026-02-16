@@ -10,6 +10,7 @@ import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
+import { THEME } from '@renderer/assets/theme/colors'
 
 const gambling = useGamblingStore()
 const player = usePlayerStore()
@@ -51,7 +52,7 @@ const games = computed(() => [
         odds: t('gambling.odds_49'),
         payout: t('gambling.payout_2x_3x'),
         category: t('gambling.category_table'),
-        accent: '#22c55e',
+        accent: THEME.success,
         luckMechanic: t('gambling.luck_anti_bust'),
     },
     {
@@ -62,7 +63,7 @@ const games = computed(() => [
         odds: t('gambling.odds_48'),
         payout: t('gambling.payout_2x_36x'),
         category: t('gambling.category_table'),
-        accent: '#ef4444',
+        accent: THEME.danger,
         luckMechanic: t('gambling.luck_second_chance'),
     },
     {
@@ -73,7 +74,7 @@ const games = computed(() => [
         odds: t('gambling.odds_25'),
         payout: t('gambling.payout_100x'),
         category: t('gambling.category_machine'),
-        accent: '#a855f7',
+        accent: THEME.purple,
         luckMechanic: t('gambling.luck_second_chance'),
     },
     {
@@ -84,7 +85,7 @@ const games = computed(() => [
         odds: t('gambling.odds_50'),
         payout: t('gambling.payout_2x'),
         category: t('gambling.category_quick'),
-        accent: '#f59e0b',
+        accent: THEME.warning,
         luckMechanic: t('gambling.luck_second_chance'),
     },
     {
@@ -95,7 +96,7 @@ const games = computed(() => [
         odds: t('gambling.odds_variable'),
         payout: t('gambling.odds_variable'),
         category: t('gambling.category_quick'),
-        accent: '#71717a',
+        accent: THEME.info,
         luckMechanic: t('gambling.luck_second_chance'),
     },
     {
@@ -106,7 +107,7 @@ const games = computed(() => [
         odds: t('gambling.odds_variable'),
         payout: t('gambling.payout_30x'),
         category: t('gambling.category_machine'),
-        accent: '#f59e0b',
+        accent: THEME.warning,
         luckMechanic: '',
     },
     {
@@ -117,7 +118,7 @@ const games = computed(() => [
         odds: t('gambling.odds_variable'),
         payout: t('gambling.payout_100000x'),
         category: t('gambling.category_draw'),
-        accent: '#06b6d4',
+        accent: THEME.cyan,
         luckMechanic: [t('gambling.luck_second_chance'), t('gambling.luck_rolling_luck')],
     },
 ])

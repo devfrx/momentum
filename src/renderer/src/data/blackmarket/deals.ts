@@ -6,8 +6,23 @@
  */
 import type { BlackMarketDealDef } from './types'
 
+/**
+ * Black Market — Deal definitions
+ *
+ * Static deal templates used to procedurally generate rotating deals.
+ * Each deal has risk/reward, category gating, and consequences.
+ *
+ * Scaling model (v2 — percentage of wealth):
+ *   • `impactTier` + `costWeight` define cost as a % of player wealth.
+ *   • `roiRatio`   defines cash_grant rewards relative to scaled cost.
+ *   • cash_loss consequence `value` is now a fraction (0–1) of scaled cost.
+ *   • Multiplier effects (income_boost etc.) are untouched — they're ratios.
+ *   • `baseCost` is kept for early-game fallback / reference only.
+ */
+import type { BlackMarketDealDef } from './types'
+
 export const DEAL_DEFS: BlackMarketDealDef[] = [
-  // ─── Intel Deals (Tier 0+) ────────────────────────────────────
+  // ─── Intel Deals (Tier 0+) — minor impact ─────────────────────
 
   {
     id: 'leaked_earnings',
@@ -17,12 +32,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:file-eye',
     minTier: 0,
     baseCost: 200,
+    impactTier: 'minor',
+    costWeight: 0.2,
     baseRisk: 10,
     successEffects: [
       { type: 'stock_manipulation', value: 0.15, durationTicks: 1200, target: 'random_stock' },
     ],
     failConsequences: [
-      { probability: 0.8, type: 'cash_loss', value: 100, durationTicks: 0 },
+      { probability: 0.8, type: 'cash_loss', value: 0.5, durationTicks: 0 },
       { probability: 0.2, type: 'heat_spike', value: 5, durationTicks: 0 },
     ],
     xpReward: 5,
@@ -38,12 +55,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:ear-hearing',
     minTier: 0,
     baseCost: 350,
+    impactTier: 'minor',
+    costWeight: 0.35,
     baseRisk: 8,
     successEffects: [
       { type: 'income_boost', value: 1.15, durationTicks: 1800 },
     ],
     failConsequences: [
-      { probability: 1, type: 'cash_loss', value: 200, durationTicks: 0 },
+      { probability: 1, type: 'cash_loss', value: 0.6, durationTicks: 0 },
     ],
     xpReward: 3,
     repReward: 1,
@@ -58,12 +77,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:shield-key',
     minTier: 0,
     baseCost: 500,
+    impactTier: 'minor',
+    costWeight: 0.5,
     baseRisk: 22,
     successEffects: [
       { type: 'crypto_manipulation', value: 0.20, durationTicks: 900, target: 'random_crypto' },
     ],
     failConsequences: [
-      { probability: 0.6, type: 'cash_loss', value: 300, durationTicks: 0 },
+      { probability: 0.6, type: 'cash_loss', value: 0.6, durationTicks: 0 },
       { probability: 0.4, type: 'heat_spike', value: 8, durationTicks: 0 },
     ],
     xpReward: 8,
@@ -72,7 +93,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 8,
   },
 
-  // ─── Goods Deals (Tier 0+) ────────────────────────────────────
+  // ─── Intel (higher tier) ──────────────────────────────────────
 
   {
     id: 'blackmail_files',
@@ -82,13 +103,15 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:folder-lock',
     minTier: 0,
     baseCost: 1200,
+    impactTier: 'standard',
+    costWeight: 0.3,
     baseRisk: 40,
     successEffects: [
       { type: 'income_boost', value: 1.60, durationTicks: 3600 },
       { type: 'cost_reduction', value: 0.80, durationTicks: 3600 },
     ],
     failConsequences: [
-      { probability: 0.4, type: 'cash_loss', value: 1200, durationTicks: 0 },
+      { probability: 0.4, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 25, durationTicks: 0 },
       { probability: 0.3, type: 'investigation', value: 3, durationTicks: 0 },
     ],
@@ -98,6 +121,8 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 4,
   },
 
+  // ─── Goods Deals (Tier 0+) — minor impact ────────────────────
+
   {
     id: 'fallen_truck',
     nameKey: 'blackmarket.deal_fallen_truck',
@@ -106,12 +131,15 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:truck',
     minTier: 0,
     baseCost: 300,
+    impactTier: 'minor',
+    costWeight: 0.3,
+    roiRatio: 2.5,
     baseRisk: 18,
     successEffects: [
       { type: 'cash_grant', value: 800, durationTicks: 0 },
     ],
     failConsequences: [
-      { probability: 0.7, type: 'cash_loss', value: 300, durationTicks: 0 },
+      { probability: 0.7, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 10, durationTicks: 0 },
     ],
     xpReward: 5,
@@ -127,12 +155,15 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:chip',
     minTier: 0,
     baseCost: 600,
+    impactTier: 'minor',
+    costWeight: 0.6,
+    roiRatio: 2.5,
     baseRisk: 25,
     successEffects: [
       { type: 'cash_grant', value: 1500, durationTicks: 0 },
     ],
     failConsequences: [
-      { probability: 0.5, type: 'cash_loss', value: 600, durationTicks: 0 },
+      { probability: 0.5, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.5, type: 'heat_spike', value: 12, durationTicks: 0 },
     ],
     xpReward: 8,
@@ -148,12 +179,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:warehouse',
     minTier: 0,
     baseCost: 250,
+    impactTier: 'minor',
+    costWeight: 0.25,
     baseRisk: 5,
     successEffects: [
       { type: 'storage_insider', value: 1.5, durationTicks: 3600 },
     ],
     failConsequences: [
-      { probability: 1, type: 'cash_loss', value: 250, durationTicks: 0 },
+      { probability: 1, type: 'cash_loss', value: 1.0, durationTicks: 0 },
     ],
     xpReward: 3,
     repReward: 1,
@@ -161,21 +194,23 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 6,
   },
 
-  // ─── Finance Deals (Tier 1+) ──────────────────────────────────
-
-  {    id: 'weapons_cache',
+  {
+    id: 'weapons_cache',
     nameKey: 'blackmarket.deal_weapons_cache',
     descKey: 'blackmarket.deal_weapons_cache_desc',
     category: 'goods',
     icon: 'mdi:ammunition',
     minTier: 0,
     baseCost: 2000,
+    impactTier: 'standard',
+    costWeight: 0.5,
+    roiRatio: 4.0,
     baseRisk: 55,
     successEffects: [
       { type: 'cash_grant', value: 8000, durationTicks: 0 },
     ],
     failConsequences: [
-      { probability: 0.3, type: 'cash_loss', value: 2000, durationTicks: 0 },
+      { probability: 0.3, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 35, durationTicks: 0 },
       { probability: 0.4, type: 'investigation', value: 4, durationTicks: 0 },
     ],
@@ -185,20 +220,25 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 3,
   },
 
-  {    id: 'offshore_account',
+  // ─── Finance Deals (Tier 0+) — standard impact ───────────────
+
+  {
+    id: 'offshore_account',
     nameKey: 'blackmarket.deal_offshore_account',
     descKey: 'blackmarket.deal_offshore_account_desc',
     category: 'finance',
     icon: 'mdi:island',
     minTier: 0,
     baseCost: 2000,
+    impactTier: 'standard',
+    costWeight: 0.3,
     baseRisk: 20,
     successEffects: [
       { type: 'income_boost', value: 1.25, durationTicks: 3600 },
       { type: 'cost_reduction', value: 0.90, durationTicks: 3600 },
     ],
     failConsequences: [
-      { probability: 0.5, type: 'cash_loss', value: 2000, durationTicks: 0 },
+      { probability: 0.5, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.4, type: 'heat_spike', value: 15, durationTicks: 0 },
       { probability: 0.1, type: 'investigation', value: 3, durationTicks: 0 },
     ],
@@ -215,13 +255,16 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:washing-machine',
     minTier: 0,
     baseCost: 5000,
+    impactTier: 'standard',
+    costWeight: 0.6,
+    roiRatio: 1.6,
     baseRisk: 30,
     successEffects: [
       { type: 'cash_grant', value: 8000, durationTicks: 0 },
       { type: 'deposit_launder', value: 1.30, durationTicks: 1800 },
     ],
     failConsequences: [
-      { probability: 0.4, type: 'cash_loss', value: 5000, durationTicks: 0 },
+      { probability: 0.4, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 25, durationTicks: 0 },
       { probability: 0.3, type: 'investigation', value: 4, durationTicks: 0 },
     ],
@@ -238,12 +281,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:file-document-edit',
     minTier: 0,
     baseCost: 1500,
+    impactTier: 'standard',
+    costWeight: 0.25,
     baseRisk: 25,
     successEffects: [
       { type: 'loan_forgery', value: 0.70, durationTicks: 6000 },
     ],
     failConsequences: [
-      { probability: 0.5, type: 'cash_loss', value: 1500, durationTicks: 0 },
+      { probability: 0.5, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 20, durationTicks: 0 },
       { probability: 0.2, type: 'investigation', value: 3, durationTicks: 0 },
     ],
@@ -253,7 +298,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 5,
   },
 
-  // ─── Boost Deals (Tier 1+) ────────────────────────────────────
+  // ─── Boost Deals (Tier 1+) — standard impact ─────────────────
 
   {
     id: 'performance_enhancers',
@@ -263,6 +308,8 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:lightning-bolt',
     minTier: 1,
     baseCost: 3000,
+    impactTier: 'standard',
+    costWeight: 0.4,
     baseRisk: 18,
     successEffects: [
       { type: 'income_boost', value: 1.50, durationTicks: 1200 },
@@ -285,12 +332,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:cards-playing',
     minTier: 1,
     baseCost: 2500,
+    impactTier: 'standard',
+    costWeight: 0.35,
     baseRisk: 22,
     successEffects: [
       { type: 'gambling_edge', value: 1.40, durationTicks: 1800 },
     ],
     failConsequences: [
-      { probability: 0.5, type: 'cash_loss', value: 2500, durationTicks: 0 },
+      { probability: 0.5, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 15, durationTicks: 0 },
       { probability: 0.2, type: 'reputation_loss', value: 3, durationTicks: 0 },
     ],
@@ -307,12 +356,14 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:rocket-launch',
     minTier: 1,
     baseCost: 4000,
+    impactTier: 'standard',
+    costWeight: 0.5,
     baseRisk: 15,
     successEffects: [
       { type: 'business_boost', value: 2.0, durationTicks: 900 },
     ],
     failConsequences: [
-      { probability: 0.7, type: 'cash_loss', value: 2000, durationTicks: 0 },
+      { probability: 0.7, type: 'cash_loss', value: 0.5, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 8, durationTicks: 0 },
     ],
     xpReward: 12,
@@ -321,7 +372,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 6,
   },
 
-  // ─── Special Deals (Tier 2+) ──────────────────────────────────
+  // ─── Special Deals (Tier 2+) — major impact ──────────────────
 
   {
     id: 'hostile_takeover',
@@ -331,13 +382,16 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:chess-knight',
     minTier: 2,
     baseCost: 15000,
+    impactTier: 'major',
+    costWeight: 0.6,
+    roiRatio: 1.5,
     baseRisk: 35,
     successEffects: [
       { type: 'business_boost', value: 3.0, durationTicks: 1800 },
       { type: 'cash_grant', value: 10000, durationTicks: 0 },
     ],
     failConsequences: [
-      { probability: 0.4, type: 'cash_loss', value: 15000, durationTicks: 0 },
+      { probability: 0.4, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 30, durationTicks: 0 },
       { probability: 0.3, type: 'investigation', value: 5, durationTicks: 0 },
     ],
@@ -354,6 +408,8 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:chart-gantt',
     minTier: 2,
     baseCost: 10000,
+    impactTier: 'major',
+    costWeight: 0.4,
     baseRisk: 40,
     successEffects: [
       { type: 'stock_manipulation', value: 0.30, durationTicks: 1200, target: 'random_stock' },
@@ -377,12 +433,15 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:web',
     minTier: 2,
     baseCost: 8000,
+    impactTier: 'major',
+    costWeight: 0.35,
+    roiRatio: 3.0,
     baseRisk: 28,
     successEffects: [
       { type: 'cash_grant', value: 25000, durationTicks: 0 },
     ],
     failConsequences: [
-      { probability: 0.5, type: 'cash_loss', value: 8000, durationTicks: 0 },
+      { probability: 0.5, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 20, durationTicks: 0 },
       { probability: 0.2, type: 'investigation', value: 4, durationTicks: 0 },
     ],
@@ -392,7 +451,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     weight: 4,
   },
 
-  // ─── Legendary Deals (Tier 3+) ────────────────────────────────
+  // ─── Legendary Deals (Tier 3+) — legendary impact ─────────────
 
   {
     id: 'golden_heist',
@@ -402,13 +461,16 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:gold',
     minTier: 3,
     baseCost: 50000,
+    impactTier: 'legendary',
+    costWeight: 0.3,
+    roiRatio: 4.0,
     baseRisk: 45,
     successEffects: [
       { type: 'cash_grant', value: 200000, durationTicks: 0 },
       { type: 'reputation_boost', value: 10, durationTicks: 0 },
     ],
     failConsequences: [
-      { probability: 0.4, type: 'cash_loss', value: 50000, durationTicks: 0 },
+      { probability: 0.4, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'heat_spike', value: 40, durationTicks: 0 },
       { probability: 0.3, type: 'investigation', value: 5, durationTicks: 0 },
     ],
@@ -425,6 +487,8 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:city-variant',
     minTier: 4,
     baseCost: 100000,
+    impactTier: 'legendary',
+    costWeight: 0.7,
     baseRisk: 50,
     successEffects: [
       { type: 'income_boost', value: 3.0, durationTicks: 3600 },
@@ -432,7 +496,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
       { type: 'cost_reduction', value: 0.70, durationTicks: 3600 },
     ],
     failConsequences: [
-      { probability: 0.3, type: 'cash_loss', value: 100000, durationTicks: 0 },
+      { probability: 0.3, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'income_penalty', value: 0.50, durationTicks: 3600 },
       { probability: 0.2, type: 'heat_spike', value: 50, durationTicks: 0 },
       { probability: 0.2, type: 'investigation', value: 5, durationTicks: 0 },
@@ -450,6 +514,8 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     icon: 'mdi:ghost',
     minTier: 4,
     baseCost: 75000,
+    impactTier: 'legendary',
+    costWeight: 0.5,
     baseRisk: 35,
     successEffects: [
       { type: 'heat_reduction', value: -80, durationTicks: 0 },
@@ -458,7 +524,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     ],
     failConsequences: [
       { probability: 0.4, type: 'heat_spike', value: 30, durationTicks: 0 },
-      { probability: 0.3, type: 'cash_loss', value: 75000, durationTicks: 0 },
+      { probability: 0.3, type: 'cash_loss', value: 1.0, durationTicks: 0 },
       { probability: 0.3, type: 'investigation', value: 5, durationTicks: 0 },
     ],
     xpReward: 150,

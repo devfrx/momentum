@@ -23,6 +23,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { D, mul } from '@renderer/core/BigNum'
 import { PlinkoEngine, type PlinkoRisk } from '@renderer/core/PlinkoEngine'
+import { THEME, RISK_COLORS } from '@renderer/assets/theme/colors'
 
 const emit = defineEmits<{ back: [] }>()
 
@@ -52,9 +53,9 @@ const rowOptions = PlinkoEngine.getRowOptions()
 const riskOptions = PlinkoEngine.getRiskOptions()
 
 const riskMeta: Record<PlinkoRisk, { label: string; color: string; icon: string }> = {
-    low: { label: t('gambling.pk_low'), color: '#36b37e', icon: 'mdi:shield-check' },
-    medium: { label: t('gambling.pk_medium'), color: '#f59e0b', icon: 'mdi:shield-alert' },
-    high: { label: t('gambling.pk_high'), color: '#ef4444', icon: 'mdi:shield-off' },
+    low: { label: t('gambling.pk_low'), color: RISK_COLORS.low, icon: 'mdi:shield-check' },
+    medium: { label: t('gambling.pk_medium'), color: RISK_COLORS.medium, icon: 'mdi:shield-alert' },
+    high: { label: t('gambling.pk_high'), color: RISK_COLORS.high, icon: 'mdi:shield-off' },
 }
 
 // ─── Bet state ──────────────────────────────────────────────
@@ -146,7 +147,7 @@ function onBallLanded(bucketIndex: number, multiplier: number, _ballId: number):
         multiplier,
         payout: formatCash(isWin ? payoutAmount : payoutAmount),
         won: isWin,
-        color: previewBuckets.value[bucketIndex]?.color ?? '#64748b',
+        color: previewBuckets.value[bucketIndex]?.color ?? THEME.info,
     }
     lastResults.value.unshift(result)
     if (lastResults.value.length > 20) lastResults.value.pop()
@@ -312,7 +313,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                             {{ pct }}%
                         </button>
                         <button class="preset-btn preset-max" @click="maxBet" :disabled="autoDrop">{{ $t('gambling.max')
-                        }}</button>
+                            }}</button>
                     </div>
                 </div>
 
@@ -426,7 +427,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 
 .title-icon {
     font-size: 1.5rem;
-    color: #f59e0b;
+    color: var(--t-warning);
 }
 
 .balance-chip {
@@ -488,13 +489,13 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .flash-win {
-    background: rgba(34, 197, 94, 0.2);
+    background: color-mix(in srgb, var(--t-success) 20%, transparent);
     border: 2px solid var(--t-success);
 }
 
 .flash-lose {
-    background: rgba(239, 68, 68, 0.2);
-    border: 2px solid var(--t-danger, #e74c3c);
+    background: color-mix(in srgb, var(--t-danger) 20%, transparent);
+    border: 2px solid var(--t-danger);
 }
 
 .flash-mult {
@@ -508,7 +509,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .flash-lose .flash-mult {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 .flash-label {
@@ -668,9 +669,9 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .speed-btn.active {
-    border-color: #f59e0b;
-    color: #f59e0b;
-    background: color-mix(in srgb, #f59e0b 10%, transparent);
+    border-color: var(--t-warning);
+    color: var(--t-warning);
+    background: color-mix(in srgb, var(--t-warning) 10%, transparent);
 }
 
 .speed-icon {
@@ -779,7 +780,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     font-family: var(--font-mono, monospace);
     font-weight: 800;
     font-size: 1.1rem;
-    color: #f59e0b;
+    color: var(--t-warning);
 }
 
 /* ── Action buttons ── */
@@ -795,8 +796,8 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     justify-content: center;
     gap: var(--t-space-2);
     padding: var(--t-space-3) var(--t-space-4);
-    background: #f59e0b;
-    color: #1a1a1a;
+    background: var(--t-warning);
+    color: var(--t-text-inverse);
     border: none;
     border-radius: var(--t-radius-md);
     font-size: 1rem;
@@ -837,9 +838,9 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .auto-btn.active {
-    background: var(--t-danger, #e74c3c);
-    color: #fff;
-    border-color: var(--t-danger, #e74c3c);
+    background: var(--t-danger);
+    color: var(--t-text);
+    border-color: var(--t-danger);
 }
 
 .spin-icon {
@@ -949,7 +950,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .danger {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 /* ── Transitions ── */

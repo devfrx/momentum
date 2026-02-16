@@ -337,12 +337,12 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     pointer-events: auto;
 
     /* Light translucent tint — NO blur, map shows through clearly */
-    background: color-mix(in srgb, var(--d-color) 8%, rgba(12, 14, 18, 0.62));
+    background: color-mix(in srgb, var(--d-color) 8%, color-mix(in srgb, var(--t-bg-base) 62%, transparent));
     border: 1px solid color-mix(in srgb, var(--d-color) 18%, var(--t-border));
 }
 
 .district-cell:hover:not(.locked) {
-    background: color-mix(in srgb, var(--d-color) 14%, rgba(12, 14, 18, 0.72));
+    background: color-mix(in srgb, var(--d-color) 14%, color-mix(in srgb, var(--t-bg-base) 72%, transparent));
     border-color: color-mix(in srgb, var(--d-color) 40%, var(--t-border));
     box-shadow: 0 0 20px color-mix(in srgb, var(--d-color) 12%, transparent);
     transform: scale(1.01);
@@ -350,13 +350,13 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 
 .district-cell.selected {
     border-color: var(--d-color);
-    background: color-mix(in srgb, var(--d-color) 12%, rgba(12, 14, 18, 0.72));
+    background: color-mix(in srgb, var(--d-color) 12%, color-mix(in srgb, var(--t-bg-base) 72%, transparent));
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--d-color) 25%, transparent),
         0 0 30px color-mix(in srgb, var(--d-color) 15%, transparent);
 }
 
 .district-cell.locked {
-    background: rgba(12, 14, 18, 0.55);
+    background: color-mix(in srgb, var(--t-bg-base) 55%, transparent);
     border-color: var(--t-border);
     cursor: default;
     opacity: 0.45;
@@ -370,7 +370,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    background: rgb(0, 0, 0);
+    background: var(--t-bg-base);
     color: var(--t-text-muted);
 }
 
@@ -394,7 +394,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 3px var(--t-overlay);
 }
 
 .cell-tier {
@@ -447,7 +447,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     font-weight: 700;
     color: var(--d-color);
     opacity: 0.8;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 3px var(--t-overlay);
 }
 
 /* ── Dots (scanned opps + owned props) ── */

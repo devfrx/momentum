@@ -8,6 +8,7 @@
  * - Heat system for consequences and law enforcement
  */
 import type Decimal from 'break_infinity.js'
+import type { ImpactTier } from './scaling'
 
 // ─── Reputation ─────────────────────────────────────────────────
 
@@ -58,7 +59,12 @@ export type DealEffectType =
 
 export interface DealEffect {
   type: DealEffectType
-  /** Numeric value (multiplier, amount, percentage) */
+  /**
+   * Numeric value.
+   * • For multiplier effects: the ratio (e.g. 1.5 = +50%).
+   * • For cash_grant: ignored at runtime — computed from roiRatio.
+   * • For cash_loss consequences: fraction of scaled cost (0–1).
+   */
   value: number
   /** Duration in ticks (0 = instant) */
   durationTicks: number
@@ -88,8 +94,23 @@ export interface BlackMarketDealDef {
   icon: string
   /** Minimum reputation tier required */
   minTier: ReputationTier
-  /** Base cost in cash */
+  /** Base cost in cash (used only as early-game reference / fallback) */
   baseCost: number
+  /**
+   * Economic impact tier — determines cost as a % of player wealth.
+   * minor (0.01–0.05%), standard (0.1–0.5%), major (0.5–2%), legendary (2–8%)
+   */
+  impactTier: ImpactTier
+  /**
+   * Position within the tier's percentage band (0–1).
+   * 0 → cheapest of the tier, 1 → most expensive.
+   */
+  costWeight: number
+  /**
+   * ROI ratio for cash_grant effects: reward = scaledCost × roiRatio.
+   * Undefined when the deal has no cash_grant effect.
+   */
+  roiRatio?: number
   /** Base risk percentage (0–100). Reduced by tier bonuses. */
   baseRisk: number
   /** Effects when the deal succeeds */
@@ -147,8 +168,23 @@ export interface ContactAbility {
   descKey: string
   /** Icon */
   icon: string
-  /** Cost per use */
+  /** Base cost per use (early-game reference / fallback) */
   cost: number
+  /**
+   * Economic impact tier for cost scaling.
+   * Defaults to 'minor' if omitted (cost = 0 abilities ignore this).
+   */
+  impactTier?: ImpactTier
+  /**
+   * Position within the impact tier's percentage band (0–1).
+   * Defaults to 0.5 if omitted.
+   */
+  costWeight?: number
+  /**
+   * ROI ratio for abilities that grant cash (e.g. smuggler_contraband).
+   * reward = scaledCost × roiRatio.
+   */
+  roiRatio?: number
   /** Cooldown in ticks between uses */
   cooldownTicks: number
   /** Minimum loyalty level (0–100) required */

@@ -9,6 +9,7 @@ import {
     getActiveSynergies,
 } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { THEME } from '@renderer/assets/theme/colors'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 
@@ -56,9 +57,9 @@ function handleScan(): void {
 
 const tierColors: Record<string, string> = {
     starter: 'var(--t-success)',
-    mid: '#64748b',
+    mid: THEME.info,
     premium: 'var(--t-warning)',
-    elite: '#a855f7',
+    elite: THEME.purple,
 }
 </script>
 

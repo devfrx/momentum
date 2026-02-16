@@ -29,6 +29,7 @@ import {
 } from '@renderer/data/storage/locations'
 import { generateLocationPool } from '@renderer/data/storage/locationGen'
 import { applySellTax } from '@renderer/data/storage/items'
+import { CONDITION_MULTIPLIERS } from '@renderer/data/shop/restoration'
 import {
   SELL_TAX,
   INVENTORY_SOFT_CAP,
@@ -541,10 +542,12 @@ export const useStorageStore = defineStore('storage', () => {
     totalSpentOnAppraisals.value = add(totalSpentOnAppraisals.value, appraiser.costPerItem)
     session.value.appraisalSpend = add(session.value.appraisalSpend, appraiser.costPerItem)
 
-    // Calculate appraised value based on accuracy
+    // Calculate appraised value based on accuracy + condition
     const accuracyVariance = 1.0 - appraiser.accuracy
     const varianceFactor = 1.0 + (Math.random() * 2 - 1) * accuracyVariance
-    let appraisedVal = item.baseValue.mul(varianceFactor)
+    // Condition multiplier — baseValue is the "good" condition value, appraisal reveals true worth
+    const conditionMult = CONDITION_MULTIPLIERS[item.condition ?? 'good'] ?? 1.0
+    let appraisedVal = item.baseValue.mul(varianceFactor).mul(conditionMult)
 
     // Bonus discovery chance
     if (Math.random() < appraiser.bonusDiscoveryChance) {
@@ -706,6 +709,7 @@ export const useStorageStore = defineStore('storage', () => {
         appraised: i.appraised,
         appraisedValue: i.appraisedValue,
         weight: i.weight,
+        condition: i.condition,
         auctionId: i.auctionId,
         acquiredAtTick: i.acquiredAtTick,
       })),

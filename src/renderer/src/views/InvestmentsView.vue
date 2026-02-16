@@ -665,8 +665,8 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .opp-card__hot {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    font-size: 0.65rem;
+    gap: var(--t-space-1);
+    font-size: var(--t-font-size-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -686,12 +686,12 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .opp-card__stage {
     flex-shrink: 0;
-    font-size: 0.65rem;
+    font-size: var(--t-font-size-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 2px 8px;
-    border-radius: 4px;
+    padding: var(--t-space-1) var(--t-space-2);
+    border-radius: var(--t-radius-sm);
     background: var(--t-bg-muted);
     color: var(--t-text-secondary);
 }
@@ -878,7 +878,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .research-phase-dot--done {
     background: var(--t-success);
     border-color: var(--t-success);
-    color: #fff;
+    color: var(--t-text);
 }
 
 .research-phase-dot--current {

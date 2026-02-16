@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Chart, registerables } from 'chart.js'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import { smartDecimals } from '@renderer/composables/useFormat'
+import { THEME } from '@renderer/assets/theme/colors'
 
 Chart.register(...registerables, zoomPlugin)
 
@@ -93,11 +94,11 @@ const highPrice = computed(() => Math.max(...visibleData.value))
 const lowPrice = computed(() => Math.min(...visibleData.value))
 
 const colorMap: Record<string, { line: string; fill: string; buy: string }> = {
-    gold: { line: '#f59e0b', fill: 'rgba(245, 158, 11, 0.08)', buy: '#71717a' },
-    emerald: { line: '#10b981', fill: 'rgba(16, 185, 129, 0.08)', buy: '#71717a' },
-    sky: { line: '#64748b', fill: 'rgba(100, 116, 139, 0.08)', buy: '#f59e0b' },
-    purple: { line: '#a855f7', fill: 'rgba(168, 85, 247, 0.08)', buy: '#71717a' },
-    red: { line: '#ef4444', fill: 'rgba(239, 68, 68, 0.08)', buy: '#71717a' }
+    gold: { line: THEME.warning, fill: 'rgba(245, 158, 11, 0.08)', buy: THEME.info },
+    emerald: { line: THEME.success, fill: 'rgba(16, 185, 129, 0.08)', buy: THEME.info },
+    sky: { line: THEME.info, fill: 'rgba(100, 116, 139, 0.08)', buy: THEME.warning },
+    purple: { line: THEME.purple, fill: 'rgba(168, 85, 247, 0.08)', buy: THEME.info },
+    red: { line: THEME.danger, fill: 'rgba(239, 68, 68, 0.08)', buy: THEME.info }
 }
 
 function getColors() {
@@ -177,7 +178,7 @@ function createChart() {
         pointRadius: 0,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: colors.line,
-        pointHoverBorderColor: '#1e293b',
+        pointHoverBorderColor: THEME.rouletteBlack,
         pointHoverBorderWidth: 2
     }]
 
@@ -210,7 +211,7 @@ function createChart() {
                     position: 'top',
                     align: 'end',
                     labels: {
-                        color: '#64748b',
+                        color: THEME.info,
                         font: { size: 10, family: 'Inter, sans-serif' },
                         boxWidth: 10,
                         padding: 8,
@@ -221,8 +222,8 @@ function createChart() {
                 tooltip: {
                     enabled: true,
                     backgroundColor: 'rgba(15, 23, 42, 0.96)',
-                    titleColor: '#e2e8f0',
-                    bodyColor: '#94a3b8',
+                    titleColor: THEME.text,
+                    bodyColor: THEME.textSecondary,
                     borderColor: 'rgba(51, 65, 85, 0.6)',
                     borderWidth: 1,
                     padding: { x: 12, y: 8 } as any,
@@ -271,7 +272,7 @@ function createChart() {
                         lineWidth: 0.5
                     },
                     ticks: {
-                        color: '#475569',
+                        color: THEME.infoHover,
                         font: { size: 9, family: '"JetBrains Mono", monospace' },
                         maxTicksLimit: 10,
                         maxRotation: 0
@@ -288,7 +289,7 @@ function createChart() {
                         lineWidth: 0.5
                     },
                     ticks: {
-                        color: '#475569',
+                        color: THEME.infoHover,
                         font: { size: 9, family: '"JetBrains Mono", monospace' },
                         callback: (value) => {
                             const n = Number(value)

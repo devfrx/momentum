@@ -16,15 +16,17 @@ const props = defineProps<{
 
 defineEmits<{ accept: [dealId: string] }>()
 
-const { formatCash } = useFormat()
+const { formatCash, formatNumber } = useFormat()
 const { t } = useI18n()
 
+import { RISK_COLORS } from '@renderer/assets/theme/colors'
+
 function riskColor(risk: number): string {
-    if (risk <= 20) return '#22c55e'
-    if (risk <= 40) return '#f5a524'
-    if (risk <= 60) return '#f97316'
-    if (risk <= 80) return '#ef4444'
-    return '#dc2626'
+    if (risk <= 20) return RISK_COLORS.low
+    if (risk <= 40) return RISK_COLORS.medium
+    if (risk <= 60) return RISK_COLORS.high
+    if (risk <= 80) return RISK_COLORS.extreme
+    return RISK_COLORS.critical
 }
 
 function riskLabel(risk: number): string {
@@ -79,8 +81,8 @@ function categoryIcon(category: string): string {
             <div v-for="(eff, i) in deal.effects" :key="i" class="deal-card__effect">
                 <AppIcon icon="mdi:arrow-up-bold" class="deal-card__effect-icon" />
                 <span>{{ t(`blackmarket.effect_${eff.type}`, {
-                    value: eff.value, duration: Math.round(eff.durationTicks
-                        / 10)
+                    value: eff.type === 'cash_grant' ? formatNumber(eff.value) : eff.value,
+                    duration: Math.round(eff.durationTicks / 10)
                 }) }}</span>
             </div>
         </div>

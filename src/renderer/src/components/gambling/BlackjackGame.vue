@@ -596,10 +596,10 @@ const bjInfo = computed<InfoSection[]>(() => [
     align-items: center;
     gap: var(--t-space-4);
     padding: var(--t-space-5) var(--t-space-4);
-    background: radial-gradient(ellipse at center, #1a5c3a 0%, #0e3a24 70%, #091f15 100%);
-    border: 3px solid #2a7a4a;
+    background: radial-gradient(ellipse at center, var(--t-gamble-felt-light) 0%, var(--t-gamble-felt) 70%, var(--t-gamble-felt) 100%);
+    border: 3px solid var(--t-gamble-felt-border);
     border-radius: var(--t-radius-xl, 16px);
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 0 40px var(--t-overlay-light), 0 4px 20px var(--t-overlay-light);
     min-height: 320px;
     position: relative;
 }
@@ -619,21 +619,21 @@ const bjInfo = computed<InfoSection[]>(() => [
 }
 
 .outcome-win {
-    background: rgba(46, 204, 113, 0.2);
-    border: 2px solid #2ecc71;
-    color: #2ecc71;
+    background: var(--t-success-muted);
+    border: 2px solid var(--t-gamble-win);
+    color: var(--t-gamble-win);
 }
 
 .outcome-lose {
-    background: rgba(231, 76, 60, 0.2);
-    border: 2px solid #e74c3c;
-    color: #e74c3c;
+    background: var(--t-danger-muted);
+    border: 2px solid var(--t-gamble-lose);
+    color: var(--t-gamble-lose);
 }
 
 .outcome-push {
-    background: rgba(241, 196, 15, 0.2);
-    border: 2px solid #f1c40f;
-    color: #f1c40f;
+    background: var(--t-gold-muted);
+    border: 2px solid var(--t-gamble-push);
+    color: var(--t-gamble-push);
 }
 
 .outcome-amount {
@@ -665,7 +665,7 @@ const bjInfo = computed<InfoSection[]>(() => [
 .divider-line {
     flex: 1;
     height: 1px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--t-overlay-light);
 }
 
 .bet-tag {
@@ -674,8 +674,8 @@ const bjInfo = computed<InfoSection[]>(() => [
     gap: 4px;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #f1c40f;
-    background: rgba(0, 0, 0, 0.3);
+    color: var(--t-gold);
+    background: var(--t-overlay-light);
     padding: 4px 12px;
     border-radius: var(--t-radius-xl);
     font-family: var(--font-mono, monospace);
@@ -699,7 +699,7 @@ const bjInfo = computed<InfoSection[]>(() => [
     font-weight: 800;
     cursor: pointer;
     transition: all var(--t-transition-fast);
-    color: #fff;
+    color: var(--t-text);
 }
 
 .action-btn:disabled {
@@ -713,15 +713,15 @@ const bjInfo = computed<InfoSection[]>(() => [
 }
 
 .hit-btn {
-    background: #2ecc71;
+    background: var(--t-success);
 }
 
 .stand-btn {
-    background: #e67e22;
+    background: var(--t-orange);
 }
 
 .double-btn {
-    background: #3498db;
+    background: var(--t-blue);
 }
 
 .dealer-thinking {
@@ -861,7 +861,7 @@ const bjInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-2);
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-accent);
-    color: #fff;
+    color: var(--t-text);
     border: none;
     border-radius: var(--t-radius-md);
     font-size: 1rem;
@@ -917,7 +917,7 @@ const bjInfo = computed<InfoSection[]>(() => [
 }
 
 .danger {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 /* ── Transitions ── */
@@ -953,34 +953,34 @@ const bjInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-2) var(--t-space-4);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    box-shadow: 0 0 24px rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg, var(--t-success-muted), transparent);
+    border: 1px solid var(--t-success);
+    box-shadow: 0 0 24px var(--t-success-muted);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
 .lucky-icon {
     font-size: 1.5rem;
-    color: #22c55e;
+    color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    filter: drop-shadow(0 0 6px var(--t-success-muted));
 }
 
 .lucky-text {
     font-size: 1rem;
     font-weight: 800;
-    color: #22c55e;
+    color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    text-shadow: 0 0 8px var(--t-success-muted);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 16px var(--t-success-muted);
     }
 
     to {
-        box-shadow: 0 0 32px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 0 32px var(--t-success-muted);
     }
 }
 
@@ -1048,7 +1048,7 @@ const bjInfo = computed<InfoSection[]>(() => [
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #e74c3c;
+    color: var(--t-danger);
 }
 
 .discarded-card-wrapper {
@@ -1062,7 +1062,7 @@ const bjInfo = computed<InfoSection[]>(() => [
     top: -6px;
     right: -6px;
     font-size: 1.2rem;
-    color: #e74c3c;
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+    color: var(--t-danger);
+    filter: drop-shadow(0 0 2px var(--t-overlay));
 }
 </style>

@@ -126,9 +126,9 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
 
 <style scoped>
 .wheel-container {
-    --roulette-red: #c0392b;
-    --roulette-black: #1a1a2e;
-    --roulette-green: #27ae60;
+    --roulette-red: var(--t-gamble-roulette-red);
+    --roulette-black: var(--t-gamble-roulette-black);
+    --roulette-green: var(--t-gamble-roulette-green);
 
     position: relative;
     width: 100%;
@@ -162,7 +162,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
     border-right: 10px solid transparent;
     border-top: 20px solid var(--t-accent);
     z-index: 5;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 2px 4px var(--t-overlay-light));
 }
 
 .result-chip {
@@ -178,9 +178,9 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
     justify-content: center;
     font-size: 1.2rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--t-text);
     border: 3px solid var(--t-bg-card);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 2px 12px var(--t-overlay-light);
     z-index: 6;
 }
 

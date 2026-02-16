@@ -170,10 +170,13 @@ export type {
 export {
   findLocationInPool,
   getUnlockedLocations,
-  ITEM_POOL,
   generateUnitContents,
+  generateItem,
   calculateTotalItemsValue,
   applySellTax,
+  resolveItemName,
+  resolveItemDescription,
+  decodeItemParts,
   APPRAISER_DEFS,
   getAppraiser,
   AUCTION_CONFIG,
@@ -191,6 +194,8 @@ export type {
   LocationTier,
   StorageItem,
   ItemCategory,
+  ItemCondition,
+  GeneratedItemParts,
   AppraiserDef,
   AppraiserTier,
   StorageAuction,
@@ -201,7 +206,6 @@ export type {
 
 // ─── Online Shop ────────────────────────────────────────────────
 export {
-  SHOP_ITEM_POOL,
   UNIQUE_ITEM_POOL,
   generateShopItem,
   generateShopBatch,

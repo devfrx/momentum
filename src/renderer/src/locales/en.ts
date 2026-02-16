@@ -2,7 +2,12 @@
  * English locale — default / fallback
  * Organized by feature domain for maintainability.
  */
+import itemsEn from './items-en'
+
 export default {
+  // ─── Procedural Item Names / Descriptions ─────────────────────
+  items: itemsEn,
+
   // ─── Common / Shared ──────────────────────────────────────────
   common: {
     buy: 'Buy',
@@ -2100,6 +2105,7 @@ export default {
     inventory: 'Inventory',
     est_value: 'Est. Value',
     not_appraised: 'Not appraised',
+    condition_unknown: 'Condition unknown',
     appraise: 'Appraise',
     sell_item: 'Sell',
     appraise_all: 'Appraise All ({n})',
@@ -2446,6 +2452,13 @@ export default {
     interactions: '{count} interactions',
     daily_uses: '{count} daily uses',
     use: 'Use',
+    block_cooldown: 'Recharging…',
+    block_loyalty: 'Requires {needed} loyalty (you have {current})',
+    block_tier: 'Requires reputation tier {tier}',
+    block_no_items: 'No items in inventory',
+    block_daily_limit: 'Daily limit reached ({limit}/{limit})',
+    block_no_stocks: 'No stocks owned',
+    block_no_crypto: 'No crypto owned',
 
     // Investigation
     time_remaining: 'Time Left',
@@ -2598,6 +2611,10 @@ export default {
     ability_fence_sell_desc: 'Sell items at above-market rates through underground channels.',
     ability_fence_bulk: 'Bulk Deal',
     ability_fence_bulk_desc: 'Liquidate all storage items at a premium in one transaction.',
+    ability_fence_forge: 'Forge Provenance',
+    ability_fence_forge_desc: 'Forge provenance documents to permanently boost an item\'s value. Adds heat.',
+    ability_fence_network: 'Underground Network',
+    ability_fence_network_desc: 'Activate underground buyer network: all sell prices boosted for 5 minutes.',
     ability_contraband: 'Contraband Run',
     ability_contraband_desc: 'Receive high-value contraband goods converted to cash.',
     ability_supply_run: 'Supply Run',
@@ -2657,6 +2674,11 @@ export default {
     log_fence_bulk_detail: 'Total earned: {total}',
     log_fence_no_items: 'No items in storage inventory to sell',
     log_fence_daily_limit: 'Fence daily sell limit reached',
+    log_fence_forged: 'Forged provenance for "{item}" — +{boost}% value',
+    log_fence_forged_detail: 'Value: {oldValue} → {newValue} (cost: {cost})',
+    log_fence_forge_no_cash: 'Not enough cash for forgery (need {cost})',
+    log_fence_network: 'Underground network activated: +{boost}% sell prices for {duration}s',
+    log_fence_network_detail: 'All sell channels boosted',
 
     // Log entries — Smuggler
     log_contraband: 'Contraband run: earned {value}',

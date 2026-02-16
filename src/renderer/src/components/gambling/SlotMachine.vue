@@ -7,6 +7,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { D, ZERO, mul } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
+import { THEME } from '@renderer/assets/theme/colors'
 
 const emit = defineEmits<{ back: [] }>()
 
@@ -24,13 +25,13 @@ interface SlotSymbol {
 }
 
 const SYMBOLS: SlotSymbol[] = [
-    { id: 'cherry', icon: 'mdi:fruit-cherries', label: 'Cherry', color: '#e74c3c', weight: 25 },
-    { id: 'lemon', icon: 'mdi:fruit-citrus', label: 'Lemon', color: '#f1c40f', weight: 22 },
-    { id: 'orange', icon: 'mdi:food-apple', label: 'Orange', color: '#e67e22', weight: 20 },
-    { id: 'grape', icon: 'mdi:fruit-grapes', label: 'Grape', color: '#9b59b6', weight: 17 },
-    { id: 'bell', icon: 'mdi:bell', label: 'Bell', color: '#f39c12', weight: 10 },
-    { id: 'bar', icon: 'mdi:view-dashboard', label: 'BAR', color: '#3498db', weight: 4 },
-    { id: 'seven', icon: 'mdi:numeric-7-box', label: '7', color: '#e74c3c', weight: 2 },
+    { id: 'cherry', icon: 'mdi:fruit-cherries', label: 'Cherry', color: THEME.danger, weight: 25 },
+    { id: 'lemon', icon: 'mdi:fruit-citrus', label: 'Lemon', color: THEME.gold, weight: 22 },
+    { id: 'orange', icon: 'mdi:food-apple', label: 'Orange', color: THEME.orange, weight: 20 },
+    { id: 'grape', icon: 'mdi:fruit-grapes', label: 'Grape', color: THEME.purple, weight: 17 },
+    { id: 'bell', icon: 'mdi:bell', label: 'Bell', color: THEME.warning, weight: 10 },
+    { id: 'bar', icon: 'mdi:view-dashboard', label: 'BAR', color: THEME.blue, weight: 4 },
+    { id: 'seven', icon: 'mdi:numeric-7-box', label: '7', color: THEME.danger, weight: 2 },
 ]
 
 const TOTAL_WEIGHT = SYMBOLS.reduce((s, sym) => s + sym.weight, 0)
@@ -510,7 +511,7 @@ watch(() => player.cash, (cash) => {
                         <span class="win-desc">{{ winResult.description }}</span>
                         <span class="win-amount">{{ formatCash(winResult.payout) }}</span>
                         <span class="win-multi">x{{ winResult.multiplier }} {{ $t('gambling.sl_multiplier_suffix')
-                            }}</span>
+                        }}</span>
                     </div>
                 </div>
                 <div v-else class="lose-banner">
@@ -546,7 +547,7 @@ watch(() => player.cash, (cash) => {
                         {{ pct }}%
                     </button>
                     <button class="preset-btn preset-max" @click="maxBet" :disabled="spinning">{{ $t('gambling.max')
-                        }}</button>
+                    }}</button>
                 </div>
             </div>
 
@@ -799,7 +800,7 @@ watch(() => player.cash, (cash) => {
     align-items: center;
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-success-muted, rgba(46, 204, 113, 0.1));
+    background: var(--t-success-muted);
     border: 1px solid var(--t-success);
     border-radius: var(--t-radius-lg);
     animation: bannerPop 0.3s ease;
@@ -996,7 +997,7 @@ watch(() => player.cash, (cash) => {
 }
 
 .auto-btn.active {
-    background: var(--t-accent-muted, rgba(52, 152, 219, 0.1));
+    background: var(--t-accent-muted);
     color: var(--t-accent);
 }
 
@@ -1037,7 +1038,7 @@ watch(() => player.cash, (cash) => {
 }
 
 .danger {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 /* ── Transitions ── */
@@ -1079,34 +1080,34 @@ watch(() => player.cash, (cash) => {
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    box-shadow: 0 0 24px rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--t-success) 15%, transparent), color-mix(in srgb, var(--t-success) 5%, transparent));
+    border: 1px solid color-mix(in srgb, var(--t-success) 40%, transparent);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--t-success) 25%, transparent);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
 .lucky-icon {
     font-size: 2rem;
-    color: #22c55e;
+    color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t-success) 50%, transparent));
 }
 
 .lucky-text {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #22c55e;
+    color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--t-success) 30%, transparent);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--t-success) 20%, transparent);
     }
 
     to {
-        box-shadow: 0 0 32px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 0 32px color-mix(in srgb, var(--t-success) 40%, transparent);
     }
 }
 

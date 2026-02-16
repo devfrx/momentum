@@ -278,7 +278,7 @@ const diceInfo = computed<InfoSection[]>(() => [
                 <span class="payout-value">{{ multiplier }}×</span>
                 <span class="payout-sub">{{ $t('gambling.dc_win_chance', { pct: winChance }) }}</span>
                 <span class="payout-sub">{{ $t('gambling.dc_potential', { amount: formatCash(potentialPayout) })
-                }}</span>
+                    }}</span>
             </div>
 
             <button class="dir-btn dir-over" :class="{ active: direction === 'over' }" :disabled="rolling"
@@ -332,7 +332,7 @@ const diceInfo = computed<InfoSection[]>(() => [
                         {{ pct }}%
                     </button>
                     <button class="preset-btn preset-max" @click="maxBet" :disabled="rolling">{{ $t('gambling.max')
-                    }}</button>
+                        }}</button>
                 </div>
             </div>
 
@@ -467,13 +467,13 @@ const diceInfo = computed<InfoSection[]>(() => [
 }
 
 .sum-badge.won {
-    background: rgba(46, 204, 113, 0.15);
-    border-color: #2ecc71;
+    background: var(--t-success-muted);
+    border-color: var(--t-success);
 }
 
 .sum-badge.lost {
-    background: rgba(231, 76, 60, 0.15);
-    border-color: #e74c3c;
+    background: var(--t-danger-muted);
+    border-color: var(--t-danger);
 }
 
 .sum-value {
@@ -483,11 +483,11 @@ const diceInfo = computed<InfoSection[]>(() => [
 }
 
 .sum-badge.won .sum-value {
-    color: #2ecc71;
+    color: var(--t-success);
 }
 
 .sum-badge.lost .sum-value {
-    color: #e74c3c;
+    color: var(--t-danger);
 }
 
 .sum-label {
@@ -592,15 +592,15 @@ const diceInfo = computed<InfoSection[]>(() => [
 }
 
 .dir-btn.active.dir-under {
-    border-color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
+    border-color: var(--t-danger);
+    background: var(--t-danger-muted);
+    color: var(--t-danger);
 }
 
 .dir-btn.active.dir-over {
-    border-color: #2ecc71;
-    background: rgba(46, 204, 113, 0.1);
-    color: #2ecc71;
+    border-color: var(--t-success);
+    background: var(--t-success-muted);
+    color: var(--t-success);
 }
 
 .dir-label {
@@ -828,7 +828,7 @@ const diceInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-2);
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-accent);
-    color: #fff;
+    color: var(--t-text);
     border: none;
     border-radius: var(--t-radius-md);
     font-size: 1rem;
@@ -918,7 +918,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 }
 
 .danger {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 /* ── Transitions ── */
@@ -947,34 +947,34 @@ const diceInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    box-shadow: 0 0 24px rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg, var(--t-success-muted), color-mix(in srgb, var(--t-success) 5%, transparent));
+    border: 1px solid var(--t-success);
+    box-shadow: 0 0 24px var(--t-success-muted);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
 .lucky-icon {
     font-size: 2rem;
-    color: #22c55e;
+    color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    filter: drop-shadow(0 0 6px var(--t-success-muted));
 }
 
 .lucky-text {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #22c55e;
+    color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    text-shadow: 0 0 8px var(--t-success-muted);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 16px var(--t-success-muted);
     }
 
     to {
-        box-shadow: 0 0 32px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 0 32px var(--t-success-muted);
     }
 }
 

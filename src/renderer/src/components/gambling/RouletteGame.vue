@@ -634,7 +634,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-2);
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-accent);
-    color: #fff;
+    color: var(--t-text);
     border: none;
     border-radius: var(--t-radius-md);
     font-size: 1rem;
@@ -739,7 +739,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 }
 
 .num-red {
-    color: #c0392b;
+    color: var(--t-gamble-roulette-red);
 }
 
 .num-black {
@@ -747,7 +747,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 }
 
 .num-green {
-    color: #27ae60;
+    color: var(--t-gamble-roulette-green);
 }
 
 .win-desc {
@@ -823,7 +823,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 }
 
 .danger {
-    color: var(--t-danger, #e74c3c);
+    color: var(--t-danger);
 }
 
 /* ── Transitions ── */
@@ -845,34 +845,34 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    box-shadow: 0 0 24px rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--t-success) 15%, transparent), color-mix(in srgb, var(--t-success) 5%, transparent));
+    border: 1px solid color-mix(in srgb, var(--t-success) 40%, transparent);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--t-success) 25%, transparent);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
 .lucky-icon {
     font-size: 2rem;
-    color: #22c55e;
+    color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t-success) 50%, transparent));
 }
 
 .lucky-text {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #22c55e;
+    color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--t-success) 30%, transparent);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--t-success) 20%, transparent);
     }
 
     to {
-        box-shadow: 0 0 32px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 0 32px color-mix(in srgb, var(--t-success) 40%, transparent);
     }
 }
 

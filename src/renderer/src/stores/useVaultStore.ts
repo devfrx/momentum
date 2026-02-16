@@ -236,6 +236,7 @@ export const useVaultStore = defineStore('vault', () => {
         appraised: i.appraised,
         appraisedValue: i.appraisedValue,
         weight: i.weight,
+        condition: i.condition,
         source: i.source,
         vaultedAtTick: i.vaultedAtTick,
       })),

@@ -124,23 +124,23 @@ const { t } = useI18n()
 }
 
 .kpi-icon-wrap--profit {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+    background: color-mix(in srgb, var(--t-success) 10%, transparent);
+    color: var(--t-success);
 }
 
 .kpi-icon-wrap--spent {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    background: color-mix(in srgb, var(--t-danger) 10%, transparent);
+    color: var(--t-danger);
 }
 
 .kpi-icon-wrap--sales {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    background: color-mix(in srgb, var(--t-blue) 10%, transparent);
+    color: var(--t-blue);
 }
 
 .kpi-icon-wrap--auctions {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
+    background: color-mix(in srgb, var(--t-purple) 10%, transparent);
+    color: var(--t-purple);
 }
 
 .kpi-body {
@@ -167,11 +167,11 @@ const { t } = useI18n()
 }
 
 .kpi-value--positive {
-    color: #22c55e;
+    color: var(--t-success);
 }
 
 .kpi-value--negative {
-    color: #ef4444;
+    color: var(--t-danger);
 }
 
 /* Secondary pills row */
@@ -202,13 +202,13 @@ const { t } = useI18n()
 }
 
 .kpi-pill--highlight {
-    background: rgba(234, 179, 8, 0.1);
-    border-color: rgba(234, 179, 8, 0.3);
-    color: #eab308;
+    background: color-mix(in srgb, var(--t-gold) 10%, transparent);
+    border-color: color-mix(in srgb, var(--t-gold) 30%, transparent);
+    color: var(--t-gold-hover);
 }
 
 .kpi-pill--highlight .kpi-pill__icon {
-    color: #eab308;
+    color: var(--t-gold-hover);
 }
 
 /* Responsive: stack on narrow screens */

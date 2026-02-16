@@ -3,6 +3,7 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
 import type { PerkEffect } from '@renderer/data/prestige'
+import { THEME } from '@renderer/assets/theme/colors'
 
 const { t } = useI18n()
 
@@ -24,10 +25,10 @@ defineEmits<{
 }>()
 
 const categoryColors: Record<string, string> = {
-    automation: '#71717a',
-    boost: '#22c55e',
-    unlock: '#a855f7',
-    quality_of_life: '#f59e0b',
+    automation: THEME.info,
+    boost: THEME.success,
+    unlock: THEME.purple,
+    quality_of_life: THEME.warning,
 }
 
 const catKeys: Record<string, string> = {
@@ -189,7 +190,7 @@ function formatEffect(effect: PerkEffect): string {
 }
 
 .perk-effect svg {
-    color: #a855f7;
+    color: var(--t-purple);
 }
 
 .perk-prerequisites {
@@ -214,9 +215,9 @@ function formatEffect(effect: PerkEffect): string {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem;
-    background: rgba(34, 197, 94, 0.15);
+    background: color-mix(in srgb, var(--t-success) 15%, transparent);
     border-radius: var(--t-radius-sm);
-    color: #22c55e;
+    color: var(--t-success);
     font-weight: 600;
     font-size: 0.85rem;
 }
