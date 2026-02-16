@@ -1,11 +1,20 @@
 <script setup lang="ts">
 /**
- * OnlineShopView — Browse / buy / sell items through the online shop.
+ * OnlineShopView — E-commerce style marketplace.
+ * Browse / buy / sell / restore / auction items.
  */
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { CashDisplay } from '@renderer/components/dashboard'
-import { ShopListingCard, ShopFilters, ShopStats, SellPanel } from '@renderer/components/shop'
+import {
+    ShopListingCard,
+    ShopFilters,
+    ShopStats,
+    SellPanel,
+    DemandTicker,
+    RestorationPanel,
+    ResaleAuctionPanel,
+} from '@renderer/components/shop'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -20,7 +29,7 @@ function handleBuy(listingId: string, destination: 'vault' | 'storage'): void {
     shop.buyItem(listingId, destination)
 }
 
-type ViewTab = 'browse' | 'sell'
+type ViewTab = 'browse' | 'sell' | 'workshop' | 'auctions'
 const activeTab = ref<ViewTab>('browse')
 
 const tabs = computed(() => [
@@ -28,13 +37,25 @@ const tabs = computed(() => [
         id: 'browse' as ViewTab,
         label: t('shop.tab_browse'),
         icon: 'mdi:store-search',
-        count: shop.filteredListings.length
+        count: shop.filteredCount
     },
     {
         id: 'sell' as ViewTab,
         label: t('shop.tab_sell'),
         icon: 'mdi:cash-register',
         count: 0
+    },
+    {
+        id: 'workshop' as ViewTab,
+        label: t('shop.tab_workshop'),
+        icon: 'mdi:tools',
+        count: shop.activeRestorations
+    },
+    {
+        id: 'auctions' as ViewTab,
+        label: t('shop.tab_auctions'),
+        icon: 'mdi:gavel',
+        count: shop.activeAuctionCount
     },
 ])
 
@@ -57,6 +78,13 @@ function prevPage(): void {
 function nextPage(): void {
     if (currentPage.value < totalPages.value - 1) currentPage.value++
 }
+
+// Reset page when filters change the result set
+watch(() => shop.filteredListings.length, () => {
+    if (currentPage.value >= totalPages.value) {
+        currentPage.value = Math.max(0, totalPages.value - 1)
+    }
+})
 </script>
 
 <template>
@@ -75,6 +103,9 @@ function nextPage(): void {
 
         <!-- Stats Ribbon -->
         <ShopStats />
+
+        <!-- Demand Ticker -->
+        <DemandTicker v-if="shop.demands.length > 0" />
 
         <!-- Tab Navigation -->
         <div class="tab-bar">
@@ -114,6 +145,16 @@ function nextPage(): void {
         <!-- Sell Tab -->
         <template v-if="activeTab === 'sell'">
             <SellPanel />
+        </template>
+
+        <!-- Workshop Tab -->
+        <template v-if="activeTab === 'workshop'">
+            <RestorationPanel />
+        </template>
+
+        <!-- Auctions Tab -->
+        <template v-if="activeTab === 'auctions'">
+            <ResaleAuctionPanel />
         </template>
     </div>
 </template>

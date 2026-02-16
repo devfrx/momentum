@@ -10,14 +10,16 @@
 import { D } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
 import type { Rarity } from '../rarity'
-import type { ItemCategory, StorageItem } from '../storage/items'
+import type { ItemCategory, ItemCondition, StorageItem } from '../storage/items'
 import {
   SHOP_RARITY_WEIGHTS,
   UNIQUE_ITEM_CHANCE,
   SHOP_BUY_MARKUP,
   FLASH_SALE_CHANCE,
   FLASH_SALE_DISCOUNT,
+  SHOP_CONDITION_WEIGHTS,
 } from './balance'
+import { CONDITION_MULTIPLIERS } from './restoration'
 
 // ─── Extended Categories ────────────────────────────────────────
 
@@ -37,7 +39,7 @@ export const SHOP_CATEGORIES: ShopCategory[] = [
   'coins', 'maps', 'manuscripts',
 ]
 
-export const SHOP_CATEGORY_ICONS: Record<ShopCategory, string> = {
+export const SHOP_CATEGORY_ICONS: Record<string, string> = {
   furniture: 'mdi:sofa',
   electronics: 'mdi:laptop',
   clothing: 'mdi:tshirt-crew',
@@ -50,7 +52,6 @@ export const SHOP_CATEGORY_ICONS: Record<ShopCategory, string> = {
   instruments: 'mdi:guitar-acoustic',
   vehicles: 'mdi:car-cog',
   documents: 'mdi:certificate',
-  junk: 'mdi:trash-can',
   luxury: 'mdi:diamond-stone',
   tech: 'mdi:chip',
   memorabilia: 'mdi:star-shooting',
@@ -271,6 +272,21 @@ function pickWeightedTemplate(candidates: ShopItemTemplate[]): ShopItemTemplate 
 }
 
 /**
+ * Pick a random item condition using shop-specific weights.
+ * Shop items have slightly more damaged items to create restoration opportunities.
+ */
+function pickShopCondition(): ItemCondition {
+  const entries = Object.entries(SHOP_CONDITION_WEIGHTS)
+  const total = entries.reduce((s, [, w]) => s + w, 0)
+  let roll = Math.random() * total
+  for (const [condition, weight] of entries) {
+    roll -= weight
+    if (roll <= 0) return condition as ItemCondition
+  }
+  return 'good'
+}
+
+/**
  * Generate a single shop item procedurally.
  */
 export function generateShopItem(
@@ -302,13 +318,18 @@ export function generateShopItem(
     }
   }
 
-  // Calculate value
+  // Calculate base value ("good" condition reference)
   const range = template.maxValue - template.minValue
   const rawValue = template.minValue + Math.random() * range
   const baseValue = Math.max(1, Math.round(rawValue))
 
-  // Apply buy markup
-  let price = Math.round(baseValue * SHOP_BUY_MARKUP)
+  // Roll condition (unique items are always pristine)
+  const condition: ItemCondition = isUnique ? 'pristine' : pickShopCondition()
+  const conditionMult = CONDITION_MULTIPLIERS[condition] ?? 1.0
+  const conditionedValue = Math.max(1, Math.round(baseValue * conditionMult))
+
+  // Apply buy markup on the condition-adjusted value
+  let price = Math.round(conditionedValue * SHOP_BUY_MARKUP)
 
   // Flash sale?
   let flashSale = false
@@ -330,18 +351,19 @@ export function generateShopItem(
     icon: template.icon,
     category: template.category as ItemCategory,
     rarity: template.rarity,
-    baseValue: D(baseValue),
+    baseValue: D(baseValue),          // full value at "good" condition
     description: template.description,
-    appraised: true, // Shop items are always "appraised" (value known)
-    appraisedValue: D(baseValue),
+    appraised: true,
+    appraisedValue: D(conditionedValue), // condition-adjusted value
     weight: template.weight,
+    condition,
   }
 
   return {
     id: `listing_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     item,
     price: D(price),
-    basePrice: D(baseValue),
+    basePrice: D(conditionedValue),
     flashSale,
     discount,
     unique: isUnique,
@@ -375,10 +397,10 @@ export function refreshShopPartial(
   tick: number = 0,
 ): ShopListing[] {
   const removeCount = Math.max(1, Math.floor(currentListings.length * fraction))
-  // Remove the oldest listings
-  const kept = currentListings
+  // Remove the oldest listings (sort a copy to avoid mutating input)
+  const sorted = [...currentListings]
     .sort((a, b) => b.listedAtTick - a.listedAtTick)
-    .slice(0, currentListings.length - removeCount)
+  const kept = sorted.slice(0, currentListings.length - removeCount)
   const newOnes = generateShopBatch(removeCount, luckBonus, tick)
   return [...kept, ...newOnes]
 }

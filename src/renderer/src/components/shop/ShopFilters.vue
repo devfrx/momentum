@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * ShopFilters — Search bar, category/rarity filters, and sort controls
+ * ShopFilters — Search bar, category/rarity/condition filters, and sort controls
  * for the online shop browse interface.
  */
 import { computed } from 'vue'
@@ -8,6 +8,8 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import { useI18n } from 'vue-i18n'
 import { SHOP_CATEGORIES, SHOP_CATEGORY_ICONS } from '@renderer/data/shop/items'
 import type { ShopCategory } from '@renderer/data/shop/items'
+import { CONDITION_ORDER } from '@renderer/data/shop/restoration'
+import type { ItemCondition } from '@renderer/data/storage/items'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import type { SortField } from '@renderer/stores/useShopStore'
 
@@ -16,29 +18,63 @@ const { t } = useI18n()
 
 const rarities = ['all', 'common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic']
 
-const sortOptions: { value: SortField; label: string }[] = [
-    { value: 'newest', label: 'Newest' },
-    { value: 'price_asc', label: 'Price ↑' },
-    { value: 'price_desc', label: 'Price ↓' },
-    { value: 'rarity_asc', label: 'Rarity ↑' },
-    { value: 'rarity_desc', label: 'Rarity ↓' },
-    { value: 'name', label: 'Name' },
-]
+const sortOptions = computed(() => [
+    { value: 'newest' as SortField, label: t('shop.sort_newest') },
+    { value: 'price_asc' as SortField, label: t('shop.sort_value_asc') },
+    { value: 'price_desc' as SortField, label: t('shop.sort_value_desc') },
+    { value: 'rarity_asc' as SortField, label: t('shop.sort_rarity') + ' ↑' },
+    { value: 'rarity_desc' as SortField, label: t('shop.sort_rarity') + ' ↓' },
+    { value: 'name' as SortField, label: t('shop.sort_name') },
+])
 
 const categories = computed(() => {
     const items: { value: ShopCategory | 'all'; label: string; icon: string }[] = [
-        { value: 'all', label: t('common.all'), icon: 'mdi:view-grid' },
+        { value: 'all', label: t('shop.all_categories'), icon: 'mdi:view-grid' },
     ]
     for (const cat of SHOP_CATEGORIES) {
         if (cat === 'junk') continue // skip junk in shop
         items.push({
             value: cat,
-            label: cat.charAt(0).toUpperCase() + cat.slice(1),
+            label: t(`shop.category_${cat}`),
             icon: SHOP_CATEGORY_ICONS[cat],
         })
     }
     return items
 })
+
+const conditions = computed(() => {
+    const items: { value: ItemCondition | 'all'; label: string }[] = [
+        { value: 'all', label: t('shop.all_categories') },
+    ]
+    for (const cond of CONDITION_ORDER) {
+        items.push({
+            value: cond,
+            label: t(`shop.condition_${cond}`),
+        })
+    }
+    return items
+})
+
+function rarityLabel(r: string): string {
+    if (r === 'all') return t('shop.all_rarities')
+    return t(`shop.rarity_${r}`, r.charAt(0).toUpperCase() + r.slice(1))
+}
+
+function onSearchInput(e: Event): void {
+    shop.setSearch((e.target as HTMLInputElement).value)
+}
+function onCategoryChange(e: Event): void {
+    shop.setCategory((e.target as HTMLSelectElement).value as ShopCategory | 'all')
+}
+function onRarityChange(e: Event): void {
+    shop.setRarity((e.target as HTMLSelectElement).value)
+}
+function onConditionChange(e: Event): void {
+    shop.setConditionFilter((e.target as HTMLSelectElement).value as ItemCondition | 'all')
+}
+function onSortChange(e: Event): void {
+    shop.setSort((e.target as HTMLSelectElement).value as SortField)
+}
 </script>
 
 <template>
@@ -47,7 +83,7 @@ const categories = computed(() => {
         <div class="search-box">
             <AppIcon icon="mdi:magnify" class="search-icon" />
             <input type="text" class="search-input" :placeholder="t('shop.search_placeholder')"
-                :value="shop.searchQuery" @input="shop.setSearch(($event.target as HTMLInputElement).value)" />
+                :value="shop.searchQuery" @input="onSearchInput" />
             <button v-if="shop.searchQuery" class="search-clear" @click="shop.setSearch('')">
                 <AppIcon icon="mdi:close" />
             </button>
@@ -55,24 +91,28 @@ const categories = computed(() => {
 
         <div class="filter-row">
             <!-- Category Dropdown -->
-            <select class="filter-select" :value="shop.filterCategory"
-                @change="shop.setCategory(($event.target as HTMLSelectElement).value as any)">
+            <select class="filter-select" :value="shop.filterCategory" @change="onCategoryChange">
                 <option v-for="cat in categories" :key="cat.value" :value="cat.value">
                     {{ cat.label }}
                 </option>
             </select>
 
             <!-- Rarity Dropdown -->
-            <select class="filter-select" :value="shop.filterRarity"
-                @change="shop.setRarity(($event.target as HTMLSelectElement).value as any)">
+            <select class="filter-select" :value="shop.filterRarity" @change="onRarityChange">
                 <option v-for="r in rarities" :key="r" :value="r">
-                    {{ r === 'all' ? t('common.all') : r }}
+                    {{ rarityLabel(r) }}
+                </option>
+            </select>
+
+            <!-- Condition Dropdown -->
+            <select class="filter-select" :value="shop.filterCondition" @change="onConditionChange">
+                <option v-for="c in conditions" :key="c.value" :value="c.value">
+                    {{ c.label }}
                 </option>
             </select>
 
             <!-- Sort Dropdown -->
-            <select class="filter-select" :value="shop.sortBy"
-                @change="shop.setSort(($event.target as HTMLSelectElement).value as SortField)">
+            <select class="filter-select" :value="shop.sortBy" @change="onSortChange">
                 <option v-for="s in sortOptions" :key="s.value" :value="s.value">
                     {{ s.label }}
                 </option>

@@ -28,13 +28,16 @@ export type ItemCategory =
   | 'watches' | 'wine' | 'sneakers' | 'cards'
   | 'coins' | 'maps' | 'manuscripts'
 
+/** Item physical condition — affects value via multiplier. */
+export type ItemCondition = 'damaged' | 'poor' | 'fair' | 'good' | 'excellent' | 'mint' | 'pristine'
+
 export interface StorageItem {
   id: string
   name: string
   icon: string
   category: ItemCategory
   rarity: Rarity
-  /** Base value before any appraisal or multiplier */
+  /** Base value before any appraisal or multiplier (value at "good" condition). */
   baseValue: Decimal
   /** Flavor text shown to player */
   description: string
@@ -44,6 +47,8 @@ export interface StorageItem {
   appraisedValue: Decimal | null
   /** Weight factor for sell speed (higher = slower to sell) */
   weight: number
+  /** Item condition — optional, defaults to 'good' when absent (backward compat). */
+  condition?: ItemCondition
 }
 
 /** Master pool of possible items with rarity-weighted probabilities */
@@ -163,7 +168,7 @@ export const ITEM_POOL: ItemTemplate[] = [
 
 // ─── Procedural Condition System ────────────────────────────────
 
-interface ItemCondition {
+interface ConditionDef {
   id: string
   label: string
   /** Value multiplier (< 1 = worse, > 1 = better) */
@@ -174,7 +179,7 @@ interface ItemCondition {
   weight: number
 }
 
-const ITEM_CONDITIONS: ItemCondition[] = [
+const ITEM_CONDITIONS: ConditionDef[] = [
   { id: 'damaged',   label: 'Damaged',   valueMult: 0.35, descSuffix: 'Heavily damaged, needs major repair.', weight: CONDITION_WEIGHTS.damaged },
   { id: 'poor',      label: 'Poor',      valueMult: 0.55, descSuffix: 'In poor condition, shows significant wear.', weight: CONDITION_WEIGHTS.poor },
   { id: 'fair',      label: 'Fair',      valueMult: 0.80, descSuffix: 'Fair condition with some visible wear.', weight: CONDITION_WEIGHTS.fair },
@@ -184,7 +189,7 @@ const ITEM_CONDITIONS: ItemCondition[] = [
   { id: 'pristine',  label: 'Pristine',  valueMult: PRISTINE_VALUE_CAP, descSuffix: 'Pristine condition, museum-quality.', weight: CONDITION_WEIGHTS.pristine },
 ]
 
-function pickCondition(): ItemCondition {
+function pickCondition(): ConditionDef {
   const totalWeight = ITEM_CONDITIONS.reduce((s, c) => s + c.weight, 0)
   let roll = Math.random() * totalWeight
   for (const c of ITEM_CONDITIONS) {
@@ -233,6 +238,7 @@ export function generateUnitContents(
         const range = template.maxValue - template.minValue
         const rawValue = template.minValue + Math.random() * range
         const finalValue = Math.max(1, Math.round(rawValue * valueMultiplier))
+        const junkCondition = pickCondition()
         items.push({
           id: `item_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
           name: template.name,
@@ -244,6 +250,7 @@ export function generateUnitContents(
           appraised: false,
           appraisedValue: null,
           weight: template.weight,
+          condition: junkCondition.id as ItemCondition,
         })
         continue
       }
@@ -264,8 +271,8 @@ export function generateUnitContents(
     // Calculate value with condition + location multiplier
     const range = template.maxValue - template.minValue
     const rawValue = template.minValue + Math.random() * range
-    const conditionedValue = rawValue * condition.valueMult
-    const finalValue = Math.max(1, Math.round(conditionedValue * valueMultiplier))
+    // baseValue = "good" condition reference (raw * location multiplier, no condition)
+    const goodValue = Math.max(1, Math.round(rawValue * valueMultiplier))
 
     // Build name: add condition prefix for uncommon+ items (skip 'Good')
     const showCondition = rarity !== 'common' && condition.id !== 'good'
@@ -280,11 +287,12 @@ export function generateUnitContents(
       icon: template.icon,
       category: template.category,
       rarity: template.rarity as Rarity,
-      baseValue: D(finalValue),
+      baseValue: D(goodValue),
       description: itemDesc,
       appraised: false,
       appraisedValue: null,
       weight: template.weight,
+      condition: condition.id as ItemCondition,
     })
   }
 

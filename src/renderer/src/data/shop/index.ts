@@ -33,3 +33,37 @@ export type {
   ShopCategory,
   ShopListing,
 } from './items'
+
+export {
+  initDemandState,
+  tickDemand,
+  demandLevelLabel,
+  demandLevelIcon,
+  demandLevelColor,
+} from './demand'
+export type { CategoryDemand } from './demand'
+
+export {
+  CONDITION_ORDER,
+  CONDITION_MULTIPLIERS,
+  CONDITION_LABELS,
+  CONDITION_ICONS,
+  CONDITION_COLORS,
+  calculateRestorationCost,
+  getTicksPerStep,
+  getStepsBetween,
+  getSlotUpgradeCost,
+  getNextCondition,
+  getConditionAdjustedValue,
+} from './restoration'
+export type { RestorationSlot } from './restoration'
+
+export {
+  generateAuctionBidders,
+  processAuctionBids,
+  createResaleAuction,
+  calculateListingFee,
+  calculateSuccessFee,
+  getItemFairValue,
+} from './auction'
+export type { ResaleAuction, NpcAuctionBidder } from './auction'

@@ -13,6 +13,10 @@ import { useShopStore, type SellSource } from '@renderer/stores/useShopStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
+import {
+    CONDITION_ICONS,
+    CONDITION_COLORS,
+} from '@renderer/data/shop/restoration'
 
 const storageStore = useStorageStore()
 const vaultStore = useVaultStore()
@@ -90,8 +94,20 @@ function sellAllFromSource(): void {
                     </div>
                 </div>
                 <div class="sell-item__footer">
-                    <span class="sell-item__value">{{ formatCash(item.appraisedValue ?? item.baseValue) }}</span>
-                    <Button :label="t('storage.sell_item')" icon="pi pi-dollar" size="small"
+                    <div class="sell-item__value-col">
+                        <span v-if="item.condition" class="sell-item__condition"
+                            :style="{ color: CONDITION_COLORS[item.condition] }">
+                            <AppIcon :icon="CONDITION_ICONS[item.condition]" />
+                            {{ t(`shop.condition_${item.condition}`) }}
+                        </span>
+                        <span class="sell-item__value">
+                            {{ formatCash(shopStore.getEstimatedSellValue(item)) }}
+                        </span>
+                        <span v-if="shopStore.getDemandMultiplier(item.category) >= 1.4" class="sell-item__demand-hint">
+                            <AppIcon icon="mdi:trending-up" /> {{ t('shop.demand_trending') }}
+                        </span>
+                    </div>
+                    <Button :label="t('shop.sell_item')" icon="pi pi-dollar" size="small"
                         @click="sellSingle(item.id)" />
                 </div>
             </div>
@@ -228,9 +244,34 @@ function sellAllFromSource(): void {
     align-items: center;
 }
 
+.sell-item__value-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.sell-item__condition {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
 .sell-item__value {
     font-size: var(--t-font-size-sm);
     font-weight: 600;
+    color: #22c55e;
+}
+
+.sell-item__demand-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
     color: #22c55e;
 }
 

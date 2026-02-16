@@ -1,14 +1,22 @@
 <script setup lang="ts">
 /**
- * ShopListingCard — Displays a single shop listing.
- * Shows item info, price, rarity, flash sale badge, and buy button.
+ * ShopListingCard — E-commerce product card.
+ * Clean layout inspired by Amazon/StockX product tiles:
+ * image area → badges bar → name/rarity → meta row → price → actions.
+ * No absolute positioning — everything flows naturally.
  */
+import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import Button from 'primevue/button'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
 import type { ShopListing } from '@renderer/data/shop/items'
+import { useShopStore } from '@renderer/stores/useShopStore'
+import {
+    CONDITION_ICONS,
+    CONDITION_COLORS,
+} from '@renderer/data/shop/restoration'
 
 const props = defineProps<{
     listing: ShopListing
@@ -18,168 +26,246 @@ defineEmits<{
     buy: [listingId: string, destination: 'vault' | 'storage']
 }>()
 
+const shop = useShopStore()
 const { formatCash } = useFormat()
 const { t } = useI18n()
+
+const condition = computed(() => props.listing.item.condition ?? 'good')
+const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.category))
 </script>
 
 <template>
-    <div class="shop-card" :style="{ '--_rarity': rarityCssVar(listing.item.rarity) }"
-        :class="{ 'shop-card--flash': listing.flashSale, 'shop-card--unique': listing.unique }">
-        <!-- Badges -->
-        <div class="shop-card__badges">
-            <span v-if="listing.flashSale" class="badge badge--flash">
-                <AppIcon icon="mdi:flash" /> {{ t('shop.flash_sale') }}
-                -{{ Math.round(listing.discount * 100) }}%
+    <div class="card" :style="{ '--_rarity': rarityCssVar(listing.item.rarity) }"
+        :class="{ 'card--flash': listing.flashSale, 'card--unique': listing.unique }">
+
+        <!-- ── Icon / Image area ───────────────────────────── -->
+        <div class="card__visual">
+            <AppIcon :icon="listing.item.icon" class="card__icon"
+                :style="{ color: rarityCssVar(listing.item.rarity) }" />
+            <!-- Flash sale ribbon -->
+            <span v-if="listing.flashSale" class="card__ribbon">
+                <AppIcon icon="mdi:flash" /> -{{ Math.round(listing.discount * 100) }}%
             </span>
-            <span v-if="listing.unique" class="badge badge--unique">
+        </div>
+
+        <!-- ── Tags row — condition · unique · demand ──────── -->
+        <div class="card__tags">
+            <span class="tag tag--condition"
+                :style="{ color: CONDITION_COLORS[condition], borderColor: CONDITION_COLORS[condition] + '40' }">
+                <AppIcon :icon="CONDITION_ICONS[condition]" />
+                {{ t(`shop.condition_${condition}`) }}
+            </span>
+            <span v-if="listing.unique" class="tag tag--unique">
                 <AppIcon icon="mdi:star-shooting" /> {{ t('shop.unique') }}
             </span>
+            <span v-if="demandMult >= 1.4" class="tag tag--trending">
+                <AppIcon icon="mdi:trending-up" /> {{ t('shop.demand_trending') }}
+            </span>
+            <span v-else-if="demandMult <= 0.8" class="tag tag--cold">
+                <AppIcon icon="mdi:trending-down" /> {{ t('shop.demand_cold') }}
+            </span>
         </div>
 
-        <div class="shop-card__header">
-            <AppIcon :icon="listing.item.icon" class="shop-card__icon"
-                :style="{ color: rarityCssVar(listing.item.rarity) }" />
-            <div class="shop-card__info">
-                <span class="shop-card__name">{{ listing.item.name }}</span>
-                <span class="shop-card__rarity" :style="{ color: rarityCssVar(listing.item.rarity) }">{{
-                    listing.item.rarity }}</span>
-            </div>
+        <!-- ── Title + Rarity ──────────────────────────────── -->
+        <div class="card__title-block">
+            <span class="card__name">{{ listing.item.name }}</span>
+            <span class="card__rarity" :style="{ color: rarityCssVar(listing.item.rarity) }">
+                {{ listing.item.rarity }}
+            </span>
         </div>
 
-        <p class="shop-card__desc">{{ listing.item.description }}</p>
+        <!-- ── Description ─────────────────────────────────── -->
+        <p class="card__desc">{{ listing.item.description }}</p>
 
-        <div class="shop-card__meta">
-            <span class="shop-card__category">{{ listing.item.category }}</span>
-            <div class="shop-card__price">
-                <span v-if="listing.flashSale" class="price-original">{{ formatCash(listing.basePrice) }}</span>
-                <span class="price-current" :class="{ 'price-current--sale': listing.flashSale }">
-                    {{ formatCash(listing.price) }}
-                </span>
-            </div>
+        <!-- ── Category pill ───────────────────────────────── -->
+        <span class="card__category">{{ listing.item.category }}</span>
+
+        <!-- ── Price block ─────────────────────────────────── -->
+        <div class="card__price-block">
+            <span v-if="listing.flashSale" class="price-original">{{ formatCash(listing.basePrice) }}</span>
+            <span class="price-main" :class="{ 'price-main--sale': listing.flashSale }">
+                {{ formatCash(listing.price) }}
+            </span>
         </div>
 
-        <div class="shop-card__actions">
-            <Button :label="t('shop.buy_to_vault')" icon="pi pi-lock" size="small"
-                @click="$emit('buy', listing.id, 'vault')" />
-            <Button :label="t('shop.buy_to_storage')" icon="pi pi-box" size="small" severity="secondary" outlined
-                @click="$emit('buy', listing.id, 'storage')" />
+        <!-- ── Buy actions ─────────────────────────────────── -->
+        <div class="card__actions">
+            <Button class="card__buy-btn" size="small" @click="$emit('buy', listing.id, 'vault')">
+                <AppIcon icon="mdi:safe-square-outline" />
+                <span>{{ t('shop.buy_to_vault') }}</span>
+            </Button>
+            <Button class="card__buy-btn card__buy-btn--secondary" size="small" severity="secondary" text
+                @click="$emit('buy', listing.id, 'storage')">
+                <AppIcon icon="mdi:package-variant" />
+                <span>{{ t('shop.buy_to_storage') }}</span>
+            </Button>
         </div>
     </div>
 </template>
 
 <style scoped>
-.shop-card {
+/* ── Card shell ──────────────────────────────────────────── */
+.card {
     display: flex;
     flex-direction: column;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
-    border-left: 3px solid var(--_rarity, var(--t-border));
     border-radius: var(--t-radius-md);
-    transition: all var(--t-transition-fast);
-    position: relative;
+    overflow: hidden;
+    transition: border-color var(--t-transition-fast),
+        box-shadow var(--t-transition-fast),
+        transform var(--t-transition-fast);
 }
 
-.shop-card:hover {
+.card:hover {
     border-color: var(--t-border-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--t-shadow-md);
 }
 
-.shop-card--flash {
-    background: linear-gradient(135deg, var(--t-bg-card) 92%, rgba(239, 68, 68, 0.08));
+.card--flash {
+    border-color: rgba(239, 68, 68, 0.25);
 }
 
-.shop-card--unique {
-    background: linear-gradient(135deg, var(--t-bg-card) 92%, rgba(250, 204, 21, 0.08));
-    border-left-width: 4px;
+.card--unique {
+    border-color: rgba(250, 204, 21, 0.25);
 }
 
-.shop-card__badges {
+/* ── Visual area (icon centered) ─────────────────────────── */
+.card__visual {
+    position: relative;
     display: flex;
-    gap: var(--t-space-1);
+    align-items: center;
+    justify-content: center;
+    padding: var(--t-space-5) var(--t-space-4);
+    background: var(--t-bg-muted);
+    border-bottom: 1px solid var(--t-border);
+}
+
+.card__icon {
+    font-size: 2.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+.card__ribbon {
     position: absolute;
     top: var(--t-space-2);
     right: var(--t-space-2);
-}
-
-.badge {
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
+    padding: 0.15rem 0.5rem;
     font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #fff;
+    background: #ef4444;
+    border-radius: var(--t-radius-sm);
+    letter-spacing: 0.04em;
+}
+
+/* ── Tag row ─────────────────────────────────────────────── */
+.card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: var(--t-space-2) var(--t-space-3) 0;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.55rem;
     font-weight: 700;
     text-transform: uppercase;
-    padding: 0.15rem 0.4rem;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.45rem;
     border-radius: var(--t-radius-sm);
+    line-height: 1.3;
 }
 
-.badge--flash {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+.tag--condition {
+    background: rgba(128, 128, 128, 0.08);
+    border: 1px solid;
 }
 
-.badge--unique {
-    background: rgba(250, 204, 21, 0.15);
+.tag--unique {
+    background: rgba(250, 204, 21, 0.1);
     color: #facc15;
 }
 
-.shop-card__header {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-2);
+.tag--trending {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
 }
 
-.shop-card__icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
+.tag--cold {
+    background: rgba(148, 163, 184, 0.08);
+    color: #94a3b8;
 }
 
-.shop-card__info {
+/* ── Title block ─────────────────────────────────────────── */
+.card__title-block {
     display: flex;
     flex-direction: column;
+    gap: 0.1rem;
+    padding: var(--t-space-2) var(--t-space-3) 0;
 }
 
-.shop-card__name {
+.card__name {
     font-weight: 600;
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.shop-card__rarity {
-    font-size: 0.65rem;
+.card__rarity {
+    font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 700;
 }
 
-.shop-card__desc {
+/* ── Description ─────────────────────────────────────────── */
+.card__desc {
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
     margin: 0;
-    line-height: 1.4;
+    padding: var(--t-space-1) var(--t-space-3) 0;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.shop-card__meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.shop-card__category {
-    font-size: var(--t-font-size-xs);
+/* ── Category pill ───────────────────────────────────────── */
+.card__category {
+    display: inline-flex;
+    align-self: flex-start;
+    margin: var(--t-space-2) var(--t-space-3) 0;
+    font-size: 0.6rem;
     color: var(--t-text-muted);
     text-transform: capitalize;
     background: var(--t-bg-muted);
     padding: 0.15rem 0.5rem;
-    border-radius: var(--t-radius-sm);
+    border-radius: 100px;
 }
 
-.shop-card__price {
+/* ── Price ────────────────────────────────────────────────── */
+.card__price-block {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 0.4rem;
+    padding: var(--t-space-2) var(--t-space-3) 0;
+    margin-top: auto;
 }
 
 .price-original {
@@ -188,19 +274,38 @@ const { t } = useI18n()
     text-decoration: line-through;
 }
 
-.price-current {
-    font-size: var(--t-font-size-sm);
-    font-weight: 700;
-    color: #22c55e;
+.price-main {
+    font-size: var(--t-font-size-lg);
+    font-weight: 800;
+    color: var(--t-text);
+    font-variant-numeric: tabular-nums;
 }
 
-.price-current--sale {
+.price-main--sale {
     color: #ef4444;
 }
 
-.shop-card__actions {
+/* ── Actions ─────────────────────────────────────────────── */
+.card__actions {
     display: flex;
     gap: var(--t-space-2);
-    justify-content: flex-end;
+    padding: var(--t-space-3);
+}
+
+.card__buy-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: var(--t-font-size-xs) !important;
+    font-weight: 600;
+    padding: var(--t-space-2) var(--t-space-2) !important;
+    white-space: nowrap;
+}
+
+.card__buy-btn--secondary {
+    flex: 0 1 auto;
+    color: var(--t-text-secondary) !important;
 }
 </style>

@@ -11,6 +11,12 @@
 
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'jackpot' | 'mythic'
 
+/** Numeric ordering for rarity tiers — single source of truth. */
+export const RARITY_ORDER: Record<Rarity, number> = {
+  common: 0, uncommon: 1, rare: 2, epic: 3,
+  legendary: 4, jackpot: 5, mythic: 6,
+}
+
 /** Static hex values — use when a JS string is needed (canvas, charts, etc.) */
 export const RARITY_COLORS: Record<string, string> = {
   common:    '#9ca3af',
