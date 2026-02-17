@@ -15,6 +15,7 @@
 import { useI18n } from 'vue-i18n'
 import { ref, computed, onUnmounted } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import PlinkoBoard from './PlinkoBoard.vue'
@@ -226,9 +227,9 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     <div class="plinko-game">
         <!-- Header -->
         <div class="pk-header">
-            <button class="back-btn" @click="$emit('back')">
-                <AppIcon icon="mdi:arrow-left" /> {{ $t('gambling.back') }}
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-left" @click="$emit('back')">
+                {{ $t('gambling.back') }}
+            </UButton>
             <h2 class="pk-title">
                 <AppIcon icon="mdi:triangle-outline" class="title-icon" />
                 {{ $t('gambling.pk_title') }}
@@ -263,13 +264,12 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                 <div class="control-group">
                     <label class="control-label">{{ $t('gambling.pk_risk') }}</label>
                     <div class="risk-selector">
-                        <button v-for="r in riskOptions" :key="r" class="risk-btn"
-                            :class="{ active: selectedRisk === r }" :style="{
+                        <UButton variant="ghost" size="xs" v-for="r in riskOptions" :key="r"
+                            :active="selectedRisk === r" :style="{
                                 '--risk-color': riskMeta[r].color,
-                            }" @click="selectedRisk = r" :disabled="autoDrop">
-                            <AppIcon :icon="riskMeta[r].icon" class="risk-icon" />
+                            }" @click="selectedRisk = r" :disabled="autoDrop" :icon="riskMeta[r].icon">
                             <span>{{ riskMeta[r].label }}</span>
-                        </button>
+                        </UButton>
                     </div>
                 </div>
 
@@ -277,10 +277,10 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                 <div class="control-group">
                     <label class="control-label">{{ $t('gambling.pk_rows') }}</label>
                     <div class="row-selector">
-                        <button v-for="r in rowOptions" :key="r" class="row-btn" :class="{ active: selectedRows === r }"
+                        <UButton variant="ghost" size="xs" v-for="r in rowOptions" :key="r" :active="selectedRows === r"
                             @click="selectedRows = r" :disabled="autoDrop">
                             {{ r }}
-                        </button>
+                        </UButton>
                     </div>
                 </div>
 
@@ -288,11 +288,10 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                 <div class="control-group">
                     <label class="control-label">{{ $t('gambling.pk_speed') }}</label>
                     <div class="speed-selector">
-                        <button v-for="s in speedOptions" :key="s.value" class="speed-btn"
-                            :class="{ active: selectedSpeed === s.value }" @click="selectedSpeed = s.value">
-                            <AppIcon :icon="s.icon" class="speed-icon" />
+                        <UButton variant="ghost" size="xs" v-for="s in speedOptions" :key="s.value"
+                            :active="selectedSpeed === s.value" @click="selectedSpeed = s.value" :icon="s.icon">
                             <span>{{ s.label }}</span>
-                        </button>
+                        </UButton>
                     </div>
                 </div>
 
@@ -300,20 +299,21 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                 <div class="control-group">
                     <label class="control-label">{{ $t('gambling.bet_amount') }}</label>
                     <div class="bet-row">
-                        <button class="bet-adj" @click="halfBet" :disabled="autoDrop">1/2</button>
+                        <UButton variant="ghost" size="xs" @click="halfBet" :disabled="autoDrop">1/2</UButton>
                         <div class="bet-display">
                             <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
                                 class="bet-input" :disabled="autoDrop" />
                         </div>
-                        <button class="bet-adj" @click="doubleBet" :disabled="autoDrop">×2</button>
+                        <UButton variant="ghost" size="xs" @click="doubleBet" :disabled="autoDrop">×2</UButton>
                     </div>
                     <div class="bet-presets">
-                        <button v-for="pct in [10, 25, 50]" :key="pct" class="preset-btn"
+                        <UButton variant="ghost" size="xs" v-for="pct in [10, 25, 50]" :key="pct"
                             @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="autoDrop">
                             {{ pct }}%
-                        </button>
-                        <button class="preset-btn preset-max" @click="maxBet" :disabled="autoDrop">{{ $t('gambling.max')
-                            }}</button>
+                        </UButton>
+                        <UButton variant="warning" size="xs" @click="maxBet" :disabled="autoDrop">{{
+                            $t('gambling.max')
+                        }}</UButton>
                     </div>
                 </div>
 
@@ -325,15 +325,14 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 
                 <!-- Action buttons -->
                 <div class="action-buttons">
-                    <button class="drop-btn" :disabled="!canDrop && !autoDrop" @click="drop">
-                        <AppIcon :icon="dropping ? 'mdi:loading' : 'mdi:arrow-down-bold'"
-                            :class="{ 'spin-icon': dropping }" />
+                    <UButton variant="primary" :disabled="!canDrop && !autoDrop" @click="drop"
+                        :icon="dropping ? 'mdi:loading' : 'mdi:arrow-down-bold'">
                         {{ $t('gambling.pk_drop') }}
-                    </button>
-                    <button class="auto-btn" :class="{ active: autoDrop }" @click="toggleAutoDrop">
-                        <AppIcon :icon="autoDrop ? 'mdi:stop' : 'mdi:autorenew'" />
+                    </UButton>
+                    <UButton variant="ghost" size="sm" :active="autoDrop" @click="toggleAutoDrop"
+                        :icon="autoDrop ? 'mdi:stop' : 'mdi:autorenew'">
                         {{ autoDrop ? $t('gambling.pk_stop') : $t('gambling.pk_auto') }}
-                    </button>
+                    </UButton>
                 </div>
 
                 <!-- Result history -->
@@ -398,36 +397,17 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.back-btn:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
 .pk-title {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .title-icon {
-    font-size: 1.5rem;
-    color: var(--t-warning);
+    font-size: 1.1rem;
+    color: var(--t-text-secondary);
 }
 
 .balance-chip {
@@ -439,8 +419,8 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     color: var(--t-success);
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 0.85rem;
 }
 
@@ -501,7 +481,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 .flash-mult {
     font-size: 2rem;
     font-weight: 900;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
 }
 
 .flash-win .flash-mult {
@@ -514,7 +494,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 
 .flash-label {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--t-text-muted);
@@ -553,14 +533,13 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .control-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -568,38 +547,6 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 .risk-selector {
     display: flex;
     gap: var(--t-space-2);
-}
-
-.risk-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border: 2px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 700;
-    transition: all var(--t-transition-fast);
-}
-
-.risk-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.risk-btn.active {
-    border-color: var(--risk-color);
-    color: var(--risk-color);
-    background: color-mix(in srgb, var(--risk-color) 10%, transparent);
-}
-
-.risk-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .risk-icon {
@@ -612,66 +559,10 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-2);
 }
 
-.row-btn {
-    flex: 1;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 2px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-align: center;
-    transition: all var(--t-transition-fast);
-}
-
-.row-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.row-btn.active {
-    border-color: var(--t-accent);
-    color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 10%, transparent);
-}
-
-.row-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 /* ── Speed selector ── */
 .speed-selector {
     display: flex;
     gap: var(--t-space-2);
-}
-
-.speed-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border: 2px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 700;
-    transition: all var(--t-transition-fast);
-}
-
-.speed-btn:hover {
-    background: var(--t-bg-hover);
-}
-
-.speed-btn.active {
-    border-color: var(--t-warning);
-    color: var(--t-warning);
-    background: color-mix(in srgb, var(--t-warning) 10%, transparent);
 }
 
 .speed-icon {
@@ -685,28 +576,6 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-2);
 }
 
-.bet-adj {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    color: var(--t-text);
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all var(--t-transition-fast);
-}
-
-.bet-adj:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.bet-adj:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
 .bet-display {
     flex: 1;
 }
@@ -715,8 +584,8 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     width: 100%;
     text-align: center;
     font-size: 1rem;
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     padding: var(--t-space-2);
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
@@ -728,33 +597,6 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 .bet-presets {
     display: flex;
     gap: 4px;
-}
-
-.preset-btn {
-    flex: 1;
-    padding: var(--t-space-1) var(--t-space-2);
-    font-size: 0.7rem;
-    font-weight: 600;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.preset-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.preset-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.preset-max {
-    color: var(--t-accent);
-    font-weight: 700;
 }
 
 /* ── Max multiplier display ── */
@@ -772,12 +614,12 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
 .max-mult-value {
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     font-weight: 800;
     font-size: 1.1rem;
     color: var(--t-warning);
@@ -787,60 +629,6 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 .action-buttons {
     display: flex;
     gap: var(--t-space-2);
-}
-
-.drop-btn {
-    flex: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-warning);
-    color: var(--t-text-inverse);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.drop-btn:hover:not(:disabled) {
-    filter: brightness(1.1);
-}
-
-.drop-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.auto-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 700;
-    transition: all var(--t-transition-fast);
-}
-
-.auto-btn:hover {
-    background: var(--t-bg-hover);
-}
-
-.auto-btn.active {
-    background: var(--t-danger);
-    color: var(--t-text);
-    border-color: var(--t-danger);
 }
 
 .spin-icon {
@@ -866,7 +654,6 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .history-chips {
@@ -880,9 +667,9 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     align-items: center;
     padding: 2px 8px;
     border-radius: var(--t-radius-sm);
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     border: 1px solid;
 }
 
@@ -897,11 +684,11 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .chip-enter-active {
-    transition: all 0.3s ease;
+    transition: all var(--t-transition-normal);
 }
 
 .chip-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast);
 }
 
 .chip-enter-from {
@@ -922,7 +709,6 @@ const plinkoInfo = computed<InfoSection[]>(() => [
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .stat-item {
@@ -940,8 +726,8 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .stat-value {
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -955,11 +741,11 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 
 /* ── Transitions ── */
 .pop-enter-active {
-    transition: all 0.35s ease;
+    transition: all var(--t-transition-normal);
 }
 
 .pop-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast);
 }
 
 .pop-enter-from {

@@ -13,6 +13,7 @@
 import { ref, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import BlackjackHand from './BlackjackHand.vue'
 import BlackjackCard from './BlackjackCard.vue'
 import type { CardData } from './BlackjackCard.vue'
@@ -380,9 +381,9 @@ const bjInfo = computed<InfoSection[]>(() => [
     <div class="bj-game">
         <!-- Header -->
         <div class="bj-header">
-            <button class="back-btn" @click="$emit('back')">
-                <AppIcon icon="mdi:arrow-left" /> {{ $t('gambling.back') }}
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-left" @click="$emit('back')">
+                {{ $t('gambling.back') }}
+            </UButton>
             <h2 class="bj-title">
                 <AppIcon icon="mdi:cards-playing-spade" class="title-icon" />
                 {{ $t('gambling.bj_title') }}
@@ -444,15 +445,15 @@ const bjInfo = computed<InfoSection[]>(() => [
 
         <!-- Action buttons (during play) -->
         <div v-if="phase === 'playing'" class="action-buttons">
-            <button class="action-btn hit-btn" :disabled="!canHit" @click="hit">
-                <AppIcon icon="mdi:plus-circle" /> {{ $t('gambling.bj_hit') }}
-            </button>
-            <button class="action-btn stand-btn" :disabled="!canStand" @click="stand">
-                <AppIcon icon="mdi:hand-back-right" /> {{ $t('gambling.bj_stand') }}
-            </button>
-            <button class="action-btn double-btn" :disabled="!canDouble" @click="doubleDown">
-                <AppIcon icon="mdi:arrow-up-bold-circle" /> {{ $t('gambling.bj_double') }}
-            </button>
+            <UButton variant="ghost" icon="mdi:plus-circle" :disabled="!canHit" @click="hit">
+                {{ $t('gambling.bj_hit') }}
+            </UButton>
+            <UButton variant="ghost" icon="mdi:hand-back-right" :disabled="!canStand" @click="stand">
+                {{ $t('gambling.bj_stand') }}
+            </UButton>
+            <UButton variant="ghost" icon="mdi:arrow-up-bold-circle" :disabled="!canDouble" @click="doubleDown">
+                {{ $t('gambling.bj_double') }}
+            </UButton>
         </div>
 
         <!-- Dealer turn indicator -->
@@ -463,9 +464,9 @@ const bjInfo = computed<InfoSection[]>(() => [
 
         <!-- New round button -->
         <div v-if="phase === 'result'" class="result-actions">
-            <button class="deal-btn" @click="newRound">
-                <AppIcon icon="mdi:refresh" /> {{ $t('gambling.new_round') }}
-            </button>
+            <UButton variant="primary" icon="mdi:refresh" @click="newRound">
+                {{ $t('gambling.new_round') }}
+            </UButton>
         </div>
 
         <!-- Betting controls (before deal) -->
@@ -473,26 +474,26 @@ const bjInfo = computed<InfoSection[]>(() => [
             <div class="bet-section">
                 <label class="bet-label">{{ $t('gambling.bet_amount') }}</label>
                 <div class="bet-row">
-                    <button class="bet-adj" @click="halfBet">1/2</button>
+                    <UButton variant="ghost" size="xs" @click="halfBet">1/2</UButton>
                     <div class="bet-display">
                         <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
                             class="bet-input" />
                     </div>
-                    <button class="bet-adj" @click="doubleBet">x2</button>
+                    <UButton variant="ghost" size="xs" @click="doubleBet">x2</UButton>
                 </div>
                 <div class="bet-presets">
-                    <button v-for="pct in [10, 25, 50]" :key="pct" class="preset-btn"
+                    <UButton v-for="pct in [10, 25, 50]" :key="pct"
                         @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))">
                         {{ pct }}%
-                    </button>
-                    <button class="preset-btn preset-max" @click="maxBet">{{ $t('gambling.max') }}</button>
+                    </UButton>
+                    <UButton variant="warning" size="xs" @click="maxBet">{{ $t('gambling.max') }}</UButton>
                 </div>
             </div>
 
             <div class="action-col">
-                <button class="deal-btn" :disabled="!canDeal" @click="deal">
-                    <AppIcon icon="mdi:cards-playing" /> {{ $t('gambling.bj_deal') }}
-                </button>
+                <UButton variant="primary" icon="mdi:cards-playing" :disabled="!canDeal" @click="deal">
+                    {{ $t('gambling.bj_deal') }}
+                </UButton>
             </div>
         </div>
 
@@ -543,36 +544,17 @@ const bjInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.back-btn:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
 .bj-title {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .title-icon {
-    font-size: 1.5rem;
-    color: var(--t-accent);
+    font-size: 1.1rem;
+    color: var(--t-text-secondary);
 }
 
 .balance-chip {
@@ -584,8 +566,8 @@ const bjInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     color: var(--t-success);
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 0.85rem;
 }
 
@@ -638,7 +620,7 @@ const bjInfo = computed<InfoSection[]>(() => [
 
 .outcome-amount {
     font-size: 1.1rem;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
 }
 
 @keyframes badgePop {
@@ -673,12 +655,12 @@ const bjInfo = computed<InfoSection[]>(() => [
     align-items: center;
     gap: 4px;
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-gold);
     background: var(--t-overlay-light);
     padding: 4px 12px;
     border-radius: var(--t-radius-xl);
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
 }
 
 /* ── Action buttons ── */
@@ -688,49 +670,13 @@ const bjInfo = computed<InfoSection[]>(() => [
     justify-content: center;
 }
 
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-5);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-size: 1rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-    color: var(--t-text);
-}
-
-.action-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.action-btn:hover:not(:disabled) {
-    filter: brightness(1.15);
-    transform: translateY(-1px);
-}
-
-.hit-btn {
-    background: var(--t-success);
-}
-
-.stand-btn {
-    background: var(--t-orange);
-}
-
-.double-btn {
-    background: var(--t-blue);
-}
-
 .dealer-thinking {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--t-space-2);
     color: var(--t-text-muted);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .spin-icon {
@@ -768,14 +714,13 @@ const bjInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .bet-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -783,23 +728,6 @@ const bjInfo = computed<InfoSection[]>(() => [
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
-}
-
-.bet-adj {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    color: var(--t-text);
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all var(--t-transition-fast);
-}
-
-.bet-adj:hover {
-    background: var(--t-bg-hover);
 }
 
 .bet-display {
@@ -810,8 +738,8 @@ const bjInfo = computed<InfoSection[]>(() => [
     width: 100%;
     text-align: center;
     font-size: 1rem;
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     padding: var(--t-space-2);
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
@@ -825,59 +753,11 @@ const bjInfo = computed<InfoSection[]>(() => [
     gap: 4px;
 }
 
-.preset-btn {
-    flex: 1;
-    padding: var(--t-space-1) var(--t-space-2);
-    font-size: 0.7rem;
-    font-weight: 600;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.preset-btn:hover {
-    background: var(--t-bg-hover);
-}
-
-.preset-max {
-    color: var(--t-accent);
-    font-weight: 700;
-}
-
 .action-col {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
     min-width: 130px;
-}
-
-.deal-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-accent);
-    color: var(--t-text);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.deal-btn:hover:not(:disabled) {
-    filter: brightness(1.1);
-}
-
-.deal-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 /* ── Stats ── */
@@ -889,7 +769,6 @@ const bjInfo = computed<InfoSection[]>(() => [
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .stat-item {
@@ -907,8 +786,8 @@ const bjInfo = computed<InfoSection[]>(() => [
 }
 
 .stat-value {
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -922,11 +801,11 @@ const bjInfo = computed<InfoSection[]>(() => [
 
 /* ── Transitions ── */
 .pop-enter-active {
-    transition: all 0.35s ease;
+    transition: all var(--t-transition-normal);
 }
 
 .pop-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast);
 }
 
 .pop-enter-from {
@@ -1045,7 +924,7 @@ const bjInfo = computed<InfoSection[]>(() => [
 
 .discarded-label {
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--t-danger);

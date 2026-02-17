@@ -412,7 +412,7 @@ watch(() => props.result, () => startReveal())
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -506,7 +506,7 @@ watch(() => props.result, () => startReveal())
     height: 38px;
     font-size: 0.85rem;
     border: 2px solid var(--t-border);
-    opacity: 0.7;
+    color: var(--t-text-muted);
 }
 
 .player-ball.matched {
@@ -529,7 +529,7 @@ watch(() => props.result, () => startReveal())
 
 .bonus-separator {
     font-size: 1.2rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -548,11 +548,10 @@ watch(() => props.result, () => startReveal())
     align-items: center;
     gap: 2px;
     font-size: 0.55rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     color: var(--t-text-muted);
     white-space: nowrap;
-    opacity: 0.7;
     animation: luckPctFade 0.4s ease;
 }
 
@@ -1147,7 +1146,7 @@ watch(() => props.result, () => startReveal())
 }
 
 .result-pop-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast);
 }
 
 .result-pop-enter-from {
@@ -1218,7 +1217,7 @@ watch(() => props.result, () => startReveal())
 }
 
 .lucky-pop-leave-active {
-    transition: all 0.3s ease;
+    transition: all var(--t-transition-normal);
 }
 
 .lucky-pop-enter-from {

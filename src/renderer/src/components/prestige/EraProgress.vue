@@ -64,7 +64,6 @@ defineProps<{
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-xl);
     padding: var(--t-space-6);
-    box-shadow: var(--t-shadow-sm);
     display: flex;
     flex-direction: column;
     gap: var(--t-space-5);
@@ -88,7 +87,7 @@ defineProps<{
 }
 
 .era-icon {
-    font-size: 2rem;
+    font-size: 1.9rem;
 }
 
 .era-info {
@@ -106,7 +105,7 @@ defineProps<{
 
 .era-name {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     margin: 0;
 }
 
@@ -148,7 +147,7 @@ defineProps<{
 }
 
 .era-progress-bar :deep(.p-progressbar-value) {
-    background: linear-gradient(90deg, var(--t-primary), var(--t-primary-hover));
+    background: var(--t-primary);
 }
 
 .era-next {
@@ -172,10 +171,10 @@ defineProps<{
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-lg);
     color: var(--t-warning);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .max-icon {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
 }
 </style>

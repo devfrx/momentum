@@ -94,7 +94,7 @@ const scrollDuration = computed(() => Math.max(20, shop.demands.length * 2.5))
     gap: 0.35rem;
     padding: 0 var(--t-space-3);
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -149,7 +149,7 @@ const scrollDuration = computed(() => Math.max(20, shop.demands.length * 2.5))
     white-space: nowrap;
     flex-shrink: 0;
     border-right: 1px solid color-mix(in srgb, var(--t-border) 40%, transparent);
-    transition: background 0.3s;
+    transition: background var(--t-transition-normal);
 }
 
 .ticker-chip--hot {
@@ -161,7 +161,7 @@ const scrollDuration = computed(() => Math.max(20, shop.demands.length * 2.5))
 }
 
 .ticker-chip--cold {
-    opacity: 0.5;
+    color: var(--t-text-muted);
 }
 
 .ticker-chip__icon {
@@ -171,7 +171,7 @@ const scrollDuration = computed(() => Math.max(20, shop.demands.length * 2.5))
 
 .ticker-chip__name {
     font-size: 0.7rem;
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     color: var(--t-text-secondary);
     text-transform: capitalize;
 }
@@ -184,7 +184,7 @@ const scrollDuration = computed(() => Math.max(20, shop.demands.length * 2.5))
 
 .ticker-chip__mult {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-variant-numeric: tabular-nums;
 }
 </style>

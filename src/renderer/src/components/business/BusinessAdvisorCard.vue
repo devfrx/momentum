@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 import { ADVISOR_DEFS, advisorCost, advisorEffect } from '@renderer/data/businesses'
 import type { AdvisorType } from '@renderer/data/businesses'
@@ -66,10 +67,9 @@ const advisorItems = computed(() =>
                     </div>
                 </div>
 
-                <button class="btn-advisor" @click="store.hireAdvisor(business.id, adv.def.type)">
-                    <AppIcon :icon="adv.hired ? 'mdi:arrow-up-bold' : 'mdi:account-plus'" />
+                <UButton variant="ghost" :icon="adv.hired ? 'mdi:arrow-up-bold' : 'mdi:account-plus'" @click="store.hireAdvisor(business.id, adv.def.type)">
                     {{ adv.hired ? $t('business.upgrade') : $t('business.hire') }} — {{ formatCash(adv.cost) }}
-                </button>
+                </UButton>
             </div>
         </div>
     </div>
@@ -87,7 +87,7 @@ const advisorItems = computed(() =>
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -108,11 +108,11 @@ const advisorItems = computed(() =>
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
-    transition: border-color 0.2s;
+    transition: border-color var(--t-transition-fast);
 }
 
 .advisor-card.hired {
-    border-color: var(--t-accent);
+    border-color: var(--t-border-hover);
 }
 
 .adv-header {
@@ -122,7 +122,7 @@ const advisorItems = computed(() =>
 }
 
 .adv-icon {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     color: var(--t-accent);
     flex-shrink: 0;
     margin-top: 2px;
@@ -130,7 +130,7 @@ const advisorItems = computed(() =>
 
 .adv-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -157,7 +157,7 @@ const advisorItems = computed(() =>
 }
 
 .stat-val {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
     color: var(--t-text);
 }
@@ -170,25 +170,4 @@ const advisorItems = computed(() =>
     color: var(--t-accent);
 }
 
-.btn-advisor {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--t-accent);
-    border-radius: var(--t-radius-sm);
-    background: transparent;
-    color: var(--t-accent);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.btn-advisor:hover {
-    background: var(--t-accent);
-    color: var(--t-bg);
-}
 </style>

@@ -1,9 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * AuctionCard — Displays an available auction in the lobby grid.
  * Shows location, peek hints, bidder count, starting bid.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -59,8 +60,8 @@ const location = storage.getLocation(props.auction.locationId)
 
         <!-- Actions -->
         <div class="auction-card__actions">
-            <button class="btn btn-primary btn-sm auction-card__btn" @click="$emit('bid', auction.id)"><i
-                    class="pi pi-sign-in"></i> {{ t('storage.enter_auction') }}</button>
+            <UButton variant="primary" size="sm" icon="mdi:login" block @click="$emit('bid', auction.id)">{{
+                t('storage.enter_auction') }}</UButton>
         </div>
     </div>
 </template>
@@ -76,8 +77,7 @@ const location = storage.getLocation(props.auction.locationId)
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
 }
 
 .auction-card:hover {
@@ -91,7 +91,7 @@ const location = storage.getLocation(props.auction.locationId)
 }
 
 .auction-card__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--_accent);
     flex-shrink: 0;
 }
@@ -104,7 +104,7 @@ const location = storage.getLocation(props.auction.locationId)
 }
 
 .auction-card__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-base);
     color: var(--t-text);
 }
@@ -113,7 +113,7 @@ const location = storage.getLocation(props.auction.locationId)
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
     letter-spacing: 0.08em;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .auction-card__badge {
@@ -174,7 +174,7 @@ const location = storage.getLocation(props.auction.locationId)
 }
 
 .auction-card__kpi-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -182,9 +182,5 @@ const location = storage.getLocation(props.auction.locationId)
 .auction-card__actions {
     display: flex;
     justify-content: flex-end;
-}
-
-.auction-card__btn {
-    width: 100%;
 }
 </style>

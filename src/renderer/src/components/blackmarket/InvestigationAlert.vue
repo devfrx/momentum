@@ -76,7 +76,6 @@ function severity(level: number): string {
     border: 1px solid var(--t-danger);
     border-left: 4px solid var(--t-danger);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .inv-alert__head {
@@ -86,12 +85,12 @@ function severity(level: number): string {
 }
 
 .inv-alert__icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--t-danger);
 }
 
 .inv-alert__title {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
     flex: 1;
@@ -123,7 +122,7 @@ function severity(level: number): string {
 }
 
 .inv-alert__kpi-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }

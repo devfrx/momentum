@@ -66,7 +66,7 @@ function toggle(id: string): void {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-lg);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin-bottom: var(--t-space-4);
 }
@@ -89,16 +89,23 @@ function toggle(id: string): void {
     padding: var(--t-space-3) var(--t-space-4);
     cursor: pointer;
     transition: all var(--t-transition-normal);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .multi-card:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-md);
+}
+
+.multi-card:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.multi-card:active {
+    transform: scale(0.98);
 }
 
 .multi-card.active {
-    border-color: color-mix(in srgb, var(--t-accent) 40%, transparent);
+    border-color: var(--t-border-hover);
 }
 
 .mc-top {
@@ -116,7 +123,7 @@ function toggle(id: string): void {
     justify-content: center;
     flex-shrink: 0;
     background: var(--t-bg-muted);
-    transition: all 0.2s;
+    transition: all var(--t-transition-fast);
 }
 
 .mc-icon-wrap.glow {
@@ -142,7 +149,7 @@ function toggle(id: string): void {
 .mc-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -216,7 +223,7 @@ function toggle(id: string): void {
 
 .src-val {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
     white-space: nowrap;
     margin-left: 0.5rem;
@@ -225,7 +232,7 @@ function toggle(id: string): void {
 /* Slide transition */
 .slide-enter-active,
 .slide-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast) ease;
     overflow: hidden;
 }
 

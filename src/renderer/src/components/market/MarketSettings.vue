@@ -4,6 +4,7 @@
  */
 import { ref } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 
 const settings = useSettingsStore()
@@ -27,16 +28,15 @@ const intervalOptions = [
                 <span>{{ $t('market.tick_speed') }}</span>
             </div>
             <div class="interval-buttons">
-                <button v-for="opt in intervalOptions" :key="opt.value"
-                    :class="['interval-btn', { active: settings.marketUpdateInterval === opt.value }]"
+                <UButton variant="ghost" size="xs" v-for="opt in intervalOptions" :key="opt.value"
+                    :active="settings.marketUpdateInterval === opt.value"
                     @click="settings.marketUpdateInterval = opt.value" :title="$t(opt.descKey)">
                     {{ opt.label }}
-                </button>
+                </UButton>
             </div>
-            <button class="info-toggle" :class="{ active: showInfo }" @click="showInfo = !showInfo"
-                :title="$t('market.how_markets_work_tip')">
-                <AppIcon icon="mdi:information-outline" />
-            </button>
+            <UButton variant="text" :active="showInfo" @click="showInfo = !showInfo"
+                :title="$t('market.how_markets_work_tip')" icon="mdi:information-outline">
+            </UButton>
         </div>
 
         <!-- Info Panel -->
@@ -99,7 +99,7 @@ const intervalOptions = [
     align-items: center;
     gap: 0.35rem;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     white-space: nowrap;
 }
@@ -107,57 +107,6 @@ const intervalOptions = [
 .interval-buttons {
     display: flex;
     gap: 0.2rem;
-}
-
-.interval-btn {
-    padding: 0.2rem 0.5rem;
-    font-size: 0.68rem;
-    font-weight: 600;
-    font-family: var(--t-font-mono);
-    cursor: pointer;
-    background: transparent;
-    color: var(--t-text-secondary);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    transition: all var(--t-transition-fast);
-}
-
-.interval-btn:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-}
-
-.interval-btn.active {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    border-color: var(--t-border-focus);
-}
-
-.info-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    background: transparent;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all var(--t-transition-fast);
-}
-
-.info-toggle:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-}
-
-.info-toggle.active {
-    background: var(--t-info-muted);
-    color: var(--t-info);
-    border-color: var(--t-info);
 }
 
 /* ─── Info Panel ─── */
@@ -176,7 +125,7 @@ const intervalOptions = [
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-bg-muted);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     border-bottom: 1px solid var(--t-border);
 }
@@ -193,7 +142,7 @@ const intervalOptions = [
     align-items: center;
     gap: 0.35rem;
     font-size: 0.78rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0 0 var(--t-space-1) 0;
 }
@@ -217,7 +166,7 @@ const intervalOptions = [
 /* Transition */
 .slide-enter-active,
 .slide-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast) ease;
 }
 
 .slide-enter-from,

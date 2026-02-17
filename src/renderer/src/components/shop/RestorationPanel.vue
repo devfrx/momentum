@@ -1,10 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * RestorationPanel — Workshop interface for restoring item conditions.
  * Shows active restoration slots, progress bars, and slot upgrade button.
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -119,11 +120,10 @@ function showRestoreMax(item: any): boolean {
                 <span class="slot-info">
                     {{ t('shop.workshop_slots', { used: shop.activeRestorations, total: shop.restorationSlotCount }) }}
                 </span>
-                <button v-if="shop.canUpgradeSlots" class="btn btn-ghost btn-sm"
+                <UButton v-if="shop.canUpgradeSlots" variant="ghost" size="sm" icon="mdi:plus"
                     :disabled="player.cash.lt(shop.nextSlotUpgradeCost)" @click="shop.upgradeRestorationSlots()">
-                    <i class="pi pi-plus"></i>
                     {{ t('shop.workshop_upgrade_slot', { cost: formatCash(shop.nextSlotUpgradeCost) }) }}
-                </button>
+                </UButton>
             </div>
         </div>
 
@@ -157,10 +157,9 @@ function showRestoreMax(item: any): boolean {
                         {{ t('shop.workshop_step', { current: slot.currentStep + 1, total: slot.totalSteps }) }}
                     </div>
 
-                    <button class="btn btn-primary btn-sm" @click="shop.cancelRestoration(idx)">
-                        <i class="pi pi-times"></i>
+                    <UButton variant="primary" size="sm" icon="mdi:close" @click="shop.cancelRestoration(idx)">
                         {{ t('shop.workshop_cancel') }}
-                    </button>
+                    </UButton>
                 </template>
 
                 <template v-else>
@@ -210,16 +209,14 @@ function showRestoreMax(item: any): boolean {
                 </div>
 
                 <div class="restorable-item__actions">
-                    <button v-if="nextCond(item)" class="btn btn-ghost btn-sm"
+                    <UButton v-if="nextCond(item)" variant="ghost" size="sm" icon="mdi:wrench"
                         :disabled="shop.freeRestorationSlots === 0" @click="handleRestore(item.id, source)">
-                        <i class="pi pi-wrench"></i>
                         {{ t('shop.workshop_restore_1') }}
-                    </button>
-                    <button v-if="showRestoreMax(item)" class="btn btn-primary btn-sm"
+                    </UButton>
+                    <UButton v-if="showRestoreMax(item)" variant="primary" size="sm" icon="mdi:star"
                         :disabled="shop.freeRestorationSlots === 0" @click="handleRestoreToMax(item.id, source)">
-                        <i class="pi pi-star"></i>
                         {{ t('shop.workshop_restore_max') }}
-                    </button>
+                    </UButton>
                 </div>
             </div>
         </div>
@@ -251,7 +248,7 @@ function showRestoreMax(item: any): boolean {
     align-items: center;
     gap: var(--t-space-2);
     font-size: var(--t-font-size-md);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0;
 }
@@ -284,13 +281,12 @@ function showRestoreMax(item: any): boolean {
 }
 
 .restoration-slot--active {
-    border-color: var(--t-accent);
-    border-left: 3px solid var(--t-accent);
+    border-color: var(--t-border-hover);
+    border-left: 3px solid var(--t-border-hover);
 }
 
 .restoration-slot--empty {
     border-style: dashed;
-    opacity: 0.6;
 }
 
 .slot-header {
@@ -300,7 +296,7 @@ function showRestoreMax(item: any): boolean {
 }
 
 .slot-icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .slot-info-block {
@@ -309,7 +305,7 @@ function showRestoreMax(item: any): boolean {
 }
 
 .slot-name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -338,7 +334,7 @@ function showRestoreMax(item: any): boolean {
     height: 100%;
     background: var(--t-accent);
     border-radius: 3px;
-    transition: width 0.3s;
+    transition: width var(--t-transition-normal);
 }
 
 .progress-label {
@@ -356,13 +352,12 @@ function showRestoreMax(item: any): boolean {
 }
 
 .empty-slot-icon {
-    font-size: 2rem;
-    opacity: 0.3;
+    font-size: 1.9rem;
 }
 
 .section-label {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
     margin: var(--t-space-2) 0 0 0;
     text-transform: uppercase;
@@ -393,7 +388,7 @@ function showRestoreMax(item: any): boolean {
 }
 
 .restorable-item__icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .restorable-item__info {
@@ -403,7 +398,7 @@ function showRestoreMax(item: any): boolean {
 }
 
 .restorable-item__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -413,7 +408,7 @@ function showRestoreMax(item: any): boolean {
     align-items: center;
     gap: 0.25rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .restorable-item__source {
@@ -423,7 +418,7 @@ function showRestoreMax(item: any): boolean {
     color: var(--t-text-muted);
     border-radius: var(--t-radius-sm);
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .restorable-item__values {
@@ -439,7 +434,7 @@ function showRestoreMax(item: any): boolean {
 
 .restorable-item__next-val {
     color: var(--t-success);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .restorable-item__cost {
@@ -464,7 +459,6 @@ function showRestoreMax(item: any): boolean {
 }
 
 .empty-icon {
-    font-size: 3rem;
-    opacity: 0.2;
+    font-size: 2.9rem;
 }
 </style>

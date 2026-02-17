@@ -83,7 +83,7 @@ const iconColor = props.type === 'crypto' ? 'text-purple' : 'text-sky'
 }
 
 .position-qty {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -106,7 +106,7 @@ const iconColor = props.type === 'crypto' ? 'text-purple' : 'text-sky'
 
 .pnl-label {
     font-size: 0.65rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--t-text-muted);
@@ -115,7 +115,7 @@ const iconColor = props.type === 'crypto' ? 'text-purple' : 'text-sky'
 .pnl-value {
     font-family: var(--t-font-mono);
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 

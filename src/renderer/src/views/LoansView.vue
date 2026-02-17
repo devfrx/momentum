@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Dialog from 'primevue/dialog'
+import { UModal, UButton } from '@renderer/components/ui'
+import { UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import Slider from 'primevue/slider'
 import Select from 'primevue/select'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
@@ -35,6 +32,13 @@ const player = usePlayerStore()
 const upgrades = useUpgradeStore()
 const { formatCash, formatPercent } = useFormat()
 const { t } = useI18n()
+
+const loanActiveTab = ref('active')
+const loanTabs = computed<TabDef[]>(() => [
+    { id: 'active', label: t('loans.tab_active'), icon: 'mdi:file-document-outline', count: loanStore.loans.length },
+    { id: 'available', label: t('loans.tab_available'), icon: 'mdi:bank-outline' },
+    { id: 'history', label: t('loans.tab_history'), icon: 'mdi:history' },
+])
 
 // Live tick counter
 const currentTick = ref(gameEngine.currentTick)
@@ -314,80 +318,69 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                         <div class="sidebar-stat">
                             <span class="sidebar-stat-label">{{ $t('loans.total_interest_paid') }}</span>
                             <span class="sidebar-stat-value text-warning">{{ formatCash(loanStore.totalInterestPaidEver)
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
             </aside>
 
-            <!-- Main Content -->
             <main class="loans-main">
-                <Tabs value="active" class="loans-tabs">
-                    <TabList>
-                        <Tab value="active">{{ $t('loans.tab_active') }}</Tab>
-                        <Tab value="available">{{ $t('loans.tab_available') }}</Tab>
-                        <Tab value="history">{{ $t('loans.tab_history') }}</Tab>
-                    </TabList>
-                    <TabPanels>
-                        <!-- Active Loans Tab -->
-                        <TabPanel value="active">
-                            <div v-if="loanStore.loans.length === 0" class="empty-state">
-                                <AppIcon icon="mdi:file-document-outline" class="empty-icon" />
-                                <p>{{ $t('loans.no_active') }}</p>
-                            </div>
+                <UTabs v-model="loanActiveTab" :tabs="loanTabs">
+                    <template #active>
+                        <div v-if="loanStore.loans.length === 0" class="empty-state">
+                            <AppIcon icon="mdi:file-document-outline" class="empty-icon" />
+                            <p>{{ $t('loans.no_active') }}</p>
+                        </div>
 
-                            <div v-else class="card-grid">
-                                <ActiveLoanCard v-for="loan in loanStore.loans" :key="loan.id" :loan="loan"
-                                    :current-tick="currentTick" @repay="(amount) => handleRepay(loan.id, amount)"
-                                    @repay-full="handleRepayFull(loan.id)" @refinance="openRefinanceDialog(loan.id)" />
-                            </div>
-                        </TabPanel>
+                        <div v-else class="card-grid">
+                            <ActiveLoanCard v-for="loan in loanStore.loans" :key="loan.id" :loan="loan"
+                                :current-tick="currentTick" @repay="(amount) => handleRepay(loan.id, amount)"
+                                @repay-full="handleRepayFull(loan.id)" @refinance="openRefinanceDialog(loan.id)" />
+                        </div>
+                    </template>
 
-                        <!-- Available Loans Tab -->
-                        <TabPanel value="available">
-                            <div class="category-filter">
-                                <Select v-model="selectedCategory" :options="categoryOptions" optionLabel="label"
-                                    optionValue="value" :placeholder="$t('common.filter_by_category')" />
-                            </div>
+                    <template #available>
+                        <div class="category-filter">
+                            <Select v-model="selectedCategory" :options="categoryOptions" optionLabel="label"
+                                optionValue="value" :placeholder="$t('common.filter_by_category')" />
+                        </div>
 
-                            <div class="card-grid">
-                                <LoanCard v-for="{ loan, application, effectiveRate, maxApproved } in filteredLoans"
-                                    :key="loan.id" :loan="loan" :effective-rate="effectiveRate"
-                                    :max-approved="maxApproved" :approved="application.approved"
-                                    :reason="application.reason" @apply="openApplyDialog(loan)" />
-                            </div>
-                        </TabPanel>
+                        <div class="card-grid">
+                            <LoanCard v-for="{ loan, application, effectiveRate, maxApproved } in filteredLoans"
+                                :key="loan.id" :loan="loan" :effective-rate="effectiveRate" :max-approved="maxApproved"
+                                :approved="application.approved" :reason="application.reason"
+                                @apply="openApplyDialog(loan)" />
+                        </div>
+                    </template>
 
-                        <!-- History Tab -->
-                        <TabPanel value="history">
-                            <div v-if="loanStore.loanHistory.length === 0" class="empty-state">
-                                <AppIcon icon="mdi:history" class="empty-icon" />
-                                <p>{{ $t('loans.no_history') }}</p>
-                            </div>
+                    <template #history>
+                        <div v-if="loanStore.loanHistory.length === 0" class="empty-state">
+                            <AppIcon icon="mdi:history" class="empty-icon" />
+                            <p>{{ $t('loans.no_history') }}</p>
+                        </div>
 
-                            <div v-else class="history-list">
-                                <div v-for="(entry, idx) in loanStore.loanHistory" :key="idx" class="history-item"
-                                    :class="entry.status">
-                                    <div class="history-main">
-                                        <span class="history-name">
-                                            {{LOANS.find(l => l.id === entry.loanDefId)?.name ??
-                                                $t('loans.unknown_loan')}}
-                                        </span>
-                                        <span class="history-amount">{{ formatCash(entry.principal) }}</span>
-                                    </div>
-                                    <div class="history-details">
-                                        <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                            }}</span>
-                                        <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                            }} {{ entry.latePayments
-                                            }}</span>
-                                        <span class="history-status" :class="entry.status">{{ entry.status }}</span>
-                                    </div>
+                        <div v-else class="history-list">
+                            <div v-for="(entry, idx) in loanStore.loanHistory" :key="idx" class="history-item"
+                                :class="entry.status">
+                                <div class="history-main">
+                                    <span class="history-name">
+                                        {{LOANS.find(l => l.id === entry.loanDefId)?.name ??
+                                            $t('loans.unknown_loan')}}
+                                    </span>
+                                    <span class="history-amount">{{ formatCash(entry.principal) }}</span>
+                                </div>
+                                <div class="history-details">
+                                    <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
+                                    }}</span>
+                                    <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
+                                    }} {{ entry.latePayments
+                                        }}</span>
+                                    <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                 </div>
                             </div>
-                        </TabPanel>
-                    </TabPanels>
-                </Tabs>
+                        </div>
+                    </template>
+                </UTabs>
             </main>
         </div>
 
@@ -396,7 +389,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
             :sections="loanInfoSections" />
 
         <!-- Apply for Loan Dialog -->
-        <Dialog v-model:visible="showApplyDialog" modal :header="$t('loans.apply_title')" :style="{ width: '450px' }">
+        <UModal v-model="showApplyDialog" :title="$t('loans.apply_title')" icon="mdi:bank" size="md">
             <div v-if="selectedLoan" class="apply-dialog-content">
                 <div class="loan-summary">
                     <AppIcon :icon="selectedLoan.icon" class="loan-summary-icon" />
@@ -439,15 +432,14 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                 </div>
 
                 <div class="dialog-actions">
-                    <button class="btn btn-ghost" @click="showApplyDialog = false">{{ $t('common.cancel') }}</button>
-                    <button class="btn btn-success" @click="confirmLoan">{{ $t('loans.confirm_loan') }}</button>
+                    <UButton variant="ghost" @click="showApplyDialog = false">{{ $t('common.cancel') }}</UButton>
+                    <UButton variant="success" @click="confirmLoan">{{ $t('loans.confirm_loan') }}</UButton>
                 </div>
             </div>
-        </Dialog>
+        </UModal>
 
         <!-- Refinance Dialog -->
-        <Dialog v-model:visible="showRefinanceDialog" modal :header="$t('loans.refinance_title')"
-            :style="{ width: '400px' }">
+        <UModal v-model="showRefinanceDialog" :title="$t('loans.refinance_title')" icon="mdi:refresh" size="sm">
             <div class="refinance-dialog-content">
                 <p>{{ $t('loans.refinance_desc') }}</p>
 
@@ -455,13 +447,13 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                     :placeholder="$t('loans.select_new_type')" class="w-full" />
 
                 <div class="dialog-actions">
-                    <button class="btn btn-ghost" @click="showRefinanceDialog = false">{{ $t('common.cancel')
-                        }}</button>
-                    <button class="btn btn-ghost" :disabled="!refinanceTarget" @click="confirmRefinance">{{
-                        $t('loans.refinance') }}</button>
+                    <UButton variant="ghost" @click="showRefinanceDialog = false">{{ $t('common.cancel')
+                    }}</UButton>
+                    <UButton variant="ghost" :disabled="!refinanceTarget" @click="confirmRefinance">{{
+                        $t('loans.refinance') }}</UButton>
                 </div>
             </div>
-        </Dialog>
+        </UModal>
     </div>
 </template>
 
@@ -494,7 +486,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: 6px;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     margin: 0 0 var(--t-space-3) 0;
 }
@@ -533,7 +525,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
 .sidebar-stat-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -576,7 +568,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 }
 
 .history-name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .history-amount {
@@ -592,7 +584,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
 .history-status {
     text-transform: capitalize;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .history-status.repaid {
@@ -647,7 +639,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
 .amount-selector label {
     font-size: var(--t-font-size-sm);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
 }
 
 .amount-display {
@@ -658,7 +650,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
 .amount-value {
     font-size: var(--t-font-size-xl);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     color: var(--t-success);
 }

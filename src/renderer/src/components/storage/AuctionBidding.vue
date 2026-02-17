@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * AuctionBidding — Active auction bidding interface.
  * Shows the bidding war in real-time: hints, bidder avatars,
@@ -6,6 +6,7 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton, UTooltip, UAccordion } from '@renderer/components/ui'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -76,7 +77,7 @@ function leave(): void {
         <!-- Header -->
         <div class="bidding-header">
             <div class="bidding-header__left">
-                <button class="btn btn-text btn-sm" @click="leave"><i class="pi pi-arrow-left"></i></button>
+                <UButton variant="text" size="sm" icon="mdi:arrow-left" @click="leave" />
                 <AppIcon :icon="location?.icon ?? 'mdi:warehouse'" class="bidding-location-icon" />
                 <div>
                     <h2 class="bidding-title">{{ location?.name }}</h2>
@@ -118,10 +119,8 @@ function leave(): void {
                 </div>
 
                 <!-- Bidders -->
-                <div class="bidders-section">
-                    <h3 class="section-label">
-                        <AppIcon icon="mdi:account-group" /> {{ t('storage.competitors') }}
-                    </h3>
+                <UAccordion :title="t('storage.competitors')" icon="mdi:account-group" :badge="auction.bidders.length"
+                    variant="ghost" compact defaultOpen>
                     <div class="bidder-list">
                         <div v-for="bidder in auction.bidders" :key="bidder.id" class="bidder-chip"
                             :class="{ 'bidder-chip--dropped': bidder.droppedOut, 'bidder-chip--leading': auction.currentBidder === bidder.id }">
@@ -129,13 +128,13 @@ function leave(): void {
                             <div class="bidder-info">
                                 <span class="bidder-name">{{ bidder.name }}</span>
                                 <span class="bidder-status" v-if="bidder.droppedOut">{{ t('storage.dropped_out')
-                                    }}</span>
+                                }}</span>
                                 <span class="bidder-status bidder-status--leading"
                                     v-else-if="auction.currentBidder === bidder.id">{{ t('storage.leading') }}</span>
                             </div>
                         </div>
                     </div>
-                </div>
+                </UAccordion>
             </div>
 
             <!-- Right: Current bid + Controls -->
@@ -154,9 +153,11 @@ function leave(): void {
                 <!-- Bid Controls -->
                 <div class="bid-controls" v-if="auction.status === 'active'">
                     <div class="bid-multiplier-row">
-                        <button v-for="m in bidMultipliers" :key="m" class="btn btn-sm"
-                            :class="{ 'btn-primary': selectedMultiplier === m, 'btn-ghost': selectedMultiplier !== m }"
-                            @click="selectedMultiplier = m">{{ m }}×</button>
+                        <UTooltip v-for="m in bidMultipliers" :key="m" :text="`${m}× ${t('storage.bid_increment')}`"
+                            placement="top">
+                            <UButton size="sm" :variant="selectedMultiplier === m ? 'primary' : 'ghost'"
+                                @click="selectedMultiplier = m">{{ m }}×</UButton>
+                        </UTooltip>
                     </div>
 
                     <div class="bid-preview">
@@ -164,11 +165,11 @@ function leave(): void {
                         <span class="bid-preview-value">{{ formatCash(bidAmount) }}</span>
                     </div>
 
-                    <button class="btn btn-primary btn-lg bid-button" :disabled="!canBid" @click="placeBid"><i
-                            class="pi pi-dollar"></i> {{ t('storage.place_bid') }}</button>
+                    <UButton variant="primary" size="lg" icon="mdi:currency-usd" class="bid-button" :disabled="!canBid"
+                        @click="placeBid">{{ t('storage.place_bid') }}</UButton>
 
-                    <button class="btn btn-text btn-sm leave-button" @click="leave">{{ t('storage.leave_auction')
-                        }}</button>
+                    <UButton variant="text" size="sm" class="leave-button" @click="leave">{{ t('storage.leave_auction')
+                        }}</UButton>
                 </div>
 
                 <!-- Auction Result -->
@@ -203,11 +204,11 @@ function leave(): void {
                     <AppIcon :icon="item.icon" class="found-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
                     <span class="found-item__name">{{ resolveItemName(item, t) }}</span>
                     <span class="found-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity
-                        }}</span>
+                    }}</span>
                 </div>
             </div>
-            <button class="btn btn-primary" @click="$emit('back')"><i class="pi pi-check"></i> {{
-                t('storage.collect_items') }}</button>
+            <UButton variant="primary" icon="mdi:check" @click="$emit('back')">{{ t('storage.collect_items') }}
+            </UButton>
         </div>
     </div>
 </template>
@@ -232,13 +233,13 @@ function leave(): void {
 }
 
 .bidding-location-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--t-warning);
 }
 
 .bidding-title {
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     margin: 0;
     color: var(--t-text);
 }
@@ -267,7 +268,7 @@ function leave(): void {
 .timer-bar__fill {
     height: 100%;
     background: var(--t-warning);
-    transition: width 0.3s linear;
+    transition: width var(--t-transition-normal) linear;
     border-radius: 2px;
 }
 
@@ -322,7 +323,7 @@ function leave(): void {
 }
 
 .going-icon {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
 }
 
 .going-text {
@@ -353,7 +354,7 @@ function leave(): void {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0 0 var(--t-space-2);
 }
@@ -396,7 +397,7 @@ function leave(): void {
     padding: 0.4rem 0.6rem;
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-sm);
-    transition: opacity 0.3s;
+    transition: opacity var(--t-transition-normal);
 }
 
 .bidder-chip--dropped {
@@ -409,7 +410,7 @@ function leave(): void {
 }
 
 .bidder-avatar {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--t-text-muted);
 }
 
@@ -420,7 +421,7 @@ function leave(): void {
 
 .bidder-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     color: var(--t-text);
 }
 
@@ -431,7 +432,7 @@ function leave(): void {
 
 .bidder-status--leading {
     color: var(--t-danger);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 /* Right column */
@@ -479,7 +480,7 @@ function leave(): void {
 .bid-holder {
     font-size: var(--t-font-size-sm);
     color: var(--t-danger);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .bid-holder.positive {
@@ -513,7 +514,7 @@ function leave(): void {
 }
 
 .bid-preview-value {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -534,7 +535,7 @@ function leave(): void {
     padding: var(--t-space-4);
     border-radius: var(--t-radius-md);
     text-align: center;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-lg);
 }
 
@@ -551,12 +552,12 @@ function leave(): void {
 }
 
 .result-icon {
-    font-size: 2rem;
+    font-size: 1.9rem;
 }
 
 .result-price {
     font-size: var(--t-font-size-sm);
-    opacity: 0.8;
+    color: var(--t-text-muted);
 }
 
 /* Balance */
@@ -600,12 +601,12 @@ function leave(): void {
 }
 
 .found-item__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
 }
 
 .found-item__name {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -613,6 +614,6 @@ function leave(): void {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 </style>

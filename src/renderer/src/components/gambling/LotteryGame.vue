@@ -13,6 +13,7 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import LotteryTicket from './LotteryTicket.vue'
 import LotteryDraw from './LotteryDraw.vue'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
@@ -499,9 +500,9 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     <div class="lottery-game">
         <!-- Header -->
         <div class="lottery-header">
-            <button class="back-btn" @click="$emit('back')">
-                <AppIcon icon="mdi:arrow-left" /> {{ $t('gambling.back') }}
-            </button>
+            <UButton variant="ghost" size="sm" @click="$emit('back')" icon="mdi:arrow-left">
+                {{ $t('gambling.back') }}
+            </UButton>
             <h2 class="lottery-title">
                 <AppIcon icon="mdi:ticket" class="title-icon" />
                 {{ $t('gambling.lt_title') }}
@@ -515,31 +516,31 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                 <!-- Draw Speed Selector -->
                 <div class="speed-selector">
                     <AppIcon icon="mdi:speedometer" class="speed-icon" />
-                    <button v-for="sp in SPEED_OPTIONS" :key="sp" class="speed-btn"
-                        :class="{ active: settings.lotteryDrawSpeed === sp }" @click="settings.lotteryDrawSpeed = sp"
+                    <UButton variant="ghost" size="xs" v-for="sp in SPEED_OPTIONS" :key="sp"
+                        :active="settings.lotteryDrawSpeed === sp" @click="settings.lotteryDrawSpeed = sp"
                         :disabled="isDrawing">
                         {{ sp }}×
-                    </button>
+                    </UButton>
                 </div>
 
                 <!-- Multi-Draw Selector -->
                 <div class="multi-draw-selector">
                     <AppIcon icon="mdi:layers-triple" class="multi-icon" />
-                    <button v-for="n in MULTI_DRAW_OPTIONS" :key="n" class="multi-btn"
-                        :class="{ active: settings.lotteryMultiDraw === n }" @click="settings.lotteryMultiDraw = n"
+                    <UButton variant="ghost" size="xs" v-for="n in MULTI_DRAW_OPTIONS" :key="n"
+                        :active="settings.lotteryMultiDraw === n" @click="settings.lotteryMultiDraw = n"
                         :disabled="isDrawing">
                         {{ n }}
-                    </button>
+                    </UButton>
                 </div>
 
-                <button class="prize-toggle" @click="showDivineGallery = !showDivineGallery"
-                    :title="$t('gambling.lt_divine_gallery')">
-                    <AppIcon icon="mdi:shimmer" /> {{ showDivineGallery ? $t('gambling.hide') :
+                <UButton variant="ghost" size="sm" @click="showDivineGallery = !showDivineGallery"
+                    :title="$t('gambling.lt_divine_gallery')" icon="mdi:shimmer">
+                    {{ showDivineGallery ? $t('gambling.hide') :
                         $t('gambling.lt_divine_gallery') }}
-                </button>
-                <button class="prize-toggle" @click="showPrizeTable = !showPrizeTable">
-                    <AppIcon icon="mdi:table" /> {{ showPrizeTable ? $t('gambling.hide') : $t('gambling.lt_prizes') }}
-                </button>
+                </UButton>
+                <UButton variant="ghost" size="sm" @click="showPrizeTable = !showPrizeTable" icon="mdi:table">
+                    {{ showPrizeTable ? $t('gambling.hide') : $t('gambling.lt_prizes') }}
+                </UButton>
             </div>
         </div>
 
@@ -602,13 +603,12 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
             <div class="ticket-selector">
                 <span class="selector-label">{{ $t('gambling.lt_select_ticket') }}</span>
                 <div class="ticket-tabs">
-                    <button v-for="t in LOTTERY_TICKETS" :key="t.id" class="ticket-tab"
-                        :class="{ active: selectedTicketId === t.id }" :style="{ '--tab-accent': t.accent }"
-                        @click="selectTicket(t.id)" :disabled="isDrawing">
-                        <AppIcon :icon="t.icon" class="tab-icon" />
+                    <UButton variant="tab" v-for="t in LOTTERY_TICKETS" :key="t.id"
+                        :active="selectedTicketId === t.id" :style="{ '--tab-accent': t.accent }"
+                        @click="selectTicket(t.id)" :disabled="isDrawing" :icon="t.icon">
                         <span class="tab-name">{{ t.name }}</span>
                         <span class="tab-cost">${{ t.ticketCost }}</span>
-                    </button>
+                    </UButton>
                 </div>
             </div>
 
@@ -621,9 +621,9 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                         :original-result="currentOriginalResult" :original-luck-chances="currentOriginalLuckChances"
                         :original-lucky-indices="currentOriginalLuckyIndices" :speed-multiplier="drawSpeed"
                         @done="onSingleDrawDone" />
-                    <button class="new-draw-btn" @click="clearResult" :disabled="isDrawing">
-                        <AppIcon icon="mdi:refresh" /> {{ $t('gambling.lt_new_draw') }}
-                    </button>
+                    <UButton variant="ghost" size="sm" @click="clearResult" :disabled="isDrawing" icon="mdi:refresh">
+                        {{ $t('gambling.lt_new_draw') }}
+                    </UButton>
                 </template>
 
                 <!-- Multi-draw results — animated grid of LotteryDraw components -->
@@ -677,9 +677,9 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                         </div>
                     </div>
 
-                    <button class="new-draw-btn" @click="clearResult" :disabled="isDrawing">
-                        <AppIcon icon="mdi:refresh" /> {{ $t('gambling.lt_new_draw') }}
-                    </button>
+                    <UButton variant="ghost" size="sm" @click="clearResult" :disabled="isDrawing" icon="mdi:refresh">
+                        {{ $t('gambling.lt_new_draw') }}
+                    </UButton>
                 </template>
 
                 <!-- Number picker (no result showing) -->
@@ -781,12 +781,12 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
             <div v-for="ticket in LOTTERY_TICKETS" :key="ticket.id" class="dev-ticket-group">
                 <span class="dev-ticket-name" :style="{ color: ticket.accent }">{{ ticket.name }}</span>
                 <div class="dev-btn-row">
-                    <button v-for="(prize, pi) in ticket.prizes" :key="pi" class="dev-sim-btn"
+                    <UButton variant="ghost" size="xs" v-for="(prize, pi) in ticket.prizes" :key="pi"
                         :class="`dev-rarity-${prize.rarity}`"
                         :title="`${prize.label} — ×${prize.payoutMultiplier.toLocaleString()}`"
                         @click="simulateJackpot(ticket, pi)">
                         {{ prize.label }}
-                    </button>
+                    </UButton>
                 </div>
             </div>
         </div>
@@ -811,36 +811,17 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     gap: var(--t-space-3);
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.back-btn:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
 .lottery-title {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .title-icon {
-    font-size: 1.5rem;
-    color: var(--t-accent);
+    font-size: 1.1rem;
+    color: var(--t-text-secondary);
 }
 
 .header-info {
@@ -858,28 +839,9 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     border: 1px solid color-mix(in srgb, var(--t-success) 30%, transparent);
     border-radius: var(--t-radius-sm);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-success);
     font-family: var(--t-font-mono);
-}
-
-.prize-toggle {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.prize-toggle:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
 }
 
 /* ── Prize Table ── */
@@ -892,7 +854,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .prize-table-title {
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin-bottom: var(--t-space-3);
     color: var(--t-text-secondary);
 }
@@ -926,13 +888,13 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 .prize-label {
     flex: 1;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
 .prize-rarity {
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--prize-color, var(--t-text-muted));
@@ -975,7 +937,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -985,34 +947,6 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     gap: var(--t-space-2);
 }
 
-.ticket-tab {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    padding: var(--t-space-3);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-    text-align: left;
-}
-
-.ticket-tab:hover:not(:disabled) {
-    border-color: var(--tab-accent, var(--t-border-hover));
-}
-
-.ticket-tab.active {
-    border-color: var(--tab-accent, var(--t-accent));
-    background: color-mix(in srgb, var(--tab-accent, var(--t-accent)) 6%, transparent);
-}
-
-.ticket-tab:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .tab-icon {
     font-size: 1.2rem;
     color: var(--tab-accent, var(--t-text-secondary));
@@ -1020,7 +954,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .tab-name {
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -1045,32 +979,6 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     gap: 4px;
     font-size: var(--t-font-size-sm);
     color: var(--t-danger);
-}
-
-.new-draw-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: var(--t-font-size-sm);
-    font-weight: 600;
-    transition: all var(--t-transition-fast);
-}
-
-.new-draw-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
-.new-draw-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 /* ── Footer: Stats & History ── */
@@ -1107,7 +1015,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .stat-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -1130,7 +1038,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -1156,7 +1064,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 }
 
 .history-ticket {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     min-width: 100px;
 }
@@ -1168,7 +1076,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 }
 
 .history-prize {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
 }
 
@@ -1180,7 +1088,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 /* ── Transitions ── */
 .slide-enter-active,
 .slide-leave-active {
-    transition: all 0.3s ease;
+    transition: all var(--t-transition-normal);
     overflow: hidden;
 }
 
@@ -1314,7 +1222,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .dev-ticket-name {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
@@ -1323,24 +1231,6 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-}
-
-.dev-sim-btn {
-    padding: 3px 8px;
-    font-size: 0.6rem;
-    font-weight: 700;
-    border-radius: var(--t-radius-sm);
-    border: 1px solid var(--t-border);
-    background: var(--t-bg-muted);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    white-space: nowrap;
-}
-
-.dev-sim-btn:hover {
-    background: var(--t-bg-hover);
-    transform: scale(1.05);
 }
 
 .dev-rarity-common {
@@ -1472,38 +1362,6 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     margin: 2px;
 }
 
-.speed-btn,
-.multi-btn {
-    padding: 3px 8px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    font-family: var(--t-font-mono);
-    border: none;
-    border-radius: var(--t-radius-sm);
-    background: transparent;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.speed-btn:hover:not(:disabled),
-.multi-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
-.speed-btn.active,
-.multi-btn.active {
-    background: var(--t-accent);
-    color: var(--t-text);
-}
-
-.speed-btn:disabled,
-.multi-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
 /* ── Divine Abilities Gallery (minimal) ── */
 .divine-gallery-panel {
     background: var(--t-bg-card);
@@ -1521,13 +1379,13 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .divine-gallery-title {
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
 .divine-gallery-count {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
     color: var(--t-text-muted);
 }
@@ -1575,7 +1433,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .dg-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     flex: 1;
     min-width: 0;
@@ -1648,7 +1506,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .multi-stat-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -1661,7 +1519,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 .multi-abilities-label {
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 
@@ -1670,7 +1528,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     align-items: center;
     gap: 4px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     padding: 2px 8px;
     border-radius: var(--t-radius-sm);
     background: var(--t-bg-muted);
@@ -1701,7 +1559,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     top: var(--t-space-1);
     left: var(--t-space-2);
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
     z-index: 1;

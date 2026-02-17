@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * SellPanel — Choose which warehouse to sell items from.
  * Integrates with shop's sell-to-shop, vault sell, and storage wars sell.
@@ -6,6 +6,8 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton, UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore, type SellSource } from '@renderer/stores/useShopStore'
@@ -26,15 +28,15 @@ const { t } = useI18n()
 
 const activeSource = ref<SellSource>('vault')
 
-const sources = computed(() => [
+const sources = computed<TabDef[]>(() => [
     {
-        id: 'vault' as SellSource,
+        id: 'vault',
         label: t('shop.sell_from_vault'),
         icon: 'mdi:safe-square',
         count: vaultStore.itemCount,
     },
     {
-        id: 'storage_wars' as SellSource,
+        id: 'storage_wars',
         label: t('shop.sell_from_storage'),
         icon: 'mdi:warehouse',
         count: storageStore.inventoryCount,
@@ -64,23 +66,15 @@ function sellAllFromSource(): void {
         </h3>
 
         <!-- Source Selector -->
-        <div class="source-tabs">
-            <button v-for="src in sources" :key="src.id" class="source-tab" :class="{ active: activeSource === src.id }"
-                @click="activeSource = src.id">
-                <AppIcon :icon="src.icon" />
-                <span>{{ src.label }}</span>
-                <span class="source-count">{{ src.count }}</span>
-            </button>
-        </div>
+        <UTabs v-model="activeSource" :tabs="sources" />
 
         <!-- Bulk Actions -->
         <div v-if="currentItems.length > 0" class="sell-actions">
-            <button class="btn btn-danger btn-sm" @click="sellAllFromSource">
-                <i class="pi pi-dollar"></i>
+            <UButton variant="danger" size="sm" icon="mdi:currency-usd" @click="sellAllFromSource">
                 {{ t('shop.sell_all_from', {
                     source: activeSource === 'vault' ? t('shop.vault') : t('shop.storage_wars')
                 }) }}
-            </button>
+            </UButton>
         </div>
 
         <!-- Item Grid -->
@@ -110,10 +104,9 @@ function sellAllFromSource(): void {
                             <AppIcon icon="mdi:trending-up" /> {{ t('shop.demand_trending') }}
                         </span>
                     </div>
-                    <button class="btn btn-primary btn-sm" @click="sellSingle(item.id)">
-                        <i class="pi pi-dollar"></i>
+                    <UButton variant="primary" size="sm" icon="mdi:currency-usd" @click="sellSingle(item.id)">
                         {{ t('shop.sell_item') }}
-                    </button>
+                    </UButton>
                 </div>
             </div>
         </div>
@@ -137,61 +130,12 @@ function sellAllFromSource(): void {
     align-items: center;
     gap: var(--t-space-2);
     font-size: var(--t-font-size-md);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0;
 }
 
-.source-tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--t-border);
-}
 
-.source-tab {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1rem;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--t-text-muted);
-    font-size: var(--t-font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.source-tab:hover {
-    color: var(--t-text);
-    background: var(--t-bg-muted);
-}
-
-.source-tab.active {
-    color: var(--t-accent);
-    border-bottom-color: var(--t-accent);
-    font-weight: 600;
-}
-
-.source-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    background: var(--t-bg-muted);
-    color: var(--t-text-muted);
-    border-radius: 9px;
-}
-
-.source-tab.active .source-count {
-    background: var(--t-accent);
-    color: white;
-}
 
 .sell-actions {
     display: flex;
@@ -222,7 +166,7 @@ function sellAllFromSource(): void {
 }
 
 .sell-item__icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .sell-item__info {
@@ -231,7 +175,7 @@ function sellAllFromSource(): void {
 }
 
 .sell-item__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -240,7 +184,7 @@ function sellAllFromSource(): void {
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .sell-item__footer {
@@ -260,13 +204,13 @@ function sellAllFromSource(): void {
     align-items: center;
     gap: 0.2rem;
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
 }
 
 .sell-item__value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 
@@ -275,7 +219,7 @@ function sellAllFromSource(): void {
     align-items: center;
     gap: 0.15rem;
     font-size: 0.55rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     color: var(--t-success);
 }
@@ -291,7 +235,6 @@ function sellAllFromSource(): void {
 }
 
 .empty-icon {
-    font-size: 3rem;
-    opacity: 0.2;
+    font-size: 2.9rem;
 }
 </style>

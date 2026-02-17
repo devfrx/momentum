@@ -17,7 +17,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
-import { D, ZERO, add, sub, mul, max } from '@renderer/core/BigNum'
+import { D, ZERO, add, sub, mul } from '@renderer/core/BigNum'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import type { StorageItem } from '@renderer/data/storage/items'
@@ -27,7 +27,6 @@ import {
   VAULT_SLOT_COST_GROWTH,
   VAULT_UPGRADE_SLOTS,
   VAULT_SELL_TAX,
-  SHOP_SELL_FRACTION,
 } from '@renderer/data/shop/balance'
 
 // ─── Types ──────────────────────────────────────────────────────

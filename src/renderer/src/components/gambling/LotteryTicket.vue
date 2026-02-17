@@ -8,6 +8,7 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import type { LotteryTicketDef } from '@renderer/data/lottery'
 
 const props = defineProps<{
@@ -108,23 +109,23 @@ function confirmPlay(): void {
                 <AppIcon icon="mdi:check-circle" /> {{ $t('gambling.lt_numbers_selected') }}
             </span>
             <div class="pick-actions">
-                <button class="pick-action-btn" @click="quickPick" :disabled="disabled">
-                    <AppIcon icon="mdi:dice-multiple" /> {{ $t('gambling.lt_quick_pick') }}
-                </button>
-                <button class="pick-action-btn" @click="clearSelection"
-                    :disabled="disabled || selectedNumbers.size === 0">
-                    <AppIcon icon="mdi:close-circle-outline" /> {{ $t('gambling.lt_clear') }}
-                </button>
+                <UButton variant="ghost" size="sm" @click="quickPick" :disabled="disabled" icon="mdi:dice-multiple">
+                    {{ $t('gambling.lt_quick_pick') }}
+                </UButton>
+                <UButton variant="ghost" size="sm" @click="clearSelection"
+                    :disabled="disabled || selectedNumbers.size === 0" icon="mdi:close-circle-outline">
+                    {{ $t('gambling.lt_clear') }}
+                </UButton>
             </div>
         </div>
 
         <!-- Main number grid -->
         <div class="number-grid">
-            <button v-for="n in mainNumbers" :key="n" class="number-ball"
+            <UButton unstyled v-for="n in mainNumbers" :key="n" class="number-ball"
                 :class="{ selected: selectedNumbers.has(n), full: selectedNumbers.size >= ticket.pickCount && !selectedNumbers.has(n) }"
                 :disabled="disabled" @click="toggleNumber(n)">
                 {{ n }}
-            </button>
+            </UButton>
         </div>
 
         <!-- Bonus number grid (if applicable) -->
@@ -135,18 +136,17 @@ function confirmPlay(): void {
                 </span>
             </div>
             <div class="number-grid bonus-grid">
-                <button v-for="n in bonusNumbers" :key="n" class="number-ball bonus-ball"
+                <UButton unstyled v-for="n in bonusNumbers" :key="n" class="number-ball bonus-ball"
                     :class="{ selected: selectedBonus === n }" :disabled="disabled" @click="toggleBonus(n)">
                     {{ n }}
-                </button>
+                </UButton>
             </div>
         </template>
 
         <!-- Confirm button -->
-        <button class="play-ticket-btn" :disabled="!isComplete || disabled" @click="confirmPlay">
-            <AppIcon icon="mdi:ticket-confirmation" />
+        <UButton variant="primary" :disabled="!isComplete || disabled" @click="confirmPlay" icon="mdi:ticket-confirmation">
             {{ $t('gambling.lt_buy_draw', { cost: ticket.ticketCost }) }}
-        </button>
+        </UButton>
     </div>
 </template>
 
@@ -163,7 +163,7 @@ function confirmPlay(): void {
 }
 
 .lottery-ticket:hover {
-    border-color: color-mix(in srgb, var(--ticket-accent) 40%, var(--t-border));
+    border-color: var(--t-border-hover);
 }
 
 /* ── Header ── */
@@ -196,7 +196,7 @@ function confirmPlay(): void {
 
 .ticket-name {
     font-size: var(--t-font-size-md);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     margin: 0;
 }
@@ -223,12 +223,12 @@ function confirmPlay(): void {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--t-text-muted);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .cost-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-md);
     color: var(--ticket-accent);
 }
@@ -253,37 +253,12 @@ function confirmPlay(): void {
     gap: 4px;
     font-size: var(--t-font-size-sm);
     color: var(--t-success);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .pick-actions {
     display: flex;
     gap: 4px;
-}
-
-.pick-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-1) var(--t-space-2);
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.pick-action-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
-.pick-action-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 /* ── Number grid ── */
@@ -302,7 +277,7 @@ function confirmPlay(): void {
     align-items: center;
     justify-content: center;
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     background: var(--t-bg-muted);
     border: 2px solid var(--t-border);
@@ -355,7 +330,7 @@ function confirmPlay(): void {
     align-items: center;
     gap: 4px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--t-text-muted);
@@ -369,31 +344,5 @@ function confirmPlay(): void {
     box-shadow: 0 0 10px color-mix(in srgb, var(--t-warning) 40%, transparent);
 }
 
-/* ── Play button ── */
-.play-ticket-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--ticket-accent);
-    border: none;
-    border-radius: var(--t-radius-md);
-    color: var(--t-text);
-    font-size: var(--t-font-size-sm);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
 
-.play-ticket-btn:hover:not(:disabled) {
-    filter: brightness(1.1);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--ticket-accent) 30%, transparent);
-}
-
-.play-ticket-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    filter: none;
-}
 </style>

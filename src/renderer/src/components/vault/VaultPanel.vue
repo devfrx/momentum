@@ -1,10 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * VaultPanel — Main vault inventory grid with filtering.
  */
 import { computed, ref } from 'vue'
 import VaultItemCard from './VaultItemCard.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -109,9 +110,9 @@ function sellAllFiltered(): void {
                     {{ filteredItems.length }} {{ t('vault.items_label') }} —
                     {{ t('vault.total_value') }}: {{ formatCash(totalValue) }}
                 </span>
-                <button v-if="filteredItems.length > 0" class="btn btn-danger btn-sm" @click="sellAllFiltered()">
-                    <i class="pi pi-dollar"></i> {{ t('vault.sell_all_filtered') }}
-                </button>
+                <UButton v-if="filteredItems.length > 0" variant="danger" size="sm" icon="mdi:currency-usd" @click="sellAllFiltered()">
+                    {{ t('vault.sell_all_filtered') }}
+                </UButton>
             </div>
         </div>
 
@@ -161,6 +162,10 @@ function sellAllFiltered(): void {
     border-color: var(--t-accent);
 }
 
+.search-input:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+}
+
 .filter-select {
     flex: 1 1 130px;
     padding: 0.45rem 0.75rem;
@@ -192,8 +197,7 @@ function sellAllFiltered(): void {
 }
 
 .empty-icon {
-    font-size: 3rem;
-    opacity: 0.4;
+    font-size: 2.9rem;
 }
 
 .empty-text {

@@ -93,7 +93,7 @@ export function useAutoSave() {
     const shopStore = useShopStore()
 
     return dehydrateDecimals({
-      version: 2,
+      version: 3,
       savedAt: Date.now(),
       totalTicks: gameEngine.currentTick,
       totalPlayTime: gameEngine.elapsedTime,

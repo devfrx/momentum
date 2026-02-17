@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore, type Property } from '@renderer/stores/useRealEstateStore'
@@ -6,6 +6,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getDistrict, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UAccordion, UButton } from '@renderer/components/ui'
 import { THEME } from '@renderer/assets/theme/colors'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -25,7 +26,6 @@ const emit = defineEmits<{
 const showRename = ref(false)
 const newName = ref('')
 const confirmSell = ref(false)
-const showDetails = ref(false)
 
 const district = computed(() => getDistrict(props.property.districtId))
 const traits = computed(() => props.property.traits.map(tid => getTrait(tid)).filter(Boolean) as PropertyTrait[])
@@ -90,9 +90,8 @@ function handleRentSlider(val: number | number[]): void {
                     <div v-else class="prop-card__rename">
                         <InputText v-model="newName" size="small" class="prop-card__rename-input"
                             @keyup.enter="handleRename" />
-                        <button class="btn btn-icon btn-sm" @click="handleRename"><i class="pi pi-check"></i></button>
-                        <button class="btn btn-icon btn-sm" @click="showRename = false"><i
-                                class="pi pi-times"></i></button>
+                        <UButton variant="ghost" size="sm" icon="mdi:check" @click="handleRename" />
+                        <UButton variant="ghost" size="sm" icon="mdi:close" @click="showRename = false" />
                     </div>
                 </div>
                 <div class="prop-card__meta">
@@ -167,151 +166,133 @@ function handleRentSlider(val: number | number[]): void {
 
         <!-- ── Actions row ── -->
         <div class="prop-card__actions">
-            <button class="prop-card__act-btn" :disabled="!canAffordRepair" @click="handleRepair"
-                :title="t('realestate.repair')">
-                <AppIcon icon="mdi:wrench" />
-                <span class="act-label">{{ t('realestate.repair') }}</span>
-                <span v-if="property.condition < 98" class="act-cost">{{ formatCash(repairCost) }}</span>
-            </button>
-            <button class="prop-card__act-btn" :disabled="!canAffordRenovate" @click="handleRenovate"
-                :title="t('realestate.renovate')">
-                <AppIcon icon="mdi:arrow-up-bold" />
-                <span class="act-label">{{ t('realestate.renovate') }}</span>
-                <span v-if="property.renovationLevel < property.maxRenovationLevel" class="act-cost">{{
-                    formatCash(renovateCost) }}</span>
-            </button>
-            <button class="prop-card__act-btn prop-card__act-btn--sell"
-                :class="{ 'prop-card__act-btn--confirm': confirmSell }" @click="handleSell">
-                <AppIcon icon="mdi:currency-usd" />
-                <span class="act-label">{{ confirmSell ? t('realestate.confirm_sell') : t('realestate.sell') }}</span>
-                <span v-if="!confirmSell" class="act-cost act-cost--sell">{{ formatCash(sellPrice) }}</span>
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:wrench" :disabled="!canAffordRepair" @click="handleRepair"
+                :title="t('realestate.repair')" :label="t('realestate.repair')"
+                :subtitle="property.condition < 98 ? formatCash(repairCost) : undefined" />
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-up-bold" :disabled="!canAffordRenovate"
+                @click="handleRenovate" :title="t('realestate.renovate')" :label="t('realestate.renovate')"
+                :subtitle="property.renovationLevel < property.maxRenovationLevel ? formatCash(renovateCost) : undefined" />
+            <UButton :variant="confirmSell ? 'warning' : 'danger'" size="sm" icon="mdi:currency-usd" @click="handleSell"
+                :label="confirmSell ? t('realestate.confirm_sell') : t('realestate.sell')"
+                :subtitle="!confirmSell ? formatCash(sellPrice) : undefined" />
         </div>
 
-        <!-- ── Footer: Details toggle ── -->
+        <!-- ── Footer stats ── -->
         <div class="prop-card__footer">
             <div class="prop-card__footer-stats">
                 <span>{{ t('realestate.total_rent_collected') }}: {{ formatCash(property.totalRentCollected) }}</span>
                 <span>{{ t('realestate.total_maint_paid') }}: {{ formatCash(property.totalMaintenancePaid) }}</span>
             </div>
-            <button class="details-toggle" @click="showDetails = !showDetails">
-                <AppIcon :icon="showDetails ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
-                {{ showDetails ? t('common.less') : t('common.details') }}
-            </button>
         </div>
 
-        <!-- ── Expandable Details Panel ── -->
-        <Transition name="slide">
-            <div v-if="showDetails" class="details-panel">
-                <!-- Financials -->
-                <div class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:finance" /> {{ t('realestate.financials') }}
-                    </h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.current_value') }}</span>
-                            <span class="d-value highlight">{{ formatCash(property.currentValue) }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.purchase_price') }}</span>
-                            <span class="d-value">{{ formatCash(property.purchasePrice) }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.gross_rent') }}/t</span>
-                            <span class="d-value success">{{ formatCash(grossRent) }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.maintenance') }}/t</span>
-                            <span class="d-value danger">-{{ formatCash(maintenance) }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.tax_rate') }}</span>
-                            <span class="d-value">{{ formatRate(property.taxRate * 100) }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.roi') }}</span>
-                            <span class="d-value" :class="roi > 0 ? 'success' : 'danger'">{{ formatPercent(roi)
-                            }}</span>
-                        </div>
+        <!-- ── Expandable Details ── -->
+        <UAccordion :title="t('common.details')" icon="mdi:information-outline" variant="ghost" compact>
+            <!-- Financials -->
+            <div class="detail-section">
+                <h4 class="detail-title">
+                    <AppIcon icon="mdi:finance" /> {{ t('realestate.financials') }}
+                </h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.current_value') }}</span>
+                        <span class="d-value highlight">{{ formatCash(property.currentValue) }}</span>
                     </div>
-                </div>
-
-                <!-- Property Info -->
-                <div class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:information-outline" /> {{ t('realestate.property_info') }}
-                    </h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.wear_rate') }}</span>
-                            <span class="d-value">{{ property.wearRate.toFixed(4) }}/t</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.appreciation') }}</span>
-                            <span class="d-value success">{{ formatPercent(property.baseAppreciationRate * 100)
-                            }}/{{ t('common.cycle') }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.rent_multiplier') }}</span>
-                            <span class="d-value info">{{ property.rentMultiplier.toFixed(2) }}&#215;</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.sell_value') }}</span>
-                            <span class="d-value warn">{{ formatCash(sellPrice) }}</span>
-                        </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.purchase_price') }}</span>
+                        <span class="d-value">{{ formatCash(property.purchasePrice) }}</span>
                     </div>
-                </div>
-
-                <!-- Management Style -->
-                <div class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:cog" /> {{ t('realestate.management_style') }}
-                    </h4>
-                    <div class="prop-card__styles">
-                        <div v-for="style in MANAGEMENT_STYLES" :key="style.id" class="style-opt"
-                            :class="{ active: property.managementStyle === style.id }"
-                            @click="handleStyleChange(style.id)">
-                            <AppIcon :icon="style.icon" />
-                            <span>{{ t(style.nameKey) }}</span>
-                        </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.gross_rent') }}/t</span>
+                        <span class="d-value success">{{ formatCash(grossRent) }}</span>
                     </div>
-                </div>
-
-                <!-- Rent Slider -->
-                <div class="detail-section">
-                    <div class="prop-card__slider-head">
-                        <h4 class="detail-title" style="margin:0">
-                            <AppIcon icon="mdi:cash-multiple" /> {{ t('realestate.rent_multiplier') }}
-                        </h4>
-                        <span class="prop-card__rent-val">{{ property.rentMultiplier.toFixed(2) }}&#215;</span>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.maintenance') }}/t</span>
+                        <span class="d-value danger">-{{ formatCash(maintenance) }}</span>
                     </div>
-                    <Slider :modelValue="Math.round(property.rentMultiplier * 100)" :min="50" :max="200" :step="5"
-                        class="prop-card__slider" @update:modelValue="handleRentSlider" />
-                    <div class="prop-card__slider-labels">
-                        <span>0.5&#215;</span><span>1.0&#215;</span><span>2.0&#215;</span>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.tax_rate') }}</span>
+                        <span class="d-value">{{ formatRate(property.taxRate * 100) }}</span>
                     </div>
-                </div>
-
-                <!-- Improvements -->
-                <div class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:puzzle" /> {{ t('realestate.improvements_label') }}
-                        <span class="detail-count">{{ property.improvements.length }}/{{ property.maxImprovements
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.roi') }}</span>
+                        <span class="d-value" :class="roi > 0 ? 'success' : 'danger'">{{ formatPercent(roi)
                         }}</span>
-                    </h4>
-                    <div v-if="improvements.length > 0" class="prop-card__improvements">
-                        <span v-for="im in improvements" :key="im.id" class="imp-badge">
-                            <AppIcon :icon="im.icon" /> {{ t(im.nameKey) }}
-                        </span>
                     </div>
-                    <button v-if="property.improvements.length < property.maxImprovements" class="prop-card__link-btn"
-                        @click="emit('open-improvements')">
-                        <AppIcon icon="mdi:plus-circle-outline" /> {{ t('realestate.add_improvement') }}
-                    </button>
                 </div>
             </div>
-        </Transition>
+
+            <!-- Property Info -->
+            <div class="detail-section">
+                <h4 class="detail-title">
+                    <AppIcon icon="mdi:information-outline" /> {{ t('realestate.property_info') }}
+                </h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.wear_rate') }}</span>
+                        <span class="d-value">{{ property.wearRate.toFixed(4) }}/t</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.appreciation') }}</span>
+                        <span class="d-value success">{{ formatPercent(property.baseAppreciationRate * 100)
+                        }}/{{ t('common.cycle') }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.rent_multiplier') }}</span>
+                        <span class="d-value info">{{ property.rentMultiplier.toFixed(2) }}&#215;</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.sell_value') }}</span>
+                        <span class="d-value warn">{{ formatCash(sellPrice) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Style -->
+            <div class="detail-section">
+                <h4 class="detail-title">
+                    <AppIcon icon="mdi:cog" /> {{ t('realestate.management_style') }}
+                </h4>
+                <div class="prop-card__styles">
+                    <div v-for="style in MANAGEMENT_STYLES" :key="style.id" class="style-opt"
+                        :class="{ active: property.managementStyle === style.id }" @click="handleStyleChange(style.id)">
+                        <AppIcon :icon="style.icon" />
+                        <span>{{ t(style.nameKey) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rent Slider -->
+            <div class="detail-section">
+                <div class="prop-card__slider-head">
+                    <h4 class="detail-title" style="margin:0">
+                        <AppIcon icon="mdi:cash-multiple" /> {{ t('realestate.rent_multiplier') }}
+                    </h4>
+                    <span class="prop-card__rent-val">{{ property.rentMultiplier.toFixed(2) }}&#215;</span>
+                </div>
+                <Slider :modelValue="Math.round(property.rentMultiplier * 100)" :min="50" :max="200" :step="5"
+                    class="prop-card__slider" @update:modelValue="handleRentSlider" />
+                <div class="prop-card__slider-labels">
+                    <span>0.5&#215;</span><span>1.0&#215;</span><span>2.0&#215;</span>
+                </div>
+            </div>
+
+            <!-- Improvements -->
+            <div class="detail-section">
+                <h4 class="detail-title">
+                    <AppIcon icon="mdi:puzzle" /> {{ t('realestate.improvements_label') }}
+                    <span class="detail-count">{{ property.improvements.length }}/{{ property.maxImprovements
+                    }}</span>
+                </h4>
+                <div v-if="improvements.length > 0" class="prop-card__improvements">
+                    <span v-for="im in improvements" :key="im.id" class="imp-badge">
+                        <AppIcon :icon="im.icon" /> {{ t(im.nameKey) }}
+                    </span>
+                </div>
+                <UButton v-if="property.improvements.length < property.maxImprovements" variant="text" size="sm"
+                    icon="mdi:plus-circle-outline" @click="emit('open-improvements')">{{ t('realestate.add_improvement')
+                    }}</UButton>
+            </div>
+        </UAccordion>
     </div>
 </template>
 
@@ -324,13 +305,11 @@ function handleRentSlider(val: number | number[]): void {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
 }
 
 .prop-card:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-md);
 }
 
 /* ── Head ── */
@@ -341,7 +320,7 @@ function handleRentSlider(val: number | number[]): void {
 }
 
 .prop-card__icon {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     color: var(--_accent);
     flex-shrink: 0;
 }
@@ -359,7 +338,7 @@ function handleRentSlider(val: number | number[]): void {
 
 .prop-card__name {
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     cursor: pointer;
 }
@@ -484,7 +463,7 @@ function handleRentSlider(val: number | number[]): void {
 .bar-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     width: 40px;
     text-align: right;
 }
@@ -503,7 +482,7 @@ function handleRentSlider(val: number | number[]): void {
     padding: 0.15rem 0.5rem;
     border-radius: 6px;
     font-size: var(--t-font-size-xs);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
 }
 
 .trait-badge--pos {
@@ -536,62 +515,6 @@ function handleRentSlider(val: number | number[]): void {
     flex-wrap: wrap;
 }
 
-.prop-card__act-btn {
-    flex: 1;
-    min-width: 90px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.15rem;
-    padding: var(--t-space-2) var(--t-space-2);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    border-radius: var(--t-radius-sm);
-    border: 1px solid var(--t-border);
-    background: var(--t-bg-muted);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-    line-height: 1.2;
-}
-
-.prop-card__act-btn:hover:not(:disabled) {
-    border-color: var(--t-border-hover);
-    color: var(--t-text);
-    background: var(--t-bg-card-hover);
-}
-
-.prop-card__act-btn:disabled {
-    opacity: 0.35;
-    cursor: default;
-}
-
-.act-label {
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-}
-
-.act-cost {
-    font-family: var(--t-font-mono);
-    font-size: 0.6rem;
-    color: var(--t-text-muted);
-    font-weight: 400;
-}
-
-.act-cost--sell {
-    color: var(--t-success);
-}
-
-.prop-card__act-btn--sell:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--t-warning) 35%, var(--t-border));
-    color: var(--t-warning);
-}
-
-.prop-card__act-btn--confirm {
-    border-color: var(--t-danger);
-    background: var(--t-danger-muted);
-    color: var(--t-danger);
-}
 
 /* ── Footer ── */
 .prop-card__footer {
@@ -610,56 +533,6 @@ function handleRentSlider(val: number | number[]): void {
     color: var(--t-text-muted);
 }
 
-.details-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: var(--t-space-1) var(--t-space-2);
-    border: none;
-    background: none;
-    color: var(--t-text-muted);
-    font-size: var(--t-font-size-xs);
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: var(--t-radius-sm);
-    transition: color var(--t-transition-fast), background var(--t-transition-fast);
-}
-
-.details-toggle:hover {
-    color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 6%, transparent);
-}
-
-/* ── Slide transition ── */
-.slide-enter-active,
-.slide-leave-active {
-    transition: all 0.25s ease;
-    overflow: hidden;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-    opacity: 0;
-    max-height: 0;
-}
-
-.slide-enter-to,
-.slide-leave-from {
-    opacity: 1;
-    max-height: 800px;
-}
-
-/* ── Details Panel ── */
-.details-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-3);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-md);
-    border: 1px solid var(--t-border);
-}
-
 .detail-section {
     display: flex;
     flex-direction: column;
@@ -672,7 +545,7 @@ function handleRentSlider(val: number | number[]): void {
     align-items: center;
     gap: var(--t-space-1);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 
@@ -705,7 +578,7 @@ function handleRentSlider(val: number | number[]): void {
 .d-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -718,7 +591,7 @@ function handleRentSlider(val: number | number[]): void {
 }
 
 .d-value.info {
-    color: var(--t-accent);
+    color: var(--t-text-secondary);
 }
 
 .d-value.warn {
@@ -756,10 +629,19 @@ function handleRentSlider(val: number | number[]): void {
     border-color: var(--t-border-hover);
 }
 
+.style-opt:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.style-opt:active {
+    transform: scale(0.98);
+}
+
 .style-opt.active {
-    border-color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card));
-    color: var(--t-accent);
+    border-color: var(--t-text);
+    background: var(--t-bg-card-hover);
+    color: var(--t-text);
 }
 
 /* ── Slider ── */
@@ -771,9 +653,9 @@ function handleRentSlider(val: number | number[]): void {
 
 .prop-card__rent-val {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-base);
-    color: var(--t-accent);
+    color: var(--t-text);
 }
 
 .prop-card__slider {
@@ -799,27 +681,9 @@ function handleRentSlider(val: number | number[]): void {
     align-items: center;
     gap: 0.2rem;
     padding: 0.15rem 0.5rem;
-    background: color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card));
+    background: var(--t-bg-muted);
     border-radius: 6px;
     font-size: var(--t-font-size-xs);
     color: var(--t-text-secondary);
-}
-
-/* ── Link button (add improvement) ── */
-.prop-card__link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-    padding: var(--t-space-1) 0;
-    transition: color var(--t-transition-fast);
-}
-
-.prop-card__link-btn:hover {
-    color: var(--t-accent);
 }
 </style>

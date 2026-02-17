@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -168,9 +169,9 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     <div class="coinflip-game">
         <!-- Header -->
         <div class="cf-header">
-            <button class="back-btn" @click="$emit('back')">
-                <AppIcon icon="mdi:arrow-left" /> {{ $t('gambling.back') }}
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-left" @click="$emit('back')">
+                {{ $t('gambling.back') }}
+            </UButton>
             <h2 class="cf-title">
                 <AppIcon icon="mdi:circle-half-full" class="title-icon" />
                 {{ $t('gambling.cf_title') }}
@@ -218,17 +219,15 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 
         <!-- Side selector -->
         <div class="side-selector">
-            <button class="side-btn" :class="{ active: chosenSide === 'heads', disabled: flipping }"
-                :disabled="flipping" @click="chosenSide = 'heads'">
-                <AppIcon icon="mdi:crown" class="side-icon" />
+            <UButton variant="ghost" :active="chosenSide === 'heads'" :disabled="flipping" icon="mdi:crown"
+                @click="chosenSide = 'heads'">
                 <span>{{ $t('gambling.cf_heads') }}</span>
-            </button>
+            </UButton>
             <span class="side-vs">{{ $t('gambling.cf_vs') }}</span>
-            <button class="side-btn" :class="{ active: chosenSide === 'tails', disabled: flipping }"
-                :disabled="flipping" @click="chosenSide = 'tails'">
-                <AppIcon icon="mdi:shield" class="side-icon" />
+            <UButton variant="ghost" :active="chosenSide === 'tails'" :disabled="flipping" icon="mdi:shield"
+                @click="chosenSide = 'tails'">
                 <span>{{ $t('gambling.cf_tails') }}</span>
-            </button>
+            </UButton>
         </div>
 
         <!-- Controls -->
@@ -236,32 +235,31 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
             <div class="bet-section">
                 <label class="bet-label">{{ $t('gambling.bet_amount') }}</label>
                 <div class="bet-row">
-                    <button class="bet-adj" @click="halfBet" :disabled="flipping">1/2</button>
+                    <UButton variant="ghost" size="xs" @click="halfBet" :disabled="flipping">1/2</UButton>
                     <div class="bet-display">
                         <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
                             class="bet-input" :disabled="flipping" />
                     </div>
-                    <button class="bet-adj" @click="doubleBet" :disabled="flipping">x2</button>
+                    <UButton variant="ghost" size="xs" @click="doubleBet" :disabled="flipping">x2</UButton>
                 </div>
                 <div class="bet-presets">
-                    <button v-for="pct in [10, 25, 50]" :key="pct" class="preset-btn"
+                    <UButton v-for="pct in [10, 25, 50]" :key="pct" variant="ghost" size="xs"
                         @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="flipping">
                         {{ pct }}%
-                    </button>
-                    <button class="preset-btn preset-max" @click="maxBet" :disabled="flipping">{{ $t('gambling.max')
-                        }}</button>
+                    </UButton>
+                    <UButton variant="warning" size="xs" @click="maxBet" :disabled="flipping">{{ $t('gambling.max')
+                        }}</UButton>
                 </div>
             </div>
 
             <div class="action-col">
-                <button class="flip-btn" :disabled="!canFlip" @click="flip">
-                    <AppIcon :icon="flipping ? 'mdi:loading' : 'mdi:rotate-3d-variant'"
-                        :class="{ 'spin-icon': flipping }" />
+                <UButton variant="primary" :disabled="!canFlip"
+                    :icon="flipping ? 'mdi:loading' : 'mdi:rotate-3d-variant'" @click="flip">
                     {{ flipping ? $t('gambling.cf_flipping') : $t('gambling.cf_flip') }}
-                </button>
-                <button v-if="showResult" class="new-round-btn" @click="newRound">
-                    <AppIcon icon="mdi:refresh" /> {{ $t('gambling.new_round') }}
-                </button>
+                </UButton>
+                <UButton v-if="showResult" variant="ghost" size="sm" icon="mdi:refresh" @click="newRound">
+                    {{ $t('gambling.new_round') }}
+                </UButton>
             </div>
         </div>
 
@@ -312,36 +310,17 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.back-btn:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
 .cf-title {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .title-icon {
-    font-size: 1.5rem;
-    color: var(--t-accent);
+    font-size: 1.1rem;
+    color: var(--t-text-secondary);
 }
 
 .balance-chip {
@@ -353,8 +332,8 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     color: var(--t-success);
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 0.85rem;
 }
 
@@ -422,9 +401,9 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: 4px;
     backface-visibility: hidden;
     border: 4px solid color-mix(in srgb, var(--t-text) 15%, transparent);
-    box-shadow:
+    /* box-shadow:
         0 4px 20px var(--t-overlay-light),
-        inset 0 2px 10px color-mix(in srgb, var(--t-text) 10%, transparent);
+        inset 0 2px 10px color-mix(in srgb, var(--t-text) 10%, transparent); */
 }
 
 .coin-heads {
@@ -482,13 +461,13 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 
 .badge-side {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .badge-payout {
     font-size: 1.4rem;
     font-weight: 800;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     color: var(--t-success);
 }
 
@@ -517,40 +496,8 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
 }
 
-.side-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--t-space-1);
-    padding: var(--t-space-3) var(--t-space-5);
-    background: var(--t-bg-card);
-    border: 2px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 700;
-    transition: all var(--t-transition-fast);
-    min-width: 110px;
-}
-
-.side-btn:hover:not(.disabled) {
-    background: var(--t-bg-hover);
-}
-
-.side-btn.active {
-    background: var(--t-accent);
-    color: var(--t-text);
-    box-shadow: 0 0 16px rgba(var(--t-accent-rgb, 99 102 241), 0.35);
-}
-
-.side-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .side-icon {
-    font-size: 1.8rem;
+    font-size: 1.1rem;
 }
 
 .side-vs {
@@ -576,14 +523,13 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .bet-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -591,28 +537,6 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
-}
-
-.bet-adj {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    color: var(--t-text);
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all var(--t-transition-fast);
-}
-
-.bet-adj:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.bet-adj:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 .bet-display {
@@ -623,8 +547,8 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     width: 100%;
     text-align: center;
     font-size: 1rem;
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     padding: var(--t-space-2);
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
@@ -638,65 +562,12 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: 4px;
 }
 
-.preset-btn {
-    flex: 1;
-    padding: var(--t-space-1) var(--t-space-2);
-    font-size: 0.7rem;
-    font-weight: 600;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.preset-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.preset-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.preset-max {
-    color: var(--t-accent);
-    font-weight: 700;
-}
-
 /* ── Action buttons ── */
 .action-col {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
     min-width: 130px;
-}
-
-.flip-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-accent);
-    color: var(--t-text);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.flip-btn:hover:not(:disabled) {
-    filter: brightness(1.1);
-}
-
-.flip-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .spin-icon {
@@ -713,26 +584,6 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     }
 }
 
-.new-round-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-accent);
-    border-radius: var(--t-radius-md);
-    color: var(--t-accent);
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 600;
-    transition: all var(--t-transition-fast);
-}
-
-.new-round-btn:hover {
-    background: var(--t-bg-hover);
-}
-
 /* ── Stats ── */
 .cf-stats {
     display: flex;
@@ -742,7 +593,6 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .stat-item {
@@ -760,8 +610,8 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 }
 
 .stat-value {
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -775,11 +625,11 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 
 /* ── Transitions ── */
 .pop-enter-active {
-    transition: all 0.35s ease;
+    transition: all var(--t-transition-normal);
 }
 
 .pop-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast);
 }
 
 .pop-enter-from {

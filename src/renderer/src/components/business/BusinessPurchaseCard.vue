@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { type BusinessDef } from '@renderer/data/businesses'
@@ -50,11 +51,10 @@ const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth
             </div>
         </div>
 
-        <button class="btn btn-success buy-button" :disabled="!canAfford || owned" @click="emit('buy', def.id)">
-            <AppIcon icon="mdi:cart-plus" />
+        <UButton variant="success" icon="mdi:cart-plus" class="buy-button" :disabled="!canAfford || owned" @click="emit('buy', def.id)">
             <span v-if="owned">{{ $t('business.already_owned') }}</span>
             <span v-else>{{ $t('common.buy') }} — {{ formatCash(def.purchasePrice) }}</span>
-        </button>
+        </UButton>
     </div>
 </template>
 
@@ -67,7 +67,6 @@ const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth
     background: var(--t-bg-card);
     border: 1px dashed var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
     transition: border-color var(--t-transition-fast);
 }
 
@@ -99,7 +98,7 @@ const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth
 }
 
 .biz-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--t-text-secondary);
 }
 
@@ -109,7 +108,7 @@ const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth
 
 .purchase-name {
     font-size: var(--t-font-size-base);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0;
 }
@@ -140,11 +139,16 @@ const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth
 
 .ps-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 
 .buy-button {
     width: 100%;
+}
+
+.buy-button:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 </style>

@@ -160,7 +160,7 @@ const { t } = useI18n()
 
 .kpi-value {
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     line-height: 1.3;
     white-space: nowrap;
@@ -192,7 +192,7 @@ const { t } = useI18n()
     color: var(--t-text-secondary);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
-    border-radius: 100px;
+    border-radius: var(--t-radius-full);
     white-space: nowrap;
 }
 

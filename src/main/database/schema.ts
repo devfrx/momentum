@@ -685,7 +685,7 @@ export function createDefaultSave(): GameSave {
       totalReturned: ZERO_SD,
       sectorBonuses: {},
       globalSuccessBonus: 0,
-      globalReturnBonus: 0,
+      globalReturnBonus: 1,
       successfulCount: 0,
       failedCount: 0
     },

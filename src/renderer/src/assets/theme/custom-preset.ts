@@ -1,7 +1,7 @@
-/**
- * PrimeVue Theme Preset — Clean, minimal, near-flat
- * Based on Aura preset with slate/neutral palette.
- * Minimal border-radius, subtle shadows, professional look.
+﻿/**
+ * PrimeVue Theme Preset - Minimal professional design
+ * Based on Aura with neutral palette.
+ * CTA primary = white (dark) / dark (light) for maximum contrast.
  */
 import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
@@ -9,114 +9,114 @@ import Aura from '@primeuix/themes/aura'
 const ProfessionalPreset = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '{slate.50}',
-      100: '{slate.100}',
-      200: '{slate.200}',
-      300: '{slate.300}',
-      400: '{slate.400}',
-      500: '{slate.500}',
-      600: '{slate.600}',
-      700: '{slate.700}',
-      800: '{slate.800}',
-      900: '{slate.900}',
-      950: '{slate.950}'
+      50: '{zinc.50}',
+      100: '{zinc.100}',
+      200: '{zinc.200}',
+      300: '{zinc.300}',
+      400: '{zinc.400}',
+      500: '{zinc.500}',
+      600: '{zinc.600}',
+      700: '{zinc.700}',
+      800: '{zinc.800}',
+      900: '{zinc.900}',
+      950: '{zinc.950}'
     },
     borderRadius: {
       none: '0',
-      xs: '2px',
-      sm: '3px',
-      md: '5px',
-      lg: '6px',
-      xl: '8px'
+      xs: '3px',
+      sm: '4px',
+      md: '6px',
+      lg: '8px',
+      xl: '10px'
     },
     colorScheme: {
       dark: {
         surface: {
-          0: '#e8eaed',
-          50: '#d0d3da',
-          100: '#8b919e',
-          200: '#565c68',
-          300: '#3a4150',
-          400: '#2a303c',
-          500: '#1e222b',
-          600: '#1c2028',
-          700: '#1e222b',
-          800: '#161a21',
-          900: '#12151a',
-          950: '#0c0e12'
+          0: '#ececef',
+          50: '#d4d4d8',
+          100: '#8b8b95',
+          200: '#55555e',
+          300: '#3a3a42',
+          400: '#2a2a30',
+          500: '#1f1f23',
+          600: '#1a1a1e',
+          700: '#1f1f23',
+          800: '#141416',
+          900: '#111113',
+          950: '#09090b'
         },
         primary: {
-          color: '{zinc.50}',
-          inverseColor: '{zinc.950}',
-          hoverColor: '{zinc.200}',
-          activeColor: '{zinc.300}'
+          color: '#ececef',
+          inverseColor: '#111113',
+          hoverColor: '#d4d4d8',
+          activeColor: '#a1a1aa'
         },
         highlight: {
-          background: 'rgba(255, 255, 255, 0.08)',
-          focusBackground: 'rgba(255, 255, 255, 0.12)',
+          background: 'rgba(255, 255, 255, 0.06)',
+          focusBackground: 'rgba(255, 255, 255, 0.10)',
           color: 'rgba(255, 255, 255, 0.87)',
           focusColor: 'rgba(255, 255, 255, 0.87)'
         },
         formField: {
-          background: '{surface.900}',
-          disabledBackground: '{surface.800}',
-          filledBackground: '{surface.900}',
-          filledHoverBackground: '{surface.900}',
-          filledFocusBackground: '{surface.900}',
-          borderColor: '{surface.700}',
-          hoverBorderColor: '{surface.600}',
-          focusBorderColor: '{surface.500}',
+          background: '{surface.800}',
+          disabledBackground: '{surface.700}',
+          filledBackground: '{surface.800}',
+          filledHoverBackground: '{surface.800}',
+          filledFocusBackground: '{surface.800}',
+          borderColor: '{surface.500}',
+          hoverBorderColor: '{surface.400}',
+          focusBorderColor: '{surface.300}',
           invalidBorderColor: '{red.400}',
           color: '{surface.0}',
-          disabledColor: '{surface.500}',
-          placeholderColor: '{surface.500}',
+          disabledColor: '{surface.400}',
+          placeholderColor: '{surface.400}',
           invalidPlaceholderColor: '{red.300}',
-          floatLabelColor: '{surface.500}',
-          floatLabelFocusColor: '{surface.300}',
-          floatLabelActiveColor: '{surface.500}',
+          floatLabelColor: '{surface.400}',
+          floatLabelFocusColor: '{surface.200}',
+          floatLabelActiveColor: '{surface.400}',
           floatLabelInvalidColor: '{red.400}',
-          iconColor: '{surface.500}',
+          iconColor: '{surface.400}',
           shadow: 'none'
         },
         text: {
           color: '{surface.0}',
           hoverColor: '{surface.0}',
-          mutedColor: '{surface.400}',
-          hoverMutedColor: '{surface.300}'
+          mutedColor: '{surface.300}',
+          hoverMutedColor: '{surface.200}'
         },
         content: {
           background: '{surface.900}',
           hoverBackground: '{surface.800}',
-          borderColor: '{surface.700}',
+          borderColor: '{surface.500}',
           color: '{surface.0}',
           hoverColor: '{surface.0}'
         },
         overlay: {
           select: {
-            background: '{surface.900}',
-            borderColor: '{surface.700}',
+            background: '{surface.800}',
+            borderColor: '{surface.500}',
             color: '{surface.0}'
           },
           popover: {
-            background: '{surface.900}',
-            borderColor: '{surface.700}',
+            background: '{surface.800}',
+            borderColor: '{surface.500}',
             color: '{surface.0}'
           },
           modal: {
-            background: '{surface.900}',
-            borderColor: '{surface.700}',
+            background: '{surface.800}',
+            borderColor: '{surface.500}',
             color: '{surface.0}'
           }
         },
         navigation: {
           item: {
-            focusBackground: '{surface.800}',
-            activeBackground: '{surface.800}',
-            color: '{surface.400}',
+            focusBackground: '{surface.700}',
+            activeBackground: '{surface.700}',
+            color: '{surface.300}',
             focusColor: '{surface.0}',
             activeColor: '{surface.0}',
             icon: {
-              color: '{surface.500}',
+              color: '{surface.400}',
               focusColor: '{surface.0}',
               activeColor: '{surface.0}'
             }
@@ -126,7 +126,7 @@ const ProfessionalPreset = definePreset(Aura, {
             color: '{surface.400}'
           },
           submenuIcon: {
-            color: '{surface.500}',
+            color: '{surface.400}',
             focusColor: '{surface.0}',
             activeColor: '{surface.0}'
           }
@@ -135,27 +135,27 @@ const ProfessionalPreset = definePreset(Aura, {
       light: {
         surface: {
           0: '#ffffff',
-          50: '#f7f8fa',
-          100: '#f0f1f4',
-          200: '#e2e4ea',
-          300: '#cdd0d8',
-          400: '#9198a5',
-          500: '#6b7280',
-          600: '#50555f',
-          700: '#3a3f4a',
-          800: '#252830',
-          900: '#181a20',
-          950: '#111318'
+          50: '#f8f8fa',
+          100: '#f0f0f2',
+          200: '#e4e4e7',
+          300: '#d4d4d8',
+          400: '#a1a1aa',
+          500: '#71717a',
+          600: '#52525b',
+          700: '#3f3f46',
+          800: '#27272a',
+          900: '#18181b',
+          950: '#09090b'
         },
         primary: {
-          color: '{zinc.950}',
-          inverseColor: '{zinc.50}',
-          hoverColor: '{zinc.800}',
-          activeColor: '{zinc.700}'
+          color: '#18181b',
+          inverseColor: '#fafafa',
+          hoverColor: '#27272a',
+          activeColor: '#3f3f46'
         },
         highlight: {
-          background: 'rgba(0, 0, 0, 0.06)',
-          focusBackground: 'rgba(0, 0, 0, 0.1)',
+          background: 'rgba(0, 0, 0, 0.04)',
+          focusBackground: 'rgba(0, 0, 0, 0.08)',
           color: '{zinc.950}',
           focusColor: '{zinc.950}'
         },
@@ -165,9 +165,9 @@ const ProfessionalPreset = definePreset(Aura, {
           filledBackground: '{surface.50}',
           filledHoverBackground: '{surface.50}',
           filledFocusBackground: '{surface.50}',
-          borderColor: '{surface.300}',
-          hoverBorderColor: '{surface.400}',
-          focusBorderColor: '{surface.600}',
+          borderColor: '{surface.200}',
+          hoverBorderColor: '{surface.300}',
+          focusBorderColor: '{surface.500}',
           invalidBorderColor: '{red.500}',
           color: '{surface.950}',
           disabledColor: '{surface.400}',

@@ -16,6 +16,8 @@ import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
+import { useStorageStore } from '@renderer/stores/useStorageStore'
+import { useEventStore } from '@renderer/stores/useEventStore'
 import { EventImpactBanner } from '@renderer/components/events'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -34,11 +36,8 @@ import {
 import { UPGRADE_CATEGORY_INFO, type PrestigeUpgradeDef } from '@renderer/data/prestige'
 import { rarityCssVar } from '@renderer/data/rarity'
 import { THEME } from '@renderer/assets/theme/colors'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
+import { UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 
 const prestige = usePrestigeStore()
 const player = usePlayerStore()
@@ -55,9 +54,19 @@ const deposits = useDepositStore()
 const blackmarket = useBlackMarketStore()
 const vault = useVaultStore()
 const shop = useShopStore()
+const storage = useStorageStore()
+const events = useEventStore()
 const achievementStore = useAchievementStore()
 const { formatNumber, formatMultiplier } = useFormat()
 const { t } = useI18n()
+
+const prestigeActiveTab = ref('upgrades')
+const prestigeTabs = computed<TabDef[]>(() => [
+    { id: 'upgrades', label: t('prestige.upgrades'), icon: 'mdi:arrow-up-bold' },
+    { id: 'perks', label: t('prestige.perks'), icon: 'mdi:star-four-points' },
+    { id: 'milestones', label: t('prestige.milestones'), icon: 'mdi:flag-checkered' },
+    { id: 'achievements', label: t('prestige.tab_achievements'), icon: 'mdi:trophy', count: achievementStore.unlockedCount },
+])
 
 type UpgradeWithLevel = PrestigeUpgradeDef & { level: number }
 
@@ -221,6 +230,8 @@ function doPrestige(): void {
     blackmarket.prestigeReset()
     vault.prestigeReset()
     shop.prestigeReset()
+    storage.prestigeReset()
+    events.prestigeReset()
 
     // Apply starting bonuses
     const startingCash = prestige.getStartingCash()
@@ -302,129 +313,114 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
             :rebirth-count="prestige.rebirthCount" :era-color="prestige.currentEra.themeColor" @prestige="doPrestige" />
 
         <!-- Tabbed Content -->
-        <Tabs value="upgrades" class="prestige-tabs">
-            <TabList>
-                <Tab value="upgrades">{{ $t('prestige.upgrades') }}</Tab>
-                <Tab value="perks">{{ $t('prestige.perks') }}</Tab>
-                <Tab value="milestones">{{ $t('prestige.milestones') }}</Tab>
-                <Tab value="achievements">{{ $t('prestige.tab_achievements') }}</Tab>
-            </TabList>
-            <TabPanels>
-                <!-- Upgrades Tab -->
-                <TabPanel value="upgrades">
-                    <div v-for="cat in upgradeCategories" :key="cat.category" class="upgrade-category">
-                        <h3 class="category-header">
-                            <AppIcon :icon="cat.info.icon" :style="{ color: cat.info.color }" />
-                            {{ cat.info.label }}
-                        </h3>
-                        <div class="card-grid">
-                            <PrestigeUpgradeCard v-for="upgrade in cat.upgrades" :key="upgrade.id" :name="upgrade.name"
-                                :description="upgrade.description" :icon="upgrade.icon"
-                                :effect-type="upgrade.effectType" :effect-value="upgrade.effectValue"
-                                :level="upgrade.level" :max-level="upgrade.maxLevel"
-                                :cost="formatNumber(prestige.getUpgradeCost(upgrade.id))"
-                                :can-afford="!prestige.points.lt(prestige.getUpgradeCost(upgrade.id))"
-                                @buy="prestige.buyPrestigeUpgrade(upgrade.id)" />
-                        </div>
-                    </div>
-                </TabPanel>
-
-                <!-- Perks Tab -->
-                <TabPanel value="perks">
-                    <p class="tab-description">
-                        {{ $t('prestige.perks_desc') }}
-                    </p>
+        <UTabs v-model="prestigeActiveTab" :tabs="prestigeTabs">
+            <template #upgrades>
+                <div v-for="cat in upgradeCategories" :key="cat.category" class="upgrade-category">
+                    <h3 class="category-header">
+                        <AppIcon :icon="cat.info.icon" :style="{ color: cat.info.color }" />
+                        {{ cat.info.label }}
+                    </h3>
                     <div class="card-grid">
-                        <PerkCard v-for="perk in perksWithStatus" :key="perk.id" :name="perk.name"
-                            :description="perk.description" :icon="perk.icon" :cost="formatNumber(perk.cost)"
-                            :purchased="perk.purchased" :can-buy="perk.canBuy" :effect="perk.effect"
-                            :category="perk.category" :prerequisites="perk.prerequisites"
-                            :prerequisites-met="perk.prerequisitesMet" @buy="buyPerk(perk.id)" />
+                        <PrestigeUpgradeCard v-for="upgrade in cat.upgrades" :key="upgrade.id" :name="upgrade.name"
+                            :description="upgrade.description" :icon="upgrade.icon" :effect-type="upgrade.effectType"
+                            :effect-value="upgrade.effectValue" :level="upgrade.level" :max-level="upgrade.maxLevel"
+                            :cost="formatNumber(prestige.getUpgradeCost(upgrade.id))"
+                            :can-afford="!prestige.points.lt(prestige.getUpgradeCost(upgrade.id))"
+                            @buy="prestige.buyPrestigeUpgrade(upgrade.id)" />
                     </div>
-                </TabPanel>
+                </div>
+            </template>
 
-                <!-- Milestones Tab -->
-                <TabPanel value="milestones">
-                    <p class="tab-description">
-                        {{ $t('prestige.milestones_desc') }}
-                    </p>
-                    <div class="milestones-grid">
-                        <MilestoneCard v-for="ms in prestige.milestones" :key="ms.id" :name="ms.name"
-                            :description="ms.description" :icon="ms.icon" :unlocked="ms.unlocked"
-                            :rewards="ms.rewards" />
+            <template #perks>
+                <p class="tab-description">
+                    {{ $t('prestige.perks_desc') }}
+                </p>
+                <div class="card-grid">
+                    <PerkCard v-for="perk in perksWithStatus" :key="perk.id" :name="perk.name"
+                        :description="perk.description" :icon="perk.icon" :cost="formatNumber(perk.cost)"
+                        :purchased="perk.purchased" :can-buy="perk.canBuy" :effect="perk.effect"
+                        :category="perk.category" :prerequisites="perk.prerequisites"
+                        :prerequisites-met="perk.prerequisitesMet" @buy="buyPerk(perk.id)" />
+                </div>
+            </template>
+
+            <template #milestones>
+                <p class="tab-description">
+                    {{ $t('prestige.milestones_desc') }}
+                </p>
+                <div class="milestones-grid">
+                    <MilestoneCard v-for="ms in prestige.milestones" :key="ms.id" :name="ms.name"
+                        :description="ms.description" :icon="ms.icon" :unlocked="ms.unlocked" :rewards="ms.rewards" />
+                </div>
+            </template>
+
+            <template #achievements>
+                <p class="tab-description">
+                    {{ $t('prestige.achievements_desc') }}
+                </p>
+
+                <!-- Achievement progress bar -->
+                <div class="ach-progress-bar">
+                    <div class="ach-progress-label">
+                        <AppIcon icon="mdi:trophy" />
+                        <span>{{ achievementStore.unlockedCount }} / {{ achievementStore.totalCount }}</span>
+                        <span class="ach-progress-pct">{{ Math.round(achievementStore.completionPercent) }}%</span>
                     </div>
-                </TabPanel>
-
-                <!-- Achievements Tab -->
-                <TabPanel value="achievements">
-                    <p class="tab-description">
-                        {{ $t('prestige.achievements_desc') }}
-                    </p>
-
-                    <!-- Achievement progress bar -->
-                    <div class="ach-progress-bar">
-                        <div class="ach-progress-label">
-                            <AppIcon icon="mdi:trophy" />
-                            <span>{{ achievementStore.unlockedCount }} / {{ achievementStore.totalCount }}</span>
-                            <span class="ach-progress-pct">{{ Math.round(achievementStore.completionPercent) }}%</span>
-                        </div>
-                        <div class="ach-progress-track">
-                            <div class="ach-progress-fill"
-                                :style="{ width: achievementStore.completionPercent + '%' }" />
-                        </div>
+                    <div class="ach-progress-track">
+                        <div class="ach-progress-fill" :style="{ width: achievementStore.completionPercent + '%' }" />
                     </div>
+                </div>
 
-                    <!-- Divine Abilities Section (if any unlocked) -->
-                    <div v-if="divineAbilities.length > 0" class="divine-section">
-                        <h3 class="category-header divine-header">
-                            <AppIcon icon="mdi:shimmer" />
-                            {{ $t('prestige.divine_abilities') }}
-                        </h3>
-                        <div class="divine-grid">
-                            <div v-for="ability in divineAbilities" :key="ability.id" class="divine-card">
-                                <AppIcon :icon="ability.icon" class="divine-card-icon" />
-                                <div class="divine-card-body">
-                                    <span class="divine-card-name">{{ ability.name }}</span>
-                                    <span class="divine-card-value" :style="{ color: rarityCssVar(ability.rarity) }">+{{
-                                        Math.round((ability.effect.value - 1) * 100) }}%</span>
-                                    <span class="divine-card-desc">{{ ability.description }}</span>
-                                </div>
+                <!-- Divine Abilities Section (if any unlocked) -->
+                <div v-if="divineAbilities.length > 0" class="divine-section">
+                    <h3 class="category-header divine-header">
+                        <AppIcon icon="mdi:shimmer" />
+                        {{ $t('prestige.divine_abilities') }}
+                    </h3>
+                    <div class="divine-grid">
+                        <div v-for="ability in divineAbilities" :key="ability.id" class="divine-card">
+                            <AppIcon :icon="ability.icon" class="divine-card-icon" />
+                            <div class="divine-card-body">
+                                <span class="divine-card-name">{{ ability.name }}</span>
+                                <span class="divine-card-value" :style="{ color: rarityCssVar(ability.rarity) }">+{{
+                                    Math.round((ability.effect.value - 1) * 100) }}%</span>
+                                <span class="divine-card-desc">{{ ability.description }}</span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Achievements by category -->
-                    <div v-for="cat in achievementsByCategory" :key="cat.category" class="ach-category">
-                        <h3 class="category-header">
-                            <AppIcon
-                                :icon="cat.category === 'Lottery' ? 'mdi:ticket' : cat.category === 'Wealth' ? 'mdi:cash' : cat.category === 'Net Worth' ? 'mdi:scale-balance' : cat.category === 'Progress' ? 'mdi:arrow-up-bold-circle' : cat.category === 'Business' ? 'mdi:store' : cat.category === 'Prestige' ? 'mdi:star-circle' : 'mdi:trophy'" />
-                            {{ cat.category }}
-                            <span class="ach-cat-count">({{cat.items.filter(a => a.unlocked).length}}/{{
-                                cat.items.length }})</span>
-                        </h3>
-                        <div class="ach-grid">
-                            <div v-for="ach in cat.items" :key="ach.id" class="ach-card"
-                                :class="{ 'ach-unlocked': ach.unlocked, 'ach-hidden': ach.hidden && !ach.unlocked }"
-                                :style="{ '--ach-color': ach.category === 'Lottery' ? rarityCssVar(getLotteryAchRarity(ach.id)) : 'var(--t-success)' }">
-                                <div class="ach-icon-wrap">
-                                    <AppIcon :icon="ach.hidden && !ach.unlocked ? 'mdi:help-circle' : ach.icon"
-                                        class="ach-icon" />
-                                </div>
-                                <div class="ach-info">
-                                    <span class="ach-name">{{ ach.hidden && !ach.unlocked ? '???' : ach.name }}</span>
-                                    <span class="ach-desc">{{ ach.hidden && !ach.unlocked ? $t('prestige.ach_hidden') :
-                                        ach.description }}</span>
-                                    <span v-if="ach.reward && ach.unlocked" class="ach-reward">
-                                        <AppIcon icon="mdi:gift" /> {{ formatAchReward(ach.reward) }}
-                                    </span>
-                                </div>
-                                <AppIcon v-if="ach.unlocked" icon="mdi:check-circle" class="ach-check" />
+                <!-- Achievements by category -->
+                <div v-for="cat in achievementsByCategory" :key="cat.category" class="ach-category">
+                    <h3 class="category-header">
+                        <AppIcon
+                            :icon="cat.category === 'Lottery' ? 'mdi:ticket' : cat.category === 'Wealth' ? 'mdi:cash' : cat.category === 'Net Worth' ? 'mdi:scale-balance' : cat.category === 'Progress' ? 'mdi:arrow-up-bold-circle' : cat.category === 'Business' ? 'mdi:store' : cat.category === 'Prestige' ? 'mdi:star-circle' : 'mdi:trophy'" />
+                        {{ cat.category }}
+                        <span class="ach-cat-count">({{cat.items.filter(a => a.unlocked).length}}/{{
+                            cat.items.length }})</span>
+                    </h3>
+                    <div class="ach-grid">
+                        <div v-for="ach in cat.items" :key="ach.id" class="ach-card"
+                            :class="{ 'ach-unlocked': ach.unlocked, 'ach-hidden': ach.hidden && !ach.unlocked }"
+                            :style="{ '--ach-color': ach.category === 'Lottery' ? rarityCssVar(getLotteryAchRarity(ach.id)) : 'var(--t-success)' }">
+                            <div class="ach-icon-wrap">
+                                <AppIcon :icon="ach.hidden && !ach.unlocked ? 'mdi:help-circle' : ach.icon"
+                                    class="ach-icon" />
                             </div>
+                            <div class="ach-info">
+                                <span class="ach-name">{{ ach.hidden && !ach.unlocked ? '???' : ach.name }}</span>
+                                <span class="ach-desc">{{ ach.hidden && !ach.unlocked ? $t('prestige.ach_hidden') :
+                                    ach.description }}</span>
+                                <span v-if="ach.reward && ach.unlocked" class="ach-reward">
+                                    <AppIcon icon="mdi:gift" /> {{ formatAchReward(ach.reward) }}
+                                </span>
+                            </div>
+                            <AppIcon v-if="ach.unlocked" icon="mdi:check-circle" class="ach-check" />
                         </div>
                     </div>
-                </TabPanel>
-            </TabPanels>
-        </Tabs>
+                </div>
+            </template>
+        </UTabs>
 
         <!-- Info Panel -->
         <InfoPanel :title="$t('prestige.info_title')" :description="$t('prestige.info_desc')"
@@ -434,43 +430,14 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 
 <style scoped>
 .page-title-icon {
-    transition: color 0.3s ease;
+    transition: color var(--t-transition-normal);
 }
 
 .stats-section {
     margin: var(--t-space-6) 0;
 }
 
-.prestige-tabs {
-    margin-top: var(--t-space-6);
-}
 
-.prestige-tabs :deep(.p-tabs-panels) {
-    background: transparent;
-    padding: var(--t-space-4) 0;
-    border-radius: 0;
-}
-
-.prestige-tabs :deep(.p-tablist) {
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
-}
-
-.prestige-tabs :deep(.p-tab) {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    color: var(--t-text-secondary);
-    padding: var(--t-space-3) var(--t-space-4);
-}
-
-.prestige-tabs :deep(.p-tab[data-p-active="true"]) {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    border-radius: 0;
-}
 
 .tab-description {
     color: var(--t-text-secondary);
@@ -491,7 +458,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
     align-items: center;
     gap: 0.5rem;
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin-bottom: var(--t-space-4);
     padding-bottom: var(--t-space-2);
     border-bottom: 1px solid var(--t-border);
@@ -513,7 +480,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
     align-items: center;
     gap: var(--t-space-2);
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin-bottom: var(--t-space-2);
     color: var(--t-text-secondary);
 }
@@ -534,7 +501,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 
 .ach-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--t-success), var(--t-gold));
+    background: var(--t-success);
     border-radius: 3px;
     transition: width 0.5s ease;
 }
@@ -566,18 +533,18 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
     border-radius: var(--t-radius-md);
     transition: all var(--t-transition-fast);
     opacity: 0.5;
-    border-left: 3px solid var(--t-border);
+    /* border-left: 3px solid var(--t-border); */
 }
 
 .ach-card.ach-unlocked {
     opacity: 1;
-    border-left-color: var(--ach-color);
+    /* border-left-color: var(--ach-color); */
     background: color-mix(in srgb, var(--ach-color) 5%, var(--t-bg-card));
 }
 
 .ach-card.ach-hidden {
     opacity: 0.35;
-    border-left-color: var(--t-text-muted);
+    /* border-left-color: var(--t-text-muted); */
 }
 
 .ach-icon-wrap {
@@ -596,7 +563,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 }
 
 .ach-icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--t-text-muted);
 }
 
@@ -614,7 +581,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 
 .ach-name {
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -628,13 +595,13 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
     align-items: center;
     gap: 4px;
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--ach-color);
     margin-top: 2px;
 }
 
 .ach-check {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--ach-color);
     flex-shrink: 0;
 }
@@ -670,7 +637,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 }
 
 .divine-card-icon {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     color: var(--t-text-secondary);
     flex-shrink: 0;
 }
@@ -685,7 +652,7 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
 
 .divine-card-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 

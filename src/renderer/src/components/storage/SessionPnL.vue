@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * SessionPnL — Per-session profit & loss breakdown panel.
  *
@@ -8,6 +8,7 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -41,8 +42,8 @@ const hasActivity = computed(() =>
                 <AppIcon icon="mdi:chart-box" />
                 <span>{{ t('storage.session_pnl_title') }}</span>
             </div>
-            <button v-if="hasActivity" class="btn btn-text btn-sm" @click="storage.resetSession()"><i
-                    class="pi pi-refresh"></i> {{ t('storage.session_reset') }}</button>
+            <UButton v-if="hasActivity" variant="text" size="sm" icon="mdi:refresh" @click="storage.resetSession()">{{
+                t('storage.session_reset') }}</UButton>
         </div>
 
         <template v-if="hasActivity">
@@ -108,7 +109,6 @@ const hasActivity = computed(() =>
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .session-pnl__header {
@@ -121,7 +121,7 @@ const hasActivity = computed(() =>
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -160,7 +160,7 @@ const hasActivity = computed(() =>
     border-top: 1px solid var(--t-border);
     padding-top: 0.3rem;
     margin-top: 0.15rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .cost-icon {
@@ -175,7 +175,7 @@ const hasActivity = computed(() =>
 }
 
 .cost-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -202,7 +202,7 @@ const hasActivity = computed(() =>
     gap: 0.4rem;
     padding: var(--t-space-2);
     border-radius: var(--t-radius-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-sm);
 }
 
@@ -234,6 +234,6 @@ const hasActivity = computed(() =>
 }
 
 .empty-icon {
-    opacity: 0.3;
+    color: var(--t-text-muted);
 }
 </style>

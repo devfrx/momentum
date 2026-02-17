@@ -12,7 +12,8 @@ import PropertyCard from '@renderer/components/realestate/PropertyCard.vue'
 import ImprovementShop from '@renderer/components/realestate/ImprovementShop.vue'
 import PropertyCustomizer from '@renderer/components/realestate/PropertyCustomizer.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Dialog from 'primevue/dialog'
+import { UTabs, UModal } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import { EventImpactBanner } from '@renderer/components/events'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
@@ -22,7 +23,12 @@ const realEstate = useRealEstateStore()
 const player = usePlayerStore()
 const { formatCash } = useFormat()
 
-const activeTab = ref<'map' | 'opportunities' | 'portfolio'>('map')
+const activeTab = ref<string>('map')
+const reTabs = computed<TabDef[]>(() => [
+    { id: 'map', label: t('realestate.tab.map'), icon: 'mdi:map-outline' },
+    { id: 'opportunities', label: t('realestate.tab.opportunities'), icon: 'mdi:tag-multiple-outline', count: realEstate.hotDeals.length },
+    { id: 'portfolio', label: t('realestate.tab.portfolio'), icon: 'mdi:briefcase-outline', count: realEstate.properties.length },
+])
 const selectedDistrict = ref<District | null>(null)
 const selectedPropertyId = ref<string | null>(null)
 const showImprovements = ref(false)
@@ -180,150 +186,87 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
         </div>
 
         <!-- Tab Navigation -->
-        <div class="re-tabs">
-            <button class="re-tab" :class="{ active: activeTab === 'map' }" @click="activeTab = 'map'">
-                <AppIcon icon="mdi:map-outline" />
-                <span>{{ t('realestate.tab.map') }}</span>
-            </button>
-            <button class="re-tab" :class="{ active: activeTab === 'opportunities' }"
-                @click="activeTab = 'opportunities'">
-                <AppIcon icon="mdi:tag-multiple-outline" />
-                <span>{{ t('realestate.tab.opportunities') }}</span>
-                <span v-if="realEstate.hotDeals.length > 0" class="tab-badge tab-badge--hot">{{
-                    realEstate.hotDeals.length }}</span>
-            </button>
-            <button class="re-tab" :class="{ active: activeTab === 'portfolio' }" @click="activeTab = 'portfolio'">
-                <AppIcon icon="mdi:briefcase-outline" />
-                <span>{{ t('realestate.tab.portfolio') }}</span>
-                <span v-if="realEstate.properties.length > 0" class="tab-badge">{{ realEstate.properties.length
-                }}</span>
-            </button>
-        </div>
+        <UTabs v-model="activeTab" :tabs="reTabs">
+            <template #map>
+                <section class="section">
+                    <div class="map-layout">
+                        <div class="map-area">
+                            <CityMap @select-district="handleSelectDistrict"
+                                @select-opportunity="handleSelectOpportunity" @select-property="handleSelectProperty" />
+                        </div>
+                        <transition name="slide-panel">
+                            <DistrictPanel v-if="selectedDistrict" :district="selectedDistrict"
+                                @close="selectedDistrict = null" @view-property="handleSelectProperty"
+                                @view-opportunity="handleSelectOpportunity" />
+                        </transition>
+                    </div>
+                </section>
+            </template>
 
-        <!-- TAB: City Map -->
-        <section v-if="activeTab === 'map'" class="section">
-            <div class="map-layout">
-                <div class="map-area">
-                    <CityMap @select-district="handleSelectDistrict" @select-opportunity="handleSelectOpportunity"
-                        @select-property="handleSelectProperty" />
-                </div>
-                <transition name="slide-panel">
-                    <DistrictPanel v-if="selectedDistrict" :district="selectedDistrict" @close="selectedDistrict = null"
-                        @view-property="handleSelectProperty" @view-opportunity="handleSelectOpportunity" />
-                </transition>
-            </div>
-        </section>
+            <template #opportunities>
+                <section class="section">
+                    <h2 class="section-header">
+                        <AppIcon icon="mdi:tag-multiple" class="section-icon text-gold" />
+                        {{ t('realestate.opp.market_title') }}
+                        <span class="opp-count">({{ realEstate.availableOpportunities.length }})</span>
+                    </h2>
 
-        <!-- TAB: Opportunities -->
-        <section v-if="activeTab === 'opportunities'" class="section">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:tag-multiple" class="section-icon text-gold" />
-                {{ t('realestate.opp.market_title') }}
-                <span class="opp-count">({{ realEstate.availableOpportunities.length }})</span>
-            </h2>
+                    <div v-if="realEstate.availableOpportunities.length === 0" class="empty-state">
+                        <AppIcon icon="mdi:map-search-outline" class="empty-icon" />
+                        <p>{{ t('realestate.no_opportunities') }}</p>
+                        <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.scan_hint') }}
+                        </p>
+                    </div>
 
-            <div v-if="realEstate.availableOpportunities.length === 0" class="empty-state">
-                <AppIcon icon="mdi:map-search-outline" class="empty-icon" />
-                <p>{{ t('realestate.no_opportunities') }}</p>
-                <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.scan_hint') }}</p>
-            </div>
+                    <div v-else class="card-grid">
+                        <OpportunityCard v-for="opp in realEstate.availableOpportunities" :key="opp.id"
+                            :opportunity="opp" @bought="handleBought" />
+                    </div>
+                </section>
+            </template>
 
-            <div v-else class="card-grid">
-                <OpportunityCard v-for="opp in realEstate.availableOpportunities" :key="opp.id" :opportunity="opp"
-                    @bought="handleBought" />
-            </div>
-        </section>
+            <template #portfolio>
+                <section class="section">
+                    <h2 class="section-header">
+                        <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
+                        {{ t('realestate.portfolio') }}
+                        <span class="opp-count">({{ realEstate.properties.length }})</span>
+                    </h2>
 
-        <!-- TAB: Portfolio -->
-        <section v-if="activeTab === 'portfolio'" class="section">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
-                {{ t('realestate.portfolio') }}
-                <span class="opp-count">({{ realEstate.properties.length }})</span>
-            </h2>
+                    <div v-if="realEstate.properties.length === 0" class="empty-state">
+                        <AppIcon icon="mdi:home-outline" class="empty-icon" />
+                        <p>{{ t('realestate.no_properties') }}</p>
+                        <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.buy_hint') }}
+                        </p>
+                    </div>
 
-            <div v-if="realEstate.properties.length === 0" class="empty-state">
-                <AppIcon icon="mdi:home-outline" class="empty-icon" />
-                <p>{{ t('realestate.no_properties') }}</p>
-                <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.buy_hint') }}</p>
-            </div>
-
-            <div v-else class="card-grid-lg">
-                <PropertyCard v-for="prop in realEstate.properties" :key="prop.id" :property="prop" @sold="handleSold"
-                    @open-improvements="selectedPropertyId = prop.id; handleOpenImprovements()" />
-            </div>
-        </section>
+                    <div v-else class="card-grid-lg">
+                        <PropertyCard v-for="prop in realEstate.properties" :key="prop.id" :property="prop"
+                            @sold="handleSold"
+                            @open-improvements="selectedPropertyId = prop.id; handleOpenImprovements()" />
+                    </div>
+                </section>
+            </template>
+        </UTabs>
 
         <!-- Info Panel -->
         <InfoPanel :title="t('realestate.info_title')" :description="t('realestate.info_desc')"
             :sections="realEstateInfoSections" />
 
         <!-- Dialogs -->
-        <Dialog v-model:visible="showImprovements" :header="t('realestate.improvement_shop')" modal
-            :style="{ width: '500px', maxHeight: '80vh' }" :dismissableMask="true">
+        <UModal v-model="showImprovements" :title="t('realestate.improvement_shop')" icon="mdi:hammer-wrench" size="md">
             <ImprovementShop v-if="improvementProperty" :property="improvementProperty"
                 @close="showImprovements = false" @installed="() => { }" />
-        </Dialog>
+        </UModal>
 
-        <Dialog v-model:visible="showCustomizer" :header="t('realestate.customize')" modal
-            :style="{ width: '500px', maxHeight: '80vh' }" :dismissableMask="true">
+        <UModal v-model="showCustomizer" :title="t('realestate.customize')" icon="mdi:palette" size="md">
             <PropertyCustomizer v-if="customizerProperty" :property="customizerProperty"
                 @close="showCustomizer = false" />
-        </Dialog>
+        </UModal>
     </div>
 </template>
 
 <style scoped>
-.re-tabs {
-    display: flex;
-    gap: var(--t-space-1);
-    border-bottom: 1px solid var(--t-border);
-    padding-bottom: 0;
-}
-
-.re-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1rem;
-    font-size: var(--t-font-size-sm);
-    font-weight: 500;
-    color: var(--t-text-muted);
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: color var(--t-transition-fast), border-color var(--t-transition-fast);
-}
-
-.re-tab:hover {
-    color: var(--t-text);
-}
-
-.re-tab.active {
-    color: var(--t-accent);
-    border-bottom-color: var(--t-accent);
-}
-
-.tab-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 9px;
-    background: var(--t-accent);
-    color: var(--t-bg-base);
-    font-size: 0.65rem;
-    font-weight: 700;
-}
-
-.tab-badge--hot {
-    background: var(--t-danger);
-    color: white;
-}
-
 .map-layout {
     display: flex;
     gap: var(--t-space-4);

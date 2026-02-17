@@ -30,13 +30,11 @@ defineProps<{
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
 }
 
 .stat-card:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-md);
 }
 
 .stat-icon-wrap {
@@ -51,7 +49,7 @@ defineProps<{
 }
 
 .stat-icon {
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: var(--t-text-secondary);
 }
 
@@ -64,7 +62,7 @@ defineProps<{
 .stat-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -73,7 +71,7 @@ defineProps<{
 
 .stat-label {
     font-size: var(--t-font-size-xs);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     letter-spacing: 0.04em;
     color: var(--t-text-muted);
     text-transform: uppercase;

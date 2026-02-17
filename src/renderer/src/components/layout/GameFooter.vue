@@ -77,11 +77,15 @@ function toggleEventsPanel(): void {
 
 .app-footer.clickable {
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--t-transition-fast);
 }
 
 .app-footer.clickable:hover {
     background: var(--t-bg-muted);
+}
+
+.app-footer.clickable:active {
+    background: var(--t-border);
 }
 
 .ticker {
@@ -100,7 +104,7 @@ function toggleEventsPanel(): void {
 }
 
 .ticker-icon {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     flex-shrink: 0;
 }
 
@@ -110,16 +114,13 @@ function toggleEventsPanel(): void {
 }
 
 @keyframes bell-pulse {
-
-    0%,
-    100% {
+    0%, 100% {
         opacity: 1;
         transform: scale(1);
     }
-
     50% {
-        opacity: 0.6;
-        transform: scale(1.15);
+        opacity: 0.5;
+        transform: scale(1.1);
     }
 }
 
@@ -139,21 +140,28 @@ function toggleEventsPanel(): void {
     align-items: center;
     gap: 0.25rem;
     padding: 0.15rem 0.5rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--t-accent) 15%, transparent);
-    color: var(--t-accent);
-    font-weight: 700;
+    border-radius: var(--t-radius-full);
+    background: var(--t-bg-muted);
+    color: var(--t-text-secondary);
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-xs);
     cursor: pointer;
     flex-shrink: 0;
-    transition: background 0.15s;
+    transition: all var(--t-transition-fast);
+    border: 1px solid var(--t-border);
 }
 
 .event-count-badge:hover {
-    background: color-mix(in srgb, var(--t-accent) 25%, transparent);
+    background: var(--t-border);
+    color: var(--t-text);
+}
+
+.event-count-badge:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 
 .badge-icon {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 </style>

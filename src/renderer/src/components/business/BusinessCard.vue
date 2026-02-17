@@ -8,6 +8,7 @@ import BusinessAdvisorCard from './BusinessAdvisorCard.vue'
 import BusinessBranchPanel from './BusinessBranchPanel.vue'
 import BusinessSynergyBadge from './BusinessSynergyBadge.vue'
 import BusinessMilestoneList from './BusinessMilestoneList.vue'
+import { UTooltip, UAccordion, UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 import { mul } from '@renderer/core/BigNum'
@@ -102,27 +103,32 @@ function adjustMarketing(delta: number): void {
                         <h3 class="biz-name" @dblclick="startRename" :title="$t('common.double_click_rename')">
                             {{ displayName }}
                         </h3>
-                        <button class="rename-btn" @click="startRename" :title="$t('common.rename')">
-                            <AppIcon icon="mdi:pencil-outline" />
-                        </button>
+                        <UButton variant="text" icon="mdi:pencil-outline" @click="startRename"
+                            :title="$t('common.rename')" />
                     </template>
                     <span class="biz-category">{{ business.category }}</span>
                     <BusinessSynergyBadge :category="business.category" :count="catCount" />
                 </div>
                 <!-- Badges row -->
                 <div class="badges-row">
-                    <span class="level-badge" :title="$t('business.level')">
-                        <AppIcon icon="mdi:arrow-up-bold-circle" /> Lv.{{ business.level }}
-                    </span>
-                    <span v-if="business.branches > 0" class="branch-badge" :title="$t('business.branches_title')">
-                        <AppIcon :icon="geoTier.icon" /> {{ business.branches }}
-                    </span>
+                    <UTooltip :text="$t('business.level')" placement="bottom">
+                        <span class="level-badge">
+                            <AppIcon icon="mdi:arrow-up-bold-circle" /> Lv.{{ business.level }}
+                        </span>
+                    </UTooltip>
+                    <UTooltip v-if="business.branches > 0" :text="$t('business.branches_title')" placement="bottom">
+                        <span class="branch-badge">
+                            <AppIcon :icon="geoTier.icon" /> {{ business.branches }}
+                        </span>
+                    </UTooltip>
                     <span v-if="business.isCorporation" class="corp-badge">
                         <AppIcon icon="mdi:domain" /> {{ $t('business.corporation') }}
                     </span>
-                    <span class="rep-badge" :title="$t('business.reputation')">
-                        <AppIcon icon="mdi:star" /> {{ business.reputation.toFixed(0) }}
-                    </span>
+                    <UTooltip :text="$t('business.reputation')" placement="bottom">
+                        <span class="rep-badge">
+                            <AppIcon icon="mdi:star" /> {{ business.reputation.toFixed(0) }}
+                        </span>
+                    </UTooltip>
                 </div>
             </div>
         </div>
@@ -139,15 +145,22 @@ function adjustMarketing(delta: number): void {
                 <span class="stat-chip-val">{{ business.unitsSold }}/{{ business.maxCapacity }}</span>
                 <span class="stat-chip-label">{{ $t('business.sold') }}</span>
             </div>
-            <div class="stat-chip" :class="utilizationCls">
-                <AppIcon icon="mdi:gauge" class="stat-chip-icon" />
-                <span class="stat-chip-val">{{ utilizationPct }}%</span>
-                <span class="stat-chip-label">{{ $t('business.capacity') }}</span>
-            </div>
-            <div class="stat-chip" :class="priceStatus.cls">
-                <AppIcon icon="mdi:currency-usd" class="stat-chip-icon" />
-                <span class="stat-chip-val">{{ $t(priceStatus.label) }}</span>
-            </div>
+            <UTooltip :text="`${$t('business.capacity')}: ${business.unitsSold} / ${business.maxCapacity}`"
+                placement="bottom">
+                <div class="stat-chip" :class="utilizationCls">
+                    <AppIcon icon="mdi:gauge" class="stat-chip-icon" />
+                    <span class="stat-chip-val">{{ utilizationPct }}%</span>
+                    <span class="stat-chip-label">{{ $t('business.capacity') }}</span>
+                </div>
+            </UTooltip>
+            <UTooltip
+                :text="`${$t('business.price')}: $${business.pricePerUnit.toFixed(2)} (opt: $${business.optimalPrice.toFixed(0)})`"
+                placement="bottom">
+                <div class="stat-chip" :class="priceStatus.cls">
+                    <AppIcon icon="mdi:currency-usd" class="stat-chip-icon" />
+                    <span class="stat-chip-val">{{ $t(priceStatus.label) }}</span>
+                </div>
+            </UTooltip>
         </div>
 
         <!-- P&L Summary -->
@@ -176,19 +189,17 @@ function adjustMarketing(delta: number): void {
                     <span class="pending-label">{{ $t('business.pending') }}</span>
                     <span class="pending-amount">{{ formatCash(business.pendingProfit) }}</span>
                 </div>
-                <button class="collect-btn" @click="store.collectProfit(business.id)">
-                    <AppIcon icon="mdi:hand-coin" />
+                <UButton variant="success" icon="mdi:hand-coin" @click="store.collectProfit(business.id)">
                     {{ $t('common.collect') }}
-                </button>
+                </UButton>
             </div>
-            <button class="manager-btn" @click="store.hireManager(business.id)">
-                <AppIcon icon="mdi:account-tie" class="manager-btn-icon" />
+            <UButton variant="primary" icon="mdi:account-tie" @click="store.hireManager(business.id)">
                 <div class="manager-btn-text">
                     <span class="manager-btn-title">{{ $t('business.hire_manager') }}</span>
                     <span class="manager-btn-price">{{ formatCash(business.managerCost) }}</span>
                 </div>
                 <span class="manager-btn-hint">{{ $t('business.auto_collects') }}</span>
-            </button>
+            </UButton>
         </div>
         <div v-else class="manager-active">
             <AppIcon icon="mdi:account-tie-hat" class="manager-active-icon" />
@@ -198,42 +209,47 @@ function adjustMarketing(delta: number): void {
         <!-- Action buttons for NEW systems -->
         <div class="action-bar">
             <!-- Level Up -->
-            <button class="action-btn accent" @click="store.levelUp(business.id)" :title="$t('business.level_up')">
-                <AppIcon icon="mdi:arrow-up-bold" />
+            <UButton variant="primary" icon="mdi:arrow-up-bold" @click="store.levelUp(business.id)"
+                :title="$t('business.level_up')">
                 <span>{{ $t('business.level_up') }}</span>
                 <span class="action-cost">{{ formatCash(levelCost) }}</span>
-            </button>
+            </UButton>
             <!-- Become Corporation -->
-            <button v-if="canCorp" class="action-btn gold" @click="store.becomeCorporation(business.id)">
-                <AppIcon icon="mdi:domain" />
+            <UButton v-if="canCorp" variant="warning" icon="mdi:domain" @click="store.becomeCorporation(business.id)">
                 {{ $t('business.become_corp') }}
-            </button>
+            </UButton>
         </div>
 
         <!-- Expandable sub-panels -->
         <div class="panel-tabs">
-            <button class="tab-btn" :class="{ active: activePanel === 'upgrades' }" @click="togglePanel('upgrades')">
-                <AppIcon icon="mdi:arrow-up-bold-box" /> {{ $t('business.upgrades') }}
-            </button>
-            <button class="tab-btn" :class="{ active: activePanel === 'staff' }" @click="togglePanel('staff')">
-                <AppIcon icon="mdi:account-group" /> {{ $t('business.staff') }}
-            </button>
-            <button class="tab-btn" :class="{ active: activePanel === 'branches' }" @click="togglePanel('branches')">
-                <AppIcon icon="mdi:source-branch" /> {{ $t('business.branches') }}
-            </button>
-            <button class="tab-btn" :class="{ active: activePanel === 'policies' }" @click="togglePanel('policies')">
-                <AppIcon icon="mdi:tune-vertical" /> {{ $t('business.policies') }}
-            </button>
-            <button class="tab-btn" :class="{ active: activePanel === 'advisors' }" @click="togglePanel('advisors')">
-                <AppIcon icon="mdi:account-tie" /> {{ $t('business.advisors') }}
-            </button>
-            <button class="tab-btn" :class="{ active: activePanel === 'milestones' }"
+            <UButton variant="tab" :active="activePanel === 'upgrades'" icon="mdi:arrow-up-bold-box"
+                @click="togglePanel('upgrades')">
+                {{ $t('business.upgrades') }}
+            </UButton>
+            <UButton variant="tab" :active="activePanel === 'staff'" icon="mdi:account-group"
+                @click="togglePanel('staff')">
+                {{ $t('business.staff') }}
+            </UButton>
+            <UButton variant="tab" :active="activePanel === 'branches'" icon="mdi:source-branch"
+                @click="togglePanel('branches')">
+                {{ $t('business.branches') }}
+            </UButton>
+            <UButton variant="tab" :active="activePanel === 'policies'" icon="mdi:tune-vertical"
+                @click="togglePanel('policies')">
+                {{ $t('business.policies') }}
+            </UButton>
+            <UButton variant="tab" :active="activePanel === 'advisors'" icon="mdi:account-tie"
+                @click="togglePanel('advisors')">
+                {{ $t('business.advisors') }}
+            </UButton>
+            <UButton variant="tab" :active="activePanel === 'milestones'" icon="mdi:trophy"
                 @click="togglePanel('milestones')">
-                <AppIcon icon="mdi:trophy" /> {{ $t('business.milestones') }}
-            </button>
-            <button class="tab-btn" :class="{ active: activePanel === 'details' }" @click="togglePanel('details')">
-                <AppIcon icon="mdi:information" /> {{ $t('common.details') }}
-            </button>
+                {{ $t('business.milestones') }}
+            </UButton>
+            <UButton variant="tab" :active="activePanel === 'details'" icon="mdi:information"
+                @click="togglePanel('details')">
+                {{ $t('common.details') }}
+            </UButton>
         </div>
 
         <Transition name="slide">
@@ -270,9 +286,9 @@ function adjustMarketing(delta: number): void {
                                     <span class="control-hint">(opt: ${{ business.optimalPrice.toFixed(0) }})</span>
                                 </div>
                                 <div class="control-actions">
-                                    <button class="adj-btn" @click="adjustPrice(-1)">−</button>
+                                    <UButton variant="ghost" size="xs" @click="adjustPrice(-1)">−</UButton>
                                     <span class="control-value">${{ business.pricePerUnit.toFixed(2) }}</span>
-                                    <button class="adj-btn" @click="adjustPrice(1)">+</button>
+                                    <UButton variant="ghost" size="xs" @click="adjustPrice(1)">+</UButton>
                                 </div>
                             </div>
                             <!-- Marketing -->
@@ -283,10 +299,10 @@ function adjustMarketing(delta: number): void {
                                     <span class="control-hint">(×{{ business.marketingFactor.toFixed(2) }})</span>
                                 </div>
                                 <div class="control-actions">
-                                    <button class="adj-btn" :disabled="business.marketingBudget <= 0"
-                                        @click="adjustMarketing(-10)">−</button>
+                                    <UButton variant="ghost" size="xs" :disabled="business.marketingBudget <= 0"
+                                        @click="adjustMarketing(-10)">−</UButton>
                                     <span class="control-value">${{ business.marketingBudget }}/t</span>
-                                    <button class="adj-btn" @click="adjustMarketing(10)">+</button>
+                                    <UButton variant="ghost" size="xs" @click="adjustMarketing(10)">+</UButton>
                                 </div>
                             </div>
                             <!-- Quality -->
@@ -301,23 +317,22 @@ function adjustMarketing(delta: number): void {
                                     <span v-if="isQualityMaxed" class="quality-max-badge">
                                         <AppIcon icon="mdi:check-decagram" /> {{ $t('common.max') }}
                                     </span>
-                                    <button v-else class="btn btn-ghost btn-sm"
+                                    <UButton v-else variant="ghost" size="sm"
                                         @click="store.upgradeQuality(business.id)">
                                         {{ formatCash(business.qualityUpgradeCost) }}
-                                    </button>
+                                    </UButton>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Cost structure + lifetime stats -->
-                    <div class="detail-section">
-                        <h4 class="section-title">{{ $t('business.cost_structure') }}</h4>
+                    <UAccordion :title="$t('business.cost_structure')" icon="mdi:chart-pie" variant="ghost" compact>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.wages') }}</span>
                                 <span class="d-value">${{ (business.employees * business.baseSalary).toFixed(2)
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.rent') }}</span>
@@ -326,12 +341,11 @@ function adjustMarketing(delta: number): void {
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.supplies') }}</span>
                                 <span class="d-value">${{ (business.supplyCostPerUnit * business.unitsSold).toFixed(2)
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="detail-section">
-                        <h4 class="section-title">{{ $t('business.lifetime') }}</h4>
+                    </UAccordion>
+                    <UAccordion :title="$t('business.lifetime')" icon="mdi:history" variant="ghost" compact>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.total_revenue') }}</span>
@@ -352,7 +366,7 @@ function adjustMarketing(delta: number): void {
                                 <span class="d-value">{{ Math.floor(business.ticksOwned / 10) }}s</span>
                             </div>
                         </div>
-                    </div>
+                    </UAccordion>
                 </div>
             </div>
         </Transition>
@@ -364,10 +378,9 @@ function adjustMarketing(delta: number): void {
                     {{ $t('business.value_label', { value: formatCash(business.purchasePrice) }) }}
                 </span>
             </div>
-            <button class="btn btn-text btn-sm" @click="store.sellBusiness(business.id)">
-                <AppIcon icon="mdi:store-remove" />
+            <UButton variant="text" size="sm" icon="mdi:store-remove" @click="store.sellBusiness(business.id)">
                 {{ $t('common.sell') }}
-            </button>
+            </UButton>
         </div>
     </div>
 </template>
@@ -381,7 +394,6 @@ function adjustMarketing(delta: number): void {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
     transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
 }
 
@@ -390,8 +402,8 @@ function adjustMarketing(delta: number): void {
 }
 
 .business-card.is-corp {
-    border-color: goldenrod;
-    box-shadow: 0 0 12px rgba(218, 165, 32, 0.15);
+    border-color: var(--t-gold);
+    box-shadow: 0 0 12px var(--t-gold-muted);
 }
 
 /* Header */
@@ -412,7 +424,7 @@ function adjustMarketing(delta: number): void {
 }
 
 .biz-icon {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     color: var(--t-text-secondary);
 }
 
@@ -430,21 +442,12 @@ function adjustMarketing(delta: number): void {
 
 .biz-name {
     font-size: var(--t-font-size-base);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: text;
-}
-
-.rename-btn {
-    background: none;
-    border: none;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    padding: 2px;
-    font-size: 0.8rem;
 }
 
 .rename-input {
@@ -483,7 +486,7 @@ function adjustMarketing(delta: number): void {
     align-items: center;
     gap: 0.2rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     padding: 0.1rem 0.4rem;
     border-radius: var(--t-radius-sm);
     background: var(--t-bg-muted);
@@ -491,8 +494,8 @@ function adjustMarketing(delta: number): void {
 }
 
 .corp-badge {
-    background: rgba(218, 165, 32, 0.15);
-    color: goldenrod;
+    background: var(--t-gold-muted);
+    color: var(--t-gold);
 }
 
 .rep-badge {
@@ -522,7 +525,7 @@ function adjustMarketing(delta: number): void {
 }
 
 .stat-chip-val {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     color: var(--t-text);
 }
@@ -579,7 +582,7 @@ function adjustMarketing(delta: number): void {
 
 .pl-value {
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
 }
 
@@ -626,46 +629,14 @@ function adjustMarketing(delta: number): void {
 }
 
 .pending-amount {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     color: var(--t-success);
     font-size: var(--t-font-size-sm);
 }
 
-.collect-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.3rem 0.6rem;
-    background: var(--t-success);
-    color: var(--t-bg);
-    border: none;
-    border-radius: var(--t-radius-sm);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.manager-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-2);
-    background: transparent;
-    border: 1px solid var(--t-accent);
-    border-radius: var(--t-radius-sm);
-    cursor: pointer;
-    color: var(--t-text);
-    transition: background 0.15s;
-}
-
-.manager-btn:hover {
-    background: var(--t-accent);
-    color: var(--t-bg);
-}
-
 .manager-btn-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--t-accent);
 }
 
@@ -677,7 +648,7 @@ function adjustMarketing(delta: number): void {
 
 .manager-btn-title {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .manager-btn-price {
@@ -698,7 +669,7 @@ function adjustMarketing(delta: number): void {
     gap: 0.4rem;
     font-size: var(--t-font-size-xs);
     color: var(--t-success);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .manager-active-icon {
@@ -712,39 +683,9 @@ function adjustMarketing(delta: number): void {
     flex-wrap: wrap;
 }
 
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--t-radius-sm);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--t-accent);
-    background: transparent;
-    color: var(--t-accent);
-    transition: all 0.15s;
-}
-
-.action-btn:hover {
-    background: var(--t-accent);
-    color: var(--t-bg);
-}
-
-.action-btn.gold {
-    border-color: goldenrod;
-    color: goldenrod;
-}
-
-.action-btn.gold:hover {
-    background: goldenrod;
-    color: var(--t-text-inverse);
-}
-
 .action-cost {
     font-family: var(--t-font-mono);
-    opacity: 0.8;
+    color: var(--t-text-muted);
 }
 
 /* Panel tabs */
@@ -766,9 +707,9 @@ function adjustMarketing(delta: number): void {
     background: transparent;
     color: var(--t-text-muted);
     font-size: var(--t-font-size-xs);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all var(--t-transition-fast);
 }
 
 .tab-btn:hover {
@@ -776,10 +717,14 @@ function adjustMarketing(delta: number): void {
     background: var(--t-bg-muted);
 }
 
+.tab-btn:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
 .tab-btn.active {
-    color: var(--t-accent);
-    border-color: var(--t-accent);
-    background: var(--t-accent-alpha, rgba(99, 102, 241, 0.08));
+    color: var(--t-text);
+    background: var(--t-bg-muted);
 }
 
 /* Sub panel */
@@ -805,7 +750,7 @@ function adjustMarketing(delta: number): void {
 
 .section-title {
     font-size: var(--t-font-size-xs);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -840,7 +785,6 @@ function adjustMarketing(delta: number): void {
 
 .control-hint {
     font-family: var(--t-font-mono);
-    opacity: 0.7;
 }
 
 .control-actions {
@@ -851,37 +795,11 @@ function adjustMarketing(delta: number): void {
 
 .control-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-xs);
     min-width: 3.5rem;
     text-align: center;
     color: var(--t-text);
-}
-
-.adj-btn {
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    background: var(--t-bg);
-    color: var(--t-text);
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 700;
-    transition: all 0.15s;
-}
-
-.adj-btn:hover {
-    border-color: var(--t-accent);
-    color: var(--t-accent);
-}
-
-.adj-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
 }
 
 .quality-max-badge {
@@ -890,7 +808,7 @@ function adjustMarketing(delta: number): void {
     gap: 0.2rem;
     font-size: var(--t-font-size-xs);
     color: var(--t-success);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .detail-section {
@@ -916,7 +834,7 @@ function adjustMarketing(delta: number): void {
 }
 
 .d-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
     color: var(--t-text);
 }
@@ -956,7 +874,7 @@ function adjustMarketing(delta: number): void {
 /* Transitions */
 .slide-enter-active,
 .slide-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast) ease;
 }
 
 .slide-enter-from,

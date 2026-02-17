@@ -5,6 +5,7 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useI18n } from 'vue-i18n'
 import { SHOP_CATEGORIES, SHOP_CATEGORY_ICONS } from '@renderer/data/shop/items'
 import type { ShopCategory } from '@renderer/data/shop/items'
@@ -84,9 +85,7 @@ function onSortChange(e: Event): void {
             <AppIcon icon="mdi:magnify" class="search-icon" />
             <input type="text" class="search-input" :placeholder="t('shop.search_placeholder')"
                 :value="shop.searchQuery" @input="onSearchInput" />
-            <button v-if="shop.searchQuery" class="search-clear" @click="shop.setSearch('')">
-                <AppIcon icon="mdi:close" />
-            </button>
+            <UButton variant="text" v-if="shop.searchQuery" icon="mdi:close" @click="shop.setSearch('')" />
         </div>
 
         <div class="filter-row">
@@ -161,23 +160,12 @@ function onSortChange(e: Event): void {
     border-color: var(--t-accent);
 }
 
+.search-input:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+}
+
 .search-input::placeholder {
     color: var(--t-text-muted);
-}
-
-.search-clear {
-    position: absolute;
-    right: 0.5rem;
-    background: none;
-    border: none;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    padding: 0.2rem;
-    font-size: 1rem;
-}
-
-.search-clear:hover {
-    color: var(--t-text);
 }
 
 .filter-row {
@@ -201,6 +189,10 @@ function onSortChange(e: Event): void {
 .filter-select:focus {
     outline: none;
     border-color: var(--t-accent);
+}
+
+.filter-select:focus-visible {
+    box-shadow: var(--t-shadow-focus);
 }
 
 .result-count {

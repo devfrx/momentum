@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UAccordion, UButton, UTooltip } from '@renderer/components/ui'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 import { getGeoTier, getNextGeoTier, GEO_TIERS } from '@renderer/data/businesses'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -49,7 +50,9 @@ const tierProgress = computed(() => {
             </div>
             <div class="stat-block">
                 <span class="stat-label">{{ $t('business.revenue_mult') }}</span>
-                <span class="stat-value accent">×{{ currentTier.revenueMultiplier.toFixed(1) }}</span>
+                <UTooltip :text="$t('business.revenue_mult')" placement="bottom">
+                    <span class="stat-value accent">×{{ currentTier.revenueMultiplier.toFixed(1) }}</span>
+                </UTooltip>
             </div>
         </div>
 
@@ -71,8 +74,7 @@ const tierProgress = computed(() => {
         </div>
 
         <!-- All tiers reference -->
-        <details class="tier-details">
-            <summary>{{ $t('business.all_tiers') }}</summary>
+        <UAccordion :title="$t('business.all_tiers')" icon="mdi:format-list-bulleted" variant="ghost" compact>
             <div class="tier-list">
                 <div v-for="tier in GEO_TIERS" :key="tier.tier" class="tier-item"
                     :class="{ active: tier.tier === currentTier.tier }">
@@ -82,14 +84,13 @@ const tierProgress = computed(() => {
                     <span class="tier-item-mult">×{{ tier.revenueMultiplier.toFixed(1) }}</span>
                 </div>
             </div>
-        </details>
+        </UAccordion>
 
         <!-- Open branch button -->
-        <button class="btn-branch" @click="store.openBranch(business.id)">
-            <AppIcon icon="mdi:plus-circle" />
+        <UButton variant="primary" icon="mdi:plus-circle" @click="store.openBranch(business.id)">
             {{ $t('business.open_branch') }}
             <span class="cost">{{ formatCash(branchCost) }}</span>
-        </button>
+        </UButton>
     </div>
 </template>
 
@@ -105,7 +106,7 @@ const tierProgress = computed(() => {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -131,7 +132,7 @@ const tierProgress = computed(() => {
 
 .stat-value {
     font-size: var(--t-font-size-md);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     color: var(--t-text);
 }
@@ -145,7 +146,7 @@ const tierProgress = computed(() => {
     align-items: center;
     gap: 0.3rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-accent);
 }
 
@@ -161,7 +162,7 @@ const tierProgress = computed(() => {
     align-items: center;
     gap: 0.3rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin-bottom: 0.4rem;
 }
@@ -188,7 +189,7 @@ const tierProgress = computed(() => {
     height: 100%;
     background: var(--t-accent);
     border-radius: 3px;
-    transition: width 0.3s;
+    transition: width var(--t-transition-normal);
 }
 
 .tier-reward {
@@ -201,7 +202,7 @@ const tierProgress = computed(() => {
     align-items: center;
     gap: 0.3rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
     padding: var(--t-space-2);
     background: var(--t-bg-muted);
@@ -215,7 +216,12 @@ const tierProgress = computed(() => {
 
 .tier-details summary {
     cursor: pointer;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
+}
+
+.tier-details summary:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 
 .tier-list {
@@ -235,9 +241,9 @@ const tierProgress = computed(() => {
 }
 
 .tier-item.active {
-    background: var(--t-accent-alpha);
+    background: var(--t-bg-muted);
     color: var(--t-text);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .tier-item-icon {
@@ -254,33 +260,12 @@ const tierProgress = computed(() => {
 
 .tier-item-mult {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-accent);
-}
-
-.btn-branch {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--t-accent);
-    border-radius: var(--t-radius-sm);
-    background: transparent;
-    color: var(--t-accent);
-    font-size: var(--t-font-size-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.btn-branch:hover {
-    background: var(--t-accent);
-    color: var(--t-bg);
 }
 
 .cost {
     font-family: var(--t-font-mono);
-    opacity: 0.8;
+    color: var(--t-text-muted);
 }
 </style>

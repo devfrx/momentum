@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useMultipliers } from '@renderer/composables/useMultipliers'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 const emit = defineEmits<{ close: [] }>()
 
@@ -23,9 +24,7 @@ function toggleCategory(id: string): void {
                         <AppIcon icon="mdi:chart-bar" class="title-icon" />
                         <h2>{{ $t('multipliers.title') }}</h2>
                     </div>
-                    <button class="close-btn" @click="emit('close')">
-                        <AppIcon icon="mdi:close" />
-                    </button>
+                    <UButton variant="ghost" icon="mdi:close" @click="emit('close')" />
                 </div>
 
                 <div class="mp-body">
@@ -116,34 +115,15 @@ function toggleCategory(id: string): void {
 }
 
 .title-icon {
-    font-size: 1.25rem;
-    color: var(--t-accent);
+    font-size: 1.15rem;
+    color: var(--t-text-secondary);
 }
 
 .mp-title h2 {
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     margin: 0;
-}
-
-.close-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: transparent;
-    border: none;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    border-radius: var(--t-radius-sm);
-    transition: all 0.15s;
-}
-
-.close-btn:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
 }
 
 .mp-body {
@@ -165,11 +145,16 @@ function toggleCategory(id: string): void {
     padding: 0.5rem 0.75rem;
     cursor: pointer;
     border-radius: var(--t-radius-md);
-    transition: background 0.15s;
+    transition: background var(--t-transition-fast);
 }
 
 .cat-header:hover {
     background: var(--t-bg-muted);
+}
+
+.cat-header:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 
 .cat-left {
@@ -184,12 +169,12 @@ function toggleCategory(id: string): void {
 }
 
 .has-bonus .cat-icon {
-    color: var(--t-accent);
+    color: var(--t-success);
 }
 
 .cat-label {
     font-size: var(--t-font-size-sm);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     color: var(--t-text-secondary);
 }
 
@@ -198,7 +183,7 @@ function toggleCategory(id: string): void {
     align-items: center;
     gap: 0.15rem;
     font-size: 0.6rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     padding: 0.05rem 0.35rem;
     border-radius: var(--t-radius-sm);
     background: color-mix(in srgb, var(--t-purple) 12%, transparent);
@@ -222,7 +207,7 @@ function toggleCategory(id: string): void {
 .cat-total {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
 }
 
@@ -280,7 +265,7 @@ function toggleCategory(id: string): void {
 
 .source-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
     white-space: nowrap;
 }
@@ -288,7 +273,7 @@ function toggleCategory(id: string): void {
 /* Expand transition */
 .expand-enter-active,
 .expand-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast) ease;
     overflow: hidden;
 }
 

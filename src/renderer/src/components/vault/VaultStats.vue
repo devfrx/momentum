@@ -78,7 +78,7 @@ const { t } = useI18n()
 
 .stat-value {
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * ResaleAuctionPanel — List items for NPC auction and monitor active bids.
  * Shows active auctions with live bid tracking and auction history.
@@ -11,6 +11,7 @@ import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
+import { UButton, UModal } from '@renderer/components/ui'
 import { D, ZERO } from '@renderer/core/BigNum'
 import { rarityCssVar } from '@renderer/data/rarity'
 import { calculateListingFee } from '@renderer/data/shop/auction'
@@ -163,10 +164,7 @@ function auctionTimeLeft(auction: any): string {
                     </div>
                 </div>
 
-                <button class="btn btn-text btn-sm" @click="shop.cancelAuction(auction.id)">
-                    <i class="pi pi-times"></i>
-                    {{ t('shop.auction_cancel') }}
-                </button>
+                <UButton variant="text" size="sm" icon="mdi:close" @click="shop.cancelAuction(auction.id)">{{ t('shop.auction_cancel') }}</UButton>
             </div>
         </div>
 
@@ -194,10 +192,7 @@ function auctionTimeLeft(auction: any): string {
                 </div>
                 <div class="auctionable-item__footer">
                     <span class="auctionable-item__value">{{ formatCash(item.appraisedValue ?? item.baseValue) }}</span>
-                    <button class="btn btn-primary btn-sm" @click="openListDialog(item.id, source)">
-                        <i class="pi pi-tag"></i>
-                        {{ t('shop.auction_list') }}
-                    </button>
+                    <UButton variant="primary" size="sm" icon="mdi:tag" @click="openListDialog(item.id, source)">{{ t('shop.auction_list') }}</UButton>
                 </div>
             </div>
         </div>
@@ -229,14 +224,7 @@ function auctionTimeLeft(auction: any): string {
         </template>
 
         <!-- Listing Dialog (inline) -->
-        <Teleport to="body">
-            <div v-if="showListDialog" class="dialog-overlay" @click.self="showListDialog = false">
-                <div class="dialog-box">
-                    <h3 class="dialog-title">
-                        <AppIcon icon="mdi:tag-plus" />
-                        {{ t('shop.auction_create') }}
-                    </h3>
-
+        <UModal v-model="showListDialog" :title="t('shop.auction_create')" icon="mdi:tag" size="sm">
                     <div v-if="selectedItem" class="dialog-item">
                         <AppIcon :icon="selectedItem.item.icon" class="dialog-item-icon"
                             :style="{ color: rarityCssVar(selectedItem.item.rarity) }" />
@@ -265,20 +253,13 @@ function auctionTimeLeft(auction: any): string {
                         <span class="dialog-fee-amount">{{ formatCash(estimatedListingFee) }}</span>
                     </div>
 
-                    <div class="dialog-actions">
-                        <button class="btn btn-ghost" @click="showListDialog = false">
-                            {{ t('common.cancel') }}
-                        </button>
-                        <button class="btn btn-primary"
+                    <template #footer>
+                        <UButton variant="ghost" @click="showListDialog = false">{{ t('common.cancel') }}</UButton>
+                        <UButton variant="primary" icon="mdi:check"
                             :disabled="parseFloat(startingPriceInput) <= 0 || player.cash.lt(estimatedListingFee)"
-                            @click="confirmListing">
-                            <i class="pi pi-check"></i>
-                            {{ t('shop.auction_confirm') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
+                            @click="confirmListing">{{ t('shop.auction_confirm') }}</UButton>
+                    </template>
+        </UModal>
     </div>
 </template>
 
@@ -300,7 +281,7 @@ function auctionTimeLeft(auction: any): string {
     align-items: center;
     gap: var(--t-space-2);
     font-size: var(--t-font-size-md);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0;
 }
@@ -338,7 +319,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .auction-card__icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .auction-card__info {
@@ -348,7 +329,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .auction-card__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -360,7 +341,7 @@ function auctionTimeLeft(auction: any): string {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .auction-card__timer {
@@ -368,8 +349,8 @@ function auctionTimeLeft(auction: any): string {
     align-items: center;
     gap: 0.25rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    color: var(--t-accent);
+    font-weight: var(--t-font-semibold);
+    color: var(--t-text-secondary);
     white-space: nowrap;
 }
 
@@ -391,7 +372,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .bid-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -408,7 +389,7 @@ function auctionTimeLeft(auction: any): string {
 
 .section-label {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
     margin: var(--t-space-2) 0 0 0;
     text-transform: uppercase;
@@ -439,7 +420,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .auctionable-item__icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .auctionable-item__info {
@@ -449,7 +430,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .auctionable-item__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -458,7 +439,7 @@ function auctionTimeLeft(auction: any): string {
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .auctionable-item__source {
@@ -468,7 +449,7 @@ function auctionTimeLeft(auction: any): string {
     color: var(--t-text-muted);
     border-radius: var(--t-radius-sm);
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .auctionable-item__footer {
@@ -479,7 +460,7 @@ function auctionTimeLeft(auction: any): string {
 
 .auctionable-item__value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 
@@ -506,8 +487,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .empty-icon {
-    font-size: 3rem;
-    opacity: 0.2;
+    font-size: 2.9rem;
 }
 
 .history-list {
@@ -534,14 +514,14 @@ function auctionTimeLeft(auction: any): string {
 
 .history-item__name {
     flex: 1;
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     color: var(--t-text);
 }
 
 .history-item__status {
     text-transform: uppercase;
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     letter-spacing: 0.05em;
 }
 
@@ -558,44 +538,11 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .history-item__price {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 
 /* ── Dialog ─────────────────────────────────────────────────── */
-
-.dialog-overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--t-overlay);
-    z-index: 1000;
-}
-
-.dialog-box {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 8px 32px var(--t-overlay-light);
-}
-
-.dialog-title {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-2);
-    font-size: var(--t-font-size-md);
-    font-weight: 600;
-    color: var(--t-text);
-    margin: 0;
-}
 
 .dialog-item {
     display: flex;
@@ -607,11 +554,11 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .dialog-item-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
 }
 
 .dialog-item-name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
     display: block;
@@ -631,7 +578,7 @@ function auctionTimeLeft(auction: any): string {
 .dialog-field label {
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
 }
 
 .dialog-input {
@@ -648,6 +595,10 @@ function auctionTimeLeft(auction: any): string {
     border-color: var(--t-accent);
 }
 
+.dialog-input:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+}
+
 .dialog-fee {
     display: flex;
     justify-content: space-between;
@@ -658,13 +609,7 @@ function auctionTimeLeft(auction: any): string {
 }
 
 .dialog-fee-amount {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
-}
-
-.dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--t-space-2);
 }
 </style>

@@ -52,14 +52,14 @@ defineProps<{
 
 .hand-label {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--t-text-muted);
 }
 
 .hand-score {
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     font-weight: 800;
     font-size: 1rem;
     padding: 2px 10px;

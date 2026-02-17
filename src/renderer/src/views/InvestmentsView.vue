@@ -13,7 +13,7 @@ import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
-import Dialog from 'primevue/dialog'
+import { UButton, UModal, UTooltip, UAccordion } from '@renderer/components/ui'
 import ProgressBar from 'primevue/progressbar'
 import {
     SECTORS,
@@ -256,17 +256,17 @@ const investInfoSections = computed<InfoSection[]>(() => [
                         <Tag :value="inv.status" severity="success" />
                     </div>
                     <div class="card-stats">
-                        <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
+                        <span>{{ $t('investments.invested') }} <strong>{{
                             formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                                }}x</strong></span>
+                        }}x</strong></span>
                     </div>
                     <div class="success-result">
                         <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
                             formatCash(mul(inv.investedAmount, inv.returnMultiplier)) }}</strong></p>
-                        <button class="btn btn-success" @click="collectReturns(inv.id)">
-                            <i class="pi pi-wallet"></i> {{ $t('investments.collect_returns') }}
-                        </button>
+                        <UButton variant="success" icon="mdi:wallet" @click="collectReturns(inv.id)">
+                            {{ $t('investments.collect_returns') }}
+                        </UButton>
                     </div>
                 </div>
             </div>
@@ -355,11 +355,14 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
                     <!-- Traits row -->
                     <div v-if="opp.traits.length" class="opp-card__traits">
-                        <span v-for="trait in opp.traits" :key="trait" class="opp-card__trait"
-                            :class="getTraitData(trait).isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
-                            <AppIcon :icon="getTraitData(trait).icon" />
-                            {{ getTraitData(trait).name }}
-                        </span>
+                        <UTooltip v-for="trait in opp.traits" :key="trait"
+                            :text="getTraitData(trait).description ?? getTraitData(trait).name" placement="bottom">
+                            <span class="opp-card__trait"
+                                :class="getTraitData(trait).isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
+                                <AppIcon :icon="getTraitData(trait).icon" />
+                                {{ getTraitData(trait).name }}
+                            </span>
+                        </UTooltip>
                     </div>
 
                     <!-- Stats grid -->
@@ -381,7 +384,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                             <!-- Phase 1 (basic): approximate range -->
                             <span v-else-if="getPhaseIndex(opp) === 1"
                                 class="opp-card__kpi-value opp-card__kpi-value--blue">
-                                ~{{ formatRate(Math.max(0, opp.baseSuccessChance - 0.10) * 100) }}–{{
+                                ~{{ formatRate(Math.max(0, opp.baseSuccessChance - 0.10) * 100) }}�{{
                                     formatRate(Math.min(1, opp.baseSuccessChance + 0.10) * 100) }}
                             </span>
                             <!-- Phase 2+ (detailed/deep): exact -->
@@ -389,12 +392,16 @@ const investInfoSections = computed<InfoSection[]>(() => [
                                 {{ formatRate(opp.baseSuccessChance * 100) }}
                             </span>
                         </div>
-                        <div class="opp-card__kpi">
-                            <span class="opp-card__kpi-label">{{ $t('investments.return_label') }}</span>
-                            <span class="opp-card__kpi-value opp-card__kpi-value--green">
-                                {{ opp.baseReturnMultiplier.toFixed(1) }}x
-                            </span>
-                        </div>
+                        <UTooltip
+                            :text="`${$t('investments.potential_return')}: ${formatCash(D(opp.minInvestment * opp.baseReturnMultiplier))} – ${formatCash(D(opp.maxInvestment * opp.baseReturnMultiplier))}`"
+                            placement="bottom">
+                            <div class="opp-card__kpi">
+                                <span class="opp-card__kpi-label">{{ $t('investments.return_label') }}</span>
+                                <span class="opp-card__kpi-value opp-card__kpi-value--green">
+                                    {{ opp.baseReturnMultiplier.toFixed(1) }}x
+                                </span>
+                            </div>
+                        </UTooltip>
                     </div>
 
                     <!-- Research reveals (risk rating & founder score) -->
@@ -436,23 +443,23 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
                     <!-- Actions -->
                     <div class="opp-card__actions">
-                        <button v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1"
-                            class="btn btn-ghost btn-sm opp-card__btn"
+                        <UButton v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1" variant="ghost" size="xs"
+                            icon="mdi:magnify"
                             :disabled="!gte(player.cash, D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))"
                             @click="doResearch(opp.id)">
-                            <i class="pi pi-search"></i> {{ $t('investments.research_phase', {
+                            {{ $t('investments.research_phase', {
                                 phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
                                 cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
                             }) }}
-                        </button>
+                        </UButton>
                         <span v-else class="opp-card__research-complete">
                             <AppIcon icon="mdi:check-decagram" />
                             {{ $t('investments.fully_researched') }}
                         </span>
-                        <button class="btn btn-primary btn-sm opp-card__btn opp-card__btn--primary"
+                        <UButton variant="primary" size="xs" icon="mdi:send"
                             :disabled="!gte(player.cash, D(opp.minInvestment))" @click="openInvestDialog(opp)">
-                            <i class="pi pi-send"></i> {{ $t('investments.invest') }}
-                        </button>
+                            {{ $t('investments.invest') }}
+                        </UButton>
                     </div>
                 </div>
             </div>
@@ -460,30 +467,28 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
         <!-- Investment History -->
         <section v-if="startups.completedInvestments.length" class="section">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:history" class="section-icon" />
-                {{ $t('investments.history') }}
-            </h2>
-            <div class="history-grid">
-                <div v-for="inv in startups.completedInvestments.slice(-20).reverse()" :key="inv.id"
-                    class="history-item" :class="inv.status">
-                    <AppIcon :icon="inv.icon" class="history-icon" />
-                    <span class="history-name">{{ inv.name }}</span>
-                    <span class="history-amount">{{ formatCash(inv.investedAmount) }}</span>
-                    <Tag :value="inv.status" :severity="statusSeverity(inv.status)" size="small" />
-                    <span v-if="inv.status === 'exited'" class="history-return text-emerald">
-                        +{{ formatCash(mul(inv.investedAmount, inv.returnMultiplier - 1)) }}
-                    </span>
-                    <span v-else-if="inv.status === 'failed'" class="history-return text-red">
-                        -{{ formatCash(inv.investedAmount) }}
-                    </span>
+            <UAccordion :title="$t('investments.history')" icon="mdi:history"
+                :badge="startups.completedInvestments.length" variant="muted">
+                <div class="history-grid">
+                    <div v-for="inv in startups.completedInvestments.slice(-20).reverse()" :key="inv.id"
+                        class="history-item" :class="inv.status">
+                        <AppIcon :icon="inv.icon" class="history-icon" />
+                        <span class="history-name">{{ inv.name }}</span>
+                        <span class="history-amount">{{ formatCash(inv.investedAmount) }}</span>
+                        <Tag :value="inv.status" :severity="statusSeverity(inv.status)" size="small" />
+                        <span v-if="inv.status === 'exited'" class="history-return text-emerald">
+                            +{{ formatCash(mul(inv.investedAmount, inv.returnMultiplier - 1)) }}
+                        </span>
+                        <span v-else-if="inv.status === 'failed'" class="history-return text-red">
+                            -{{ formatCash(inv.investedAmount) }}
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </UAccordion>
         </section>
 
         <!-- Investment Dialog -->
-        <Dialog v-model:visible="showInvestDialog" modal :header="$t('investments.dialog_title')"
-            :style="{ width: '450px' }">
+        <UModal v-model="showInvestDialog" :title="$t('investments.dialog_title')" icon="mdi:rocket-launch" size="md">
             <div v-if="selectedOpp" class="invest-dialog">
                 <div class="dialog-opp-info">
                     <AppIcon :icon="SECTORS[selectedOpp.sector].icon" class="dialog-icon"
@@ -514,23 +519,23 @@ const investInfoSections = computed<InfoSection[]>(() => [
                         formatCash(D(investAmount))
                             }}</strong></label>
                     <Slider v-model="investAmount" :min="selectedOpp.minInvestment"
-                        :max="Math.min(selectedOpp.maxInvestment, player.cash.toNumber())" :step="1000" />
+                        :max="Math.min(selectedOpp.maxInvestment, player.cash.toNumber())" :step="1" />
                 </div>
 
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                        }}</strong>
+                    }}</strong>
                 </div>
             </div>
 
             <template #footer>
-                <button class="btn btn-ghost" @click="showInvestDialog = false">{{ $t('common.cancel') }}</button>
-                <button class="btn btn-primary" @click="confirmInvest">
-                    <i class="pi pi-check"></i> {{ $t('investments.confirm_investment') }}
-                </button>
+                <UButton variant="ghost" @click="showInvestDialog = false">{{ $t('common.cancel') }}</UButton>
+                <UButton variant="primary" icon="mdi:check" @click="confirmInvest">
+                    {{ $t('investments.confirm_investment') }}
+                </UButton>
             </template>
-        </Dialog>
+        </UModal>
 
         <!-- Info Panel -->
         <InfoPanel :title="$t('investments.info_title')" :description="$t('investments.info_desc')"
@@ -552,7 +557,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .section-icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .section-icon.text-emerald {
@@ -564,7 +569,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .section-icon.text-gold {
-    color: var(--t-warn);
+    color: var(--t-warning);
 }
 
 .opp-count {
@@ -583,13 +588,13 @@ const investInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-surface-alt);
+    background: var(--t-bg-muted);
     border-radius: var(--t-radius-md);
     font-size: 0.9rem;
 }
 
 .refresh-icon {
-    color: var(--t-surface-alt);
+    color: var(--t-text);
 }
 
 .refresh-progress {
@@ -611,7 +616,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     gap: var(--t-space-4);
 }
 
-/* ─── Opportunity Card ─── */
+/* --- Opportunity Card --- */
 .opp-card {
     --_accent: var(--t-accent);
     position: relative;
@@ -622,13 +627,11 @@ const investInfoSections = computed<InfoSection[]>(() => [
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
 }
 
 .opp-card:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .opp-card--hot {
@@ -643,7 +646,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .opp-card__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--_accent);
     flex-shrink: 0;
     margin-top: 1px;
@@ -661,7 +664,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .opp-card__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-base);
     white-space: nowrap;
     overflow: hidden;
@@ -673,7 +676,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: var(--t-space-1);
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--t-danger);
@@ -693,7 +696,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .opp-card__stage {
     flex-shrink: 0;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: var(--t-space-1) var(--t-space-2);
@@ -737,7 +740,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .opp-card__sector {
-    opacity: 0.8;
+    color: var(--t-text-muted);
 }
 
 .opp-card__timer {
@@ -748,7 +751,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .opp-card__timer--urgent {
     color: var(--t-danger);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 /* Traits */
@@ -765,7 +768,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 0.68rem;
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     line-height: 1.5;
 }
 
@@ -811,11 +814,11 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .opp-card__kpi-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .opp-card__kpi-value--gold {
-    color: var(--t-warning);
+    /* color: var(--t-warning); */
 }
 
 .opp-card__kpi-value--blue {
@@ -853,7 +856,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .opp-card__reveal-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 /* Research phase indicator */
@@ -911,7 +914,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .research-phase-label {
     font-size: 0.7rem;
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     color: var(--t-text-secondary);
     margin-left: var(--t-space-1);
 }
@@ -921,7 +924,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: 4px;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 
@@ -933,25 +936,16 @@ const investInfoSections = computed<InfoSection[]>(() => [
     margin-top: auto;
 }
 
-.opp-card__btn {
-    font-size: var(--t-font-size-xs) !important;
-}
-
-.opp-card__btn--primary {
-    font-weight: 600;
-}
-
 /* Investment Cards */
 .investment-card {
-    background: var(--t-surface-card);
+    background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-4);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .investment-card.success-card {
-    background: color-mix(in srgb, var(--t-success) 5%, var(--t-surface-card));
+    /* background: color-mix(in srgb, var(--t-success) 5%, var(--t-bg-card)); */
 }
 
 .card-header {
@@ -965,11 +959,11 @@ const investInfoSections = computed<InfoSection[]>(() => [
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .card-icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--t-info);
 }
 
@@ -994,7 +988,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     justify-content: space-between;
     font-size: 0.8rem;
     margin-bottom: var(--t-space-1);
-    opacity: 0.8;
+    color: var(--t-text-muted);
 }
 
 .maturity-progress {
@@ -1024,7 +1018,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: var(--t-space-3);
     padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-surface-alt);
+    background: var(--t-bg-muted);
     border-radius: var(--t-radius-sm);
     font-size: 0.85rem;
 }
@@ -1047,7 +1041,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .history-return {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     min-width: 80px;
     text-align: right;
 }
@@ -1056,7 +1050,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .empty-state {
     text-align: center;
     padding: var(--t-space-8);
-    opacity: 0.6;
+    color: var(--t-text-muted);
 }
 
 .empty-icon {
@@ -1088,14 +1082,14 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .dialog-opp-info p {
     margin: 0;
     font-size: 0.85rem;
-    opacity: 0.7;
+    color: var(--t-text-muted);
 }
 
 .dialog-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--t-space-3);
-    background: var(--t-surface-alt);
+    background: var(--t-bg-muted);
     padding: var(--t-space-3);
     border-radius: var(--t-radius-md);
 }
@@ -1107,13 +1101,13 @@ const investInfoSections = computed<InfoSection[]>(() => [
 .dialog-stat span {
     display: block;
     font-size: 0.75rem;
-    opacity: 0.7;
+    color: var(--t-text-muted);
     margin-bottom: 4px;
 }
 
 .invest-slider-section {
     padding: var(--t-space-3);
-    background: var(--t-surface-alt);
+    background: var(--t-bg-muted);
     border-radius: var(--t-radius-md);
 }
 
@@ -1127,7 +1121,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     justify-content: space-between;
     align-items: center;
     padding: var(--t-space-3);
-    background: color-mix(in srgb, var(--t-success) 10%, var(--t-surface-alt));
+    background: color-mix(in srgb, var(--t-success) 10%, var(--t-bg-muted));
     border-radius: var(--t-radius-md);
 }
 
@@ -1137,7 +1131,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .text-gold {
-    color: var(--t-warn);
+    color: var(--t-warning);
 }
 
 .text-sky {

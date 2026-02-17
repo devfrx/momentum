@@ -1,9 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * InventoryItem — Displays a single item in the inventory.
  * Shows rarity-colored border, appraisal status, value, and action buttons.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -60,10 +61,11 @@ const { t } = useI18n()
         </div>
 
         <div class="inv-item__actions">
-            <button v-if="!item.appraised" class="btn btn-ghost btn-sm" @click="$emit('appraise', item.id)"><i
-                    class="pi pi-search"></i> {{ t('storage.appraise') }}</button>
-            <button class="btn btn-primary btn-sm" @click="$emit('sell', item.id)"><i class="pi pi-dollar"></i> {{
-                t('storage.sell_item') }}</button>
+            <UButton v-if="!item.appraised" variant="ghost" size="sm" icon="mdi:magnify"
+                @click="$emit('appraise', item.id)">{{
+                    t('storage.appraise') }}</UButton>
+            <UButton variant="primary" size="sm" icon="mdi:currency-usd" @click="$emit('sell', item.id)">{{
+                t('storage.sell_item') }}</UButton>
         </div>
     </div>
 </template>
@@ -76,7 +78,7 @@ const { t } = useI18n()
     padding: var(--t-space-3);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
-    border-left: 3px solid var(--_rarity, var(--t-border));
+    /* border-left: 3px solid var(--_rarity, var(--t-border)); */
     border-radius: var(--t-radius-md);
     transition: border-color var(--t-transition-normal);
 }
@@ -92,7 +94,7 @@ const { t } = useI18n()
 }
 
 .inv-item__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     flex-shrink: 0;
 }
 
@@ -102,7 +104,7 @@ const { t } = useI18n()
 }
 
 .inv-item__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -111,7 +113,7 @@ const { t } = useI18n()
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .inv-item__desc {
@@ -134,7 +136,7 @@ const { t } = useI18n()
     align-items: center;
     gap: 0.25rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: capitalize;
 }
 
@@ -170,7 +172,7 @@ const { t } = useI18n()
 
 .value-text {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .value-text--appraised {

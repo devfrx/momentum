@@ -8,6 +8,7 @@
 import { ref } from 'vue'
 import { useActiveEvents } from '@renderer/composables/useActiveEvents'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 const emit = defineEmits<{ close: [] }>()
 
@@ -30,9 +31,7 @@ function toggleEvent(id: string): void {
                         <AppIcon icon="mdi:bell-ring" class="title-icon" />
                         <h2>{{ $t('events.panel_title') }}</h2>
                     </div>
-                    <button class="close-btn" @click="emit('close')">
-                        <AppIcon icon="mdi:close" />
-                    </button>
+                    <UButton variant="ghost" icon="mdi:close" @click="emit('close')" />
                 </div>
 
                 <!-- Body -->
@@ -102,7 +101,7 @@ function toggleEvent(id: string): void {
 .ep-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--t-overlay);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -120,7 +119,7 @@ function toggleEvent(id: string): void {
     max-height: calc(100vh - var(--t-footer-height, 32px) - var(--t-header-height, 40px) - 32px);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--t-shadow-lg);
 }
 
 .ep-header {
@@ -139,34 +138,15 @@ function toggleEvent(id: string): void {
 }
 
 .title-icon {
-    font-size: 1.25rem;
-    color: var(--t-accent);
+    font-size: 1.15rem;
+    color: var(--t-text-secondary);
 }
 
 .ep-title h2 {
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     margin: 0;
-}
-
-.close-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: transparent;
-    border: none;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    border-radius: var(--t-radius-sm);
-    transition: all 0.15s;
-}
-
-.close-btn:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
 }
 
 .ep-body {
@@ -186,8 +166,7 @@ function toggleEvent(id: string): void {
 }
 
 .empty-icon {
-    font-size: 2rem;
-    opacity: 0.5;
+    font-size: 1.9rem;
 }
 
 /* Event card */
@@ -196,7 +175,7 @@ function toggleEvent(id: string): void {
     margin-bottom: 4px;
     overflow: hidden;
     border: 1px solid transparent;
-    transition: border-color 0.15s;
+    transition: border-color var(--t-transition-fast);
 }
 
 .ep-event:hover {
@@ -210,11 +189,16 @@ function toggleEvent(id: string): void {
     padding: 0.6rem 0.75rem;
     cursor: pointer;
     border-radius: var(--t-radius-md);
-    transition: background 0.15s;
+    transition: background var(--t-transition-fast);
 }
 
 .event-header:hover {
     background: var(--t-bg-muted);
+}
+
+.event-header:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 
 .event-left {
@@ -256,7 +240,7 @@ function toggleEvent(id: string): void {
 
 .event-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     white-space: nowrap;
     overflow: hidden;
@@ -283,7 +267,7 @@ function toggleEvent(id: string): void {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
 }
 
 .timer-icon {
@@ -339,7 +323,7 @@ function toggleEvent(id: string): void {
     align-items: center;
     gap: 0.3rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     margin-bottom: 0.25rem;
 }
@@ -368,7 +352,7 @@ function toggleEvent(id: string): void {
 
 .effect-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     white-space: nowrap;
 }
 
@@ -383,7 +367,7 @@ function toggleEvent(id: string): void {
 /* Expand transition */
 .expand-enter-active,
 .expand-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast) ease;
     overflow: hidden;
 }
 

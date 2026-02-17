@@ -1,0 +1,7 @@
+export { default as UButton } from './UButton.vue'
+export { default as UModal } from './UModal.vue'
+export { default as UAccordion } from './UAccordion.vue'
+export { default as UPopover } from './UPopover.vue'
+export { default as UTooltip } from './UTooltip.vue'
+export { default as UTabs } from './UTabs.vue'
+export type { TabDef } from './UTabs.vue'

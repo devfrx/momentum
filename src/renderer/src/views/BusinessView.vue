@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { BusinessCard, BusinessPurchaseCard } from '@renderer/components/business'
@@ -16,7 +18,13 @@ const business = useBusinessStore()
 const { formatCash } = useFormat()
 
 // ── Tabs ──
-const activeTab = ref<'overview' | 'portfolio' | 'market' | 'advisors'>('overview')
+const activeTab = ref<string>('overview')
+const businessTabs = computed<TabDef[]>(() => [
+    { id: 'overview', label: t('business.tab_overview'), icon: 'mdi:view-dashboard-outline' },
+    { id: 'portfolio', label: t('business.tab_portfolio'), icon: 'mdi:briefcase-outline', count: business.businesses.length },
+    { id: 'market', label: t('business.tab_market'), icon: 'mdi:store-plus-outline', count: availableBusinesses.value.length },
+    { id: 'advisors', label: t('business.tab_advisors'), icon: 'mdi:account-tie' },
+])
 
 // ── Market ── (always show all businesses)
 const availableBusinesses = computed(() => [...BUSINESS_DEFS])
@@ -137,152 +145,138 @@ const businessInfoSections = computed<InfoSection[]>(() => [
             </div>
         </div>
 
-        <!-- Tab Navigation (RealEstateView style) -->
-        <div class="re-tabs">
-            <button class="re-tab" :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">
-                <AppIcon icon="mdi:view-dashboard-outline" />
-                <span>{{ $t('business.tab_overview') }}</span>
-            </button>
-            <button class="re-tab" :class="{ active: activeTab === 'portfolio' }" @click="activeTab = 'portfolio'">
-                <AppIcon icon="mdi:briefcase-outline" />
-                <span>{{ $t('business.tab_portfolio') }}</span>
-                <span v-if="business.businesses.length > 0" class="tab-badge">{{ business.businesses.length }}</span>
-            </button>
-            <button class="re-tab" :class="{ active: activeTab === 'market' }" @click="activeTab = 'market'">
-                <AppIcon icon="mdi:store-plus-outline" />
-                <span>{{ $t('business.tab_market') }}</span>
-                <span v-if="availableBusinesses.length > 0" class="tab-badge">{{ availableBusinesses.length }}</span>
-            </button>
-            <button class="re-tab" :class="{ active: activeTab === 'advisors' }" @click="activeTab = 'advisors'">
-                <AppIcon icon="mdi:account-tie" />
-                <span>{{ $t('business.tab_advisors') }}</span>
-            </button>
-        </div>
-
-        <!-- TAB: Overview -->
-        <section v-if="activeTab === 'overview'" class="section">
-            <div class="overview-grid">
-                <!-- Profit Summary -->
-                <div class="kpi-card">
-                    <div class="kpi-label">{{ $t('business.kpi_profit') }}</div>
-                    <div class="kpi-value success">{{ formatCash(business.profitPerSecond) }}/s</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">{{ $t('business.kpi_value') }}</div>
-                    <div class="kpi-value gold">{{ formatCash(business.totalBusinessValue) }}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">{{ $t('business.kpi_businesses') }}</div>
-                    <div class="kpi-value">{{ totalBiz }}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">{{ $t('business.kpi_levels') }}</div>
-                    <div class="kpi-value">{{ totalLevels }}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">{{ $t('business.kpi_branches') }}</div>
-                    <div class="kpi-value">{{ totalBranches }}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">{{ $t('business.kpi_corps') }}</div>
-                    <div class="kpi-value">{{ corpCount }}</div>
-                </div>
-            </div>
-
-            <!-- Quick business list -->
-            <div v-if="business.businesses.length > 0" class="overview-list">
-                <h3 class="section-header">
-                    <AppIcon icon="mdi:format-list-bulleted" class="section-icon" />
-                    {{ $t('business.overview_list') }}
-                </h3>
-                <div class="overview-table">
-                    <div v-for="biz in business.businesses" :key="biz.id" class="overview-row"
-                        @click="activeTab = 'portfolio'">
-                        <AppIcon :icon="biz.icon || 'mdi:store'" class="overview-row-icon" />
-                        <span class="overview-row-name">{{ biz.customName || biz.name }}</span>
-                        <span class="overview-row-level">Lv.{{ biz.level }}</span>
-                        <span class="overview-row-profit" :class="biz.avgProfitPerTick.gte(0) ? 'success' : 'danger'">
-                            {{ formatCash(biz.avgProfitPerTick.mul(10)) }}/s
-                        </span>
+        <!-- Tab Navigation -->
+        <UTabs v-model="activeTab" :tabs="businessTabs">
+            <template #overview>
+                <section class="section">
+                    <div class="overview-grid">
+                        <!-- Profit Summary -->
+                        <div class="kpi-card">
+                            <div class="kpi-label">{{ $t('business.kpi_profit') }}</div>
+                            <div class="kpi-value success">{{ formatCash(business.profitPerSecond) }}/s</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">{{ $t('business.kpi_value') }}</div>
+                            <div class="kpi-value gold">{{ formatCash(business.totalBusinessValue) }}</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">{{ $t('business.kpi_businesses') }}</div>
+                            <div class="kpi-value">{{ totalBiz }}</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">{{ $t('business.kpi_levels') }}</div>
+                            <div class="kpi-value">{{ totalLevels }}</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">{{ $t('business.kpi_branches') }}</div>
+                            <div class="kpi-value">{{ totalBranches }}</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">{{ $t('business.kpi_corps') }}</div>
+                            <div class="kpi-value">{{ corpCount }}</div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Empty -->
-            <div v-else class="empty-state">
-                <AppIcon icon="mdi:store-off" class="empty-icon" />
-                <p class="empty-title">{{ $t('business.no_businesses') }}</p>
-                <p class="empty-text">{{ $t('business.empty_hint') }}</p>
-            </div>
+                    <!-- Quick business list -->
+                    <div v-if="business.businesses.length > 0" class="overview-list">
+                        <h3 class="section-header">
+                            <AppIcon icon="mdi:format-list-bulleted" class="section-icon" />
+                            {{ $t('business.overview_list') }}
+                        </h3>
+                        <div class="overview-table">
+                            <div v-for="biz in business.businesses" :key="biz.id" class="overview-row"
+                                @click="activeTab = 'portfolio'">
+                                <AppIcon :icon="biz.icon || 'mdi:store'" class="overview-row-icon" />
+                                <span class="overview-row-name">{{ biz.customName || biz.name }}</span>
+                                <span class="overview-row-level">Lv.{{ biz.level }}</span>
+                                <span class="overview-row-profit"
+                                    :class="biz.avgProfitPerTick.gte(0) ? 'success' : 'danger'">
+                                    {{ formatCash(biz.avgProfitPerTick.mul(10)) }}/s
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Info Panel -->
-            <InfoPanel :title="$t('business.info_title')" :description="$t('business.info_desc')"
-                :sections="businessInfoSections" />
-        </section>
+                    <!-- Empty -->
+                    <div v-else class="empty-state">
+                        <AppIcon icon="mdi:store-off" class="empty-icon" />
+                        <p class="empty-title">{{ $t('business.no_businesses') }}</p>
+                        <p class="empty-text">{{ $t('business.empty_hint') }}</p>
+                    </div>
 
-        <!-- TAB: Portfolio -->
-        <section v-if="activeTab === 'portfolio'" class="section">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
-                {{ $t('business.tab_portfolio') }}
-                <span class="count-badge">({{ business.businesses.length }})</span>
-            </h2>
+                    <!-- Info Panel -->
+                    <InfoPanel :title="$t('business.info_title')" :description="$t('business.info_desc')"
+                        :sections="businessInfoSections" />
+                </section>
+            </template>
 
-            <div v-if="business.businesses.length === 0" class="empty-state">
-                <AppIcon icon="mdi:store-off" class="empty-icon" />
-                <p class="empty-title">{{ $t('business.no_businesses') }}</p>
-                <p class="empty-text">{{ $t('business.empty_hint') }}</p>
-            </div>
+            <template #portfolio>
+                <section class="section">
+                    <h2 class="section-header">
+                        <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
+                        {{ $t('business.tab_portfolio') }}
+                        <span class="count-badge">({{ business.businesses.length }})</span>
+                    </h2>
 
-            <div v-else class="card-grid">
-                <BusinessCard v-for="biz in business.businesses" :key="biz.id" :business="biz" />
-            </div>
-        </section>
+                    <div v-if="business.businesses.length === 0" class="empty-state">
+                        <AppIcon icon="mdi:store-off" class="empty-icon" />
+                        <p class="empty-title">{{ $t('business.no_businesses') }}</p>
+                        <p class="empty-text">{{ $t('business.empty_hint') }}</p>
+                    </div>
 
-        <!-- TAB: Market -->
-        <section v-if="activeTab === 'market'" class="section">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:store-plus" class="section-icon text-gold" />
-                {{ $t('business.tab_market') }}
-                <span class="count-badge">({{ availableBusinesses.length }})</span>
-            </h2>
+                    <div v-else class="card-grid">
+                        <BusinessCard v-for="biz in business.businesses" :key="biz.id" :business="biz" />
+                    </div>
+                </section>
+            </template>
 
-            <div v-if="availableBusinesses.length === 0" class="empty-state">
-                <AppIcon icon="mdi:store-search-outline" class="empty-icon" />
-                <p class="empty-title">{{ $t('business.no_available') }}</p>
-                <p class="empty-text">{{ $t('business.market_hint') }}</p>
-            </div>
+            <template #market>
+                <section class="section">
+                    <h2 class="section-header">
+                        <AppIcon icon="mdi:store-plus" class="section-icon text-gold" />
+                        {{ $t('business.tab_market') }}
+                        <span class="count-badge">({{ availableBusinesses.length }})</span>
+                    </h2>
 
-            <div v-else class="card-grid">
-                <BusinessPurchaseCard v-for="def in availableBusinesses" :key="def.id" :def="def" :owned="false"
-                    @buy="business.buyBusiness" />
-            </div>
-        </section>
+                    <div v-if="availableBusinesses.length === 0" class="empty-state">
+                        <AppIcon icon="mdi:store-search-outline" class="empty-icon" />
+                        <p class="empty-title">{{ $t('business.no_available') }}</p>
+                        <p class="empty-text">{{ $t('business.market_hint') }}</p>
+                    </div>
 
-        <!-- TAB: Advisors (global overview) -->
-        <section v-if="activeTab === 'advisors'" class="section">
-            <h2 class="section-header">
-                <AppIcon icon="mdi:account-tie" class="section-icon text-sky" />
-                {{ $t('business.tab_advisors') }}
-            </h2>
+                    <div v-else class="card-grid">
+                        <BusinessPurchaseCard v-for="def in availableBusinesses" :key="def.id" :def="def" :owned="false"
+                            @buy="business.buyBusiness" />
+                    </div>
+                </section>
+            </template>
 
-            <div v-if="business.businesses.length === 0" class="empty-state">
-                <AppIcon icon="mdi:account-search-outline" class="empty-icon" />
-                <p class="empty-title">{{ $t('business.no_businesses') }}</p>
-                <p class="empty-text">{{ $t('business.advisors_hint') }}</p>
-            </div>
+            <template #advisors>
+                <section class="section">
+                    <h2 class="section-header">
+                        <AppIcon icon="mdi:account-tie" class="section-icon text-sky" />
+                        {{ $t('business.tab_advisors') }}
+                    </h2>
 
-            <div v-else class="advisor-section">
-                <div v-for="biz in business.businesses" :key="biz.id" class="advisor-biz-block">
-                    <h3 class="advisor-biz-name">
-                        <AppIcon :icon="biz.icon || 'mdi:store'" />
-                        {{ biz.customName || biz.name }}
-                        <span class="advisor-biz-level">Lv.{{ biz.level }}</span>
-                    </h3>
-                    <BusinessAdvisorCard :business="biz" />
-                </div>
-            </div>
-        </section>
+                    <div v-if="business.businesses.length === 0" class="empty-state">
+                        <AppIcon icon="mdi:account-search-outline" class="empty-icon" />
+                        <p class="empty-title">{{ $t('business.no_businesses') }}</p>
+                        <p class="empty-text">{{ $t('business.advisors_hint') }}</p>
+                    </div>
+
+                    <div v-else class="advisor-section">
+                        <div v-for="biz in business.businesses" :key="biz.id" class="advisor-biz-block">
+                            <h3 class="advisor-biz-name">
+                                <AppIcon :icon="biz.icon || 'mdi:store'" />
+                                {{ biz.customName || biz.name }}
+                                <span class="advisor-biz-level">Lv.{{ biz.level }}</span>
+                            </h3>
+                            <BusinessAdvisorCard :business="biz" />
+                        </div>
+                    </div>
+                </section>
+            </template>
+        </UTabs>
     </div>
 </template>
 
@@ -308,60 +302,16 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 .header-stat-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xl);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-success);
 }
 
 .header-stat-suffix {
     font-size: var(--t-font-size-sm);
-    opacity: 0.7;
-}
-
-/* Tabs (identical to RealEstateView) */
-.re-tabs {
-    display: flex;
-    gap: var(--t-space-1);
-    border-bottom: 1px solid var(--t-border);
-    padding-bottom: 0;
-}
-
-.re-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1rem;
-    font-size: var(--t-font-size-sm);
-    font-weight: 500;
     color: var(--t-text-muted);
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: color var(--t-transition-fast), border-color var(--t-transition-fast);
 }
 
-.re-tab:hover {
-    color: var(--t-text);
-}
 
-.re-tab.active {
-    color: var(--t-accent);
-    border-bottom-color: var(--t-accent);
-}
-
-.tab-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 9px;
-    background: var(--t-accent);
-    color: var(--t-bg-base);
-    font-size: 0.65rem;
-    font-weight: 700;
-}
 
 /* Overview */
 .overview-grid {
@@ -390,7 +340,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 .kpi-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xl);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -399,7 +349,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 }
 
 .kpi-value.gold {
-    color: goldenrod;
+    color: var(--t-gold);
 }
 
 /* Overview list */
@@ -422,11 +372,20 @@ const businessInfoSections = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     cursor: pointer;
-    transition: border-color 0.15s;
+    transition: border-color var(--t-transition-fast);
 }
 
 .overview-row:hover {
-    border-color: var(--t-accent);
+    border-color: var(--t-border-hover);
+}
+
+.overview-row:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.overview-row:active {
+    transform: scale(0.98);
 }
 
 .overview-row-icon {
@@ -437,7 +396,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 .overview-row-name {
     flex: 1;
     font-size: var(--t-font-size-sm);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
 }
 
 .overview-row-level {
@@ -449,7 +408,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 .overview-row-profit {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .overview-row-profit.success {
@@ -487,7 +446,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-base);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin: 0 0 var(--t-space-3);
 }
 
@@ -516,7 +475,7 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 
 .empty-title {
     font-size: var(--t-font-size-xl);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     margin-bottom: var(--t-space-2);
 }

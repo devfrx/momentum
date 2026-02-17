@@ -1,5 +1,6 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PrestigeEffectType } from '@renderer/data/prestige'
@@ -93,10 +94,10 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
                 <span class="level-max">/{{ maxLevel }}</span>
             </div>
             <div class="upgrade-action">
-                <button v-if="level < maxLevel" class="btn btn-primary btn-sm" :disabled="!canAfford"
+                <UButton v-if="level < maxLevel" variant="primary" size="sm" icon="mdi:plus" :disabled="!canAfford"
                     @click="$emit('buy')">
-                    <i class="pi pi-plus"></i> {{ $t('prestige.cost_pp', { n: cost }) }}
-                </button>
+                    {{ $t('prestige.cost_pp', { n: cost }) }}
+                </UButton>
                 <div v-else class="maxed-badge">
                     <AppIcon icon="mdi:check-circle" />
                     {{ $t('common.max') }}
@@ -143,7 +144,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .upgrade-icon {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     color: var(--t-text-secondary);
 }
 
@@ -158,7 +159,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 
 .upgrade-name {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin: 0 0 0.2rem 0;
 }
 
@@ -191,7 +192,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .effect-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -216,7 +217,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 }
 
 .level-current {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -237,7 +238,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
     background: color-mix(in srgb, var(--t-success) 15%, transparent);
     border-radius: var(--t-radius-sm);
     color: var(--t-success);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: 0.8rem;
 }
 </style>

@@ -5,6 +5,7 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -184,11 +185,11 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
                     <span v-if="abilityBlockReason(ability)" class="ability__block-reason">
                         <AppIcon icon="mdi:information-outline" /> {{ abilityBlockReason(ability) }}
                     </span>
-                    <button class="btn btn-ghost btn-sm" :disabled="!isAbilityReady(ability.id) ||
+                    <UButton variant="ghost" size="sm" :disabled="!isAbilityReady(ability.id) ||
                         (state?.loyalty ?? 0) < ability.minLoyalty ||
                         blackmarket.currentTier < ability.minTier ||
                         !!abilityBlockReason(ability)
-                        " @click="handleAbility(ability.id)">{{ t('blackmarket.use') }}</button>
+                        " @click="handleAbility(ability.id)">{{ t('blackmarket.use') }}</UButton>
                 </div>
             </div>
         </div>
@@ -204,7 +205,6 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
     transition: border-color var(--t-transition-normal);
 }
 
@@ -220,7 +220,7 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
 }
 
 .contact-panel__avatar {
-    font-size: 2rem;
+    font-size: 1.9rem;
     color: var(--_accent, var(--t-accent));
 }
 
@@ -230,7 +230,7 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
 }
 
 .contact-panel__name {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-base);
     color: var(--t-text);
 }
@@ -280,7 +280,7 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
 
 .contact-panel__loyalty-value {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     white-space: nowrap;
 }
@@ -300,7 +300,7 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
 }
 
 .contact-panel__risk {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .contact-panel__risk.risk-low {
@@ -356,7 +356,7 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
 }
 
 .ability__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -376,7 +376,7 @@ function abilityBlockReason(ability: import('@renderer/data/blackmarket').Contac
 
 .ability__cost {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 

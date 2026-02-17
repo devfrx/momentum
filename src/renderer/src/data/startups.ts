@@ -704,10 +704,11 @@ export function generateOpportunity(
 
   // Risk-adjusted return: higher risk sectors/stages have higher potential returns
   const baseReturn = 2 + (sectorData.baseReturnMod * stageData.returnMod * traitReturnMod - 1) * 3
-  const returnMultiplier = Math.round(baseReturn * 10) / 10 // Round to 1 decimal
+  // Clamp to minimum 1.5x — a successful investment must always be profitable
+  const returnMultiplier = Math.max(1.5, Math.round(baseReturn * 10) / 10)
 
   // Success chance: inverse of return potential, modified by traits and stage
-  const baseSuccessChance = 1 / (1 + Math.log(Math.max(1, returnMultiplier)))
+  const baseSuccessChance = 1 / (1 + Math.log(returnMultiplier))
   const riskAdjusted = baseSuccessChance / (sectorData.baseRiskMod * stageData.riskMod)
   const successChance = Math.min(0.95, Math.max(0.05, riskAdjusted + traitSuccessMod))
 

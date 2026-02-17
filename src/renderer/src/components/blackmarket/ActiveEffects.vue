@@ -79,7 +79,7 @@ function isPositive(value: number): boolean {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -126,7 +126,7 @@ function isPositive(value: number): boolean {
 
 .effect-chip__label {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     white-space: nowrap;
     overflow: hidden;

@@ -4,6 +4,7 @@
  * Shows name, description, effect, cost, prerequisites, and a buy button.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -83,12 +84,11 @@ defineEmits<{ buy: [] }>()
 
         <!-- Action -->
         <div class="panel-action">
-            <button v-if="!purchased" class="btn btn-block"
-                :class="available && canAfford ? 'btn-primary' : 'btn-ghost'" :disabled="!available || !canAfford"
+            <UButton v-if="!purchased" block :variant="available && canAfford ? 'primary' : 'ghost'"
+                :disabled="!available || !canAfford" :icon="available ? 'mdi:lock-open' : 'mdi:lock'"
                 @click="$emit('buy')">
-                <i :class="available ? 'pi pi-lock-open' : 'pi pi-lock'"></i>
                 {{ available ? $t('skilltree.unlock_skill') : $t('common.locked') }}
-            </button>
+            </UButton>
             <div v-else class="panel-owned-indicator">
                 <AppIcon icon="mdi:check-decagram" />
                 <span>{{ $t('skilltree.purchased') }}</span>
@@ -104,7 +104,7 @@ defineEmits<{ buy: [] }>()
     /* border-left: 3px solid var(--panel-accent, var(--t-accent)); */
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-5);
-    box-shadow: var(--t-shadow-sm);
+    box-shadow: none;
     display: flex;
     flex-direction: column;
     gap: var(--t-space-4);
@@ -133,7 +133,7 @@ defineEmits<{ buy: [] }>()
 }
 
 .panel-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--panel-accent, var(--t-accent));
 }
 
@@ -146,7 +146,7 @@ defineEmits<{ buy: [] }>()
 
 .panel-name {
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     margin: 0;
 }
@@ -156,7 +156,7 @@ defineEmits<{ buy: [] }>()
     align-items: center;
     gap: 0.25rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .purchased-badge {
@@ -198,7 +198,7 @@ defineEmits<{ buy: [] }>()
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--t-text-muted);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .panel-effect {
@@ -206,7 +206,7 @@ defineEmits<{ buy: [] }>()
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     padding: var(--t-space-2) var(--t-space-3);
     background: var(--t-success-muted);
@@ -223,7 +223,7 @@ defineEmits<{ buy: [] }>()
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
     padding: var(--t-space-2) var(--t-space-3);
     border-radius: var(--t-radius-sm);
@@ -275,7 +275,7 @@ defineEmits<{ buy: [] }>()
     border: 1px solid color-mix(in srgb, var(--t-success) 20%, transparent);
     border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 </style>

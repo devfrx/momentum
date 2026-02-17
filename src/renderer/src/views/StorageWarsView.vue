@@ -6,6 +6,8 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import { AuctionCard, AuctionBidding, InventoryPanel, StorageStats, SessionPnL } from '@renderer/components/storage'
@@ -19,13 +21,11 @@ const player = usePlayerStore()
 const { formatCash } = useFormat()
 const { t } = useI18n()
 
-type ViewTab = 'auctions' | 'inventory'
+const activeTab = ref('auctions')
 
-const activeTab = ref<ViewTab>('auctions')
-
-const tabs = computed(() => [
-    { id: 'auctions' as ViewTab, label: t('storage.tab_auctions'), icon: 'mdi:gavel', count: storage.availableAuctions.length },
-    { id: 'inventory' as ViewTab, label: t('storage.tab_inventory'), icon: 'mdi:package-variant', count: storage.inventoryCount },
+const tabs = computed<TabDef[]>(() => [
+    { id: 'auctions', label: t('storage.tab_auctions'), icon: 'mdi:gavel', count: storage.availableAuctions.length },
+    { id: 'inventory', label: t('storage.tab_inventory'), icon: 'mdi:package-variant', count: storage.inventoryCount },
 ])
 
 function enterAuction(auctionId: string): void {
@@ -85,32 +85,23 @@ const infoSections = computed(() => [
             <StorageStats />
 
             <!-- Tab Navigation -->
-            <div class="tab-bar">
-                <button v-for="tab in tabs" :key="tab.id" class="tab-btn" :class="{ active: activeTab === tab.id }"
-                    @click="activeTab = tab.id">
-                    <AppIcon :icon="tab.icon" />
-                    <span>{{ tab.label }}</span>
-                    <span v-if="tab.count > 0" class="tab-count">{{ tab.count }}</span>
-                </button>
-            </div>
+            <UTabs v-model="activeTab" :tabs="tabs">
+                <template #auctions>
+                    <div v-if="storage.availableAuctions.length > 0" class="auction-grid">
+                        <AuctionCard v-for="auction in storage.availableAuctions" :key="auction.id" :auction="auction"
+                            @bid="enterAuction" />
+                    </div>
+                    <div v-else class="empty-state">
+                        <AppIcon icon="mdi:warehouse" class="empty-icon" />
+                        <p>{{ t('storage.no_auctions') }}</p>
+                        <span class="empty-hint">{{ t('storage.no_auctions_hint') }}</span>
+                    </div>
+                </template>
 
-            <!-- Auctions Tab -->
-            <template v-if="activeTab === 'auctions'">
-                <div v-if="storage.availableAuctions.length > 0" class="auction-grid">
-                    <AuctionCard v-for="auction in storage.availableAuctions" :key="auction.id" :auction="auction"
-                        @bid="enterAuction" />
-                </div>
-                <div v-else class="empty-state">
-                    <AppIcon icon="mdi:warehouse" class="empty-icon" />
-                    <p>{{ t('storage.no_auctions') }}</p>
-                    <span class="empty-hint">{{ t('storage.no_auctions_hint') }}</span>
-                </div>
-            </template>
-
-            <!-- Inventory Tab -->
-            <template v-if="activeTab === 'inventory'">
-                <InventoryPanel />
-            </template>
+                <template #inventory>
+                    <InventoryPanel />
+                </template>
+            </UTabs>
 
             <!-- Session P&L -->
             <SessionPnL />
@@ -129,57 +120,6 @@ const infoSections = computed(() => [
     align-items: center;
     flex-wrap: wrap;
     gap: var(--t-space-4);
-}
-
-.tab-bar {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--t-border);
-}
-
-.tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.75rem 1.25rem;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--t-text-muted);
-    font-size: var(--t-font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.tab-btn:hover {
-    color: var(--t-text);
-    background: var(--t-bg-muted);
-}
-
-.tab-btn.active {
-    color: var(--t-accent);
-    border-bottom-color: var(--t-accent);
-    font-weight: 600;
-}
-
-.tab-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    background: var(--t-bg-muted);
-    color: var(--t-text-muted);
-    border-radius: 9px;
-}
-
-.tab-btn.active .tab-count {
-    background: var(--t-accent);
-    color: white;
 }
 
 .auction-grid {
@@ -205,6 +145,5 @@ const infoSections = computed(() => [
 
 .empty-hint {
     font-size: var(--t-font-size-xs);
-    opacity: 0.6;
 }
 </style>

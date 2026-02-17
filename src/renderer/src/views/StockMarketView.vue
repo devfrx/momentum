@@ -4,6 +4,7 @@ import { useStockStore } from '@renderer/stores/useStockStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import AssetCard from '@renderer/components/market/AssetCard.vue'
 import MarketStats from '@renderer/components/market/MarketStats.vue'
 import MarketSettings from '@renderer/components/market/MarketSettings.vue'
@@ -145,10 +146,10 @@ const stockInfoSections = computed<InfoSection[]>(() => [
             </div>
             <div class="header-actions">
                 <MarketSettings />
-                <button class="btn btn-ghost btn-sm" @click="showCharts = !showCharts">
-                    <i :class="showCharts ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                <UButton variant="ghost" size="sm" :icon="showCharts ? 'mdi:eye-off' : 'mdi:eye'"
+                    @click="showCharts = !showCharts">
                     {{ showCharts ? $t('stocks.hide_charts') : $t('stocks.show_charts') }}
-                </button>
+                </UButton>
             </div>
         </div>
 
@@ -173,9 +174,9 @@ const stockInfoSections = computed<InfoSection[]>(() => [
                         {{ formatPercent(Math.abs(pinnedAsset.changePercent * 100)) }}
                     </div>
                 </div>
-                <button class="unpin-btn" @click="pinnedAssetId = null" :title="$t('stocks.unpin')">
-                    <AppIcon icon="mdi:close" />
-                </button>
+                <UButton variant="text" size="xs" @click="pinnedAssetId = null" :title="$t('stocks.unpin')"
+                    icon="mdi:close">
+                </UButton>
             </div>
 
             <div class="pinned-body">
@@ -235,10 +236,9 @@ const stockInfoSections = computed<InfoSection[]>(() => [
 .pinned-section {
     margin-bottom: var(--t-space-6);
     background: var(--t-bg-card);
-    border: 1px solid var(--t-accent);
+    /* border: 1px solid var(--t-accent); */
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-4);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .pinned-header {
@@ -262,7 +262,7 @@ const stockInfoSections = computed<InfoSection[]>(() => [
 .pinned-ticker {
     font-family: var(--t-font-mono);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     padding: 0.2rem 0.5rem;
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-sm);
@@ -276,7 +276,7 @@ const stockInfoSections = computed<InfoSection[]>(() => [
 .pinned-price {
     font-family: var(--t-font-mono);
     font-size: 1.2rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .pinned-change {
@@ -285,7 +285,7 @@ const stockInfoSections = computed<InfoSection[]>(() => [
     gap: 2px;
     font-family: var(--t-font-mono);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .pinned-change.positive {
@@ -293,26 +293,6 @@ const stockInfoSections = computed<InfoSection[]>(() => [
 }
 
 .pinned-change.negative {
-    color: var(--t-danger);
-}
-
-.unpin-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    background: transparent;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.unpin-btn:hover {
-    background: var(--t-danger-muted);
     color: var(--t-danger);
 }
 
@@ -354,13 +334,13 @@ const stockInfoSections = computed<InfoSection[]>(() => [
     color: var(--t-text-muted);
     text-transform: uppercase;
     font-size: 0.68rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     letter-spacing: 0.04em;
 }
 
 .pinned-kpi-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .pinned-kpi-value.positive {

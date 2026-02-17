@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * ImprovementShop — Panel showing available improvements for a property
  * and allowing the player to purchase and install them.
@@ -10,6 +10,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getAvailableImprovements, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 const { t } = useI18n()
 const realEstate = useRealEstateStore()
@@ -110,8 +111,7 @@ function handleInstall(imp: ImprovementDef): void {
 
                 <div class="imp-footer">
                     <span class="imp-cost">{{ formatCash(getCost(imp)) }}</span>
-                    <button class="btn btn-success btn-sm" :disabled="!canAfford(imp)" @click="handleInstall(imp)"><i
-                            class="pi pi-plus"></i> {{ t('realestate.install') }}</button>
+                    <UButton variant="success" size="sm" icon="mdi:plus" :disabled="!canAfford(imp)" @click="handleInstall(imp)">{{ t('realestate.install') }}</UButton>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@ function handleInstall(imp: ImprovementDef): void {
 .shop-title {
     margin: 0;
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -200,7 +200,7 @@ function handleInstall(imp: ImprovementDef): void {
 .imp-name {
     margin: 0;
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 

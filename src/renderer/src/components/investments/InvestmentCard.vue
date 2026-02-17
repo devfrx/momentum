@@ -1,6 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import Tag from 'primevue/tag'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 
 const props = defineProps<{
@@ -81,9 +82,9 @@ const remainingTime = computed(() => {
             <p class="result-text">{{ $t('investments.succeeded') }}</p>
             <p v-if="returnAmount" class="result-amount">{{ $t('investments.returns') }} <strong>{{ returnAmount
                     }}</strong></p>
-            <button class="btn btn-success btn-sm collect-btn" @click="$emit('collect')">
-                <i class="pi pi-wallet"></i> {{ $t('investments.collect_returns') }}
-            </button>
+            <UButton variant="success" size="sm" icon="mdi:wallet" class="collect-btn" @click="$emit('collect')">
+                {{ $t('investments.collect_returns') }}
+            </UButton>
         </div>
 
         <!-- Result for failed investments -->
@@ -141,7 +142,7 @@ const remainingTime = computed(() => {
     height: 100%;
     background: var(--t-info);
     border-radius: var(--t-radius-sm);
-    transition: width 0.3s ease;
+    transition: width var(--t-transition-normal) ease;
 }
 
 .progress-pct {
@@ -173,7 +174,7 @@ const remainingTime = computed(() => {
 
 .result-text {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin-bottom: var(--t-space-1);
 }
 

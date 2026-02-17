@@ -5,6 +5,7 @@ import type { OfflineSummary } from '@renderer/core/OfflineCalc'
 import { useFormat } from '@renderer/composables/useFormat'
 import { ZERO } from '@renderer/core/BigNum'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UModal, UButton } from '@renderer/components/ui'
 
 const props = defineProps<{
     summary: OfflineSummary
@@ -43,14 +44,7 @@ const incomeLines = computed(() => {
 </script>
 
 <template>
-    <Teleport to="body">
-        <div class="offline-overlay" @click.self="emit('close')">
-            <div class="offline-dialog">
-                <div class="offline-header">
-                    <AppIcon icon="mdi:clock-outline" class="header-icon" />
-                    <h2>{{ t('offline.welcome_back') }}</h2>
-                </div>
-
+    <UModal :modelValue="true" @update:modelValue="emit('close')" :title="t('offline.welcome_back')" icon="mdi:clock-outline" size="sm" :closable="false">
                 <div class="offline-time">
                     <span class="away-label">{{ t('offline.time_away') }}</span>
                     <span class="away-value">{{ summary.timeAwayFormatted }}</span>
@@ -82,56 +76,15 @@ const incomeLines = computed(() => {
                     <span class="total-value">{{ formatCash(summary.cashEarned) }}</span>
                 </div>
 
-                <button class="collect-btn" @click="emit('close')">
-                    <AppIcon icon="mdi:check" />
-                    {{ t('offline.collect') }}
-                </button>
-            </div>
-        </div>
-    </Teleport>
+                <template #footer>
+                    <UButton variant="primary" block icon="mdi:check" @click="emit('close')">
+                        {{ t('offline.collect') }}
+                    </UButton>
+                </template>
+    </UModal>
 </template>
 
 <style scoped>
-.offline-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--t-overlay);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    backdrop-filter: blur(4px);
-}
-
-.offline-dialog {
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    padding: 1.5rem;
-    width: 380px;
-    max-width: 95vw;
-    box-shadow: 0 20px 60px var(--t-overlay-light);
-}
-
-.offline-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.header-icon {
-    font-size: 1.5rem;
-    color: var(--t-accent);
-}
-
-.offline-header h2 {
-    font-size: var(--t-font-size-lg);
-    font-weight: 700;
-    color: var(--t-text);
-    margin: 0;
-}
-
 .offline-time {
     display: flex;
     justify-content: space-between;
@@ -149,7 +102,7 @@ const incomeLines = computed(() => {
 
 .away-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -207,7 +160,7 @@ const incomeLines = computed(() => {
 
 .line-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .line-value.success {
@@ -228,35 +181,14 @@ const incomeLines = computed(() => {
 }
 
 .offline-total span:first-child {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
 .total-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-success);
-}
-
-.collect-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1rem;
-    background: var(--t-accent);
-    color: var(--t-bg-base);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-weight: 600;
-    font-size: var(--t-font-size-sm);
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-.collect-btn:hover {
-    opacity: 0.9;
 }
 </style>

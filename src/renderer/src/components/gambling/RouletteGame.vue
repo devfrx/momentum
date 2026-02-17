@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import RouletteWheel from './RouletteWheel.vue'
 import RouletteBoard from './RouletteBoard.vue'
 import type { RouletteBet, RouletteBetType } from './RouletteBoard.vue'
@@ -254,9 +255,9 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     <div class="roulette-game">
         <!-- Header -->
         <div class="roulette-header">
-            <button class="back-btn" @click="$emit('back')">
-                <AppIcon icon="mdi:arrow-left" /> {{ $t('gambling.back') }}
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-left" @click="$emit('back')">
+                {{ $t('gambling.back') }}
+            </UButton>
             <h2 class="roulette-title">
                 <AppIcon icon="mdi:record-circle" class="title-icon" />
                 {{ $t('gambling.rl_title') }}
@@ -297,36 +298,38 @@ const rouletteInfo = computed<InfoSection[]>(() => [
                     <div class="bet-section">
                         <label class="bet-label">{{ $t('gambling.bet_per_chip') }}</label>
                         <div class="bet-row">
-                            <button class="bet-adj" @click="halfBet">1/2</button>
+                            <UButton variant="ghost" size="xs" @click="halfBet">1/2</UButton>
                             <div class="bet-display">
                                 <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
                                     class="bet-input" :disabled="spinning" />
                             </div>
-                            <button class="bet-adj" @click="doubleBet">x2</button>
+                            <UButton variant="ghost" size="xs" @click="doubleBet">x2</UButton>
                         </div>
                         <div class="bet-presets">
-                            <button v-for="pct in [10, 25, 50]" :key="pct" class="preset-btn"
+                            <UButton variant="ghost" size="xs" v-for="pct in [10, 25, 50]" :key="pct"
                                 @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="spinning">
                                 {{ pct }}%
-                            </button>
-                            <button class="preset-btn preset-max" @click="maxBet" :disabled="spinning">{{
-                                $t('gambling.max') }}</button>
+                            </UButton>
+                            <UButton variant="warning" size="xs" @click="maxBet" :disabled="spinning">{{
+                                $t('gambling.max') }}</UButton>
                         </div>
                     </div>
 
                     <div class="action-col">
-                        <button class="spin-btn" :disabled="!canSpin" @click="spin">
+                        <UButton variant="primary" :disabled="!canSpin" @click="spin">
                             <AppIcon :icon="spinning ? 'mdi:loading' : 'mdi:rotate-right'"
                                 :class="{ 'spin-icon': spinning }" />
                             {{ spinning ? $t('gambling.rl_spinning') : $t('gambling.rl_spin') }}
-                        </button>
+                        </UButton>
                         <div class="action-row">
-                            <button class="clear-btn" :disabled="spinning || bets.length === 0" @click="clearBets">
-                                <AppIcon icon="mdi:close" /> {{ $t('gambling.rl_clear') }}
-                            </button>
-                            <button v-if="showResult" class="new-round-btn" @click="newRound">
-                                <AppIcon icon="mdi:refresh" /> {{ $t('gambling.new_round') }}
-                            </button>
+                            <UButton variant="danger" size="sm" :disabled="spinning || bets.length === 0" @click="clearBets"
+                                icon="mdi:close">
+                                {{ $t('gambling.rl_clear') }}
+                            </UButton>
+                            <UButton variant="ghost" size="sm" v-if="showResult" @click="newRound"
+                                icon="mdi:refresh">
+                                {{ $t('gambling.new_round') }}
+                            </UButton>
                         </div>
                     </div>
                 </div>
@@ -409,36 +412,17 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.back-btn:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
 .roulette-title {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .title-icon {
-    font-size: 1.5rem;
-    color: var(--t-accent);
+    font-size: 1.1rem;
+    color: var(--t-text-secondary);
 }
 
 .balance-chip {
@@ -450,8 +434,8 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     color: var(--t-success);
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 0.85rem;
 }
 
@@ -506,7 +490,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-sm);
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 
@@ -516,7 +500,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 }
 
 .bets-total strong {
-    color: var(--t-accent);
+    color: var(--t-text);
 }
 
 /* ── Controls ── */
@@ -535,14 +519,13 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .bet-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -550,23 +533,6 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
-}
-
-.bet-adj {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    color: var(--t-text);
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all var(--t-transition-fast);
-}
-
-.bet-adj:hover {
-    background: var(--t-bg-hover);
 }
 
 .bet-display {
@@ -577,8 +543,8 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     width: 100%;
     text-align: center;
     font-size: 1rem;
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     padding: var(--t-space-2);
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
@@ -592,65 +558,12 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     gap: 4px;
 }
 
-.preset-btn {
-    flex: 1;
-    padding: var(--t-space-1) var(--t-space-2);
-    font-size: 0.7rem;
-    font-weight: 600;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.preset-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.preset-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.preset-max {
-    color: var(--t-accent);
-    font-weight: 700;
-}
-
 /* ── Action buttons ── */
 .action-col {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
     min-width: 130px;
-}
-
-.spin-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-accent);
-    color: var(--t-text);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.spin-btn:hover:not(:disabled) {
-    filter: brightness(1.1);
-}
-
-.spin-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .spin-icon {
@@ -670,38 +583,6 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 .action-row {
     display: flex;
     gap: var(--t-space-2);
-}
-
-.clear-btn,
-.new-round-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 600;
-    transition: all var(--t-transition-fast);
-}
-
-.clear-btn:hover:not(:disabled),
-.new-round-btn:hover {
-    background: var(--t-bg-hover);
-}
-
-.clear-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.new-round-btn {
-    color: var(--t-accent);
 }
 
 /* ── Result ── */
@@ -735,7 +616,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 .lose-num {
     font-size: 1.2rem;
     font-weight: 800;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
 }
 
 .num-red {
@@ -759,7 +640,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     font-size: 1.4rem;
     font-weight: 800;
     color: var(--t-success);
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
 }
 
 .lose-banner {
@@ -795,7 +676,6 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .stat-item {
@@ -813,8 +693,8 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 }
 
 .stat-value {
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -829,7 +709,7 @@ const rouletteInfo = computed<InfoSection[]>(() => [
 /* ── Transitions ── */
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.3s;
+    transition: opacity var(--t-transition-normal);
 }
 
 .fade-enter-from,

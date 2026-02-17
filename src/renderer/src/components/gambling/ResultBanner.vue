@@ -23,7 +23,7 @@ defineProps<{
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-md);
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .result-win {

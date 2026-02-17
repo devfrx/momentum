@@ -3,6 +3,7 @@ import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import { useAutoSave } from '@renderer/composables/useAutoSave'
 import { useNotify } from '@renderer/composables/useNotify'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InputText from 'primevue/inputtext'
 import ToggleSwitch from 'primevue/toggleswitch'
 import Select from 'primevue/select'
@@ -159,12 +160,12 @@ async function handleSetToken(): Promise<void> {
                     option-value="value" class="setting-input-sm" />
             </SettingRow>
             <div class="setting-actions">
-                <button class="btn btn-primary" @click="handleSave"><i class="pi pi-save"></i> {{
-                    $t('settings.save_now') }}</button>
-                <button class="btn btn-ghost" @click="handleExport"><i class="pi pi-download"></i> {{
-                    $t('settings.export_save') }}</button>
-                <button class="btn btn-ghost" @click="handleImport"><i class="pi pi-upload"></i> {{
-                    $t('settings.import_save') }}</button>
+                <UButton variant="primary" icon="mdi:content-save" @click="handleSave">{{
+                    $t('settings.save_now') }}</UButton>
+                <UButton variant="ghost" icon="mdi:download" @click="handleExport">{{
+                    $t('settings.export_save') }}</UButton>
+                <UButton variant="ghost" icon="mdi:upload" @click="handleImport">{{
+                    $t('settings.import_save') }}</UButton>
             </div>
         </SettingsSection>
 
@@ -173,14 +174,14 @@ async function handleSetToken(): Promise<void> {
             <SettingRow :label="$t('settings.github_pat')" :description="$t('settings.github_pat_desc')">
                 <div class="token-input-group">
                     <InputText v-model="cloudToken" type="password" placeholder="ghp_..." class="token-input" />
-                    <button class="btn btn-primary btn-sm" @click="handleSetToken">{{ $t('common.save') }}</button>
+                    <UButton variant="primary" size="sm" @click="handleSetToken">{{ $t('common.save') }}</UButton>
                 </div>
             </SettingRow>
             <div class="setting-actions">
-                <button class="btn btn-primary" @click="handleCloudSave"><i class="pi pi-cloud-upload"></i> {{
-                    $t('settings.cloud_save_btn') }}</button>
-                <button class="btn btn-ghost" @click="handleCloudLoad"><i class="pi pi-cloud-download"></i> {{
-                    $t('settings.cloud_load_btn') }}</button>
+                <UButton variant="primary" icon="mdi:cloud-upload" @click="handleCloudSave">{{
+                    $t('settings.cloud_save_btn') }}</UButton>
+                <UButton variant="ghost" icon="mdi:cloud-download" @click="handleCloudLoad">{{
+                    $t('settings.cloud_load_btn') }}</UButton>
             </div>
         </SettingsSection>
 
@@ -204,14 +205,14 @@ async function handleSetToken(): Promise<void> {
 
 .setting-actions {
     display: flex;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-md);
+    gap: var(--t-space-2);
+    margin-top: var(--t-space-4);
     flex-wrap: wrap;
 }
 
 .token-input-group {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--t-space-2);
 }
 
 .token-input {

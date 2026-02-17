@@ -44,7 +44,6 @@ const { t } = useI18n()
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .rep-bar__head {
@@ -54,12 +53,12 @@ const { t } = useI18n()
 }
 
 .rep-bar__icon {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     color: var(--_tier-color, var(--t-accent));
 }
 
 .rep-bar__tier-name {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-sm);
     color: var(--_tier-color, var(--t-accent));
 }
@@ -95,6 +94,6 @@ const { t } = useI18n()
 
 .rep-bar__max {
     color: var(--t-success);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 </style>

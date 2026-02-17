@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
+import Tooltip from 'primevue/tooltip'
 
 // Load bundled icons BEFORE app initialization
 import './plugins/iconify'
@@ -44,6 +45,9 @@ app.use(PrimeVue, {
 // PrimeVue services
 app.use(ToastService)
 app.use(ConfirmationService)
+
+// PrimeVue directives
+app.directive('tooltip', Tooltip)
 
 // Mount
 app.mount('#app')

@@ -40,12 +40,10 @@ defineProps<{
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .stat-icon {
-    font-size: 1.5rem;
-    opacity: 0.8;
+    font-size: 1.4rem;
 }
 
 .stat-content {
@@ -63,7 +61,7 @@ defineProps<{
 
 .stat-value {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
 }
 </style>

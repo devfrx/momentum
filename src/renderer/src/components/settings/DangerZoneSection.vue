@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useNotify } from '@renderer/composables/useNotify'
 import { setResetting } from '@renderer/composables/useAutoSave'
 import { gameEngine } from '@renderer/core/GameEngine'
-import Dialog from 'primevue/dialog'
+import { UButton, UModal } from '@renderer/components/ui'
 import SettingsSection from './SettingsSection.vue'
 import SettingRow from './SettingRow.vue'
 
@@ -31,17 +31,17 @@ async function handleHardReset(): Promise<void> {
 <template>
     <SettingsSection icon="mdi:alert" :title="$t('settings.danger_zone')" danger>
         <SettingRow :label="$t('settings.hard_reset')" :description="$t('settings.hard_reset_desc')" danger>
-            <button class="btn btn-danger" @click="showResetDialog = true">{{ $t('settings.reset_btn') }}</button>
+            <UButton variant="danger" @click="showResetDialog = true">{{ $t('settings.reset_btn') }}</UButton>
         </SettingRow>
     </SettingsSection>
 
-    <Dialog v-model:visible="showResetDialog" :header="$t('settings.hard_reset')" :modal="true" class="reset-dialog">
+    <UModal v-model="showResetDialog" :title="$t('settings.hard_reset')" icon="mdi:alert-octagon" size="sm" danger>
         <p class="reset-warning" v-html="$t('settings.hard_reset_warning')"></p>
         <div class="reset-actions">
-            <button class="btn btn-ghost" @click="showResetDialog = false">{{ $t('common.cancel') }}</button>
-            <button class="btn btn-danger" @click="handleHardReset">{{ $t('settings.yes_reset') }}</button>
+            <UButton variant="ghost" @click="showResetDialog = false">{{ $t('common.cancel') }}</UButton>
+            <UButton variant="danger" @click="handleHardReset">{{ $t('settings.yes_reset') }}</UButton>
         </div>
-    </Dialog>
+    </UModal>
 </template>
 
 <style scoped>

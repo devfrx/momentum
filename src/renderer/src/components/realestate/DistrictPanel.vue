@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
@@ -9,6 +9,7 @@ import {
     getActiveSynergies,
 } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { THEME } from '@renderer/assets/theme/colors'
 import Tag from 'primevue/tag'
 
@@ -75,9 +76,7 @@ const tierColors: Record<string, string> = {
                     </span>
                 </div>
             </div>
-            <button class="dp-close" @click="emit('close')">
-                <AppIcon icon="mdi:close" />
-            </button>
+            <UButton variant="text" icon="mdi:close" @click="emit('close')" />
         </div>
 
         <p class="dp-desc">{{ t(district.descriptionKey) }}</p>
@@ -126,10 +125,8 @@ const tierColors: Record<string, string> = {
                 <AppIcon icon="mdi:radar" /> {{ t('realestate.scan.title') }}
             </h4>
             <p class="dp-hint">{{ t('realestate.scan.desc') }}</p>
-            <button v-if="!isCooldown" class="btn btn-info btn-sm dp-scan-btn" :disabled="!canAffordScan"
-                @click="handleScan"><i class="pi pi-search"></i> {{ t('realestate.scan.action', {
-                    cost:
-                scanCostFormatted }) }}</button>
+            <UButton v-if="!isCooldown" variant="info" size="sm" icon="mdi:magnify" class="dp-scan-btn" :disabled="!canAffordScan"
+                @click="handleScan">{{ t('realestate.scan.action', { cost: scanCostFormatted }) }}</UButton>
             <div v-else class="dp-cooldown">
                 <AppIcon icon="mdi:timer-sand" />
                 <span>{{ t('realestate.scan.cooldown', { time: scanCooldownFormatted }) }}</span>
@@ -180,7 +177,6 @@ const tierColors: Record<string, string> = {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-md);
     flex-shrink: 0;
 }
 
@@ -198,36 +194,21 @@ const tierColors: Record<string, string> = {
 }
 
 .dp-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--_accent);
 }
 
 .dp-name {
     margin: 0;
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
 .dp-tier {
     font-size: var(--t-font-size-xs);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     letter-spacing: 0.08em;
-}
-
-.dp-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    color: var(--t-text-muted);
-    padding: 0.2rem;
-    border-radius: 4px;
-    transition: color var(--t-transition-fast);
-}
-
-.dp-close:hover {
-    color: var(--t-text);
 }
 
 .dp-desc {
@@ -261,7 +242,7 @@ const tierColors: Record<string, string> = {
 
 .dp-stat__value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-base);
     color: var(--t-text);
 }
@@ -278,7 +259,7 @@ const tierColors: Record<string, string> = {
     align-items: center;
     gap: 0.3rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin: 0;
 }
@@ -310,7 +291,7 @@ const tierColors: Record<string, string> = {
 .dp-synergy-bonus {
     margin-left: auto;
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-xs);
 }
 
@@ -361,6 +342,15 @@ const tierColors: Record<string, string> = {
     background: var(--t-bg-card-hover);
 }
 
+.dp-list-item:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.dp-list-item:active {
+    transform: scale(0.98);
+}
+
 .dp-list-name {
     flex: 1;
     overflow: hidden;
@@ -370,7 +360,7 @@ const tierColors: Record<string, string> = {
 
 .dp-list-price {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-xs);
     flex-shrink: 0;
 }

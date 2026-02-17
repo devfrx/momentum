@@ -49,7 +49,7 @@ const store = useBusinessStore()
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -83,7 +83,7 @@ const store = useBusinessStore()
 
 .pol-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -125,8 +125,13 @@ const store = useBusinessStore()
     text-align: center;
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     margin-top: 0.25rem;
+}
+
+.policy-slider:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 </style>

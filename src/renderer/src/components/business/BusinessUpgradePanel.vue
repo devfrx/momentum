@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 
@@ -59,9 +60,10 @@ function getNextBonus(upgradeId: string): number {
                     </span>
                 </div>
 
-                <button class="btn btn-ghost btn-sm upg-buy-btn" @click="store.purchaseUpgrade(business.id, upgDef.id)">
+                <UButton variant="ghost" size="sm" class="upg-buy-btn"
+                    @click="store.purchaseUpgrade(business.id, upgDef.id)">
                     {{ $t('business.upgrade_cost', { cost: formatCash(store.getUpgradeCost(business, upgDef.id)) }) }}
-                </button>
+                </UButton>
             </div>
         </div>
     </div>
@@ -79,7 +81,7 @@ function getNextBonus(upgradeId: string): number {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -103,7 +105,7 @@ function getNextBonus(upgradeId: string): number {
     flex-direction: column;
     gap: var(--t-space-1);
     padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
+    background: var(--t-bg-card);
     border-radius: var(--t-radius-md);
     border: 1px solid var(--t-border);
 }
@@ -127,7 +129,7 @@ function getNextBonus(upgradeId: string): number {
 
 .upg-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -139,7 +141,7 @@ function getNextBonus(upgradeId: string): number {
 .upg-level {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-accent);
     background: var(--t-bg-card);
     padding: 0.1rem 0.4rem;
@@ -160,10 +162,15 @@ function getNextBonus(upgradeId: string): number {
 .upg-next {
     color: var(--t-success);
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .upg-buy-btn {
     align-self: flex-end;
+}
+
+.upg-buy-btn:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 </style>

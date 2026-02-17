@@ -98,6 +98,5 @@ function canAfford(cost: import('break_infinity.js').default): boolean {
 
 .empty-hint {
     font-size: var(--t-font-size-xs);
-    opacity: 0.6;
 }
 </style>

@@ -26,11 +26,11 @@ const multiplier = computed(() => synergyCategoryMultiplier(props.count))
     align-items: center;
     gap: 0.2rem;
     padding: 0.15rem 0.45rem;
-    background: var(--t-accent-alpha, rgba(var(--t-accent-rgb, 99, 102, 241), 0.12));
-    border: 1px solid var(--t-accent);
-    border-radius: var(--t-radius-pill, 999px);
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border-hover);
+    border-radius: var(--t-radius-full);
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-accent);
     white-space: nowrap;
 }

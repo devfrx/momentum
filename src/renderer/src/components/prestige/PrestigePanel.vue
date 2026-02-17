@@ -1,6 +1,6 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Dialog from 'primevue/dialog'
+import { UButton, UModal } from '@renderer/components/ui'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -63,9 +63,9 @@ function confirmPrestige(): void {
                     <span class="pending-value">+{{ pendingPoints }}</span>
                     <span class="pending-suffix">{{ $t('prestige.points') }}</span>
                 </div>
-                <button class="btn btn-contrast rebirth-btn" :disabled="!canPrestige" @click="handlePrestige">
-                    <i class="pi pi-replay"></i> {{ $t('prestige.rebirth_btn') }}
-                </button>
+                <UButton variant="contrast" icon="mdi:replay" class="rebirth-btn" :disabled="!canPrestige" @click="handlePrestige">
+                    {{ $t('prestige.rebirth_btn') }}
+                </UButton>
             </div>
 
             <!-- Rebirth Count -->
@@ -85,7 +85,7 @@ function confirmPrestige(): void {
     </div>
 
     <!-- Confirmation Dialog -->
-    <Dialog v-model:visible="showConfirm" modal :header="$t('prestige.confirm_title')" :style="{ width: '400px' }">
+    <UModal v-model="showConfirm" :title="$t('prestige.confirm_title')" icon="mdi:alert-circle" size="sm" danger>
         <div class="confirm-content">
             <AppIcon icon="mdi:alert-circle" class="confirm-icon" />
             <p>{{ $t('prestige.confirm_question') }}</p>
@@ -93,10 +93,10 @@ function confirmPrestige(): void {
             <p class="confirm-warning">{{ $t('prestige.confirm_warning') }}</p>
         </div>
         <template #footer>
-            <button class="btn btn-ghost" @click="showConfirm = false">{{ $t('common.cancel') }}</button>
-            <button class="btn btn-contrast" @click="confirmPrestige">{{ $t('prestige.confirm_rebirth') }}</button>
+            <UButton variant="ghost" @click="showConfirm = false">{{ $t('common.cancel') }}</UButton>
+            <UButton variant="contrast" @click="confirmPrestige">{{ $t('prestige.confirm_rebirth') }}</UButton>
         </template>
-    </Dialog>
+    </UModal>
 </template>
 
 <style scoped>
@@ -105,7 +105,6 @@ function confirmPrestige(): void {
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-xl);
     padding: var(--t-space-6);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .panel-grid {
@@ -149,7 +148,7 @@ function confirmPrestige(): void {
 }
 
 .points-icon {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     color: var(--era-color);
 }
 
@@ -172,14 +171,14 @@ function confirmPrestige(): void {
 }
 
 .multiplier-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--t-success);
 }
 
 .multiplier-value {
     font-family: var(--t-font-mono);
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-success);
 }
 
@@ -243,8 +242,8 @@ function confirmPrestige(): void {
     align-items: center;
     gap: 0.5rem;
     font-family: var(--t-font-mono);
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: var(--t-font-bold);
     color: var(--era-color);
 }
 
@@ -275,7 +274,7 @@ function confirmPrestige(): void {
 }
 
 .confirm-icon {
-    font-size: 3rem;
+    font-size: 2.9rem;
     color: var(--t-warning);
 }
 

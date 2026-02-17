@@ -59,7 +59,6 @@ import {
   getTicksPerStep,
   getStepsBetween,
   getSlotUpgradeCost,
-  getConditionAdjustedValue,
   getRestoredValue,
   type RestorationSlot,
 } from '@renderer/data/shop/restoration'

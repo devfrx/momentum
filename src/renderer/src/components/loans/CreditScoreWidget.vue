@@ -157,7 +157,7 @@ const utilColor = computed(() => {
 
 .csw-score-num {
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     line-height: 1;
 }
@@ -247,7 +247,7 @@ const utilColor = computed(() => {
 .csw-util-pct {
     font-size: var(--t-font-size-xs);
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .csw-util-track {
@@ -260,7 +260,7 @@ const utilColor = computed(() => {
 .csw-util-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.4s ease, background 0.3s ease;
+    transition: width 0.4s ease, background var(--t-transition-normal) ease;
 }
 
 .csw-health {

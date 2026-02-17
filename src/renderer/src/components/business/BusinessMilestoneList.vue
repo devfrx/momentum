@@ -92,7 +92,7 @@ const milestoneProgress = computed(() =>
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -110,10 +110,10 @@ const milestoneProgress = computed(() =>
     align-items: center;
     gap: 0.3rem;
     padding: 0.25rem 0.6rem;
-    background: var(--t-accent-alpha, rgba(99, 102, 241, 0.1));
+    background: var(--t-bg-muted);
     border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-accent);
 }
 
@@ -155,7 +155,7 @@ const milestoneProgress = computed(() =>
 .track-name {
     flex: 1;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -177,7 +177,7 @@ const milestoneProgress = computed(() =>
     height: 100%;
     background: var(--t-accent);
     border-radius: 2px;
-    transition: width 0.3s;
+    transition: width var(--t-transition-normal);
 }
 
 .track-reward {

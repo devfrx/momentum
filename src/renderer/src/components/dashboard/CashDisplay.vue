@@ -21,7 +21,6 @@ defineProps<{
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .cash-label {
@@ -34,7 +33,7 @@ defineProps<{
 .cash-value {
     font-family: var(--t-font-mono);
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     letter-spacing: -0.02em;
 }

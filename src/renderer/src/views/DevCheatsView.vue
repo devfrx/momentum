@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
@@ -21,6 +21,7 @@ import { BUSINESS_DEFS } from '@renderer/data/businesses'
 import { SECTORS, STAGES, TRAITS } from '@renderer/data/startups'
 import { gameEngine } from '@renderer/core/GameEngine'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import { LOTTERY_TICKETS } from '@renderer/data/lottery'
 import { DIVINE_ABILITIES } from '@renderer/data/lottery'
@@ -395,7 +396,7 @@ function bmClearEffects() {
 function bmMaxLoyalty() {
     for (const cs of blackmarket.contactStates) {
         cs.loyalty = 100
-        cs.missionsCompleted = 50
+        cs.totalInteractions = 50
     }
     addLog(`All contacts set to max loyalty`)
 }
@@ -403,7 +404,7 @@ function bmMaxLoyalty() {
 function bmResetContacts() {
     for (const cs of blackmarket.contactStates) {
         cs.loyalty = 0
-        cs.missionsCompleted = 0
+        cs.totalInteractions = 0
         cs.abilityCooldowns = {}
     }
     addLog('All contacts reset')
@@ -585,14 +586,15 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="cashAmount" type="number" class="cheat-input" min="1" />
-                        <button class="btn btn-primary btn-sm" @click="giveCash"><i class="pi pi-plus"></i> {{
-                            t('dev.give_cash') }}</button>
+                        <UButton variant="primary" size="sm" icon="mdi:plus" @click="giveCash">
+                            {{ t('dev.give_cash') }}
+                        </UButton>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="giveMegaCash">{{ t('dev.plus_1b') }}</button>
-                    <button class="btn btn-danger btn-sm" @click="giveInfiniteCash">{{ t('dev.plus_1qa') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="setCashZero">{{ t('dev.set_zero') }}</button>
+                    <UButton variant="warning" size="sm" @click="giveMegaCash">{{ t('dev.plus_1b') }}</UButton>
+                    <UButton variant="danger" size="sm" @click="giveInfiniteCash">{{ t('dev.plus_1qa') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="setCashZero">{{ t('dev.set_zero') }}</UButton>
                 </div>
             </section>
 
@@ -604,14 +606,15 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="xpAmount" type="number" class="cheat-input" min="1" />
-                        <button class="btn btn-primary btn-sm" @click="giveXp"><i class="pi pi-plus"></i> {{
-                            t('dev.give_xp') }}</button>
+                        <UButton variant="primary" size="sm" icon="mdi:plus" @click="giveXp">
+                            {{ t('dev.give_xp') }}
+                        </UButton>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <button class="btn btn-ghost btn-sm" @click="setLevel(10)">Lv 10</button>
-                    <button class="btn btn-ghost btn-sm" @click="setLevel(50)">Lv 50</button>
-                    <button class="btn btn-warning btn-sm" @click="setLevel(100)">Lv 100</button>
+                    <UButton variant="ghost" size="sm" @click="setLevel(10)">Lv 10</UButton>
+                    <UButton variant="ghost" size="sm" @click="setLevel(50)">Lv 50</UButton>
+                    <UButton variant="warning" size="sm" @click="setLevel(100)">Lv 100</UButton>
                 </div>
             </section>
 
@@ -623,8 +626,9 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="prestigeAmount" type="number" class="cheat-input" min="1" />
-                        <button class="btn btn-primary btn-sm" @click="givePrestigePoints"><i class="pi pi-plus"></i> {{
-                            t('dev.give_pp') }}</button>
+                        <UButton variant="primary" size="sm" icon="mdi:plus" @click="givePrestigePoints">
+                            {{ t('dev.give_pp') }}
+                        </UButton>
                     </div>
                 </div>
             </section>
@@ -635,8 +639,9 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:domain" class="section-icon" /> {{ t('dev.section_business') }}
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="buyAllBusinesses"><i class="pi pi-shopping-cart"></i>
-                        {{ t('dev.buy_all') }}</button>
+                    <UButton variant="warning" size="sm" icon="mdi:cart" @click="buyAllBusinesses">
+                        {{ t('dev.buy_all') }}
+                    </UButton>
                 </div>
             </section>
 
@@ -658,23 +663,30 @@ const multiplierInfo = computed(() => {
                             <option :value="10000000000">$10B</option>
                             <option :value="1000000000000">$1T</option>
                         </select>
-                        <button class="btn btn-warning btn-sm" @click="refreshWithCustomNW"><i
-                                class="pi pi-refresh"></i> {{ t('dev.gen_nw') }}</button>
+                        <UButton variant="warning" size="sm" icon="mdi:refresh" @click="refreshWithCustomNW">
+                            {{ t('dev.gen_nw') }}
+                        </UButton>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <button class="btn btn-primary btn-sm" @click="refreshStartupOpps"><i class="pi pi-refresh"></i> {{
-                        t('dev.refresh_opps') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="dueDiligenceAll"><i class="pi pi-search"></i> {{
-                        t('dev.research_all') }}</button>
-                    <button class="btn btn-warning btn-sm" @click="investInAll"><i class="pi pi-send"></i> {{
-                        t('dev.invest_min') }}</button>
-                    <button class="btn btn-warning btn-sm" @click="resolveAllStartups"><i class="pi pi-bolt"></i> {{
-                        t('dev.force_resolve') }}</button>
-                    <button class="btn btn-success btn-sm" @click="collectAllPending"><i class="pi pi-wallet"></i> {{
-                        t('dev.collect_all') }}</button>
-                    <button class="btn btn-danger btn-sm" @click="clearStartups"><i class="pi pi-trash"></i> {{
-                        t('dev.reset_startups') }}</button>
+                    <UButton variant="primary" size="sm" icon="mdi:refresh" @click="refreshStartupOpps">
+                        {{ t('dev.refresh_opps') }}
+                    </UButton>
+                    <UButton variant="ghost" size="sm" icon="mdi:magnify" @click="dueDiligenceAll">
+                        {{ t('dev.research_all') }}
+                    </UButton>
+                    <UButton variant="warning" size="sm" icon="mdi:send" @click="investInAll">
+                        {{ t('dev.invest_min') }}
+                    </UButton>
+                    <UButton variant="warning" size="sm" icon="mdi:lightning-bolt" @click="resolveAllStartups">
+                        {{ t('dev.force_resolve') }}
+                    </UButton>
+                    <UButton variant="success" size="sm" icon="mdi:wallet" @click="collectAllPending">
+                        {{ t('dev.collect_all') }}
+                    </UButton>
+                    <UButton variant="danger" size="sm" icon="mdi:delete" @click="clearStartups">
+                        {{ t('dev.reset_startups') }}
+                    </UButton>
                 </div>
 
                 <!-- Live Startup Info -->
@@ -722,13 +734,13 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:chart-line" class="section-icon" /> {{ t('dev.section_market') }}
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-ghost btn-sm" @click="tickMarket100">{{ t('dev.tick_markets') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="clearAllLoans">{{ t('dev.clear_loans') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="fastForward(100)">{{ t('dev.plus_100_ticks')
-                        }}</button>
-                    <button class="btn btn-warning btn-sm" @click="fastForward(1000)">{{ t('dev.plus_1000_ticks')
-                        }}</button>
-                    <button class="btn btn-danger btn-sm" @click="fastForward(10000)">+10K ticks</button>
+                    <UButton variant="ghost" size="sm" @click="tickMarket100">{{ t('dev.tick_markets') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="clearAllLoans">{{ t('dev.clear_loans') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="fastForward(100)">{{ t('dev.plus_100_ticks')
+                        }}</UButton>
+                    <UButton variant="warning" size="sm" @click="fastForward(1000)">{{ t('dev.plus_1000_ticks')
+                        }}</UButton>
+                    <UButton variant="danger" size="sm" @click="fastForward(10000)">+10K ticks</UButton>
                 </div>
             </section>
 
@@ -740,14 +752,16 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="creditScoreAmount" type="number" class="cheat-input" min="0" max="100" />
-                        <button class="btn btn-primary btn-sm" @click="setCreditScore(creditScoreAmount)"><i
-                                class="pi pi-check"></i> Set Score</button>
+                        <UButton variant="primary" size="sm" icon="mdi:check"
+                            @click="setCreditScore(creditScoreAmount)">
+                            Set Score
+                        </UButton>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <button class="btn btn-success btn-sm" @click="maxCreditScore">Max (100)</button>
-                    <button class="btn btn-danger btn-sm" @click="minCreditScore">Min (0)</button>
-                    <button class="btn btn-ghost btn-sm" @click="setCreditScore(50)">Fair (50)</button>
+                    <UButton variant="success" size="sm" @click="maxCreditScore">Max (100)</UButton>
+                    <UButton variant="danger" size="sm" @click="minCreditScore">Min (0)</UButton>
+                    <UButton variant="ghost" size="sm" @click="setCreditScore(50)">Fair (50)</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Current: <strong
@@ -762,9 +776,9 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:graph" class="section-icon text-purple" /> Skill Tree
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-ghost btn-sm" @click="unlockAllSkills">Unlock All</button>
-                    <button class="btn btn-warning btn-sm" @click="maxAllSkills">Max All</button>
-                    <button class="btn btn-danger btn-sm" @click="resetAllSkills">Reset All</button>
+                    <UButton variant="ghost" size="sm" @click="unlockAllSkills">Unlock All</UButton>
+                    <UButton variant="warning" size="sm" @click="maxAllSkills">Max All</UButton>
+                    <UButton variant="danger" size="sm" @click="resetAllSkills">Reset All</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Purchased: <strong>{{upgrades.nodes.filter(n => n.purchased).length}}</strong>/{{
@@ -778,8 +792,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:lightning-bolt" class="section-icon text-gold" /> Events
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="triggerRandomEvent">Trigger Random</button>
-                    <button class="btn btn-ghost btn-sm" @click="clearAllEvents">Clear Events</button>
+                    <UButton variant="warning" size="sm" @click="triggerRandomEvent">Trigger Random</UButton>
+                    <UButton variant="ghost" size="sm" @click="clearAllEvents">Clear Events</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Active: <strong>{{ events.activeEvents?.length ?? 0 }}</strong></span>
@@ -792,8 +806,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:dice-multiple" class="section-icon text-emerald" /> Gambling
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-ghost btn-sm" @click="resetGamblingStats">Reset Stats</button>
-                    <button class="btn btn-success btn-sm" @click="setGamblingWinStreak">Win Streak</button>
+                    <UButton variant="ghost" size="sm" @click="resetGamblingStats">Reset Stats</UButton>
+                    <UButton variant="success" size="sm" @click="setGamblingWinStreak">Win Streak</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Games: <strong>{{ gambling.gamesPlayed }}</strong></span>
@@ -810,12 +824,15 @@ const multiplierInfo = computed(() => {
                     Abilities
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="unlockAllLotteryJackpots"><i class="pi pi-star"></i>
-                        All Lottery Jackpots</button>
-                    <button class="btn btn-warning btn-sm" @click="unlockAllDivineAbilities"><i class="pi pi-bolt"></i>
-                        All Divine Abilities</button>
-                    <button class="btn btn-danger btn-sm" @click="resetDivineAbilities"><i class="pi pi-trash"></i>
-                        Reset Divine</button>
+                    <UButton variant="warning" size="sm" icon="mdi:star" @click="unlockAllLotteryJackpots">
+                        All Lottery Jackpots
+                    </UButton>
+                    <UButton variant="warning" size="sm" icon="mdi:lightning-bolt" @click="unlockAllDivineAbilities">
+                        All Divine Abilities
+                    </UButton>
+                    <UButton variant="danger" size="sm" icon="mdi:delete" @click="resetDivineAbilities">
+                        Reset Divine
+                    </UButton>
                 </div>
                 <div class="debug-row">
                     <span>Divine Abilities: <strong class="text-gold">{{ gambling.divineAbilities.length }} / {{
@@ -841,35 +858,39 @@ const multiplierInfo = computed(() => {
                 <div class="cheat-row">
                     <div class="input-group">
                         <input v-model.number="bmDealsAmount" type="number" class="cheat-input" min="1" />
-                        <button class="btn btn-primary btn-sm" @click="bmAddDeals"><i class="pi pi-plus"></i> {{
-                            t('dev.bm_add_deals') }}</button>
+                        <UButton variant="primary" size="sm" icon="mdi:plus" @click="bmAddDeals">
+                            {{ t('dev.bm_add_deals') }}
+                        </UButton>
                     </div>
                     <div class="input-group">
                         <input v-model.number="bmHeatAmount" type="number" class="cheat-input" min="0"
                             :max="MAX_HEAT" />
-                        <button class="btn btn-primary btn-sm" @click="bmSetHeat(bmHeatAmount)"><i
-                                class="pi pi-check"></i> {{ t('dev.bm_set_heat') }}</button>
+                        <UButton variant="primary" size="sm" icon="mdi:check" @click="bmSetHeat(bmHeatAmount)">
+                            {{ t('dev.bm_set_heat') }}
+                        </UButton>
                     </div>
                 </div>
                 <div class="cheat-buttons">
-                    <button v-for="tier in 6" :key="tier - 1" class="btn btn-sm"
-                        :class="blackmarket.currentTier === tier - 1 ? 'btn-success' : 'btn-ghost'"
-                        @click="bmSetTier(tier - 1)">{{ `Tier ${tier - 1}` }}</button>
+                    <UButton v-for="tier in 6" :key="tier - 1" size="sm"
+                        :variant="blackmarket.currentTier === tier - 1 ? 'success' : 'ghost'"
+                        @click="bmSetTier(tier - 1)">{{ `Tier ${tier - 1}` }}</UButton>
                 </div>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="bmForceRotation"><i class="pi pi-refresh"></i> {{
-                        t('dev.bm_rotate_deals') }}</button>
-                    <button class="btn btn-danger btn-sm" @click="bmMaxHeat">{{ t('dev.bm_max_heat') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="bmClearHeat">{{ t('dev.bm_clear_heat') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="bmClearInvestigations">{{
-                        t('dev.bm_clear_investigations') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="bmClearEffects">{{ t('dev.bm_clear_effects')
-                        }}</button>
-                    <button class="btn btn-warning btn-sm" @click="bmMaxLoyalty">{{ t('dev.bm_max_loyalty') }}</button>
-                    <button class="btn btn-ghost btn-sm" @click="bmResetContacts">{{ t('dev.bm_reset_contacts')
-                        }}</button>
-                    <button class="btn btn-danger btn-sm" @click="bmFullReset"><i class="pi pi-trash"></i> {{
-                        t('dev.bm_full_reset') }}</button>
+                    <UButton variant="warning" size="sm" icon="mdi:refresh" @click="bmForceRotation">
+                        {{ t('dev.bm_rotate_deals') }}
+                    </UButton>
+                    <UButton variant="danger" size="sm" @click="bmMaxHeat">{{ t('dev.bm_max_heat') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="bmClearHeat">{{ t('dev.bm_clear_heat') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="bmClearInvestigations">{{
+                        t('dev.bm_clear_investigations') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="bmClearEffects">{{ t('dev.bm_clear_effects')
+                        }}</UButton>
+                    <UButton variant="warning" size="sm" @click="bmMaxLoyalty">{{ t('dev.bm_max_loyalty') }}</UButton>
+                    <UButton variant="ghost" size="sm" @click="bmResetContacts">{{ t('dev.bm_reset_contacts')
+                        }}</UButton>
+                    <UButton variant="danger" size="sm" icon="mdi:delete" @click="bmFullReset">
+                        {{ t('dev.bm_full_reset') }}
+                    </UButton>
                 </div>
                 <div class="debug-row">
                     <span>{{ t('dev.bm_tier') }} <strong :class="`text-tier-${blackmarket.currentTier}`">{{
@@ -893,8 +914,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:piggy-bank" class="section-icon text-pink" /> Deposits
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="matureAllDeposits">Mature All</button>
-                    <button class="btn btn-danger btn-sm" @click="clearAllDeposits">Clear All</button>
+                    <UButton variant="warning" size="sm" @click="matureAllDeposits">Mature All</UButton>
+                    <UButton variant="danger" size="sm" @click="clearAllDeposits">Clear All</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Active: <strong>{{ deposits.deposits?.length ?? 0 }}</strong></span>
@@ -907,8 +928,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:home-city" class="section-icon text-sky" /> Real Estate
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-ghost btn-sm" @click="repairAllProperties">Repair All</button>
-                    <button class="btn btn-success btn-sm" @click="maxOccupancyAll">100% Occupancy</button>
+                    <UButton variant="ghost" size="sm" @click="repairAllProperties">Repair All</UButton>
+                    <UButton variant="success" size="sm" @click="maxOccupancyAll">100% Occupancy</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Properties: <strong>{{ realEstate.properties.length }}</strong></span>
@@ -921,8 +942,8 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:trophy" class="section-icon text-gold" /> Achievements
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="unlockAllAchievements">Unlock All</button>
-                    <button class="btn btn-danger btn-sm" @click="resetAchievements">Reset All</button>
+                    <UButton variant="warning" size="sm" @click="unlockAllAchievements">Unlock All</UButton>
+                    <UButton variant="danger" size="sm" @click="resetAchievements">Reset All</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Unlocked: <strong>{{achievements.achievements.filter(a => a.unlocked).length}}</strong>/{{
@@ -936,10 +957,10 @@ const multiplierInfo = computed(() => {
                     <AppIcon icon="mdi:star-circle" class="section-icon text-purple" /> Prestige Advanced
                 </h2>
                 <div class="cheat-buttons">
-                    <button class="btn btn-warning btn-sm" @click="unlockAllPrestigeUpgrades">Max Upgrades</button>
-                    <button class="btn btn-warning btn-sm" @click="unlockAllMilestones">Unlock Milestones</button>
-                    <button class="btn btn-warning btn-sm" @click="purchaseAllPerks">Buy All Perks</button>
-                    <button class="btn btn-success btn-sm" @click="advanceEra">Next Era</button>
+                    <UButton variant="warning" size="sm" @click="unlockAllPrestigeUpgrades">Max Upgrades</UButton>
+                    <UButton variant="warning" size="sm" @click="unlockAllMilestones">Unlock Milestones</UButton>
+                    <UButton variant="warning" size="sm" @click="purchaseAllPerks">Buy All Perks</UButton>
+                    <UButton variant="success" size="sm" @click="advanceEra">Next Era</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Era: <strong>{{ prestige.currentEra?.name ?? 'None' }}</strong></span>
@@ -979,9 +1000,9 @@ const multiplierInfo = computed(() => {
 <style scoped>
 .dev-badge {
     background: var(--t-danger);
-    color: white;
+    color: var(--t-text-inverse);
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     padding: 0.25rem 0.75rem;
     border-radius: var(--t-radius-sm);
     letter-spacing: 0.1em;
@@ -1000,7 +1021,6 @@ const multiplierInfo = computed(() => {
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-4);
-    box-shadow: var(--t-shadow-sm);
     display: flex;
     flex-direction: column;
     gap: var(--t-space-3);
@@ -1065,7 +1085,6 @@ const multiplierInfo = computed(() => {
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
     max-height: 200px;
     overflow-y: auto;
     font-family: var(--t-font-mono);
@@ -1132,7 +1151,7 @@ const multiplierInfo = computed(() => {
 .debug-subtitle {
     font-size: var(--t-font-size-xs);
     text-transform: uppercase;
-    opacity: 0.6;
+    color: var(--t-text-muted);
     margin-bottom: var(--t-space-2);
 }
 
@@ -1148,7 +1167,7 @@ const multiplierInfo = computed(() => {
 }
 
 .debug-opp-name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     min-width: 120px;
 }
 
@@ -1191,8 +1210,8 @@ const multiplierInfo = computed(() => {
 }
 
 .multiplier-item.active {
-    border-color: color-mix(in srgb, var(--t-accent) 30%, transparent);
-    background: color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-secondary));
+    border-color: var(--t-border-hover);
+    background: var(--t-bg-muted);
 }
 
 .mul-name {
@@ -1203,7 +1222,7 @@ const multiplierInfo = computed(() => {
 .mul-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
 }
 

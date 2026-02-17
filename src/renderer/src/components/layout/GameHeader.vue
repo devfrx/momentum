@@ -13,6 +13,7 @@ import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { add, sub, ZERO } from '@renderer/core/BigNum'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton, UTooltip } from '@renderer/components/ui'
 import MultiplierBreakdownPanel from '@renderer/components/MultiplierBreakdownPanel.vue'
 
 const route = useRoute()
@@ -29,7 +30,6 @@ const { formatCash, formatCashFull, formatNumber, formatMultiplier } = useFormat
 
 const showMultiplierPanel = ref(false)
 
-// ── Total income per second (all sources) ──
 const totalIncomePerSecond = computed(() => {
     let total = ZERO
     total = add(total, business.profitPerSecond)
@@ -40,7 +40,6 @@ const totalIncomePerSecond = computed(() => {
     return total
 })
 
-// ── Route-specific multiplier ──
 const ROUTE_MULTIPLIER_MAP: Record<string, { id: string; icon: string; labelKey: string }> = {
     business: { id: 'business_revenue', icon: 'mdi:store', labelKey: 'multipliers.business_revenue' },
     realestate: { id: 'real_estate_rent', icon: 'mdi:home-city', labelKey: 'multipliers.real_estate_rent' },
@@ -60,7 +59,6 @@ const routeMultiplier = computed(() => {
     return { ...mapping, value: mul, formatted: formatMultiplier(mul), hasBonus: mul.gt(1) }
 })
 
-// XP progress percentage (0-100)
 const xpProgress = computed(() => {
     if (player.xpToNextLevel.eq(0)) return 100
     return Math.min(100, player.xp.div(player.xpToNextLevel).mul(100).toNumber())
@@ -85,7 +83,6 @@ function handleClose(): void {
 
 <template>
     <header class="app-header">
-        <!-- Drag region -->
         <div class="drag-region"></div>
 
         <!-- Brand -->
@@ -94,75 +91,81 @@ function handleClose(): void {
             <span class="brand-text">{{ $t('header.brand') }}</span>
         </div>
 
-        <!-- Hero: Primary Cash -->
-        <div class="hero-stat">
-            <span class="hero-value tip-wrap" :data-tip="formatCashFull(player.cash)">{{ formatCash(player.cash)
-                }}</span>
-            <span class="hero-profit tip-wrap" :class="{ negative: totalIncomePerSecond.lt(0) }"
-                :data-tip="formatCashFull(totalIncomePerSecond) + $t('common.per_second')">
-                <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
-                {{ formatCash(totalIncomePerSecond) }}{{ $t('common.per_second') }}
-            </span>
-        </div>
+        <!-- Hero Cash -->
+        <UTooltip :text="formatCashFull(player.cash)" placement="bottom">
+            <div class="hero-stat">
+                <span class="hero-value">{{ formatCash(player.cash) }}</span>
+                <span class="hero-profit" :class="{ negative: totalIncomePerSecond.lt(0) }">
+                    <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
+                    {{ formatCash(totalIncomePerSecond) }}{{ $t('common.per_second') }}
+                </span>
+            </div>
+        </UTooltip>
 
-        <!-- Secondary Stats -->
+        <!-- HUD Stats -->
         <div class="hud-stats">
-            <div class="hud-chip tip-wrap" :data-tip="$t('header.net_worth') + ': ' + formatCashFull(player.netWorth)">
-                <span class="hud-chip-label">{{ $t('header.net_worth') }}</span>
-                <span class="hud-chip-value">{{ formatCash(player.netWorth, 2) }}</span>
-            </div>
+            <UTooltip :text="$t('header.net_worth') + ': ' + formatCashFull(player.netWorth)" placement="bottom">
+                <div class="hud-chip">
+                    <span class="hud-chip-label">{{ $t('header.net_worth') }}</span>
+                    <span class="hud-chip-value">{{ formatCash(player.netWorth, 2) }}</span>
+                </div>
+            </UTooltip>
 
-            <div class="hud-chip" :title="$t('header.prestige')">
-                <span class="hud-chip-label">{{ $t('header.prestige') }}</span>
-                <span class="hud-chip-value">{{ formatNumber(prestige.points) }}</span>
-            </div>
+            <UTooltip :text="$t('header.prestige')" placement="bottom">
+                <div class="hud-chip">
+                    <span class="hud-chip-label">{{ $t('header.prestige') }}</span>
+                    <span class="hud-chip-value">{{ formatNumber(prestige.points) }}</span>
+                </div>
+            </UTooltip>
 
-            <!-- Route-specific multiplier chip -->
             <div v-if="routeMultiplier" class="hud-chip" :class="{ 'has-bonus': routeMultiplier.hasBonus }">
                 <AppIcon :icon="routeMultiplier.icon" class="hud-route-icon" />
                 <span class="hud-chip-value" :class="{ accent: routeMultiplier.hasBonus }">{{ routeMultiplier.formatted
-                    }}</span>
+                }}</span>
             </div>
 
-            <div class="hud-chip clickable" @click="showMultiplierPanel = !showMultiplierPanel"
-                :title="$t('header.view_multipliers')">
-                <span class="hud-chip-label">{{ $t('header.multi') }}</span>
-                <span class="hud-chip-value accent">{{ formatMultiplier(prestige.globalMultiplier) }}</span>
-                <AppIcon icon="mdi:chevron-down" class="hud-chevron" />
-            </div>
-
-            <div class="hud-chip level-chip"
-                :title="`${formatNumber(player.xp)} / ${formatNumber(player.xpToNextLevel)} XP`">
-                <span class="hud-chip-label">{{ $t('common.level', { n: '' }) }}</span>
-                <span class="hud-chip-value">{{ player.level }}</span>
-                <div class="xp-bar">
-                    <div class="xp-fill" :style="{ width: xpProgress + '%' }"></div>
+            <UTooltip :text="$t('header.view_multipliers')" placement="bottom">
+                <div class="hud-chip clickable" @click="showMultiplierPanel = !showMultiplierPanel">
+                    <span class="hud-chip-label">{{ $t('header.multi') }}</span>
+                    <span class="hud-chip-value accent">{{ formatMultiplier(prestige.globalMultiplier) }}</span>
+                    <AppIcon icon="mdi:chevron-down" class="hud-chevron" />
                 </div>
-            </div>
+            </UTooltip>
+
+            <UTooltip :text="`${formatNumber(player.xp)} / ${formatNumber(player.xpToNextLevel)} XP`"
+                placement="bottom">
+                <div class="hud-chip level-chip">
+                    <span class="hud-chip-label">{{ $t('common.level', { n: '' }) }}</span>
+                    <span class="hud-chip-value">{{ player.level }}</span>
+                    <div class="xp-bar">
+                        <div class="xp-fill" :style="{ width: xpProgress + '%' }"></div>
+                    </div>
+                </div>
+            </UTooltip>
         </div>
 
         <!-- Actions -->
         <div class="header-actions">
-            <button class="icon-btn" @click="toggleTheme"
-                :title="settings.theme === 'dark' ? $t('header.switch_light') : $t('header.switch_dark')">
-                <AppIcon :icon="settings.theme === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'" />
-            </button>
+            <UTooltip :text="settings.theme === 'dark' ? $t('header.switch_light') : $t('header.switch_dark')"
+                placement="bottom">
+                <UButton variant="text" :icon="settings.theme === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'"
+                    @click="toggleTheme" />
+            </UTooltip>
 
             <div class="header-divider"></div>
 
-            <button class="icon-btn" @click="handleMinimize" :title="$t('header.minimize')">
-                <AppIcon icon="mdi:minus" />
-            </button>
-            <button class="icon-btn" @click="handleMaximize" :title="$t('header.maximize')">
-                <AppIcon icon="mdi:checkbox-blank-outline" />
-            </button>
-            <button class="icon-btn close" @click="handleClose" :title="$t('header.close')">
-                <AppIcon icon="mdi:close" />
-            </button>
+            <UTooltip :text="$t('header.minimize')" placement="bottom">
+                <UButton variant="text" icon="mdi:minus" @click="handleMinimize" />
+            </UTooltip>
+            <UTooltip :text="$t('header.maximize')" placement="bottom">
+                <UButton variant="text" icon="mdi:checkbox-blank-outline" @click="handleMaximize" />
+            </UTooltip>
+            <UTooltip :text="$t('header.close')" placement="bottom">
+                <UButton variant="danger" icon="mdi:close" @click="handleClose" />
+            </UTooltip>
         </div>
     </header>
 
-    <!-- Multiplier Breakdown Panel -->
     <MultiplierBreakdownPanel v-if="showMultiplierPanel" @close="showMultiplierPanel = false" />
 </template>
 
@@ -173,63 +176,62 @@ function handleClose(): void {
     height: var(--t-header-height);
     background: var(--t-bg-header);
     border-bottom: 1px solid var(--t-border);
-    padding: 0 0.5rem;
+    padding: 0 var(--t-space-3);
     position: relative;
     z-index: 100;
     -webkit-app-region: drag;
     user-select: none;
-    gap: 0.75rem;
+    gap: var(--t-space-3);
 }
 
 .drag-region {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     -webkit-app-region: drag;
 }
 
-/* ─── Brand ─── */
 .brand {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     z-index: 1;
     -webkit-app-region: no-drag;
-    padding-right: 0.75rem;
-    margin-right: 0.25rem;
+    padding-right: var(--t-space-3);
 }
 
 .brand-icon {
-    font-size: 1.15rem;
-    color: var(--t-accent);
+    font-size: 1rem;
+    color: var(--t-text-muted);
 }
 
 .brand-text {
-    font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-size: var(--t-font-size-sm);
+    font-weight: var(--t-font-bold);
     letter-spacing: -0.03em;
     color: var(--t-text);
 }
 
-/* ─── Hero Cash (primary focus) ─── */
 .hero-stat {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: var(--t-space-2);
     z-index: 1;
     -webkit-app-region: no-drag;
-    padding: 0.2rem 0.65rem;
+    padding: 0.2rem 0.55rem;
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-md);
     border: 1px solid var(--t-border);
+    transition: border-color var(--t-transition-fast);
+}
+
+.hero-stat:hover {
+    border-color: var(--t-border-hover);
 }
 
 .hero-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     letter-spacing: -0.02em;
 }
@@ -237,10 +239,10 @@ function handleClose(): void {
 .hero-profit {
     display: flex;
     align-items: center;
-    gap: 0.2rem;
+    gap: 0.15rem;
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 
@@ -249,7 +251,7 @@ function handleClose(): void {
 }
 
 .hero-profit-icon {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
 }
 
 .hud-route-icon {
@@ -261,11 +263,10 @@ function handleClose(): void {
     color: var(--t-accent);
 }
 
-/* ─── Secondary HUD Stats ─── */
 .hud-stats {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--t-space-2);
     flex: 1;
     z-index: 1;
     -webkit-app-region: no-drag;
@@ -274,10 +275,10 @@ function handleClose(): void {
 .hud-chip {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.15rem 0.5rem;
+    gap: 0.25rem;
+    padding: 0.15rem 0.45rem;
     border-radius: var(--t-radius-sm);
-    transition: background 0.15s;
+    transition: background var(--t-transition-fast), color var(--t-transition-fast);
 }
 
 .hud-chip.clickable {
@@ -286,6 +287,11 @@ function handleClose(): void {
 
 .hud-chip.clickable:hover {
     background: var(--t-bg-muted);
+}
+
+.hud-chip.clickable:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 
 .hud-chip-label {
@@ -297,7 +303,7 @@ function handleClose(): void {
 .hud-chip-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     white-space: nowrap;
 }
@@ -307,102 +313,42 @@ function handleClose(): void {
 }
 
 .hud-chevron {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--t-text-muted);
-    margin-left: -0.05rem;
 }
 
-/* ─── Level + XP ─── */
 .level-chip {
     margin-left: auto;
 }
 
 .xp-bar {
-    width: 44px;
+    width: 40px;
     height: 3px;
     background: var(--t-bg-muted);
-    border-radius: 2px;
+    border-radius: var(--t-radius-full);
     overflow: hidden;
-    margin-left: 0.2rem;
+    margin-left: 0.15rem;
 }
 
 .xp-fill {
     height: 100%;
-    background: var(--t-accent);
-    border-radius: 2px;
+    background: var(--t-text-secondary);
+    border-radius: var(--t-radius-full);
     transition: width 0.3s ease;
 }
 
-/* ─── Actions ─── */
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
     z-index: 1;
     -webkit-app-region: no-drag;
 }
 
 .header-divider {
     width: 1px;
-    height: 18px;
+    height: 14px;
     background: var(--t-border);
-    margin: 0 4px;
-}
-
-.icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    background: transparent;
-    border: none;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    border-radius: var(--t-radius-sm);
-    transition: all 0.1s;
-    font-size: 0.9rem;
-}
-
-.icon-btn:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-}
-
-.icon-btn.close:hover {
-    background: var(--t-danger-hover);
-    color: var(--t-text);
-}
-
-/* ─── CSS Tooltip (no flicker on reactive updates) ─── */
-.tip-wrap {
-    position: relative;
-    cursor: default;
-}
-
-.tip-wrap::after {
-    content: attr(data-tip);
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.3rem 0.55rem;
-    font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    white-space: nowrap;
-    color: var(--t-text);
-    background: var(--t-bg-elevated);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    box-shadow: var(--t-shadow-md);
-    z-index: 999;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.12s ease;
-}
-
-.tip-wrap:hover::after {
-    opacity: 1;
+    margin: 0 var(--t-space-1);
 }
 </style>

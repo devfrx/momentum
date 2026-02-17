@@ -198,7 +198,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.3s;
+    transition: opacity var(--t-transition-normal);
 }
 
 .fade-enter-from,

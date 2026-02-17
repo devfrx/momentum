@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Chart, registerables } from 'chart.js'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import { smartDecimals } from '@renderer/composables/useFormat'
+import { UButton } from '@renderer/components/ui'
 import { THEME } from '@renderer/assets/theme/colors'
 
 Chart.register(...registerables, zoomPlugin)
@@ -374,18 +375,18 @@ function formatPrice(v: number): string {
         <div class="chart-toolbar">
             <div class="toolbar-row toolbar-row--top">
                 <div class="range-group">
-                    <button v-for="(opt, idx) in zoomOptions" :key="opt.label"
-                        :class="['range-btn', { active: selectedRange === idx }]" @click="selectedRange = idx">
+                    <UButton variant="ghost" size="xs" v-for="(opt, idx) in zoomOptions" :key="opt.label"
+                        :active="selectedRange === idx" @click="selectedRange = idx">
                         {{ opt.label }}
-                    </button>
+                    </UButton>
                 </div>
-                <button class="reset-btn" @click="resetZoom" :title="$t('charts.reset_zoom')">
+                <UButton variant="text" @click="resetZoom" :title="$t('charts.reset_zoom')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5">
                         <path d="M1 4v6h6M23 20v-6h-6" />
                         <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
                     </svg>
-                </button>
+                </UButton>
             </div>
             <div class="toolbar-row toolbar-row--bottom">
                 <div class="live-price" :class="priceChange.value >= 0 ? 'is-up' : 'is-down'">
@@ -422,8 +423,8 @@ function formatPrice(v: number): string {
     width: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--t-bg-muted, #18181b);
-    border: 1px solid var(--t-border, #27272a);
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md, 12px);
     overflow: visible;
 }
@@ -434,8 +435,8 @@ function formatPrice(v: number): string {
     flex-direction: column;
     gap: 0.25rem;
     padding: 0.4rem 0.75rem;
-    border-bottom: 1px solid var(--t-border, #27272a);
-    background: var(--t-bg-card, #18181b);
+    border-bottom: 1px solid var(--t-border);
+    background: var(--t-bg-card);
 }
 
 .toolbar-row {
@@ -457,34 +458,9 @@ function formatPrice(v: number): string {
 .range-group {
     display: flex;
     gap: 1px;
-    background: var(--t-border, #27272a);
+    background: var(--t-border);
     border-radius: var(--t-radius-lg);
     overflow: hidden;
-}
-
-.range-btn {
-    padding: 0.2rem 0.35rem;
-    font-size: 0.6rem;
-    font-weight: 600;
-    font-family: var(--t-font-mono, monospace);
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    background: var(--t-bg-card, #1e1e22);
-    color: var(--t-text-muted, #71717a);
-    border: none;
-    transition: all 0.1s;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.range-btn:hover {
-    color: var(--t-text-secondary, #a1a1aa);
-    background: var(--t-bg-muted, #27272a);
-}
-
-.range-btn.active {
-    color: var(--t-text, #fafafa);
-    background: var(--t-bg-muted, #27272a);
 }
 
 /* Live price display */
@@ -492,7 +468,7 @@ function formatPrice(v: number): string {
     display: flex;
     align-items: baseline;
     gap: 0.4rem;
-    font-family: var(--t-font-mono, monospace);
+    font-family: var(--t-font-mono);
     white-space: nowrap;
     flex-shrink: 1;
     min-width: 0;
@@ -501,31 +477,30 @@ function formatPrice(v: number): string {
 
 .live-price-value {
     font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--t-text, #fafafa);
+    font-weight: var(--t-font-bold);
+    color: var(--t-text);
     flex-shrink: 0;
 }
 
 .live-price-change {
     font-size: 0.68rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     flex-shrink: 0;
 }
 
 .live-price-pct {
     font-size: 0.64rem;
-    opacity: 0.8;
     flex-shrink: 0;
 }
 
 .live-price.is-up .live-price-change,
 .live-price.is-up .live-price-pct {
-    color: var(--t-success, #22c55e);
+    color: var(--t-success);
 }
 
 .live-price.is-down .live-price-change,
 .live-price.is-down .live-price-pct {
-    color: var(--t-danger, #ef4444);
+    color: var(--t-danger);
 }
 
 /* High/Low badges */
@@ -540,47 +515,26 @@ function formatPrice(v: number): string {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-family: var(--t-font-mono, monospace);
+    font-family: var(--t-font-mono);
     font-size: 0.6rem;
     white-space: nowrap;
 }
 
 .hl-label {
-    font-weight: 700;
-    opacity: 0.5;
+    font-weight: var(--t-font-bold);
+    color: var(--t-text-muted);
 }
 
 .hl-val {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .hl-badge--high .hl-val {
-    color: var(--t-success, #22c55e);
+    color: var(--t-success);
 }
 
 .hl-badge--low .hl-val {
-    color: var(--t-danger, #ef4444);
-}
-
-.reset-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: 1px solid var(--t-border, #27272a);
-    border-radius: var(--t-radius-md);
-    background: transparent;
-    color: var(--t-text-muted, #71717a);
-    cursor: pointer;
-    transition: all 0.1s;
-}
-
-.reset-btn:hover {
-    color: var(--t-text, #fafafa);
-    background: var(--t-bg-muted, #27272a);
-    border-color: var(--t-border-hover, #3f3f46);
+    color: var(--t-danger);
 }
 
 /* ─── Canvas ─── */

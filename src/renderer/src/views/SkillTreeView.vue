@@ -5,6 +5,7 @@ import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
@@ -164,9 +165,9 @@ function buySelected(): void {
 
         <!-- Category Selector -->
         <div class="st-categories">
-            <button v-for="meta in SKILL_TREE_META" :key="meta.id" class="st-cat-btn"
-                :class="{ active: activeTab === meta.id }" :style="{ '--_cat-accent': meta.accent }"
-                @click="activeTab = meta.id; selectedId = null">
+            <UButton variant="tab" v-for="meta in SKILL_TREE_META" :key="meta.id" :active="activeTab === meta.id"
+                :style="{ '--_cat-accent': meta.accent }" @click="activeTab = meta.id; selectedId = null"
+                class="st-cat-btn">
                 <div class="st-cat-icon-wrap">
                     <AppIcon :icon="meta.icon" class="st-cat-icon" />
                 </div>
@@ -180,7 +181,7 @@ function buySelected(): void {
                             totalInCategory(meta.id) }}</span>
                     </div>
                 </div>
-            </button>
+            </UButton>
         </div>
 
         <!-- Active Category Header -->
@@ -234,38 +235,12 @@ function buySelected(): void {
    ═══════════════════════════════════════════════════════════════════ */
 .st-categories {
     display: flex;
+    justify-content: space-evenly;
     gap: var(--t-space-2);
     overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: thin;
     scrollbar-color: var(--t-border) transparent;
-}
-
-.st-cat-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-3);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    cursor: pointer;
-    min-width: 175px;
-    transition:
-        background var(--t-transition-normal),
-        border-color var(--t-transition-normal),
-        box-shadow var(--t-transition-normal);
-}
-
-.st-cat-btn:hover {
-    border-color: var(--t-border-hover);
-    background: var(--t-bg-card-hover);
-}
-
-.st-cat-btn.active {
-    border-color: var(--_cat-accent, var(--t-accent));
-    background: color-mix(in srgb, var(--_cat-accent, var(--t-accent)) 6%, var(--t-bg-card));
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_cat-accent, var(--t-accent)) 20%, transparent);
 }
 
 .st-cat-icon-wrap {
@@ -280,7 +255,7 @@ function buySelected(): void {
 }
 
 .st-cat-icon {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     color: var(--_cat-accent, var(--t-accent));
 }
 
@@ -294,13 +269,14 @@ function buySelected(): void {
 
 .st-cat-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     white-space: nowrap;
 }
 
 .st-cat-progress-row {
     display: flex;
+    width: 100%;
     align-items: center;
     gap: var(--t-space-2);
 }
@@ -317,7 +293,7 @@ function buySelected(): void {
     height: 100%;
     border-radius: 2px;
     background: var(--_cat-accent, var(--t-accent));
-    transition: width 0.3s ease;
+    transition: width var(--t-transition-normal);
 }
 
 .st-cat-counter {
@@ -342,7 +318,7 @@ function buySelected(): void {
 }
 
 .st-active-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--_active-accent, var(--t-accent));
 }
 
@@ -355,7 +331,7 @@ function buySelected(): void {
 
 .st-active-name {
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     margin: 0;
 }
@@ -391,9 +367,18 @@ function buySelected(): void {
     align-items: center;
     justify-content: center;
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-family: var(--t-font-mono);
     color: var(--t-text-secondary);
+}
+
+.st-cat-btn {
+    width: 100%;
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+    background: var(--t-bg-card);
+    border-radius: var(--t-radius-md) var(--t-radius-md) 0 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════

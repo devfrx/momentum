@@ -1,10 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * InventoryPanel — Displays all items in the player's storage inventory.
  * Supports filtering, bulk operations, and appraisal selection.
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InventoryItem from './InventoryItem.vue'
 import AppraiseDialog from './AppraiseDialog.vue'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
@@ -63,16 +64,14 @@ function sellAllItems(): void {
         <!-- Toolbar -->
         <div class="inventory-toolbar" v-if="storage.inventoryCount > 0">
             <div class="filter-row">
-                <button v-for="cat in categories" :key="cat" class="btn btn-sm"
-                    :class="{ 'btn-primary': filterCategory === cat, 'btn-ghost': filterCategory !== cat }"
-                    @click="filterCategory = cat">{{ cat === 'all' ? t('common.all') : cat }}</button>
+                <UButton v-for="cat in categories" :key="cat" size="sm"
+                    :variant="filterCategory === cat ? 'primary' : 'ghost'"
+                    @click="filterCategory = cat">{{ cat === 'all' ? t('common.all') : cat }}</UButton>
             </div>
             <div class="bulk-actions">
-                <button v-if="unappraisedCount > 0" class="btn btn-ghost btn-sm"
-                    @click="showAppraiseDialog = true; appraiseTargetId = null"><i class="pi pi-search"></i> {{
-                        t('storage.appraise_all', { n: unappraisedCount }) }}</button>
-                <button class="btn btn-warning btn-sm" @click="sellAllItems"><i class="pi pi-dollar"></i> {{
-                    t('storage.sell_all') }}</button>
+                <UButton v-if="unappraisedCount > 0" variant="ghost" size="sm" icon="mdi:magnify"
+                    @click="showAppraiseDialog = true; appraiseTargetId = null">{{ t('storage.appraise_all', { n: unappraisedCount }) }}</UButton>
+                <UButton variant="warning" size="sm" icon="mdi:currency-usd" @click="sellAllItems">{{ t('storage.sell_all') }}</UButton>
             </div>
         </div>
 
@@ -113,7 +112,7 @@ function sellAllItems(): void {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     margin: 0;
     color: var(--t-text);
 }
@@ -137,7 +136,7 @@ function sellAllItems(): void {
 }
 
 .inv-val-amount {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-success);
 }
 
@@ -176,7 +175,6 @@ function sellAllItems(): void {
 }
 
 .empty-icon {
-    font-size: 3rem;
-    opacity: 0.3;
+    font-size: 2.9rem;
 }
 </style>

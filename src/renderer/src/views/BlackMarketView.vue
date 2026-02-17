@@ -5,6 +5,8 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import {
@@ -32,10 +34,10 @@ const { error: notifyError, warning: notifyWarning } = useNotify()
 type ViewTab = 'deals' | 'contacts' | 'stats'
 const activeTab = ref<ViewTab>('deals')
 
-const tabs = computed(() => [
-    { id: 'deals' as ViewTab, label: t('blackmarket.tab_deals'), icon: 'mdi:skull-crossbones', count: bm.availableDeals.length },
-    { id: 'contacts' as ViewTab, label: t('blackmarket.tab_contacts'), icon: 'mdi:account-group', count: bm.unlockedContacts.length },
-    { id: 'stats' as ViewTab, label: t('blackmarket.tab_stats'), icon: 'mdi:chart-box' },
+const tabs = computed<TabDef[]>(() => [
+    { id: 'deals', label: t('blackmarket.tab_deals'), icon: 'mdi:skull-crossbones', count: bm.availableDeals.length },
+    { id: 'contacts', label: t('blackmarket.tab_contacts'), icon: 'mdi:account-group', count: bm.unlockedContacts.length },
+    { id: 'stats', label: t('blackmarket.tab_stats'), icon: 'mdi:chart-box' },
 ])
 
 function handleDealAccepted(_dealId: string, _success: boolean, _message: string): void {
@@ -217,37 +219,27 @@ const infoSections = computed(() => [
         <ActiveEffects />
 
         <!-- Tab Navigation -->
-        <div class="tab-bar">
-            <button v-for="tab in tabs" :key="tab.id" class="tab-btn" :class="{ active: activeTab === tab.id }"
-                @click="activeTab = tab.id">
-                <AppIcon :icon="tab.icon" />
-                <span>{{ tab.label }}</span>
-                <span v-if="tab.count && tab.count > 0" class="tab-count">{{ tab.count }}</span>
-            </button>
-        </div>
+        <UTabs v-model="activeTab" :tabs="tabs">
+            <template #deals>
+                <DealGrid @accepted="handleDealAccepted" />
+            </template>
 
-        <!-- Deals Tab -->
-        <template v-if="activeTab === 'deals'">
-            <DealGrid @accepted="handleDealAccepted" />
-        </template>
+            <template #contacts>
+                <div v-if="bm.unlockedContacts.length > 0" class="contacts-grid">
+                    <ContactPanel v-for="contact in bm.unlockedContacts" :key="contact.id" :contact-id="contact.id"
+                        @ability-used="handleAbilityUsed" />
+                </div>
+                <div v-else class="empty-state">
+                    <AppIcon icon="mdi:account-off" class="empty-icon" />
+                    <p>{{ t('blackmarket.no_contacts') }}</p>
+                    <span class="empty-hint">{{ t('blackmarket.no_contacts_hint') }}</span>
+                </div>
+            </template>
 
-        <!-- Contacts Tab -->
-        <template v-if="activeTab === 'contacts'">
-            <div v-if="bm.unlockedContacts.length > 0" class="contacts-grid">
-                <ContactPanel v-for="contact in bm.unlockedContacts" :key="contact.id" :contact-id="contact.id"
-                    @ability-used="handleAbilityUsed" />
-            </div>
-            <div v-else class="empty-state">
-                <AppIcon icon="mdi:account-off" class="empty-icon" />
-                <p>{{ t('blackmarket.no_contacts') }}</p>
-                <span class="empty-hint">{{ t('blackmarket.no_contacts_hint') }}</span>
-            </div>
-        </template>
-
-        <!-- Stats Tab -->
-        <template v-if="activeTab === 'stats'">
-            <BlackMarketStats />
-        </template>
+            <template #stats>
+                <BlackMarketStats />
+            </template>
+        </UTabs>
 
         <!-- Activity log — persistent feed -->
         <ActivityLog />
@@ -279,57 +271,6 @@ const infoSections = computed(() => [
     }
 }
 
-.tab-bar {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--t-border);
-}
-
-.tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.75rem 1.25rem;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--t-text-muted);
-    font-size: var(--t-font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.tab-btn:hover {
-    color: var(--t-text);
-    background: var(--t-bg-muted);
-}
-
-.tab-btn.active {
-    color: var(--t-accent);
-    border-bottom-color: var(--t-accent);
-    font-weight: 600;
-}
-
-.tab-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    background: var(--t-bg-muted);
-    color: var(--t-text-muted);
-    border-radius: 9px;
-}
-
-.tab-btn.active .tab-count {
-    background: var(--t-accent);
-    color: white;
-}
-
 .contacts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -353,6 +294,5 @@ const infoSections = computed(() => [
 
 .empty-hint {
     font-size: var(--t-font-size-xs);
-    opacity: 0.6;
 }
 </style>

@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import Dialog from 'primevue/dialog'
+import { UModal, UButton } from '@renderer/components/ui'
+import { UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import Slider from 'primevue/slider'
 import Select from 'primevue/select'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
@@ -33,6 +30,13 @@ const player = usePlayerStore()
 const upgrades = useUpgradeStore()
 const { formatCash, formatPercent } = useFormat()
 const { t } = useI18n()
+
+const depositActiveTab = ref('active')
+const depositTabs = computed<TabDef[]>(() => [
+    { id: 'active', label: t('deposits.tab_active'), icon: 'mdi:piggy-bank-outline', count: depositStore.deposits.length },
+    { id: 'available', label: t('deposits.tab_available'), icon: 'mdi:bank-outline' },
+    { id: 'history', label: t('deposits.tab_history'), icon: 'mdi:history' },
+])
 
 // Live tick counter
 const currentTick = ref(gameEngine.currentTick)
@@ -214,72 +218,62 @@ const depositInfoSections = computed<InfoSection[]>(() => [
         </div>
 
         <!-- Main Content -->
-        <Tabs value="active" class="deposits-tabs">
-            <TabList>
-                <Tab value="active">{{ $t('deposits.tab_active') }}</Tab>
-                <Tab value="available">{{ $t('deposits.tab_available') }}</Tab>
-                <Tab value="history">{{ $t('deposits.tab_history') }}</Tab>
-            </TabList>
-            <TabPanels>
-                <!-- Active Deposits Tab -->
-                <TabPanel value="active">
-                    <div v-if="depositStore.deposits.length === 0" class="empty-state">
-                        <AppIcon icon="mdi:piggy-bank-outline" class="empty-icon" />
-                        <p>{{ $t('deposits.no_active') }}</p>
-                    </div>
+        <UTabs v-model="depositActiveTab" :tabs="depositTabs">
+            <template #active>
+                <div v-if="depositStore.deposits.length === 0" class="empty-state">
+                    <AppIcon icon="mdi:piggy-bank-outline" class="empty-icon" />
+                    <p>{{ $t('deposits.no_active') }}</p>
+                </div>
 
-                    <div v-else class="card-grid">
-                        <ActiveDepositCard v-for="dep in depositStore.deposits" :key="dep.id" :deposit="dep"
-                            :current-tick="currentTick" @withdraw="handleWithdraw(dep.id)" />
-                    </div>
-                </TabPanel>
+                <div v-else class="card-grid">
+                    <ActiveDepositCard v-for="dep in depositStore.deposits" :key="dep.id" :deposit="dep"
+                        :current-tick="currentTick" @withdraw="handleWithdraw(dep.id)" />
+                </div>
+            </template>
 
-                <!-- Available Accounts Tab -->
-                <TabPanel value="available">
-                    <div class="category-filter">
-                        <Select v-model="selectedCategory" :options="categoryOptions" optionLabel="label"
-                            optionValue="value" :placeholder="$t('common.filter_by_category')" />
-                    </div>
+            <template #available>
+                <div class="category-filter">
+                    <Select v-model="selectedCategory" :options="categoryOptions" optionLabel="label"
+                        optionValue="value" :placeholder="$t('common.filter_by_category')" />
+                </div>
 
-                    <div class="card-grid">
-                        <DepositCard v-for="{ def, eligible, reason, effectiveAPY } in filteredDeposits" :key="def.id"
-                            :deposit="def" :effective-a-p-y="effectiveAPY" :eligible="eligible" :reason="reason"
-                            @open="openDepositDialog(def)" />
-                    </div>
-                </TabPanel>
+                <div class="card-grid">
+                    <DepositCard v-for="{ def, eligible, reason, effectiveAPY } in filteredDeposits" :key="def.id"
+                        :deposit="def" :effective-a-p-y="effectiveAPY" :eligible="eligible" :reason="reason"
+                        @open="openDepositDialog(def)" />
+                </div>
+            </template>
 
-                <!-- History Tab -->
-                <TabPanel value="history">
-                    <div v-if="depositStore.depositHistory.length === 0" class="empty-state">
-                        <AppIcon icon="mdi:history" class="empty-icon" />
-                        <p>{{ $t('deposits.no_history') }}</p>
-                    </div>
+            <template #history>
+                <div v-if="depositStore.depositHistory.length === 0" class="empty-state">
+                    <AppIcon icon="mdi:history" class="empty-icon" />
+                    <p>{{ $t('deposits.no_history') }}</p>
+                </div>
 
-                    <div v-else class="history-list">
-                        <div v-for="(entry, idx) in depositStore.depositHistory" :key="idx" class="history-item"
-                            :class="entry.status">
-                            <div class="history-main">
-                                <span class="history-name">
-                                    {{DEPOSITS.find(d => d.id === entry.depositDefId)?.name ?? $t('deposits.unknown')}}
-                                </span>
-                                <span class="history-amount">{{ formatCash(entry.principal) }}</span>
-                            </div>
-                            <div class="history-details">
-                                <span>{{ $t('deposits.interest_label') }} <strong class="text-success">{{
-                                    formatCash(entry.totalInterestEarned)
-                                        }}</strong></span>
-                                <span>{{ $t('deposits.apy_label') }} {{ (entry.effectiveAPY * 100).toFixed(1) }}%</span>
-                                <span v-if="entry.earlyWithdrawal" class="text-warning">{{
-                                    $t('deposits.early_withdrawal', { penalty: formatCash(entry.penaltyPaid) })
-                                }}</span>
-                                <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
-                                    }}</span>
-                            </div>
+                <div v-else class="history-list">
+                    <div v-for="(entry, idx) in depositStore.depositHistory" :key="idx" class="history-item"
+                        :class="entry.status">
+                        <div class="history-main">
+                            <span class="history-name">
+                                {{DEPOSITS.find(d => d.id === entry.depositDefId)?.name ?? $t('deposits.unknown')}}
+                            </span>
+                            <span class="history-amount">{{ formatCash(entry.principal) }}</span>
+                        </div>
+                        <div class="history-details">
+                            <span>{{ $t('deposits.interest_label') }} <strong class="text-success">{{
+                                formatCash(entry.totalInterestEarned)
+                            }}</strong></span>
+                            <span>{{ $t('deposits.apy_label') }} {{ (entry.effectiveAPY * 100).toFixed(1) }}%</span>
+                            <span v-if="entry.earlyWithdrawal" class="text-warning">{{
+                                $t('deposits.early_withdrawal', { penalty: formatCash(entry.penaltyPaid) })
+                            }}</span>
+                            <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
+                            }}</span>
                         </div>
                     </div>
-                </TabPanel>
-            </TabPanels>
-        </Tabs>
+                </div>
+            </template>
+        </UTabs>
 
         <!-- Deposit Stats Card -->
         <div class="deposit-lifetime-stats">
@@ -311,7 +305,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
             :sections="depositInfoSections" />
 
         <!-- Open Deposit Dialog -->
-        <Dialog v-model:visible="showOpenDialog" modal :header="$t('deposits.open_title')" :style="{ width: '450px' }">
+        <UModal v-model="showOpenDialog" :title="$t('deposits.open_title')" icon="mdi:piggy-bank" size="md">
             <div v-if="selectedDeposit" class="open-dialog-content">
                 <div class="deposit-summary">
                     <AppIcon :icon="selectedDeposit.icon" class="deposit-summary-icon" />
@@ -356,20 +350,16 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                 </div>
 
                 <div class="dialog-actions">
-                    <button class="btn btn-ghost" @click="showOpenDialog = false">{{ $t('common.cancel') }}</button>
-                    <button class="btn btn-success" @click="confirmDeposit">{{ $t('deposits.confirm_deposit')
-                        }}</button>
+                    <UButton variant="ghost" @click="showOpenDialog = false">{{ $t('common.cancel') }}</UButton>
+                    <UButton variant="success" @click="confirmDeposit">{{ $t('deposits.confirm_deposit')
+                        }}</UButton>
                 </div>
             </div>
-        </Dialog>
+        </UModal>
     </div>
 </template>
 
 <style scoped>
-.deposits-tabs {
-    margin-bottom: var(--t-space-6);
-}
-
 .category-filter {
     margin-bottom: var(--t-space-4);
 }
@@ -380,7 +370,6 @@ const depositInfoSections = computed<InfoSection[]>(() => [
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-4);
     margin-bottom: var(--t-space-6);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .deposit-lifetime-stats h4 {
@@ -449,7 +438,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
 
 .amount-selector label {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .amount-display {
@@ -459,7 +448,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
 
 .amount-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-base);
 }
 
@@ -519,12 +508,12 @@ const depositInfoSections = computed<InfoSection[]>(() => [
 }
 
 .history-name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .history-amount {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .history-details {
@@ -536,7 +525,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
 }
 
 .history-status {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: capitalize;
 }
 

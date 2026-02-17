@@ -1,14 +1,14 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * TransferDialog — Move items between Storage Wars ↔ Vault.
  */
 import { computed, ref, watch } from 'vue'
-import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton, UModal, UTabs } from '@renderer/components/ui'
+import type { TabDef } from '@renderer/components/ui'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import type { StorageItem } from '@renderer/data/storage/items'
 import { resolveItemName } from '@renderer/data/storage/items'
 
 const props = defineProps<{ visible: boolean }>()
@@ -21,6 +21,11 @@ const { t } = useI18n()
 
 type Direction = 'to_vault' | 'from_vault'
 const direction = ref<Direction>('to_vault')
+
+const transferTabs = computed<TabDef[]>(() => [
+    { id: 'to_vault', label: t('vault.transfer_to_vault'), icon: 'mdi:arrow-right' },
+    { id: 'from_vault', label: t('vault.transfer_from_vault'), icon: 'mdi:arrow-left' },
+])
 
 const RARITY_ORDER: Record<string, number> = {
     common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, jackpot: 5, mythic: 6
@@ -99,143 +104,47 @@ function getRarityClass(rarity: string): string {
 </script>
 
 <template>
-    <Teleport to="body">
-        <div v-if="visible" class="transfer-overlay" @click.self="emit('close')">
-            <div class="transfer-dialog">
-                <div class="transfer-header">
-                    <h3>
-                        <AppIcon icon="mdi:swap-horizontal" />
-                        {{ t('vault.transfer_title') }}
-                    </h3>
-                    <button class="close-btn" @click="emit('close')">✕</button>
-                </div>
+    <UModal :modelValue="visible" @update:modelValue="v => !v && emit('close')" :title="t('vault.transfer_title')"
+        icon="mdi:swap-horizontal" size="md">
+        <UTabs v-model="direction" :tabs="transferTabs" />
 
-                <div class="transfer-tabs">
-                    <button :class="['tab', { active: direction === 'to_vault' }]" @click="direction = 'to_vault'">
-                        <AppIcon icon="mdi:arrow-right" />
-                        {{ t('vault.transfer_to_vault') }}
-                    </button>
-                    <button :class="['tab', { active: direction === 'from_vault' }]" @click="direction = 'from_vault'">
-                        <AppIcon icon="mdi:arrow-left" />
-                        {{ t('vault.transfer_from_vault') }}
-                    </button>
-                </div>
+        <div class="transfer-info">
+            <span>{{ sourceItems.length }} {{ t('vault.available') }}</span>
+            <span>{{ selectedIds.size }} {{ t('vault.selected') }}</span>
+            <div class="selection-btns">
+                <UButton variant="text" size="sm" @click="selectAll">{{ t('vault.select_all') }}</UButton>
+                <UButton variant="text" size="sm" @click="deselectAll">{{ t('vault.deselect_all') }}</UButton>
+            </div>
+        </div>
 
-                <div class="transfer-info">
-                    <span>{{ sourceItems.length }} {{ t('vault.available') }}</span>
-                    <span>{{ selectedIds.size }} {{ t('vault.selected') }}</span>
-                    <div class="selection-btns">
-                        <button class="btn btn-text btn-sm" @click="selectAll">{{ t('vault.select_all') }}</button>
-                        <button class="btn btn-text btn-sm" @click="deselectAll">{{ t('vault.deselect_all') }}</button>
-                    </div>
+        <div class="transfer-list">
+            <div v-if="sourceItems.length === 0" class="empty-msg">
+                {{ t('vault.no_items_to_transfer') }}
+            </div>
+            <div v-for="item in sourceItems" :key="item.id"
+                :class="['transfer-item', getRarityClass(item.rarity), { selected: selectedIds.has(item.id) }]"
+                @click="toggle(item.id)">
+                <div class="item-check">
+                    <span v-if="selectedIds.has(item.id)">☑</span>
+                    <span v-else>☐</span>
                 </div>
-
-                <div class="transfer-list">
-                    <div v-if="sourceItems.length === 0" class="empty-msg">
-                        {{ t('vault.no_items_to_transfer') }}
-                    </div>
-                    <div v-for="item in sourceItems" :key="item.id"
-                        :class="['transfer-item', getRarityClass(item.rarity), { selected: selectedIds.has(item.id) }]"
-                        @click="toggle(item.id)">
-                        <div class="item-check">
-                            <span v-if="selectedIds.has(item.id)">☑</span>
-                            <span v-else>☐</span>
-                        </div>
-                        <div class="item-info">
-                            <span class="item-name">{{ resolveItemName(item, t) }}</span>
-                            <span class="item-meta" style="text-transform: capitalize">{{ item.rarity }} · {{
-                                formatCash(item.appraisedValue ?? item.baseValue) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="transfer-footer">
-                    <button class="btn btn-primary" @click="transfer" :disabled="!canTransfer">
-                        <i class="pi pi-arrow-right-arrow-left"></i> {{ t('vault.transfer_action', {
-                            count:
-                        selectedIds.size }) }}
-                    </button>
+                <div class="item-info">
+                    <span class="item-name">{{ resolveItemName(item, t) }}</span>
+                    <span class="item-meta" style="text-transform: capitalize">{{ item.rarity }} · {{
+                        formatCash(item.appraisedValue ?? item.baseValue) }}</span>
                 </div>
             </div>
         </div>
-    </Teleport>
+
+        <template #footer>
+            <UButton variant="primary" icon="mdi:swap-horizontal" @click="transfer" :disabled="!canTransfer">
+                {{ t('vault.transfer_action', { count: selectedIds.size }) }}
+            </UButton>
+        </template>
+    </UModal>
 </template>
 
 <style scoped>
-.transfer-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--t-overlay);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.transfer-dialog {
-    width: min(560px, 90vw);
-    max-height: 80vh;
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.transfer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--t-space-3) var(--t-space-4);
-    border-bottom: 1px solid var(--t-border);
-}
-
-.transfer-header h3 {
-    display: flex;
-    align-items: center;
-    gap: var(--t-space-2);
-    margin: 0;
-    font-size: var(--t-font-size-md);
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: var(--t-text-muted);
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.close-btn:hover {
-    color: var(--t-text);
-}
-
-.transfer-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--t-border);
-}
-
-.tab {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-1);
-    padding: var(--t-space-2) var(--t-space-3);
-    background: none;
-    border: none;
-    color: var(--t-text-muted);
-    font-size: var(--t-font-size-sm);
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.tab.active {
-    color: var(--t-accent);
-    border-bottom: 2px solid var(--t-accent);
-}
-
 .transfer-info {
     display: flex;
     align-items: center;
@@ -275,12 +184,21 @@ function getRarityClass(rarity: string): string {
     padding: var(--t-space-2);
     border-radius: var(--t-radius-sm);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--t-transition-fast);
     border-left: 3px solid transparent;
 }
 
 .transfer-item:hover {
     background: var(--t-bg-muted);
+}
+
+.transfer-item:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.transfer-item:active {
+    transform: scale(0.98);
 }
 
 .transfer-item.selected {
@@ -326,19 +244,12 @@ function getRarityClass(rarity: string): string {
 
 .item-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
 .item-meta {
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-}
-
-.transfer-footer {
-    padding: var(--t-space-3) var(--t-space-4);
-    border-top: 1px solid var(--t-border);
-    display: flex;
-    justify-content: flex-end;
 }
 </style>

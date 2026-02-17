@@ -10,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-    <div class="overall-stats glass-card-static">
+    <div class="overall-stats card-surface">
         <h3 class="stats-title">
             <AppIcon icon="mdi:chart-bar" class="section-icon" />
             {{ $t('gambling.gambling_statistics') }}
@@ -34,7 +34,7 @@ defineProps<{
 
 <style scoped>
 .overall-stats {
-    padding: var(--spacing-lg);
+    padding: var(--t-space-6);
 }
 
 .stats-title {
@@ -42,14 +42,14 @@ defineProps<{
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-md);
+    font-weight: var(--t-font-bold);
+    margin-bottom: var(--t-space-4);
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
+    gap: var(--t-space-6);
 }
 
 .stat-item {
@@ -59,12 +59,12 @@ defineProps<{
 
 .stat-item .stat-label {
     font-size: 0.75rem;
-    color: var(--color-text-dim);
+    color: var(--t-text-secondary);
 }
 
 .stat-item .stat-value {
-    font-family: var(--font-mono);
+    font-family: var(--t-font-mono);
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 </style>

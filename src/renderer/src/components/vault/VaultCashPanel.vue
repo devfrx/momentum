@@ -1,9 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * VaultCashPanel — Deposit/withdraw protected cash in the vault.
  */
 import { ref } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -64,20 +65,20 @@ function withdrawAll(): void {
             <input type="number" class="cash-input" :placeholder="t('vault.enter_amount')" v-model="amount" min="0"
                 step="any" />
             <div class="cash-buttons">
-                <button class="btn btn-primary btn-sm" @click="deposit" :disabled="!amount.trim()">
-                    <i class="pi pi-arrow-down"></i> {{ t('vault.deposit') }}
-                </button>
-                <button class="btn btn-ghost btn-sm" @click="withdraw" :disabled="!amount.trim()">
-                    <i class="pi pi-arrow-up"></i> {{ t('vault.withdraw') }}
-                </button>
+                <UButton variant="primary" size="sm" icon="mdi:arrow-down" @click="deposit" :disabled="!amount.trim()">
+                    {{ t('vault.deposit') }}
+                </UButton>
+                <UButton variant="ghost" size="sm" icon="mdi:arrow-up" @click="withdraw" :disabled="!amount.trim()">
+                    {{ t('vault.withdraw') }}
+                </UButton>
             </div>
             <div class="cash-buttons">
-                <button class="btn btn-ghost btn-sm" @click="depositAll" :disabled="player.cash.lte(0)">
-                    <i class="pi pi-arrow-down"></i> {{ t('vault.deposit_all') }}
-                </button>
-                <button class="btn btn-ghost btn-sm" @click="withdrawAll" :disabled="vault.storedCash.lte(0)">
-                    <i class="pi pi-arrow-up"></i> {{ t('vault.withdraw_all') }}
-                </button>
+                <UButton variant="ghost" size="sm" icon="mdi:arrow-down" @click="depositAll" :disabled="player.cash.lte(0)">
+                    {{ t('vault.deposit_all') }}
+                </UButton>
+                <UButton variant="ghost" size="sm" icon="mdi:arrow-up" @click="withdrawAll" :disabled="vault.storedCash.lte(0)">
+                    {{ t('vault.withdraw_all') }}
+                </UButton>
             </div>
         </div>
 
@@ -112,8 +113,8 @@ function withdrawAll(): void {
 }
 
 .cash-icon {
-    font-size: 2rem;
-    color: var(--t-accent);
+    font-size: 1.9rem;
+    color: var(--t-text-secondary);
 }
 
 .cash-info {
@@ -130,7 +131,7 @@ function withdrawAll(): void {
 
 .cash-value {
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-success);
 }
 
@@ -157,6 +158,10 @@ function withdrawAll(): void {
 .cash-input:focus {
     outline: none;
     border-color: var(--t-accent);
+}
+
+.cash-input:focus-visible {
+    box-shadow: var(--t-shadow-focus);
 }
 
 .cash-buttons {

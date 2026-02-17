@@ -5,6 +5,7 @@
  * win/loss record, and a play button.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -86,8 +87,8 @@ defineEmits<{ play: [] }>()
 
         <!-- Actions -->
         <div class="game-card__actions">
-            <button class="btn btn-primary btn-sm game-card__btn game-card__btn--primary" @click="$emit('play')">{{
-                $t('gambling.play') }}</button>
+            <UButton variant="primary" size="xs" @click="$emit('play')">
+                {{ $t('gambling.play') }}</UButton>
         </div>
     </div>
 </template>
@@ -104,8 +105,7 @@ defineEmits<{ play: [] }>()
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
     cursor: pointer;
 }
 
@@ -121,7 +121,15 @@ defineEmits<{ play: [] }>()
 
 .game-card:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-sm);
+}
+
+.game-card:focus-visible {
+    outline: 2px solid var(--t-accent);
+    outline-offset: 2px;
+}
+
+.game-card:active {
+    transform: scale(0.98);
 }
 
 /* ─── Head ─── */
@@ -150,7 +158,7 @@ defineEmits<{ play: [] }>()
 }
 
 .game-card__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-base);
     white-space: nowrap;
     overflow: hidden;
@@ -170,7 +178,7 @@ defineEmits<{ play: [] }>()
 .game-card__stage {
     flex-shrink: 0;
     font-size: 0.65rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 2px 8px;
@@ -193,7 +201,7 @@ defineEmits<{ play: [] }>()
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 0.68rem;
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     line-height: 1.5;
 }
 
@@ -239,7 +247,7 @@ defineEmits<{ play: [] }>()
 .game-card__kpi-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .game-card__kpi-value--gold {
@@ -278,7 +286,7 @@ defineEmits<{ play: [] }>()
 
 .game-card__net-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
 }
 
@@ -288,13 +296,5 @@ defineEmits<{ play: [] }>()
     gap: var(--t-space-2);
     justify-content: flex-end;
     margin-top: auto;
-}
-
-.game-card__btn {
-    font-size: var(--t-font-size-xs) !important;
-}
-
-.game-card__btn--primary {
-    font-weight: 600;
 }
 </style>

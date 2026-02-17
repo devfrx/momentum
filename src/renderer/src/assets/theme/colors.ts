@@ -1,17 +1,17 @@
 /**
- * Centralized JS color palette — mirrors CSS variables from theme.css
+ * Centralized JS color palette - mirrors CSS variables from theme.css
  *
- * USE THESE instead of hardcoding hex values in <script> blocks.
- * In <style> blocks always reference the corresponding var(--t-*) variable.
+ * USE THESE instead of hardcoding hex values in script blocks.
+ * In style blocks always reference the corresponding var(--t-*) variable.
  *
- * For canvas / Chart.js contexts where CSS vars aren't available,
- * call `getComputedColor('--t-success')` at runtime or import constants below.
+ * For canvas / Chart.js contexts where CSS vars are not available,
+ * call getComputedColor('--t-success') at runtime or import constants below.
  */
 
-/* ── Semantic colors ──────────────────────────────────────────────────── */
+/* -- Semantic colors -- */
 export const THEME = {
-  accent: '#3ecf71',
-  accentHover: '#2db85e',
+  accent: '#22c55e',
+  accentHover: '#16a34a',
   success: '#22c55e',
   successHover: '#16a34a',
   warning: '#f5a524',
@@ -33,23 +33,23 @@ export const THEME = {
   gold: '#facc15',
   goldHover: '#eab308',
 
-  /* Muted (12 % alpha) */
-  successMuted: 'rgba(34, 197, 94, 0.12)',
-  warningMuted: 'rgba(245, 165, 36, 0.10)',
-  dangerMuted: 'rgba(239, 68, 68, 0.10)',
-  infoMuted: 'rgba(100, 116, 139, 0.10)',
-  purpleMuted: 'rgba(168, 85, 247, 0.12)',
-  orangeMuted: 'rgba(249, 115, 22, 0.10)',
-  cyanMuted: 'rgba(6, 182, 212, 0.10)',
-  blueMuted: 'rgba(59, 130, 246, 0.10)',
-  pinkMuted: 'rgba(236, 72, 153, 0.10)',
-  goldMuted: 'rgba(250, 204, 21, 0.10)',
+  /* Muted (alpha) */
+  successMuted: 'rgba(34, 197, 94, 0.10)',
+  warningMuted: 'rgba(245, 165, 36, 0.08)',
+  dangerMuted: 'rgba(239, 68, 68, 0.08)',
+  infoMuted: 'rgba(100, 116, 139, 0.08)',
+  purpleMuted: 'rgba(168, 85, 247, 0.08)',
+  orangeMuted: 'rgba(249, 115, 22, 0.08)',
+  cyanMuted: 'rgba(6, 182, 212, 0.08)',
+  blueMuted: 'rgba(59, 130, 246, 0.08)',
+  pinkMuted: 'rgba(236, 72, 153, 0.08)',
+  goldMuted: 'rgba(250, 204, 21, 0.08)',
 
   /* Text / neutral */
-  text: '#e8eaed',
-  textSecondary: '#8b919e',
-  textMuted: '#565c68',
-  textInverse: '#0c0e12',
+  text: '#fafafa',
+  textSecondary: '#a1a1aa',
+  textMuted: '#52525b',
+  textInverse: '#09090b',
 
   /* Gambling */
   gambleWin: '#22c55e',
@@ -60,7 +60,7 @@ export const THEME = {
   rouletteGreen: '#27ae60',
 } as const
 
-/* ── Rarity colors ────────────────────────────────────────────────────── */
+/* -- Rarity colors -- */
 export const RARITY_COLORS = {
   common: '#9ca3af',
   uncommon: '#22c55e',
@@ -71,21 +71,21 @@ export const RARITY_COLORS = {
   mythic: '#facc15',
 } as const
 
-/* ── Chart.js default palette ─────────────────────────────────────────── */
+/* -- Chart.js default palette -- */
 export const CHART_PALETTE = [
-  '#f5a524', // warning gold
-  '#22c55e', // success green
-  '#64748b', // info slate
-  '#a855f7', // purple
-  '#ef4444', // danger red
-  '#3b82f6', // blue
-  '#06b6d4', // cyan
-  '#ec4899', // pink
-  '#f97316', // orange
-  '#facc15', // gold
+  '#f5a524',
+  '#22c55e',
+  '#64748b',
+  '#a855f7',
+  '#ef4444',
+  '#3b82f6',
+  '#06b6d4',
+  '#ec4899',
+  '#f97316',
+  '#facc15',
 ] as const
 
-/* ── Risk-level palette (low → extreme) ───────────────────────────────── */
+/* -- Risk-level palette -- */
 export const RISK_COLORS = {
   low: '#22c55e',
   medium: '#f5a524',
@@ -94,7 +94,7 @@ export const RISK_COLORS = {
   critical: '#dc2626',
 } as const
 
-/* ── Helper: read a CSS variable value at runtime ─────────────────────── */
+/* -- Helper: read a CSS variable value at runtime -- */
 export function getComputedColor(varName: string, el?: Element): string {
   const target = el ?? document.documentElement
   return getComputedStyle(target).getPropertyValue(varName).trim()

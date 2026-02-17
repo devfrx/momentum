@@ -1,6 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
 import { RISK_LEVEL_META, type LoanDef } from '@renderer/data/loans'
@@ -87,8 +88,7 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
         </div>
 
         <div class="item-card-actions">
-            <button class="btn btn-primary btn-sm" :disabled="!approved || disabled" @click="$emit('apply')"><i
-                    class="pi pi-send"></i> {{ $t('loans.apply_loan') }}</button>
+            <UButton variant="primary" size="sm" icon="mdi:send" :disabled="!approved || disabled" @click="$emit('apply')">{{ $t('loans.apply_loan') }}</UButton>
         </div>
     </div>
 </template>
@@ -119,7 +119,7 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
 
 .loan-stat-value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
 }
 

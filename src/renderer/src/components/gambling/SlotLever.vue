@@ -186,9 +186,9 @@ const canPull = computed(() => !props.disabled && !props.spinning)
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
-    transition: color 0.2s;
+    transition: color var(--t-transition-fast);
 }
 
 .lever-label.active {

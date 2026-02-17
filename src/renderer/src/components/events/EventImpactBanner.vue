@@ -23,7 +23,7 @@ const impacts = computed<RouteEventImpact[]>(() => eventsForRoute(props.routeNam
     <transition name="banner-slide">
         <div v-if="impacts.length > 0" class="event-impact-banner">
             <div class="banner-header">
-                <AppIcon icon="mdi:lightning-bolt-circle" class="banner-icon" />
+                <!-- <AppIcon icon="mdi:lightning-bolt-circle" class="banner-icon" /> -->
                 <span class="banner-title">{{ $t('events.impact_title') }}</span>
                 <span class="banner-count">{{ impacts.length }}</span>
             </div>
@@ -63,12 +63,12 @@ const impacts = computed<RouteEventImpact[]>(() => eventsForRoute(props.routeNam
 
 .banner-icon {
     font-size: 0.9rem;
-    color: var(--t-warning);
+    color: var(--t-text-muted);
 }
 
 .banner-title {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -81,11 +81,11 @@ const impacts = computed<RouteEventImpact[]>(() => eventsForRoute(props.routeNam
     min-width: 18px;
     height: 18px;
     padding: 0 4px;
-    border-radius: 9px;
-    background: var(--t-accent);
-    color: var(--t-text-inverse);
+    border-radius: var(--t-radius-full);
+    background: var(--t-bg-muted);
+    color: var(--t-text-secondary);
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .banner-events {
@@ -101,35 +101,18 @@ const impacts = computed<RouteEventImpact[]>(() => eventsForRoute(props.routeNam
     padding: 0.25rem 0.5rem;
     border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
-    border: 1px solid transparent;
-    transition: all 0.15s;
+    background: var(--t-bg-muted);
+    transition: all var(--t-transition-fast);
     cursor: default;
-}
-
-.impact-chip.positive {
-    background: var(--t-success-muted);
-    border-color: color-mix(in srgb, var(--t-success) 20%, transparent);
-}
-
-.impact-chip.negative {
-    background: var(--t-danger-muted);
-    border-color: color-mix(in srgb, var(--t-danger) 20%, transparent);
 }
 
 .chip-icon {
     font-size: 0.85rem;
-}
-
-.impact-chip.positive .chip-icon {
-    color: var(--t-success);
-}
-
-.impact-chip.negative .chip-icon {
-    color: var(--t-danger);
+    color: var(--t-text-secondary);
 }
 
 .chip-name {
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     color: var(--t-text);
     white-space: nowrap;
 }
@@ -141,7 +124,7 @@ const impacts = computed<RouteEventImpact[]>(() => eventsForRoute(props.routeNam
 
 .chip-effect-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-xs);
 }
 
@@ -163,7 +146,7 @@ const impacts = computed<RouteEventImpact[]>(() => eventsForRoute(props.routeNam
 /* Banner transition */
 .banner-slide-enter-active,
 .banner-slide-leave-active {
-    transition: all 0.25s ease;
+    transition: all var(--t-transition-normal) ease;
     overflow: hidden;
 }
 

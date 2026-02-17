@@ -6,6 +6,7 @@
  * scams, investigations, and consequences.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
@@ -58,10 +59,8 @@ function clearLog(): void {
                 <AppIcon icon="mdi:script-text-outline" />
                 {{ t('blackmarket.log_title') }}
             </span>
-            <button v-if="entries.length > 0" class="activity-log__clear" :title="t('blackmarket.log_clear')"
-                @click="clearLog">
-                <AppIcon icon="mdi:notification-clear-all" />
-            </button>
+            <UButton variant="text" v-if="entries.length > 0" :title="t('blackmarket.log_clear')"
+                icon="mdi:notification-clear-all" @click="clearLog" />
         </div>
 
         <div v-if="entries.length === 0" class="activity-log__empty">
@@ -111,25 +110,10 @@ function clearLog(): void {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-}
-
-.activity-log__clear {
-    all: unset;
-    cursor: pointer;
-    color: var(--t-text-muted);
-    font-size: 1rem;
-    padding: 0.2rem;
-    border-radius: var(--t-radius-sm);
-    transition: color 0.15s, background 0.15s;
-}
-
-.activity-log__clear:hover {
-    color: var(--t-danger);
-    background: var(--t-danger-muted);
 }
 
 .activity-log__empty {
@@ -138,7 +122,6 @@ function clearLog(): void {
     text-align: center;
     padding: 1.5rem 0;
     font-style: italic;
-    opacity: 0.6;
 }
 
 .activity-log__scroll {
@@ -162,7 +145,7 @@ function clearLog(): void {
     border-radius: var(--t-radius-md);
     background: var(--t-bg-card);
     border-left: 3px solid transparent;
-    transition: background 0.2s;
+    transition: background var(--t-transition-fast);
 }
 
 .log-entry:hover {
@@ -243,7 +226,7 @@ function clearLog(): void {
 
 .log-entry__title {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     line-height: 1.3;
 }
@@ -264,16 +247,15 @@ function clearLog(): void {
     white-space: nowrap;
     flex-shrink: 0;
     margin-top: 0.15rem;
-    opacity: 0.7;
 }
 
 /* ─── Transition ─── */
 .log-item-enter-active {
-    transition: all 0.3s ease-out;
+    transition: all var(--t-transition-normal) ease-out;
 }
 
 .log-item-leave-active {
-    transition: all 0.2s ease-in;
+    transition: all var(--t-transition-fast) ease-in;
 }
 
 .log-item-enter-from {

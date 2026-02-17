@@ -3,7 +3,7 @@
  * TradePanel — Buy/sell controls with quantity input and % of cash buying
  */
 import { ref, computed } from 'vue'
-import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InputNumber from 'primevue/inputnumber'
 import { smartDecimals } from '@renderer/composables/useFormat'
 
@@ -76,32 +76,32 @@ function formatCost(v: number): string {
     <div class="trade-panel">
         <!-- Mode toggle -->
         <div class="mode-toggle">
-            <button :class="['toggle-btn', { active: mode === 'qty' }]" @click="mode = 'qty'">
-                <AppIcon icon="mdi:numeric" /> {{ $t('market.qty') }}
-            </button>
-            <button :class="['toggle-btn', { active: mode === 'pct' }]" @click="mode = 'pct'">
-                <AppIcon icon="mdi:percent" /> {{ $t('market.pct_cash') }}
-            </button>
+            <UButton variant="ghost" size="sm" :active="mode === 'qty'" @click="mode = 'qty'" icon="mdi:numeric">
+                {{ $t('market.qty') }}
+            </UButton>
+            <UButton variant="ghost" size="sm" :active="mode === 'pct'" @click="mode = 'pct'" icon="mdi:percent">
+                {{ $t('market.pct_cash') }}
+            </UButton>
         </div>
 
         <!-- Quantity mode -->
         <div v-if="mode === 'qty'" class="trade-row">
             <InputNumber v-model="quantity" :min="1" :max="999999" size="small" class="qty-input" placeholder="1" />
-            <button class="btn btn-primary btn-sm" :disabled="!canAffordAny" @click="handleBuy">
-                <i class="pi pi-plus"></i> {{ $t('market.buy') }}
-            </button>
-            <button class="btn btn-danger btn-sm" :disabled="!hasPosition" @click="handleSell">
-                <i class="pi pi-minus"></i> {{ $t('market.sell') }}
-            </button>
+            <UButton variant="primary" size="sm" icon="mdi:plus" :disabled="!canAffordAny" @click="handleBuy">
+                {{ $t('market.buy') }}
+            </UButton>
+            <UButton variant="danger" size="sm" icon="mdi:minus" :disabled="!hasPosition" @click="handleSell">
+                {{ $t('market.sell') }}
+            </UButton>
         </div>
 
         <!-- Percent mode -->
         <div v-else class="trade-row-pct">
             <div class="pct-presets">
-                <button v-for="pct in percentPresets" :key="pct" :class="['pct-btn', { active: percentValue === pct }]"
+                <UButton variant="ghost" size="xs" v-for="pct in percentPresets" :key="pct" :active="percentValue === pct"
                     @click="percentValue = pct">
                     {{ pct }}%
-                </button>
+                </UButton>
             </div>
             <div class="pct-info">
                 <span class="pct-detail">≈ {{ qtyFromPercent }} {{ $t(type === 'crypto' ? 'market.coins' :
@@ -109,12 +109,12 @@ function formatCost(v: number): string {
                 <span class="pct-cost">{{ formatCost(costEstimate) }}</span>
             </div>
             <div class="pct-actions">
-                <button class="btn btn-primary btn-sm" :disabled="qtyFromPercent <= 0" @click="handleBuy">
-                    <i class="pi pi-plus"></i> {{ $t('market.buy_pct', { pct: percentValue }) }}
-                </button>
-                <button v-if="hasPosition" class="btn btn-danger btn-sm" @click="sellAll">
-                    <i class="pi pi-minus"></i> {{ $t('market.sell_all') }}
-                </button>
+                <UButton variant="primary" size="sm" icon="mdi:plus" :disabled="qtyFromPercent <= 0" @click="handleBuy">
+                    {{ $t('market.buy_pct', { pct: percentValue }) }}
+                </UButton>
+                <UButton v-if="hasPosition" variant="danger" size="sm" icon="mdi:minus" @click="sellAll">
+                    {{ $t('market.sell_all') }}
+                </UButton>
             </div>
         </div>
 
@@ -141,36 +141,10 @@ function formatCost(v: number): string {
     border: 1px solid var(--t-border);
 }
 
-.toggle-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.72rem;
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    background: transparent;
-    color: var(--t-text-secondary);
-    border: none;
-    transition: all var(--t-transition-fast);
-}
-
-.toggle-btn:hover {
-    background: var(--t-bg-muted);
-}
-
-.toggle-btn.active {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-}
-
 .trade-row {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--t-space-2);
 }
 
 .trade-row-pct {
@@ -182,31 +156,6 @@ function formatCost(v: number): string {
 .pct-presets {
     display: flex;
     gap: 0.25rem;
-}
-
-.pct-btn {
-    flex: 1;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.75rem;
-    font-family: var(--t-font-mono);
-    font-weight: 700;
-    cursor: pointer;
-    background: transparent;
-    color: var(--t-text-secondary);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    transition: all var(--t-transition-fast);
-}
-
-.pct-btn:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-}
-
-.pct-btn.active {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    border-color: var(--t-border-focus);
 }
 
 .pct-info {
@@ -222,13 +171,13 @@ function formatCost(v: number): string {
 
 .pct-cost {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
 .pct-actions {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--t-space-2);
 }
 
 .qty-input {
@@ -255,7 +204,7 @@ function formatCost(v: number): string {
 
 .cost-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 </style>

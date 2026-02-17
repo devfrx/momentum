@@ -205,8 +205,8 @@ function placeBet(type: RouletteBetType, number?: number): void {
 
 .cell-num {
     font-size: 0.8rem;
-    font-weight: 700;
-    font-family: var(--font-mono, monospace);
+    font-weight: var(--t-font-bold);
+    font-family: var(--t-font-mono);
 }
 
 .cell-num.red {
@@ -237,7 +237,7 @@ function placeBet(type: RouletteBetType, number?: number): void {
     border: 1px solid var(--t-border);
     cursor: pointer;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     transition: all var(--t-transition-fast);
 }
@@ -266,7 +266,7 @@ function placeBet(type: RouletteBetType, number?: number): void {
     border: 1px solid var(--t-border);
     cursor: pointer;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     transition: all var(--t-transition-fast);
 }
@@ -297,7 +297,7 @@ function placeBet(type: RouletteBetType, number?: number): void {
     border: 1px solid var(--t-border);
     cursor: pointer;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     transition: all var(--t-transition-fast);
 }

@@ -69,7 +69,7 @@ const stats = computed(() => [
 }
 
 .stat-chip-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 

@@ -1,6 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import ProgressBar from 'primevue/progressbar'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -138,11 +139,11 @@ const isEarlyWithdrawal = computed(() => {
 
         <!-- Actions -->
         <div class="item-card-actions">
-            <button class="btn btn-sm" :class="isEarlyWithdrawal ? 'btn-warning' : 'btn-success'"
+            <UButton size="sm" :variant="isEarlyWithdrawal ? 'warning' : 'success'" icon="mdi:wallet"
                 @click="$emit('withdraw')">
-                <i class="pi pi-wallet"></i> {{ isEarlyWithdrawal ? $t('deposits.withdraw_early') :
+                {{ isEarlyWithdrawal ? $t('deposits.withdraw_early') :
                     $t('deposits.withdraw_all') }}
-            </button>
+            </UButton>
         </div>
     </div>
 </template>
@@ -183,7 +184,7 @@ const isEarlyWithdrawal = computed(() => {
 
 .balance-value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
 }
 
@@ -213,7 +214,7 @@ const isEarlyWithdrawal = computed(() => {
 
 .dep-stat-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 

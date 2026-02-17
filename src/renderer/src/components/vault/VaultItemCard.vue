@@ -1,9 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * VaultItemCard — Displays a single item in the vault.
  * Shows rarity border, value, source badge, and action buttons.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -62,12 +63,12 @@ const SOURCE_ICONS: Record<string, string> = {
         </div>
 
         <div class="vault-item__actions">
-            <button class="btn btn-ghost btn-sm" @click="$emit('transfer', item.id)">
-                <i class="pi pi-arrow-right"></i> {{ t('vault.transfer_out') }}
-            </button>
-            <button class="btn btn-primary btn-sm" @click="$emit('sell', item.id)">
-                <i class="pi pi-dollar"></i> {{ t('storage.sell_item') }}
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-right" @click="$emit('transfer', item.id)">
+                {{ t('vault.transfer_out') }}
+            </UButton>
+            <UButton variant="primary" size="sm" icon="mdi:currency-usd" @click="$emit('sell', item.id)">
+                {{ t('storage.sell_item') }}
+            </UButton>
         </div>
     </div>
 </template>
@@ -81,7 +82,7 @@ const SOURCE_ICONS: Record<string, string> = {
     padding: var(--t-space-3);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
-    border-left: 3px solid var(--_rarity, var(--t-border));
+    /* border-left: 3px solid var(--_rarity, var(--t-border)); */
     border-radius: var(--t-radius-md);
     transition: border-color var(--t-transition-normal);
 }
@@ -97,7 +98,7 @@ const SOURCE_ICONS: Record<string, string> = {
 }
 
 .vault-item__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     flex-shrink: 0;
 }
 
@@ -108,7 +109,7 @@ const SOURCE_ICONS: Record<string, string> = {
 }
 
 .vault-item__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -123,7 +124,7 @@ const SOURCE_ICONS: Record<string, string> = {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .vault-item__source {
@@ -157,7 +158,7 @@ const SOURCE_ICONS: Record<string, string> = {
     align-items: center;
     gap: 0.25rem;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: capitalize;
 }
 
@@ -172,7 +173,7 @@ const SOURCE_ICONS: Record<string, string> = {
 
 .vault-item__value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 

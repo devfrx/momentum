@@ -1,6 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import ProgressBar from 'primevue/progressbar'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -132,12 +133,10 @@ const hasEarlyPenalty = computed(() => {
         </div>
 
         <div class="item-card-actions">
-            <button class="btn btn-ghost btn-sm" :disabled="loan.isDefaulted" @click="$emit('repay', 100)"><i
-                    class="pi pi-minus"></i> {{ $t('loans.pay_amount', { amount: '$100' }) }}</button>
-            <button class="btn btn-success btn-sm" :disabled="loan.isDefaulted" @click="$emit('repayFull')"><i
-                    class="pi pi-check"></i> {{ $t('loans.pay_off', { amount: formatCash(payoffAmount) }) }}</button>
-            <button v-if="loanDef?.canRefinance && !loan.isDefaulted" class="btn btn-ghost btn-sm"
-                @click="$emit('refinance')"><i class="pi pi-refresh"></i> {{ $t('loans.refinance') }}</button>
+            <UButton variant="ghost" size="sm" icon="mdi:minus" :disabled="loan.isDefaulted" @click="$emit('repay', 100)">{{ $t('loans.pay_amount', { amount: '$100' }) }}</UButton>
+            <UButton variant="success" size="sm" icon="mdi:check" :disabled="loan.isDefaulted" @click="$emit('repayFull')">{{ $t('loans.pay_off', { amount: formatCash(payoffAmount) }) }}</UButton>
+            <UButton v-if="loanDef?.canRefinance && !loan.isDefaulted" variant="ghost" size="sm" icon="mdi:refresh"
+                @click="$emit('refinance')">{{ $t('loans.refinance') }}</UButton>
         </div>
     </div>
 </template>
@@ -171,7 +170,7 @@ const hasEarlyPenalty = computed(() => {
 
 .balance-value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
 }
 
@@ -210,7 +209,7 @@ const hasEarlyPenalty = computed(() => {
 
 .loan-stat-mini .stat-value {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
 }
 

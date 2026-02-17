@@ -1,5 +1,6 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -35,9 +36,9 @@ defineEmits<{
         </div>
 
         <div class="item-card-actions">
-            <button class="btn btn-primary btn-sm" :disabled="disabled" @click="$emit('invest')">
-                <i class="pi pi-send"></i> {{ $t('investments.invest_amount', { amount: minInvestment }) }}
-            </button>
+            <UButton variant="primary" size="sm" icon="mdi:send" :disabled="disabled" @click="$emit('invest')">
+                {{ $t('investments.invest_amount', { amount: minInvestment }) }}
+            </UButton>
         </div>
     </div>
 </template>

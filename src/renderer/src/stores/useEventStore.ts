@@ -76,10 +76,22 @@ export const useEventStore = defineStore('events', () => {
     }
   }
 
+  /** Reset event state on prestige */
+  function prestigeReset(): void {
+    eventSystem.setState({
+      activeEvents: [],
+      cooldowns: {},
+      pendingChoices: [],
+      totalTicks: 0,
+    })
+    recentEvents.value = []
+    syncState()
+  }
+
   return {
     activeEvents, pendingChoices, recentEvents,
     hasActiveEvents, hasPendingChoices,
     initEvents, tick, acceptChoice, declineChoice,
-    getMultiplier, popRecentEvent, getSystem, loadFromSave
+    getMultiplier, popRecentEvent, getSystem, loadFromSave, prestigeReset
   }
 })

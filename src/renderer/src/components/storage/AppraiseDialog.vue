@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * AppraiseDialog — Dialog to select an appraiser for item(s).
  * Shows available appraisers with costs and accuracy.
@@ -8,6 +8,7 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
+import { UModal } from '@renderer/components/ui'
 
 const props = defineProps<{
     /** Specific item ID or null for appraise-all */
@@ -33,16 +34,7 @@ function selectAppraiser(appraiserId: string): void {
 </script>
 
 <template>
-    <div class="appraise-overlay" @click.self="$emit('close')">
-        <div class="appraise-dialog">
-            <div class="dialog-header">
-                <h3>
-                    <AppIcon icon="mdi:magnify" />
-                    {{ itemId ? t('storage.choose_appraiser') : t('storage.appraise_all_title') }}
-                </h3>
-                <button class="btn btn-text btn-sm" @click="$emit('close')"><i class="pi pi-times"></i></button>
-            </div>
-
+    <UModal :modelValue="true" @update:modelValue="$emit('close')" :title="itemId ? t('storage.choose_appraiser') : t('storage.appraise_all_title')" icon="mdi:magnify" size="lg">
             <p class="dialog-desc">{{ t('storage.appraiser_desc') }}</p>
 
             <div class="appraiser-list">
@@ -71,50 +63,10 @@ function selectAppraiser(appraiserId: string): void {
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+    </UModal>
 </template>
 
 <style scoped>
-.appraise-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: var(--t-overlay);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-}
-
-.appraise-dialog {
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    padding: var(--t-space-5);
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: var(--t-shadow-lg);
-}
-
-.dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--t-space-2);
-}
-
-.dialog-header h3 {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0;
-    font-size: var(--t-font-size-lg);
-    color: var(--t-text);
-}
-
 .dialog-desc {
     font-size: var(--t-font-size-sm);
     color: var(--t-text-muted);
@@ -138,13 +90,22 @@ function selectAppraiser(appraiserId: string): void {
 }
 
 .appraiser-card:hover {
-    border-color: var(--t-accent);
+    border-color: var(--t-border-hover);
     background: var(--t-bg-muted);
 }
 
+.appraiser-card:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.appraiser-card:active {
+    transform: scale(0.98);
+}
+
 .appraiser-icon {
-    font-size: 2rem;
-    color: var(--t-accent);
+    font-size: 1.9rem;
+    color: var(--t-text-secondary);
     flex-shrink: 0;
 }
 
@@ -156,7 +117,7 @@ function selectAppraiser(appraiserId: string): void {
 }
 
 .appraiser-name {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -193,7 +154,7 @@ function selectAppraiser(appraiserId: string): void {
 
 .stat-value {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 </style>

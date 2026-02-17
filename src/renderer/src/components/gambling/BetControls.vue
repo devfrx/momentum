@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import InputNumber from 'primevue/inputnumber'
+import { UButton } from '@renderer/components/ui'
 
 defineProps<{
     modelValue: number
@@ -16,15 +17,15 @@ function updateBet(value: number): void {
 </script>
 
 <template>
-    <div class="bet-controls glass-card-static">
+    <div class="bet-controls card-surface">
         <label class="bet-label">{{ $t('gambling.bet_amount_label') }}</label>
         <InputNumber :modelValue="modelValue" @update:modelValue="(v: number) => updateBet(v)" :min="1" mode="currency"
             currency="USD" locale="en-US" class="bet-input" />
         <div class="bet-multipliers">
-            <button class="btn btn-ghost btn-sm" @click="updateBet(modelValue * 2)">{{ $t('gambling.double') }}</button>
-            <button class="btn btn-ghost btn-sm" @click="updateBet(modelValue * 5)">{{ $t('gambling.x5') }}</button>
-            <button class="btn btn-ghost btn-sm" @click="updateBet(modelValue * 10)">{{ $t('gambling.x10') }}</button>
-            <button class="btn btn-ghost btn-sm" @click="updateBet(maxBet)">{{ $t('gambling.max') }}</button>
+            <UButton variant="ghost" size="sm" @click="updateBet(modelValue * 2)">{{ $t('gambling.double') }}</UButton>
+            <UButton variant="ghost" size="sm" @click="updateBet(modelValue * 5)">{{ $t('gambling.x5') }}</UButton>
+            <UButton variant="ghost" size="sm" @click="updateBet(modelValue * 10)">{{ $t('gambling.x10') }}</UButton>
+            <UButton variant="ghost" size="sm" @click="updateBet(maxBet)">{{ $t('gambling.max') }}</UButton>
         </div>
     </div>
 </template>
@@ -33,15 +34,15 @@ function updateBet(value: number): void {
 .bet-controls {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--t-space-4);
+    padding: var(--t-space-4) var(--t-space-6);
     flex-wrap: wrap;
 }
 
 .bet-label {
     font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
+    font-weight: var(--t-font-semibold);
+    color: var(--t-text-secondary);
 }
 
 .bet-input {

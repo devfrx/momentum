@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 
@@ -31,11 +32,11 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
                 <span class="sr-hint">({{ business.employees }}/{{ maxEmployees }})</span>
             </div>
             <div class="sr-actions">
-                <button class="adj-btn" :disabled="business.employees <= 1"
-                    @click="store.fireEmployee(business.id)">−</button>
+                <UButton variant="ghost" size="xs" :disabled="business.employees <= 1"
+                    @click="store.fireEmployee(business.id)">−</UButton>
                 <span class="sr-value">{{ business.employees }}</span>
-                <button class="adj-btn" :disabled="business.employees >= maxEmployees"
-                    @click="store.hireEmployee(business.id)">+</button>
+                <UButton variant="ghost" size="xs" :disabled="business.employees >= maxEmployees"
+                    @click="store.hireEmployee(business.id)">+</UButton>
             </div>
         </div>
 
@@ -48,9 +49,9 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
             </div>
             <div class="sr-actions">
                 <span class="sr-value">Lv.{{ business.trainingLevel }}</span>
-                <button class="btn btn-ghost btn-sm" @click="store.trainStaff(business.id)">
+                <UButton variant="ghost" size="sm" @click="store.trainStaff(business.id)">
                     {{ $t('business.train') }} — {{ formatCash(trainingCost) }}
-                </button>
+                </UButton>
             </div>
         </div>
 
@@ -74,7 +75,7 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-sm);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -117,36 +118,10 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
 .sr-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     min-width: 2.5rem;
     text-align: center;
     color: var(--t-text);
-}
-
-.adj-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.adj-btn:hover:not(:disabled) {
-    background: var(--t-bg-card-hover);
-    border-color: var(--t-border-hover);
-}
-
-.adj-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
 }
 
 .capacity-info {
@@ -164,7 +139,7 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
 
 .ci-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 </style>

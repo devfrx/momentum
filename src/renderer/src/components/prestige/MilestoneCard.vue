@@ -67,9 +67,7 @@ function formatReward(reward: MilestoneReward): string {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
-    opacity: 0.6;
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast) ease;
 }
 
 .milestone-card.unlocked {
@@ -95,7 +93,7 @@ function formatReward(reward: MilestoneReward): string {
 }
 
 .milestone-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--t-text-muted);
 }
 
@@ -120,7 +118,7 @@ function formatReward(reward: MilestoneReward): string {
 
 .milestone-name {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin: 0 0 0.25rem 0;
     color: var(--t-text);
 }
@@ -144,7 +142,7 @@ function formatReward(reward: MilestoneReward): string {
 
 .reward-tag {
     font-size: 0.7rem;
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     padding: 0.2rem 0.5rem;
     border-radius: var(--t-radius-sm);
     background: var(--t-bg-muted);

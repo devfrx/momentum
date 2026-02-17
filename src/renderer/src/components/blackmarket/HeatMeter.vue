@@ -63,7 +63,6 @@ function penaltyLabel(type: string, value: number): string {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .heat-meter__head {
@@ -85,7 +84,7 @@ function penaltyLabel(type: string, value: number): string {
 }
 
 .heat-meter__level {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--_heat-color, var(--t-text));
 }
@@ -93,7 +92,7 @@ function penaltyLabel(type: string, value: number): string {
 .heat-meter__value {
     margin-left: auto;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
 }
 
@@ -124,7 +123,7 @@ function penaltyLabel(type: string, value: number): string {
     font-size: var(--t-font-size-xs);
     color: var(--_heat-color, var(--t-danger));
     padding: 0.2rem 0.5rem;
-    background: rgba(239, 68, 68, 0.08);
+    background: var(--t-danger-muted);
     border-radius: var(--t-radius-sm);
 }
 </style>

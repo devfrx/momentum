@@ -4,8 +4,13 @@ import { useI18n } from 'vue-i18n'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useJobStore } from '@renderer/stores/useJobStore'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
+import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
+import { useDepositStore } from '@renderer/stores/useDepositStore'
+import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { useFormat } from '@renderer/composables/useFormat'
+import { ZERO, add, sub } from '@renderer/core/BigNum'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UAccordion, UButton } from '@renderer/components/ui'
 import MultiplierStats from '@renderer/components/dashboard/MultiplierStats.vue'
 import { JOBS } from '@renderer/data/jobs'
 import { EventImpactBanner } from '@renderer/components/events'
@@ -13,8 +18,21 @@ import { EventImpactBanner } from '@renderer/components/events'
 const player = usePlayerStore()
 const jobStore = useJobStore()
 const business = useBusinessStore()
+const realEstate = useRealEstateStore()
+const deposits = useDepositStore()
+const loans = useLoanStore()
 const { formatCash } = useFormat()
 const { t } = useI18n()
+
+const totalIncomePerSecond = computed(() => {
+    let total = ZERO
+    total = add(total, business.profitPerSecond)
+    total = add(total, jobStore.jobIncomePerSecond)
+    total = add(total, realEstate.rentPerSecond)
+    total = add(total, deposits.interestPerSecond)
+    total = sub(total, loans.totalInterestPerSecond)
+    return total
+})
 
 const quickStats = computed(() => [
     { label: t('dashboard.net_worth'), value: formatCash(player.netWorth), icon: 'mdi:scale-balance' },
@@ -55,9 +73,10 @@ function toggleJob(defId: string): void {
             <div class="hero-balance">
                 <span class="hero-label">{{ $t('dashboard.current_balance') }}</span>
                 <span class="hero-amount">{{ formatCash(player.cash) }}</span>
-                <span class="hero-income">
+                <span class="hero-income" :class="{ negative: totalIncomePerSecond.lt(0) }">
                     <AppIcon icon="mdi:trending-up" class="hero-income-icon" />
-                    +{{ formatCash(business.profitPerSecond) }}{{ $t('common.per_second') }}
+                    {{ totalIncomePerSecond.gte(0) ? '+' : '' }}{{ formatCash(totalIncomePerSecond) }}{{
+                        $t('common.per_second') }}
                 </span>
             </div>
         </section>
@@ -94,16 +113,15 @@ function toggleJob(defId: string): void {
                             <span class="job-name">{{JOBS.find(j => j.id === uj.defId)?.name}}</span>
                             <span class="job-meta">{{ $t('dashboard.exp_level', { n: uj.experienceLevel }) }}</span>
                         </div>
-                        <button class="btn btn-sm" :class="uj.active ? 'btn-danger' : 'btn-success'"
-                            @click="toggleJob(uj.defId)">
+                        <UButton size="sm" :variant="uj.active ? 'danger' : 'success'" @click="toggleJob(uj.defId)">
                             {{ uj.active ? $t('common.stop') : $t('common.start') }}
-                        </button>
+                        </UButton>
                     </div>
                 </div>
 
                 <!-- Available to Unlock -->
-                <div v-if="availableJobs.length > 0" class="unlock-section">
-                    <h3 class="unlock-heading">{{ $t('dashboard.available_unlock') }}</h3>
+                <UAccordion v-if="availableJobs.length > 0" :title="$t('dashboard.available_unlock')"
+                    icon="mdi:lock-open-outline" :badge="availableJobs.length" variant="muted" compact>
                     <div class="jobs-list">
                         <div v-for="job in availableJobs" :key="job.id" class="job-row locked">
                             <AppIcon :icon="job.icon" class="job-icon" />
@@ -111,14 +129,14 @@ function toggleJob(defId: string): void {
                                 <span class="job-name">{{ job.name }}</span>
                                 <span class="job-meta">{{ job.description }}</span>
                             </div>
-                            <button class="btn btn-primary btn-sm" :disabled="player.level < job.requiredLevel"
+                            <UButton variant="primary" size="sm" :disabled="player.level < job.requiredLevel"
                                 @click="jobStore.unlockJob(job.id)">
                                 {{ job.requiredLevel > 0 && player.level < job.requiredLevel ?
                                     $t('dashboard.requires_level', { n: job.requiredLevel }) : $t('dashboard.apply') }}
-                                    </button>
+                                    </UButton>
                         </div>
                     </div>
-                </div>
+                </UAccordion>
 
                 <div v-if="jobStore.unlockedJobs.length === 0 && availableJobs.length === 0" class="empty-state">
                     <AppIcon icon="mdi:briefcase-off-outline" class="empty-icon" />
@@ -159,7 +177,7 @@ function toggleJob(defId: string): void {
 
 .hero-greeting {
     font-size: var(--t-font-size-2xl);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     letter-spacing: -0.03em;
     margin: 0;
@@ -179,7 +197,6 @@ function toggleJob(defId: string): void {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
     min-width: 200px;
 }
 
@@ -188,13 +205,13 @@ function toggleJob(defId: string): void {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--t-text-muted);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .hero-amount {
     font-family: var(--t-font-mono);
     font-size: 1.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -206,9 +223,13 @@ function toggleJob(defId: string): void {
     gap: 0.2rem;
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-success);
     margin-top: 0.15rem;
+}
+
+.hero-income.negative {
+    color: var(--t-danger);
 }
 
 .hero-income-icon {
@@ -235,7 +256,6 @@ function toggleJob(defId: string): void {
 
 .qs-item:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-md);
 }
 
 .qs-icon-wrap {
@@ -263,7 +283,7 @@ function toggleJob(defId: string): void {
 .qs-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
     white-space: nowrap;
     overflow: hidden;
@@ -272,7 +292,7 @@ function toggleJob(defId: string): void {
 
 .qs-label {
     font-size: var(--t-font-size-xs);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
     letter-spacing: 0.03em;
     color: var(--t-text-muted);
     text-transform: uppercase;
@@ -298,7 +318,7 @@ function toggleJob(defId: string): void {
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-lg);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin-bottom: var(--t-space-3);
 }
@@ -311,7 +331,7 @@ function toggleJob(defId: string): void {
 .panel-badge {
     margin-left: auto;
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
     background: var(--t-bg-muted);
     padding: 0.1rem 0.45rem;
@@ -349,7 +369,7 @@ function toggleJob(defId: string): void {
 }
 
 .job-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--t-text-secondary);
     flex-shrink: 0;
 }
@@ -363,7 +383,7 @@ function toggleJob(defId: string): void {
 
 .job-name {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
 }
 
@@ -381,7 +401,7 @@ function toggleJob(defId: string): void {
 
 .unlock-heading {
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
     margin-bottom: var(--t-space-2);
 }

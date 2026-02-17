@@ -35,7 +35,7 @@ defineProps<{
 }
 
 .setting-label {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-base);
     color: var(--t-text);
 }

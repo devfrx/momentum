@@ -5,6 +5,7 @@
  * States: purchased (green), available (accent pulse), locked (dimmed), selected (glow).
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 defineProps<{
     icon: string
@@ -20,7 +21,7 @@ defineEmits<{ select: [] }>()
 </script>
 
 <template>
-    <button class="skill-node" :class="{ purchased, available, locked, selected }" :style="{ '--node-accent': accent }"
+    <UButton unstyled class="skill-node" :class="{ purchased, available, locked, selected }" :style="{ '--node-accent': accent }"
         @click="$emit('select')">
         <div class="node-ring">
             <div class="node-inner">
@@ -28,7 +29,7 @@ defineEmits<{ select: [] }>()
             </div>
         </div>
         <span class="node-label">{{ name }}</span>
-    </button>
+    </UButton>
 </template>
 
 <style scoped>
@@ -44,6 +45,15 @@ defineEmits<{ select: [] }>()
     outline: none;
     width: 80px;
     -webkit-tap-highlight-color: transparent;
+}
+
+.skill-node:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.skill-node:active {
+    transform: scale(0.98);
 }
 
 /* ── Ring ─────────────────────────────── */
@@ -71,7 +81,7 @@ defineEmits<{ select: [] }>()
 }
 
 .node-icon {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     color: var(--t-text-muted);
     transition: color var(--t-transition-normal);
 }
@@ -79,7 +89,7 @@ defineEmits<{ select: [] }>()
 /* ── Label ────────────────────────────── */
 .node-label {
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
     text-align: center;
     line-height: 1.2;

@@ -7,6 +7,7 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -90,15 +91,13 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 
         <!-- ── Buy actions ─────────────────────────────────── -->
         <div class="card__actions">
-            <button class="btn btn-primary btn-sm card__buy-btn" @click="$emit('buy', listing.id, 'vault')">
-                <AppIcon icon="mdi:safe-square-outline" />
-                <span>{{ t('shop.buy_to_vault') }}</span>
-            </button>
-            <button class="btn btn-text btn-sm card__buy-btn card__buy-btn--secondary"
-                @click="$emit('buy', listing.id, 'storage')">
-                <AppIcon icon="mdi:package-variant" />
-                <span>{{ t('shop.buy_to_storage') }}</span>
-            </button>
+            <UButton variant="primary" size="xs" icon="mdi:safe-square-outline" block
+                @click="$emit('buy', listing.id, 'vault')">
+                {{ t('shop.buy_to_vault') }}
+            </UButton>
+            <UButton variant="ghost" size="xs" icon="mdi:package-variant" @click="$emit('buy', listing.id, 'storage')">
+                {{ t('shop.buy_to_storage') }}
+            </UButton>
         </div>
     </div>
 </template>
@@ -120,7 +119,6 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 .card:hover {
     border-color: var(--t-border-hover);
     transform: translateY(-2px);
-    box-shadow: var(--t-shadow-md);
 }
 
 .card--flash {
@@ -143,8 +141,8 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 }
 
 .card__icon {
-    font-size: 2.5rem;
-    filter: drop-shadow(0 2px 4px var(--t-overlay-light));
+    font-size: 2.4rem;
+    /* filter: drop-shadow(0 2px 4px var(--t-overlay-light)); */
 }
 
 .card__ribbon {
@@ -177,7 +175,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
     align-items: center;
     gap: 0.2rem;
     font-size: 0.55rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     padding: 0.15rem 0.45rem;
@@ -214,7 +212,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 }
 
 .card__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
     line-height: 1.3;
@@ -229,7 +227,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 /* ── Description ─────────────────────────────────────────── */
@@ -256,7 +254,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
     text-transform: capitalize;
     background: var(--t-bg-muted);
     padding: 0.15rem 0.5rem;
-    border-radius: 100px;
+    border-radius: var(--t-radius-full);
 }
 
 /* ── Price ────────────────────────────────────────────────── */
@@ -290,22 +288,5 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
     display: flex;
     gap: var(--t-space-2);
     padding: var(--t-space-3);
-}
-
-.card__buy-btn {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    font-size: var(--t-font-size-xs) !important;
-    font-weight: 600;
-    padding: var(--t-space-2) var(--t-space-2) !important;
-    white-space: nowrap;
-}
-
-.card__buy-btn--secondary {
-    flex: 0 1 auto;
-    color: var(--t-text-secondary) !important;
 }
 </style>

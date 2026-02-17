@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getDistrict, SCOUT_PHASES, SCOUT_PHASE_DATA, type PropertyOpportunity, type ScoutPhase } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UAccordion, UButton } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 
 const { t } = useI18n()
@@ -15,8 +16,6 @@ const { formatCash, formatPercent, formatRate } = useFormat()
 
 const props = defineProps<{ opportunity: PropertyOpportunity }>()
 const emit = defineEmits<{ (e: 'bought', propId: string): void }>()
-
-const showDetails = ref(false)
 
 const district = computed(() => getDistrict(props.opportunity.districtId))
 
@@ -134,84 +133,74 @@ function handleBuy(): void {
                     {{ t(SCOUT_PHASE_DATA[opportunity.scoutPhase].nameKey) }}
                 </span>
             </div>
-            <button v-if="nextScoutPhase" class="opp-card__scout-btn" :disabled="!canAffordScout" @click="handleScout">
-                <AppIcon icon="mdi:magnify" />
+            <UButton v-if="nextScoutPhase" variant="ghost" size="sm" icon="mdi:magnify" :disabled="!canAffordScout"
+                @click="handleScout">
                 {{ t(SCOUT_PHASE_DATA[nextScoutPhase].nameKey) }}
                 <span class="scout-cost">{{ scanCostFormatted }}</span>
-            </button>
+            </UButton>
             <span v-else class="opp-card__research-complete">
                 <AppIcon icon="mdi:check-decagram" /> {{ t('realestate.scout.appraisal') }}
             </span>
         </div>
 
         <!-- ── Buy action ── -->
-        <button class="opp-card__buy-btn" :disabled="!canAfford" @click="handleBuy">
-            <AppIcon icon="mdi:cart" />
+        <UButton variant="primary" size="sm" icon="mdi:cart" :disabled="!canAfford" @click="handleBuy">
             <span>{{ t('realestate.buy') }}</span>
             <span class="opp-card__buy-price">{{ formatCash(opportunity.askingPrice) }}</span>
-        </button>
-
-        <!-- ── Details toggle ── -->
-        <button class="details-toggle" @click="showDetails = !showDetails">
-            <AppIcon :icon="showDetails ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
-            {{ showDetails ? t('common.less') : t('common.details') }}
-        </button>
+        </UButton>
 
         <!-- ── Expandable Details ── -->
-        <Transition name="slide">
-            <div v-if="showDetails" class="details-panel">
-                <!-- Property details -->
-                <div class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:information-outline" /> {{ t('realestate.property_info') }}
-                    </h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.condition') }}</span>
-                            <span class="d-value">{{ opportunity.startingCondition }}%</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.wear_rate') }}</span>
-                            <span class="d-value">{{ opportunity.wearRate.toFixed(4) }}/t</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.tax_rate') }}</span>
-                            <span class="d-value">{{ formatRate(opportunity.taxRate * 100) }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.appreciation') }}</span>
-                            <span class="d-value success">{{ formatPercent(opportunity.baseAppreciationRate * 100)
-                                }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.maintenance') }}</span>
-                            <span class="d-value danger">{{ formatCash(opportunity.baseMaintenance) }}/t</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="d-label">{{ t('realestate.max_renovation') }}</span>
-                            <span class="d-value">Lv.{{ opportunity.maxRenovationLevel }}</span>
-                        </div>
+        <UAccordion :title="t('common.details')" icon="mdi:information-outline" variant="ghost" compact>
+            <!-- Property details -->
+            <div class="detail-section">
+                <h4 class="detail-title">
+                    <AppIcon icon="mdi:information-outline" /> {{ t('realestate.property_info') }}
+                </h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.condition') }}</span>
+                        <span class="d-value">{{ opportunity.startingCondition }}%</span>
                     </div>
-                </div>
-
-                <!-- Scout costs breakdown -->
-                <div class="detail-section">
-                    <h4 class="detail-title">
-                        <AppIcon icon="mdi:magnify" /> {{ t('realestate.scout_costs') }}
-                    </h4>
-                    <div class="detail-grid">
-                        <div v-for="phase in SCOUT_PHASES.slice(1)" :key="phase" class="detail-item">
-                            <span class="d-label">{{ t(SCOUT_PHASE_DATA[phase].nameKey) }}</span>
-                            <span class="d-value"
-                                :class="currentScoutIdx >= SCOUT_PHASES.indexOf(phase) ? 'success' : ''">
-                                {{ currentScoutIdx >= SCOUT_PHASES.indexOf(phase) ? '✓' :
-                                    formatCash(opportunity.scoutCosts[phase]) }}
-                            </span>
-                        </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.wear_rate') }}</span>
+                        <span class="d-value">{{ opportunity.wearRate.toFixed(4) }}/t</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.tax_rate') }}</span>
+                        <span class="d-value">{{ formatRate(opportunity.taxRate * 100) }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.appreciation') }}</span>
+                        <span class="d-value success">{{ formatPercent(opportunity.baseAppreciationRate * 100)
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.maintenance') }}</span>
+                        <span class="d-value danger">{{ formatCash(opportunity.baseMaintenance) }}/t</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="d-label">{{ t('realestate.max_renovation') }}</span>
+                        <span class="d-value">Lv.{{ opportunity.maxRenovationLevel }}</span>
                     </div>
                 </div>
             </div>
-        </Transition>
+
+            <!-- Scout costs breakdown -->
+            <div class="detail-section">
+                <h4 class="detail-title">
+                    <AppIcon icon="mdi:magnify" /> {{ t('realestate.scout_costs') }}
+                </h4>
+                <div class="detail-grid">
+                    <div v-for="phase in SCOUT_PHASES.slice(1)" :key="phase" class="detail-item">
+                        <span class="d-label">{{ t(SCOUT_PHASE_DATA[phase].nameKey) }}</span>
+                        <span class="d-value" :class="currentScoutIdx >= SCOUT_PHASES.indexOf(phase) ? 'success' : ''">
+                            {{ currentScoutIdx >= SCOUT_PHASES.indexOf(phase) ? '✓' :
+                                formatCash(opportunity.scoutCosts[phase]) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </UAccordion>
     </div>
 </template>
 
@@ -225,13 +214,11 @@ function handleBuy(): void {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
 }
 
 .opp-card:hover {
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-md);
 }
 
 .opp-card--hot {
@@ -240,7 +227,7 @@ function handleBuy(): void {
 }
 
 .opp-card--scanned {
-    border-color: color-mix(in srgb, var(--t-accent) 25%, var(--t-border));
+    border-color: var(--t-border-hover);
 }
 
 /* ── Head ── */
@@ -251,7 +238,7 @@ function handleBuy(): void {
 }
 
 .opp-card__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--_accent);
     flex-shrink: 0;
 }
@@ -270,7 +257,7 @@ function handleBuy(): void {
 
 .opp-card__name {
     font-size: var(--t-font-size-base);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -281,9 +268,9 @@ function handleBuy(): void {
     padding: 0.1rem 0.4rem;
     border-radius: 4px;
     background: var(--t-danger);
-    color: white;
+    color: var(--t-text-inverse);
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -376,7 +363,7 @@ function handleBuy(): void {
     padding: 0.15rem 0.5rem;
     border-radius: 6px;
     font-size: var(--t-font-size-xs);
-    font-weight: 500;
+    font-weight: var(--t-font-medium);
 }
 
 .opp-card__trait--pos {
@@ -451,33 +438,6 @@ function handleBuy(): void {
     margin-left: var(--t-space-1);
 }
 
-.opp-card__scout-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: var(--t-space-2) var(--t-space-3);
-    font-size: var(--t-font-size-xs);
-    font-weight: 600;
-    border-radius: var(--t-radius-sm);
-    border: 1px solid var(--t-border);
-    background: var(--t-bg-muted);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-    white-space: nowrap;
-}
-
-.opp-card__scout-btn:hover:not(:disabled) {
-    border-color: var(--t-border-hover);
-    color: var(--t-text);
-    background: var(--t-bg-card-hover);
-}
-
-.opp-card__scout-btn:disabled {
-    opacity: 0.35;
-    cursor: default;
-}
-
 .scout-cost {
     font-family: var(--t-font-mono);
     font-size: 0.6rem;
@@ -490,99 +450,21 @@ function handleBuy(): void {
     align-items: center;
     gap: 0.3rem;
     font-size: var(--t-font-size-sm);
-    color: var(--t-accent);
-    font-weight: 500;
-}
-
-/* ── Buy button ── */
-.opp-card__buy-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-2) var(--t-space-3);
-    font-size: var(--t-font-size-sm);
-    font-weight: 700;
-    border-radius: var(--t-radius-sm);
-    border: 1px solid color-mix(in srgb, var(--t-accent) 25%, var(--t-border));
-    background: color-mix(in srgb, var(--t-accent) 6%, var(--t-bg-card));
-    color: var(--t-accent);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.opp-card__buy-btn:hover:not(:disabled) {
-    border-color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 12%, var(--t-bg-card));
-}
-
-.opp-card__buy-btn:disabled {
-    opacity: 0.35;
-    cursor: default;
+    color: var(--t-text-secondary);
+    font-weight: var(--t-font-medium);
 }
 
 .opp-card__buy-price {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    opacity: 0.7;
-}
-
-/* ── Details toggle ── */
-.details-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    padding: var(--t-space-1) var(--t-space-2);
-    border: none;
-    background: none;
     color: var(--t-text-muted);
-    font-size: var(--t-font-size-xs);
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: var(--t-radius-sm);
-    transition: color var(--t-transition-fast), background var(--t-transition-fast);
-}
-
-.details-toggle:hover {
-    color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 6%, transparent);
-}
-
-/* ── Slide transition ── */
-.slide-enter-active,
-.slide-leave-active {
-    transition: all 0.25s ease;
-    overflow: hidden;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-    opacity: 0;
-    max-height: 0;
-}
-
-.slide-enter-to,
-.slide-leave-from {
-    opacity: 1;
-    max-height: 600px;
-}
-
-/* ── Details Panel ── */
-.details-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-3);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-md);
-    border: 1px solid var(--t-border);
 }
 
 .detail-section {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
+    margin-top: var(--t-space-3);
 }
 
 .detail-title {
@@ -591,7 +473,7 @@ function handleBuy(): void {
     align-items: center;
     gap: var(--t-space-1);
     font-size: var(--t-font-size-sm);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-secondary);
 }
 
@@ -616,7 +498,7 @@ function handleBuy(): void {
 .d-value {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 

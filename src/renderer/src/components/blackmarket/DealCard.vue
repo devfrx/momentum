@@ -1,9 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * DealCard — Displays a single black-market deal with risk indicator,
  * cost, effects, and accept action.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import type { BlackMarketDeal } from '@renderer/data/blackmarket'
@@ -104,9 +105,8 @@ function categoryIcon(category: string): string {
 
         <!-- Action -->
         <div class="deal-card__actions">
-            <button class="btn btn-primary btn-sm deal-card__btn" :disabled="disabled"
-                @click="$emit('accept', deal.id)"><i class="pi pi-check"></i> {{ t('blackmarket.accept_deal')
-                }}</button>
+            <UButton variant="primary" size="sm" icon="mdi:check" block :disabled="disabled"
+                @click="$emit('accept', deal.id)">{{ t('blackmarket.accept_deal') }}</UButton>
         </div>
     </div>
 </template>
@@ -121,8 +121,7 @@ function categoryIcon(category: string): string {
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
-    box-shadow: var(--t-shadow-sm);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
+    transition: border-color var(--t-transition-normal);
 }
 
 .deal-card:hover {
@@ -136,7 +135,7 @@ function categoryIcon(category: string): string {
 }
 
 .deal-card__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--_risk-color, var(--t-accent));
     flex-shrink: 0;
 }
@@ -149,7 +148,7 @@ function categoryIcon(category: string): string {
 }
 
 .deal-card__name {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-base);
     color: var(--t-text);
 }
@@ -203,7 +202,7 @@ function categoryIcon(category: string): string {
 
 .deal-card__risk-value {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--_risk-color, var(--t-danger));
     white-space: nowrap;
 }
@@ -252,7 +251,7 @@ function categoryIcon(category: string): string {
 }
 
 .deal-card__kpi-value {
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -261,9 +260,5 @@ function categoryIcon(category: string): string {
 .deal-card__actions {
     display: flex;
     justify-content: flex-end;
-}
-
-.deal-card__btn {
-    width: 100%;
 }
 </style>

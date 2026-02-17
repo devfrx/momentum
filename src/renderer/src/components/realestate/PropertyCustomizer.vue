@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
  * PropertyCustomizer — Dedicated customization dialog for a property.
  * Allows: renaming, trait viewing, management style, rent slider.
@@ -10,6 +10,7 @@ import { useRealEstateStore, type Property } from '@renderer/stores/useRealEstat
 import { useFormat } from '@renderer/composables/useFormat'
 import { getTrait, MANAGEMENT_STYLES } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import InputText from 'primevue/inputtext'
 import Slider from 'primevue/slider'
 import Tag from 'primevue/tag'
@@ -48,7 +49,7 @@ function apply(): void {
     <div class="property-customizer">
         <div class="customizer-header">
             <h3>{{ t('realestate.customize') }}</h3>
-            <button class="btn btn-icon btn-sm" @click="emit('close')"><i class="pi pi-times"></i></button>
+            <UButton variant="ghost" size="sm" icon="mdi:close" @click="emit('close')" />
         </div>
 
         <!-- Name -->
@@ -114,8 +115,8 @@ function apply(): void {
         </div>
 
         <!-- Apply -->
-        <button class="btn btn-success apply-btn" @click="apply"><i class="pi pi-check"></i> {{ t('realestate.apply')
-            }}</button>
+        <UButton variant="success" icon="mdi:check" class="apply-btn" @click="apply">{{ t('realestate.apply')
+            }}</UButton>
     </div>
 </template>
 
@@ -136,7 +137,7 @@ function apply(): void {
 .customizer-header h3 {
     margin: 0;
     font-size: var(--t-font-size-lg);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -148,7 +149,7 @@ function apply(): void {
 
 .field label {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--t-text-muted);
@@ -212,13 +213,22 @@ function apply(): void {
     background: var(--t-bg-card-hover);
 }
 
+.style-card:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.style-card:active {
+    transform: scale(0.98);
+}
+
 .style-card.active {
-    border-color: var(--t-accent);
-    background: color-mix(in srgb, var(--t-accent) 6%, var(--t-bg-card));
+    border-color: var(--t-text);
+    background: var(--t-bg-card-hover);
 }
 
 .style-name {
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
 }
@@ -246,8 +256,8 @@ function apply(): void {
 
 .field-value {
     font-family: var(--t-font-mono);
-    font-weight: 700;
-    color: var(--t-accent);
+    font-weight: var(--t-font-bold);
+    color: var(--t-text);
 }
 
 .slider-labels {
@@ -266,6 +276,6 @@ function apply(): void {
 
 .apply-btn {
     width: 100%;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 </style>

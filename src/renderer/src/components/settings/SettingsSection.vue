@@ -25,7 +25,6 @@ defineProps<{
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-5);
     margin-bottom: var(--t-space-5);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .settings-section-title {
@@ -33,7 +32,7 @@ defineProps<{
     align-items: center;
     gap: 0.4rem;
     font-size: var(--t-font-size-lg);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     margin-bottom: var(--t-space-4);
 }

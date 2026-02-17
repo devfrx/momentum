@@ -3,14 +3,6 @@
  *
  * Static deal templates used to procedurally generate rotating deals.
  * Each deal has risk/reward, category gating, and consequences.
- */
-import type { BlackMarketDealDef } from './types'
-
-/**
- * Black Market — Deal definitions
- *
- * Static deal templates used to procedurally generate rotating deals.
- * Each deal has risk/reward, category gating, and consequences.
  *
  * Scaling model (v2 — percentage of wealth):
  *   • `impactTier` + `costWeight` define cost as a % of player wealth.

@@ -5,6 +5,7 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UTooltip, UButton } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import MiniChart from '@renderer/components/charts/MiniChart.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
@@ -85,10 +86,9 @@ function handleSell(amount: number) {
                 <h3 class="item-card-name">{{ asset.name }}</h3>
             </div>
             <div class="header-right">
-                <button class="pin-btn" :class="{ active: pinned }" @click="emit('pin', asset.id)"
-                    :title="pinned ? $t('market.unpin') : $t('market.pin_to_focus')">
-                    <AppIcon :icon="pinned ? 'mdi:pin' : 'mdi:pin-outline'" />
-                </button>
+                <UButton variant="text" :active="pinned" @click="emit('pin', asset.id)"
+                    :title="pinned ? $t('market.unpin') : $t('market.pin_to_focus')" :icon="pinned ? 'mdi:pin' : 'mdi:pin-outline'">
+                </UButton>
                 <div class="price-display">
                     <div class="current-price">{{ formatCash(asset.currentPrice) }}</div>
                     <div class="change-indicator" :class="asset.changePercent >= 0 ? 'up' : 'down'">
@@ -101,14 +101,18 @@ function handleSell(amount: number) {
 
         <!-- ATH / ATL mini stats -->
         <div class="ath-atl-row">
-            <span class="mini-stat">
-                <span class="mini-stat-label">{{ $t('market.ath') }}</span>
-                <span class="mini-stat-value positive">{{ formatCash(asset.ath) }}</span>
-            </span>
-            <span class="mini-stat">
-                <span class="mini-stat-label">{{ $t('market.atl') }}</span>
-                <span class="mini-stat-value negative">{{ formatCash(asset.atl) }}</span>
-            </span>
+            <UTooltip :text="$t('market.ath')" placement="bottom">
+                <span class="mini-stat">
+                    <span class="mini-stat-label">{{ $t('market.ath') }}</span>
+                    <span class="mini-stat-value positive">{{ formatCash(asset.ath) }}</span>
+                </span>
+            </UTooltip>
+            <UTooltip :text="$t('market.atl')" placement="bottom">
+                <span class="mini-stat">
+                    <span class="mini-stat-label">{{ $t('market.atl') }}</span>
+                    <span class="mini-stat-value negative">{{ formatCash(asset.atl) }}</span>
+                </span>
+            </UTooltip>
         </div>
 
         <!-- Price Chart (mini sparkline) -->
@@ -116,11 +120,10 @@ function handleSell(amount: number) {
             :color="accentColor" :height="60" :buy-price="position?.averageBuyPrice ?? null" />
 
         <!-- Expand to full chart -->
-        <button v-if="showChart && asset.priceHistory?.length > 1" class="expand-chart-btn"
-            @click="expanded = !expanded">
-            <AppIcon :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'" />
+        <UButton variant="text" v-if="showChart && asset.priceHistory?.length > 1"
+            @click="expanded = !expanded" :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'">
             {{ expanded ? $t('market.collapse_chart') : $t('market.expand_chart') }}
-        </button>
+        </UButton>
 
         <!-- Expanded Interactive Chart -->
         <PriceChart v-if="expanded && asset.priceHistory?.length > 1" :data="asset.priceHistory" :color="accentColor"
@@ -158,37 +161,10 @@ function handleSell(amount: number) {
     gap: var(--t-space-2);
 }
 
-.pin-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    background: transparent;
-    color: var(--t-text-muted);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-    flex-shrink: 0;
-}
-
-.pin-btn:hover {
-    background: var(--t-bg-muted);
-    color: var(--t-text);
-    border-color: var(--t-border-hover);
-}
-
-.pin-btn.active {
-    background: var(--t-info-muted);
-    color: var(--t-accent);
-}
-
 .stock-symbol {
     font-family: var(--t-font-mono);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     padding: 0.25rem 0.5rem;
     background: var(--t-bg-muted);
     color: var(--t-text);
@@ -198,7 +174,7 @@ function handleSell(amount: number) {
 .crypto-symbol {
     font-family: var(--t-font-mono);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     padding: 0.25rem 0.5rem;
     background: var(--t-bg-muted);
     color: var(--t-text);
@@ -212,7 +188,7 @@ function handleSell(amount: number) {
 .current-price {
     font-family: var(--t-font-mono);
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text);
 }
 
@@ -231,14 +207,14 @@ function handleSell(amount: number) {
 
 .mini-stat-label {
     color: var(--t-text-muted);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
 
 .mini-stat-value {
     font-family: var(--t-font-mono);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .mini-stat-value.positive {
@@ -249,25 +225,4 @@ function handleSell(amount: number) {
     color: var(--t-danger);
 }
 
-.expand-chart-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.72rem;
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    background: var(--t-bg-muted);
-    color: var(--t-text-secondary);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    transition: all var(--t-transition-fast);
-}
-
-.expand-chart-btn:hover {
-    background: var(--t-bg-card-hover);
-    color: var(--t-text);
-}
 </style>

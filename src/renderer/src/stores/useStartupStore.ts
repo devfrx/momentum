@@ -270,7 +270,10 @@ export const useStartupStore = defineStore('startups', () => {
       sectorBonus,
       globalSuccessBonus.value
     )
-    const effectiveReturn = calculateEffectiveReturn(opp, globalReturnBonus.value)
+    // Use baseReturnMultiplier directly so the stored value matches what
+    // the opportunity card displayed. globalReturnBonus is applied at
+    // collection time via exitInvestment instead.
+    const effectiveReturn = opp.baseReturnMultiplier
 
     // Create investment record
     const investment: StartupInvestment = {
@@ -347,7 +350,9 @@ export const useStartupStore = defineStore('startups', () => {
     if (!inv || inv.status !== 'succeeded') return null
 
     const player = usePlayerStore()
-    const returnAmount = mul(inv.investedAmount, inv.returnMultiplier)
+    // Apply globalReturnBonus at collection time (base multiplier is stored on invest)
+    const effectiveMultiplier = inv.returnMultiplier * globalReturnBonus.value
+    const returnAmount = mul(inv.investedAmount, effectiveMultiplier)
 
     // Add returns to player cash
     player.earnCash(returnAmount)
@@ -504,10 +509,13 @@ export const useStartupStore = defineStore('startups', () => {
       })
     }
     if (state.investments) {
-      // Convert saved amounts back to Decimal
+      // Convert saved amounts back to Decimal + fix broken 0.0x returns
       investments.value = state.investments.map((inv) => ({
         ...inv,
-        investedAmount: D(inv.investedAmount)
+        investedAmount: D(inv.investedAmount),
+        returnMultiplier: (inv.returnMultiplier && inv.returnMultiplier >= 1.5)
+          ? inv.returnMultiplier
+          : 1.5 // clamp broken values to minimum
       }))
     }
     if (state.lastRefreshTick !== undefined) lastRefreshTick.value = state.lastRefreshTick

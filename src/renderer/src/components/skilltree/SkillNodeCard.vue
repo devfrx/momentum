@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -50,11 +51,10 @@ defineEmits<{
         </div>
 
         <div class="upgrade-action">
-            <button v-if="!purchased" class="btn btn-sm btn-block" :class="unlocked ? 'btn-primary' : 'btn-ghost'"
-                :disabled="!unlocked || !canAfford" @click="$emit('buy')">
-                <i :class="unlocked ? 'pi pi-shopping-cart' : 'pi pi-lock'"></i>
+            <UButton v-if="!purchased" size="sm" block :variant="unlocked ? 'primary' : 'ghost'"
+                :disabled="!unlocked || !canAfford" :icon="unlocked ? 'mdi:cart' : 'mdi:lock'" @click="$emit('buy')">
                 {{ unlocked ? cost : $t('common.locked') }}
-            </button>
+            </UButton>
             <div v-else class="purchased-badge">
                 <AppIcon icon="mdi:check-circle" />
                 <span>{{ $t('skilltree.purchased') }}</span>
@@ -67,7 +67,7 @@ defineEmits<{
 .upgrade-card {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--t-space-2);
 }
 
 .upgrade-card.owned {
@@ -99,7 +99,7 @@ defineEmits<{
 }
 
 .upgrade-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
 }
 
 .icon-purchased {
@@ -124,7 +124,7 @@ defineEmits<{
 
 .upgrade-name {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin-bottom: 0.25rem;
 }
 
@@ -164,6 +164,6 @@ defineEmits<{
     padding: 0.5rem;
     color: var(--t-success);
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 </style>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UButton } from '@renderer/components/ui'
+
 defineProps<{
     modelValue: number
     options?: number[]
@@ -13,10 +15,10 @@ defineEmits<{
     <div class="buy-controls">
         <span class="buy-label">{{ $t('business.purchase_amount') }}</span>
         <div class="buy-buttons">
-            <button v-for="amount in (options ?? [1, 10, 100])" :key="amount" class="buy-btn"
-                :class="{ active: modelValue === amount }" @click="$emit('update:modelValue', amount)">
+            <UButton variant="ghost" size="sm" v-for="amount in (options ?? [1, 10, 100])" :key="amount"
+                :active="modelValue === amount" @click="$emit('update:modelValue', amount)">
                 x{{ amount }}
-            </button>
+            </UButton>
         </div>
     </div>
 </template>
@@ -41,25 +43,4 @@ defineEmits<{
     border-radius: var(--t-radius-sm);
 }
 
-.buy-btn {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: transparent;
-    border: none;
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.buy-btn:hover {
-    background: var(--t-bg-card-hover);
-    color: var(--t-text);
-}
-
-.buy-btn.active {
-    background: var(--t-text);
-    color: var(--t-text-inverse);
-}
 </style>

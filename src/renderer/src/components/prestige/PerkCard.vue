@@ -1,5 +1,6 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import { useI18n } from 'vue-i18n'
 import type { PerkEffect } from '@renderer/data/prestige'
 import { THEME } from '@renderer/assets/theme/colors'
@@ -100,9 +101,9 @@ function formatEffect(effect: PerkEffect): string {
                 <AppIcon icon="mdi:check-circle" />
                 <span>{{ $t('common.owned') }}</span>
             </div>
-            <button v-else class="btn btn-primary btn-sm btn-block" :disabled="!canBuy" @click="$emit('buy')">
-                <i class="pi pi-shopping-cart"></i> {{ $t('prestige.cost_pp', { n: cost }) }}
-            </button>
+            <UButton v-else variant="primary" size="sm" block icon="mdi:cart" :disabled="!canBuy" @click="$emit('buy')">
+                {{ $t('prestige.cost_pp', { n: cost }) }}
+            </UButton>
         </div>
     </div>
 </template>
@@ -132,7 +133,7 @@ function formatEffect(effect: PerkEffect): string {
     width: 48px;
     height: 48px;
     border-radius: var(--t-radius-md);
-    border: 2px solid;
+    /* border: 2px solid; */
     background: var(--t-bg-muted);
     display: flex;
     align-items: center;
@@ -141,7 +142,7 @@ function formatEffect(effect: PerkEffect): string {
 }
 
 .perk-icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
 }
 
 .perk-info {
@@ -158,13 +159,13 @@ function formatEffect(effect: PerkEffect): string {
 
 .perk-name {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     margin: 0;
 }
 
 .perk-category {
     font-size: 0.65rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 0.15rem 0.4rem;
@@ -218,7 +219,7 @@ function formatEffect(effect: PerkEffect): string {
     background: color-mix(in srgb, var(--t-success) 15%, transparent);
     border-radius: var(--t-radius-sm);
     color: var(--t-success);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     font-size: 0.85rem;
 }
 </style>

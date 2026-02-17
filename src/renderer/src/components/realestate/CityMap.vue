@@ -344,7 +344,6 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 .district-cell:hover:not(.locked) {
     background: color-mix(in srgb, var(--d-color) 14%, color-mix(in srgb, var(--t-bg-base) 72%, transparent));
     border-color: color-mix(in srgb, var(--d-color) 40%, var(--t-border));
-    box-shadow: 0 0 20px color-mix(in srgb, var(--d-color) 12%, transparent);
     transform: scale(1.01);
 }
 
@@ -362,6 +361,15 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     opacity: 0.45;
 }
 
+.district-cell:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.district-cell:active:not(.locked) {
+    transform: scale(0.98);
+}
+
 /* ── Locked overlay ── */
 .locked-overlay {
     position: absolute;
@@ -369,7 +377,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     background: var(--t-bg-base);
     color: var(--t-text-muted);
 }
@@ -389,7 +397,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 
 .cell-name {
     font-size: var(--t-font-size-xs);
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text);
     white-space: nowrap;
     overflow: hidden;
@@ -424,7 +432,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     font-size: 0.6rem;
     padding: 0.1rem 0.3rem;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
 }
 
 .cell-stat.owned {
@@ -444,9 +452,8 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
 .cell-mult {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--d-color);
-    opacity: 0.8;
     text-shadow: 0 1px 3px var(--t-overlay);
 }
 
@@ -460,13 +467,18 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     transform: translate(-50%, -50%);
     cursor: pointer;
     z-index: 3;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform var(--t-transition-fast) ease, box-shadow var(--t-transition-fast) ease;
     pointer-events: auto;
 }
 
 .cell-dot:hover {
     transform: translate(-50%, -50%) scale(1.2);
     z-index: 5;
+}
+
+.cell-dot:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
 }
 
 /* Scanned opportunity */

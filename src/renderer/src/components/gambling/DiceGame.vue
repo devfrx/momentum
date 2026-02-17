@@ -10,6 +10,7 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UButton } from '@renderer/components/ui'
 import DiceFace from './DiceFace.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
@@ -215,9 +216,9 @@ const diceInfo = computed<InfoSection[]>(() => [
     <div class="dice-game">
         <!-- Header -->
         <div class="dice-header">
-            <button class="back-btn" @click="$emit('back')">
-                <AppIcon icon="mdi:arrow-left" /> {{ $t('gambling.back') }}
-            </button>
+            <UButton variant="ghost" size="sm" icon="mdi:arrow-left" @click="$emit('back')">
+                {{ $t('gambling.back') }}
+            </UButton>
             <h2 class="dice-title">
                 <AppIcon icon="mdi:dice-6" class="title-icon" />
                 {{ $t('gambling.dc_title') }}
@@ -265,13 +266,12 @@ const diceInfo = computed<InfoSection[]>(() => [
 
         <!-- Direction selector + stats -->
         <div class="direction-row">
-            <button class="dir-btn dir-under" :class="{ active: direction === 'under' }" :disabled="rolling"
+            <UButton variant="ghost" :active="direction === 'under'" :disabled="rolling" icon="mdi:arrow-down-bold"
                 @click="direction = 'under'">
-                <AppIcon icon="mdi:arrow-down-bold" />
                 <span class="dir-label">{{ $t('gambling.dc_under', { n: target }) }}</span>
                 <span class="dir-detail">{{ waysUnder(target) }}/36 · {{ direction === 'under' ? winChance :
                     Math.round(waysUnder(target) / 36 * 1000) / 10 }}%</span>
-            </button>
+            </UButton>
 
             <div class="payout-display">
                 <span class="payout-label">{{ $t('gambling.dc_multiplier') }}</span>
@@ -281,13 +281,12 @@ const diceInfo = computed<InfoSection[]>(() => [
                     }}</span>
             </div>
 
-            <button class="dir-btn dir-over" :class="{ active: direction === 'over' }" :disabled="rolling"
+            <UButton variant="ghost" :active="direction === 'over'" :disabled="rolling" icon="mdi:arrow-up-bold"
                 @click="direction = 'over'">
-                <AppIcon icon="mdi:arrow-up-bold" />
                 <span class="dir-label">{{ $t('gambling.dc_over', { n: target }) }}</span>
                 <span class="dir-detail">{{ waysOver(target) }}/36 · {{ direction === 'over' ? winChance :
                     Math.round(waysOver(target) / 36 * 1000) / 10 }}%</span>
-            </button>
+            </UButton>
         </div>
 
         <!-- Result banner -->
@@ -319,31 +318,31 @@ const diceInfo = computed<InfoSection[]>(() => [
             <div class="bet-section">
                 <label class="bet-label">{{ $t('gambling.bet_amount') }}</label>
                 <div class="bet-row">
-                    <button class="bet-adj" @click="halfBet" :disabled="rolling">1/2</button>
+                    <UButton variant="ghost" size="xs" @click="halfBet" :disabled="rolling">1/2</UButton>
                     <div class="bet-display">
                         <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
                             class="bet-input" :disabled="rolling" />
                     </div>
-                    <button class="bet-adj" @click="doubleBet" :disabled="rolling">x2</button>
+                    <UButton variant="ghost" size="xs" @click="doubleBet" :disabled="rolling">x2</UButton>
                 </div>
                 <div class="bet-presets">
-                    <button v-for="pct in [10, 25, 50]" :key="pct" class="preset-btn"
+                    <UButton variant="ghost" size="xs" v-for="pct in [10, 25, 50]" :key="pct"
                         @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="rolling">
                         {{ pct }}%
-                    </button>
-                    <button class="preset-btn preset-max" @click="maxBet" :disabled="rolling">{{ $t('gambling.max')
-                        }}</button>
+                    </UButton>
+                    <UButton variant="warning" size="xs" @click="maxBet" :disabled="rolling">{{ $t('gambling.max')
+                        }}</UButton>
                 </div>
             </div>
 
             <div class="action-col">
-                <button class="roll-btn" :disabled="!canRoll" @click="roll">
+                <UButton variant="primary" :disabled="!canRoll" @click="roll">
                     <AppIcon :icon="rolling ? 'mdi:loading' : 'mdi:dice-multiple'" :class="{ 'spin-icon': rolling }" />
                     {{ rolling ? $t('gambling.dc_rolling') : $t('gambling.dc_roll') }}
-                </button>
-                <button v-if="showResult" class="new-round-btn" @click="newRound">
-                    <AppIcon icon="mdi:refresh" /> {{ $t('gambling.new_round') }}
-                </button>
+                </UButton>
+                <UButton variant="ghost" size="sm" v-if="showResult" icon="mdi:refresh" @click="newRound">
+                    {{ $t('gambling.new_round') }}
+                </UButton>
             </div>
         </div>
 
@@ -394,36 +393,17 @@ const diceInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: var(--t-space-2) var(--t-space-3);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all var(--t-transition-fast);
-}
-
-.back-btn:hover {
-    background: var(--t-bg-hover);
-    color: var(--t-text);
-}
-
 .dice-title {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
 }
 
 .title-icon {
-    font-size: 1.5rem;
-    color: var(--t-accent);
+    font-size: 1.1rem;
+    color: var(--t-text-secondary);
 }
 
 .balance-chip {
@@ -435,8 +415,8 @@ const diceInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     color: var(--t-success);
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 0.85rem;
 }
 
@@ -479,7 +459,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 .sum-value {
     font-size: 2rem;
     font-weight: 900;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
 }
 
 .sum-badge.won .sum-value {
@@ -517,7 +497,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 
 .target-label-text {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--t-text-muted);
@@ -526,7 +506,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 .target-number {
     font-size: 1.8rem;
     font-weight: 900;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     color: var(--t-accent);
     min-width: 40px;
     text-align: center;
@@ -548,7 +528,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 
 .scale-mark {
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: var(--t-font-semibold);
     color: var(--t-text-muted);
     width: 24px;
     text-align: center;
@@ -562,45 +542,9 @@ const diceInfo = computed<InfoSection[]>(() => [
 /* ── Direction buttons ── */
 .direction-row {
     display: flex;
+    justify-content: space-around;
     gap: var(--t-space-3);
     align-items: stretch;
-}
-
-.dir-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--t-space-1);
-    padding: var(--t-space-3);
-    background: var(--t-bg-card);
-    border: 2px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-    color: var(--t-text-secondary);
-    font-size: 1rem;
-}
-
-.dir-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.dir-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.dir-btn.active.dir-under {
-    border-color: var(--t-danger);
-    background: var(--t-danger-muted);
-    color: var(--t-danger);
-}
-
-.dir-btn.active.dir-over {
-    border-color: var(--t-success);
-    background: var(--t-success-muted);
-    color: var(--t-success);
 }
 
 .dir-label {
@@ -629,7 +573,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 
 .payout-label {
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--t-text-muted);
@@ -638,7 +582,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 .payout-value {
     font-size: 1.6rem;
     font-weight: 900;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     color: var(--t-accent);
 }
 
@@ -692,7 +636,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 .banner-amount {
     font-size: 1.3rem;
     font-weight: 800;
-    font-family: var(--font-mono, monospace);
+    font-family: var(--t-font-mono);
     color: var(--t-success);
 }
 
@@ -711,6 +655,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 /* ── Controls (shared pattern) ── */
 .controls-row {
     display: flex;
+    flex-direction: column;
     gap: var(--t-space-3);
     align-items: center;
 }
@@ -724,14 +669,13 @@ const diceInfo = computed<InfoSection[]>(() => [
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .bet-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 700;
+    font-weight: var(--t-font-bold);
     color: var(--t-text-muted);
 }
 
@@ -739,28 +683,6 @@ const diceInfo = computed<InfoSection[]>(() => [
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
-}
-
-.bet-adj {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    color: var(--t-text);
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all var(--t-transition-fast);
-}
-
-.bet-adj:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.bet-adj:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 .bet-display {
@@ -771,8 +693,8 @@ const diceInfo = computed<InfoSection[]>(() => [
     width: 100%;
     text-align: center;
     font-size: 1rem;
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     padding: var(--t-space-2);
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
@@ -786,65 +708,12 @@ const diceInfo = computed<InfoSection[]>(() => [
     gap: 4px;
 }
 
-.preset-btn {
-    flex: 1;
-    padding: var(--t-space-1) var(--t-space-2);
-    font-size: 0.7rem;
-    font-weight: 600;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text-secondary);
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.preset-btn:hover:not(:disabled) {
-    background: var(--t-bg-hover);
-}
-
-.preset-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.preset-max {
-    color: var(--t-accent);
-    font-weight: 700;
-}
-
 /* ── Action buttons ── */
 .action-col {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
     min-width: 130px;
-}
-
-.roll-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3) var(--t-space-4);
-    background: var(--t-accent);
-    color: var(--t-text);
-    border: none;
-    border-radius: var(--t-radius-md);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--t-transition-fast);
-}
-
-.roll-btn:hover:not(:disabled) {
-    filter: brightness(1.1);
-}
-
-.roll-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .spin-icon {
@@ -861,26 +730,6 @@ const diceInfo = computed<InfoSection[]>(() => [
     }
 }
 
-.new-round-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-accent);
-    border-radius: var(--t-radius-md);
-    color: var(--t-accent);
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 600;
-    transition: all var(--t-transition-fast);
-}
-
-.new-round-btn:hover {
-    background: var(--t-bg-hover);
-}
-
 /* ── Stats ── */
 .dice-stats {
     display: flex;
@@ -890,7 +739,6 @@ const diceInfo = computed<InfoSection[]>(() => [
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    box-shadow: var(--t-shadow-sm);
 }
 
 .stat-item {
@@ -908,8 +756,8 @@ const diceInfo = computed<InfoSection[]>(() => [
 }
 
 .stat-value {
-    font-family: var(--font-mono, monospace);
-    font-weight: 700;
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
     font-size: 1rem;
 }
 
@@ -923,11 +771,11 @@ const diceInfo = computed<InfoSection[]>(() => [
 
 /* ── Transitions ── */
 .pop-enter-active {
-    transition: all 0.35s ease;
+    transition: all var(--t-transition-normal);
 }
 
 .pop-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--t-transition-fast);
 }
 
 .pop-enter-from {
