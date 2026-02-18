@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
 import { DEPOSIT_RISK_META, type DepositDef, type CompoundFrequency } from '@renderer/data/deposits'
@@ -51,14 +51,14 @@ const apyClass = computed(() => {
 </script>
 
 <template>
-    <div class="item-card deposit-card" :class="{ locked: !eligible }">
-        <div class="item-card-header">
+    <UCard class="deposit-card" :class="{ 'deposit-card--locked': !eligible }">
+        <template #header>
             <div class="item-card-title">
                 <AppIcon :icon="deposit.icon" class="item-card-icon" />
                 <h3 class="item-card-name">{{ deposit.name }}</h3>
             </div>
             <Tag :value="riskMeta.label" :severity="tagSeverity" />
-        </div>
+        </template>
 
         <p class="item-card-description">{{ deposit.description }}</p>
 
@@ -86,7 +86,7 @@ const apyClass = computed(() => {
         <div v-if="deposit.earlyWithdrawalPenalty > 0" class="deposit-info-badge">
             <AppIcon icon="mdi:alert-outline" class="info-badge-icon" />
             <span>{{ $t('deposits.early_penalty_badge', { pct: (deposit.earlyWithdrawalPenalty * 100).toFixed(0) })
-                }}</span>
+            }}</span>
         </div>
 
         <div v-if="deposit.loyaltyBonusAPY > 0" class="deposit-info-badge loyalty">
@@ -99,21 +99,15 @@ const apyClass = computed(() => {
             <span>{{ reason }}</span>
         </div>
 
-        <div class="item-card-actions">
+        <template #footer>
             <UButton variant="primary" size="sm" icon="mdi:plus" :disabled="!eligible" @click="$emit('open')">
                 {{ $t('deposits.open_account') }}
             </UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.deposit-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .deposit-details {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -176,11 +170,8 @@ const apyClass = computed(() => {
     flex-shrink: 0;
 }
 
-.deposit-card.locked {
+.deposit-card--locked {
     opacity: 0.7;
-}
-
-.deposit-card .item-card-actions {
-    margin-top: auto;
+    pointer-events: none;
 }
 </style>

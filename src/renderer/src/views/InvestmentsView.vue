@@ -259,7 +259,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                         <span>{{ $t('investments.invested') }} <strong>{{
                             formatCash(inv.investedAmount) }}</strong></span>
                         <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                        }}x</strong></span>
+                                }}x</strong></span>
                     </div>
                     <div class="success-result">
                         <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
@@ -340,7 +340,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                             <span class="opp-card__tagline">{{ opp.tagline }}</span>
                         </div>
                         <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">{{ STAGES[opp.stage].name
-                        }}</span>
+                            }}</span>
                     </div>
 
                     <!-- Meta row: sector + timer -->
@@ -525,7 +525,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                    }}</strong>
+                        }}</strong>
                 </div>
             </div>
 
@@ -766,7 +766,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: 3px;
     padding: 1px 6px;
-    border-radius: 4px;
+    border-radius: var(--t-radius-xs);
     font-size: 0.68rem;
     font-weight: var(--t-font-medium);
     line-height: 1.5;
@@ -877,7 +877,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     justify-content: center;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     font-size: 0.75rem;
     border: 2px solid var(--t-border);
     color: var(--t-text-muted);

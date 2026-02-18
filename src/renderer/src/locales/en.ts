@@ -272,6 +272,25 @@ export default {
     no_available: 'No Businesses Available',
     market_hint: 'Grow your net worth to unlock more businesses.',
     advisors_hint: 'Buy a business first to hire advisors.',
+    size_stand: 'Stand',
+    size_workshop: 'Workshop',
+    size_store: 'Store',
+    size_shop: 'Shop',
+    size_venture: 'Venture',
+    size_business: 'Business',
+    size_company: 'Company',
+    size_firm: 'Firm',
+    size_corporation: 'Corporation',
+    size_enterprise: 'Enterprise',
+    size_conglomerate: 'Conglomerate',
+    size_holding: 'Holding',
+    size_empire: 'Empire',
+    est_profit: 'Est. Profit',
+    est_margin: 'Margin',
+    roi_tooltip: 'Estimated ROI with 1 employee (starting state)',
+    customize_title: 'Name Your Business',
+    custom_name: 'Business Name',
+    custom_icon: 'Choose Icon',
 
     // ── Level & Scaling ──
     level: 'Level',
@@ -280,6 +299,7 @@ export default {
     become_corp: 'Become Corporation',
     corporation: 'Corporation',
     reputation: 'Reputation',
+    sell_confirm: 'Are you sure you want to sell "{name}"? This action cannot be undone. All levels, upgrades, and advisors will be lost.',
 
     // ── Branches ──
     branches: 'Branches',
@@ -377,6 +397,8 @@ export default {
     adv_hr_desc: 'Increases output & auto-trains staff.',
     adv_cfo: 'CFO',
     adv_cfo_desc: 'Auto-optimizes pricing toward optimal level.',
+    auto_pricing: 'Auto-pricing',
+    faster_pricing: 'Faster convergence',
 
     // ── Milestones ──
     milestones: 'Milestones',

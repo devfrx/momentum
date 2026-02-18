@@ -4,7 +4,7 @@
  * Shows rarity border, value, source badge, and action buttons.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -33,8 +33,8 @@ const SOURCE_ICONS: Record<string, string> = {
 </script>
 
 <template>
-    <div class="vault-item" :style="{ '--_rarity': rarityCssVar(item.rarity) }">
-        <div class="vault-item__header">
+    <UCard class="vault-item" size="sm" radius="md" :style="{ '--_rarity': rarityCssVar(item.rarity) }">
+        <template #header>
             <AppIcon :icon="item.icon" class="vault-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
             <div class="vault-item__info">
                 <span class="vault-item__name">{{ resolveItemName(item, t) }}</span>
@@ -48,7 +48,7 @@ const SOURCE_ICONS: Record<string, string> = {
                     </span>
                 </div>
             </div>
-        </div>
+        </template>
 
         <p class="vault-item__desc">{{ resolveItemDescription(item, t) }}</p>
 
@@ -62,35 +62,18 @@ const SOURCE_ICONS: Record<string, string> = {
             <span class="vault-item__value">{{ formatCash(item.appraisedValue ?? item.baseValue) }}</span>
         </div>
 
-        <div class="vault-item__actions">
+        <template #footer>
             <UButton variant="ghost" size="sm" icon="mdi:arrow-right" @click="$emit('transfer', item.id)">
                 {{ t('vault.transfer_out') }}
             </UButton>
             <UButton variant="primary" size="sm" icon="mdi:currency-usd" @click="$emit('sell', item.id)">
                 {{ t('storage.sell_item') }}
             </UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.vault-item {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    /* border-left: 3px solid var(--_rarity, var(--t-border)); */
-    border-radius: var(--t-radius-md);
-    transition: border-color var(--t-transition-normal);
-}
-
-.vault-item:hover {
-    border-color: var(--t-border-hover);
-}
-
 .vault-item__header {
     display: flex;
     align-items: center;
@@ -175,11 +158,5 @@ const SOURCE_ICONS: Record<string, string> = {
     font-size: var(--t-font-size-sm);
     font-weight: var(--t-font-semibold);
     color: var(--t-success);
-}
-
-.vault-item__actions {
-    display: flex;
-    gap: var(--t-space-2);
-    justify-content: flex-end;
 }
 </style>

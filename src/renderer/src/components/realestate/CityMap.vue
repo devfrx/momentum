@@ -431,7 +431,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     gap: 0.15rem;
     font-size: 0.6rem;
     padding: 0.1rem 0.3rem;
-    border-radius: 4px;
+    border-radius: var(--t-radius-xs);
     font-weight: var(--t-font-semibold);
 }
 
@@ -545,7 +545,7 @@ function handleDotClick(dot: CellDot, ev: MouseEvent): void {
     display: inline-block;
     width: 10px;
     height: 10px;
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
 }
 
 .legend-swatch--owned {

@@ -135,7 +135,7 @@ const canPull = computed(() => !props.disabled && !props.spinning)
     margin-left: -24px;
     width: 48px;
     height: 48px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     background: var(--t-accent);
     border: 3px solid var(--t-bg-card);
     box-shadow: 0 2px 8px var(--t-overlay-light);
@@ -179,7 +179,7 @@ const canPull = computed(() => !props.disabled && !props.spinning)
     width: 16px;
     height: 2px;
     background: color-mix(in srgb, var(--t-text) 50%, transparent);
-    border-radius: 1px;
+    border-radius: var(--t-radius-xs);
 }
 
 .lever-label {

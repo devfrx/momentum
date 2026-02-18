@@ -7,7 +7,7 @@
  */
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -36,7 +36,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
 </script>
 
 <template>
-    <div class="card" :style="{ '--_rarity': rarityCssVar(listing.item.rarity) }"
+    <UCard class="shop-card" :style="{ '--_rarity': rarityCssVar(listing.item.rarity) }"
         :class="{ 'card--flash': listing.flashSale, 'card--unique': listing.unique }">
 
         <!-- ── Icon / Image area ───────────────────────────── -->
@@ -45,7 +45,7 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
                 :style="{ color: rarityCssVar(listing.item.rarity) }" />
             <!-- Flash sale ribbon -->
             <span v-if="listing.flashSale" class="card__ribbon">
-                <AppIcon icon="mdi:flash" /> -{{ Math.round(listing.discount * 100) }}%
+                -{{ Math.round(listing.discount * 100) }}%
             </span>
         </div>
 
@@ -99,25 +99,19 @@ const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.ca
                 {{ t('shop.buy_to_storage') }}
             </UButton>
         </div>
-    </div>
+    </UCard>
 </template>
 
 <style scoped>
 /* ── Card shell ──────────────────────────────────────────── */
-.card {
+.shop-card {
     display: flex;
     flex-direction: column;
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
     overflow: hidden;
-    transition: border-color var(--t-transition-fast),
-        box-shadow var(--t-transition-fast),
-        transform var(--t-transition-fast);
+    padding: 0;
 }
 
-.card:hover {
-    border-color: var(--t-border-hover);
+.shop-card:hover {
     transform: translateY(-2px);
 }
 

@@ -101,7 +101,7 @@ function handleInstall(imp: ImprovementDef): void {
                     <div class="imp-stat" v-if="imp.appreciationMod > 1">
                         <AppIcon icon="mdi:trending-up" size="0.7rem" />
                         <span>{{ formatPercent((imp.appreciationMod - 1) * 100) }} {{ t('realestate.appreciation')
-                        }}</span>
+                            }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.valueFraction > 0">
                         <AppIcon icon="mdi:home-plus" size="0.7rem" />
@@ -111,7 +111,8 @@ function handleInstall(imp: ImprovementDef): void {
 
                 <div class="imp-footer">
                     <span class="imp-cost">{{ formatCash(getCost(imp)) }}</span>
-                    <UButton variant="success" size="sm" icon="mdi:plus" :disabled="!canAfford(imp)" @click="handleInstall(imp)">{{ t('realestate.install') }}</UButton>
+                    <UButton variant="success" size="sm" icon="mdi:plus" :disabled="!canAfford(imp)"
+                        @click="handleInstall(imp)">{{ t('realestate.install') }}</UButton>
                 </div>
             </div>
         </div>
@@ -223,7 +224,7 @@ function handleInstall(imp: ImprovementDef): void {
     gap: 0.2rem;
     padding: 2px 6px;
     background: var(--t-success-muted);
-    border-radius: 4px;
+    border-radius: var(--t-radius-xs);
     font-size: var(--t-font-size-xs);
     color: var(--t-success);
 }

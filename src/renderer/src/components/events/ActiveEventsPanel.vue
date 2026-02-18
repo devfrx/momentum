@@ -289,7 +289,7 @@ function toggleEvent(id: string): void {
 .event-progress-fill {
     height: 100%;
     transition: width 0.3s linear;
-    border-radius: 1px;
+    border-radius: var(--t-radius-xs);
 }
 
 .event-progress-fill.positive {

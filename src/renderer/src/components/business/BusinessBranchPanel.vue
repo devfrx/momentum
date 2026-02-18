@@ -180,7 +180,7 @@ const tierProgress = computed(() => {
 .progress-bar {
     height: 6px;
     background: var(--t-bg);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
     margin-bottom: 0.3rem;
 }
@@ -188,7 +188,7 @@ const tierProgress = computed(() => {
 .progress-fill {
     height: 100%;
     background: var(--t-accent);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     transition: width var(--t-transition-normal);
 }
 

@@ -1,0 +1,245 @@
+/*
+ * Primitives — Cards, Badges, Alerts, Progress Bars, Stat Displays
+ */
+
+/* ====================================
+   CARD GRID
+   ==================================== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--t-grid-col-md), 1fr));
+  gap: var(--t-space-4);
+}
+
+.card-grid-lg {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--t-grid-col-lg), 1fr));
+  gap: var(--t-space-4);
+}
+
+/* ====================================
+   ITEM CARD (legacy — prefer UCard component)
+   ==================================== */
+.item-card {
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  padding: var(--t-space-4);
+  transition: border-color var(--t-transition-normal),
+              box-shadow var(--t-transition-normal);
+}
+
+.item-card:hover {
+  border-color: var(--t-border-hover);
+}
+
+.item-card.locked {
+  opacity: var(--t-opacity-disabled);
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+.item-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--t-space-3);
+}
+
+.item-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-1);
+}
+
+.item-card-icon {
+  font-size: 1.15rem;
+  color: var(--t-text-secondary);
+}
+
+.item-card-name {
+  font-size: var(--t-font-size-base);
+  font-weight: var(--t-font-semibold);
+}
+
+.item-card-badge {
+  font-size: var(--t-font-size-xs);
+  padding: var(--t-space-0-5) var(--t-space-1-5);
+  border-radius: var(--t-radius-sm);
+  background: var(--t-bg-muted);
+  color: var(--t-text-muted);
+}
+
+.item-card-description {
+  font-size: var(--t-font-size-sm);
+  color: var(--t-text-muted);
+  margin-bottom: var(--t-space-3);
+  line-height: var(--t-leading-relaxed);
+}
+
+.item-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--t-space-4);
+  font-size: var(--t-font-size-sm);
+  margin-bottom: var(--t-space-3);
+}
+
+.item-card-actions {
+  display: flex;
+  gap: var(--t-space-2);
+  flex-wrap: wrap;
+}
+
+/* ====================================
+   CARD SURFACE (generic)
+   ==================================== */
+.card,
+.card-surface {
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+}
+
+/* ====================================
+   CHART CONTAINERS
+   ==================================== */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  margin-top: var(--t-space-4);
+}
+
+.chart-mini {
+  height: 80px;
+}
+
+/* ====================================
+   STAT DISPLAY
+   ==================================== */
+.stat-value {
+  font-family: var(--t-font-mono);
+  font-weight: var(--t-font-bold);
+  font-size: var(--t-font-size-3xl);
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: var(--t-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--t-text-muted);
+  margin-top: var(--t-space-0-5);
+}
+
+/* ====================================
+   PROGRESS BAR
+   ==================================== */
+.progress-bar {
+  height: 4px;
+  background: var(--t-bg-muted);
+  border-radius: var(--t-radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--t-text-secondary);
+  border-radius: var(--t-radius-full);
+  transition: width var(--t-transition-normal);
+}
+
+/* ====================================
+   BADGE
+   ==================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--t-space-0-5);
+  padding: var(--t-space-0-5) var(--t-space-1-5);
+  font-size: var(--t-font-size-xs);
+  font-weight: var(--t-font-semibold);
+  border-radius: var(--t-radius-sm);
+  background: var(--t-bg-muted);
+  color: var(--t-text-secondary);
+}
+
+/* ====================================
+   ALERT BOX
+   ==================================== */
+.alert-box {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-2);
+  padding: var(--t-space-3) var(--t-space-4);
+  border-radius: var(--t-radius-md);
+  font-size: var(--t-font-size-sm);
+}
+
+.alert-box-warning {
+  background: var(--t-warning-muted);
+  border: 1px solid color-mix(in srgb, var(--t-warning) 20%, transparent);
+  color: var(--t-warning);
+}
+
+.alert-box-info {
+  background: var(--t-info-muted);
+  border: 1px solid color-mix(in srgb, var(--t-info) 20%, transparent);
+  color: var(--t-text-secondary);
+}
+
+.alert-box-success {
+  background: var(--t-success-muted);
+  border: 1px solid color-mix(in srgb, var(--t-success) 20%, transparent);
+  color: var(--t-success);
+}
+
+.alert-box-danger {
+  background: var(--t-danger-muted);
+  border: 1px solid color-mix(in srgb, var(--t-danger) 20%, transparent);
+  color: var(--t-danger);
+}
+
+/* ====================================
+   EMPTY STATE
+   ==================================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--t-space-10) var(--t-space-4);
+  color: var(--t-text-muted);
+  font-size: var(--t-font-size-sm);
+  gap: var(--t-space-2);
+}
+
+.empty-state-icon {
+  font-size: 2rem;
+  opacity: 0.3;
+}
+
+/* ====================================
+   SKELETON / LOADING PLACEHOLDER
+   ==================================== */
+.skeleton {
+  background: var(--t-bg-muted);
+  border-radius: var(--t-radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* ====================================
+   DIVIDER
+   ==================================== */
+.divider {
+  height: 1px;
+  background: var(--t-border);
+  border: none;
+  margin: var(--t-space-4) 0;
+}

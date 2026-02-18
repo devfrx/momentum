@@ -60,7 +60,7 @@ function getNextBonus(upgradeId: string): number {
                     </span>
                 </div>
 
-                <UButton variant="ghost" size="sm" class="upg-buy-btn"
+                <UButton variant="primary" size="sm" class="upg-buy-btn"
                     @click="store.purchaseUpgrade(business.id, upgDef.id)">
                     {{ $t('business.upgrade_cost', { cost: formatCash(store.getUpgradeCost(business, upgDef.id)) }) }}
                 </UButton>

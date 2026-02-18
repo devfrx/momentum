@@ -43,15 +43,41 @@ export interface PlayerSave {
 
 export interface BusinessSave {
   id: string
+  /** BusinessDef.id reference */
+  defId: string
   name: string
-  description: string
   icon: string
   category: string
+
+  /** Player-chosen custom name */
+  customName?: string
+
+  // ── Scaling ──
+  level: number
+  branches: number
+  trainingLevel: number
+
   // Operational levers
   employees: number
   pricePerUnit: number
   marketingBudget: number
   quality: number
+
+  // ── Policies (slider 0-100) ──
+  policies: Record<string, number>
+
+  // ── Upgrades (per-business levels) ──
+  upgrades: { id: string; level: number }[]
+
+  // ── Advisors ──
+  advisors: { type: string; level: number }[]
+
+  // ── Reputation (0-100) ──
+  reputation: number
+
+  // ── Mega-Corp ──
+  isCorporation: boolean
+
   // Fixed from definition
   outputPerEmployee: number
   baseSalary: number
@@ -63,12 +89,30 @@ export interface BusinessSave {
   sectorMultiplier: number
   qualityUpgradeCost: SD
   purchasePrice: SD
+
   // Tracked stats
   totalRevenue: SD
   totalCosts: SD
   totalProfit: SD
   avgProfitPerTick: SD
   ticksOwned: number
+
+  // ── Live stats (updated each tick) ──
+  currentCustomers: number
+  maxCapacity: number
+  unitsSold: number
+  utilization: number
+  revenuePerTick: SD
+  costsPerTick: SD
+  profitPerTick: SD
+  priceFactor: number
+  qualityFactor: number
+  marketingFactor: number
+
+  // ── Manager ──
+  hasManager: boolean
+  managerCost: SD
+  pendingProfit: SD
 }
 
 // ─── Jobs ───────────────────────────────────────────────────────────

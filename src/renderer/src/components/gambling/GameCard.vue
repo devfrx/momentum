@@ -5,7 +5,7 @@
  * win/loss record, and a play button.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -28,19 +28,20 @@ defineEmits<{ play: [] }>()
 </script>
 
 <template>
-    <div class="game-card" :style="{ '--_accent': accent }">
+    <UCard class="game-card" radius="md" :interactive="true" :accent="accent">
 
-        <!-- Top row: icon + name + category badge -->
-        <div class="game-card__head">
-            <AppIcon :icon="icon" class="game-card__icon" />
-            <div class="game-card__identity">
-                <div class="game-card__name-row">
-                    <span class="game-card__name">{{ name }}</span>
+        <template #header>
+            <div class="game-card__head">
+                <AppIcon :icon="icon" class="game-card__icon" />
+                <div class="game-card__identity">
+                    <div class="game-card__name-row">
+                        <span class="game-card__name">{{ name }}</span>
+                    </div>
+                    <span class="game-card__tagline">{{ description }}</span>
                 </div>
-                <span class="game-card__tagline">{{ description }}</span>
+                <span class="game-card__stage">{{ category }}</span>
             </div>
-            <span class="game-card__stage">{{ category }}</span>
-        </div>
+        </template>
 
         <!-- Meta row: luck mechanic tags -->
         <div class="game-card__meta">
@@ -85,51 +86,17 @@ defineEmits<{ play: [] }>()
             <span class="game-card__net-value" :class="isProfitable ? 'positive' : 'negative'">{{ netProfit }}</span>
         </div>
 
-        <!-- Actions -->
-        <div class="game-card__actions">
+        <template #footer>
             <UButton variant="primary" size="xs" @click="$emit('play')">
                 {{ $t('gambling.play') }}</UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-/* ─── Card shell (matches opp-card) ─── */
-.game-card {
-    --_accent: var(--t-accent);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4) var(--t-space-4) var(--t-space-4) calc(var(--t-space-4) + 4px);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    transition: border-color var(--t-transition-normal);
-    cursor: pointer;
-}
-
-/* .game-card::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    left: -1px;
-    width: 4px;
-    border-radius: var(--t-radius-md) 0 0 var(--t-radius-md);
-    background: var(--_accent);
-} */
-
-.game-card:hover {
-    border-color: var(--t-border-hover);
-}
-
 .game-card:focus-visible {
     outline: 2px solid var(--t-accent);
     outline-offset: 2px;
-}
-
-.game-card:active {
-    transform: scale(0.98);
 }
 
 /* ─── Head ─── */
@@ -182,7 +149,7 @@ defineEmits<{ play: [] }>()
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: var(--t-radius-xs);
     background: color-mix(in srgb, var(--_accent) 12%, transparent);
     color: var(--_accent);
 }
@@ -199,7 +166,7 @@ defineEmits<{ play: [] }>()
     align-items: center;
     gap: 3px;
     padding: 1px 6px;
-    border-radius: 4px;
+    border-radius: var(--t-radius-xs);
     font-size: 0.68rem;
     font-weight: var(--t-font-medium);
     line-height: 1.5;
@@ -288,13 +255,5 @@ defineEmits<{ play: [] }>()
     font-family: var(--t-font-mono);
     font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
-}
-
-/* ─── Actions ─── */
-.game-card__actions {
-    display: flex;
-    gap: var(--t-space-2);
-    justify-content: flex-end;
-    margin-top: auto;
 }
 </style>

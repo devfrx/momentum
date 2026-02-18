@@ -326,14 +326,14 @@ function showRestoreMax(item: any): boolean {
 .progress-bar {
     height: 6px;
     background: var(--t-bg-muted);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
     background: var(--t-accent);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     transition: width var(--t-transition-normal);
 }
 

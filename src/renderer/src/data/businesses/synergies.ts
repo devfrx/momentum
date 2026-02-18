@@ -62,11 +62,11 @@ export interface GeoTierDef {
 
 export const GEO_TIERS: GeoTierDef[] = [
   { tier: 'local', nameKey: 'business.geo_local', icon: 'mdi:map-marker', minBranches: 0, revenueMultiplier: 1.0 },
-  { tier: 'regional', nameKey: 'business.geo_regional', icon: 'mdi:map', minBranches: 10, revenueMultiplier: 1.5 },
-  { tier: 'national', nameKey: 'business.geo_national', icon: 'mdi:flag', minBranches: 20, revenueMultiplier: 2.5 },
-  { tier: 'continental', nameKey: 'business.geo_continental', icon: 'mdi:earth', minBranches: 30, revenueMultiplier: 4.0 },
-  { tier: 'global', nameKey: 'business.geo_global', icon: 'mdi:web', minBranches: 40, revenueMultiplier: 7.0 },
-  { tier: 'interplanetary', nameKey: 'business.geo_interplanetary', icon: 'mdi:rocket-launch', minBranches: 50, revenueMultiplier: 12.0 },
+  { tier: 'regional', nameKey: 'business.geo_regional', icon: 'mdi:map', minBranches: 5, revenueMultiplier: 1.5 },
+  { tier: 'national', nameKey: 'business.geo_national', icon: 'mdi:flag', minBranches: 12, revenueMultiplier: 2.5 },
+  { tier: 'continental', nameKey: 'business.geo_continental', icon: 'mdi:earth', minBranches: 20, revenueMultiplier: 4.0 },
+  { tier: 'global', nameKey: 'business.geo_global', icon: 'mdi:web', minBranches: 30, revenueMultiplier: 7.0 },
+  { tier: 'interplanetary', nameKey: 'business.geo_interplanetary', icon: 'mdi:rocket-launch', minBranches: 45, revenueMultiplier: 12.0 },
 ]
 
 /**
@@ -94,8 +94,8 @@ export function getNextGeoTier(branches: number): GeoTierDef | null {
 // ─── Mega-Corporation ────────────────────────────────────────────
 
 export const MEGA_CORP_REQUIREMENTS = {
-  minLevel: 50,
-  minBranches: 25,
+  minLevel: 25,
+  minBranches: 15,
 }
 
 /**
@@ -104,5 +104,5 @@ export const MEGA_CORP_REQUIREMENTS = {
  */
 export function marketDominanceMultiplier(countInCategory: number): number {
   if (countInCategory <= 0) return 1.0
-  return 1 + 0.05 * Math.pow(countInCategory, 1.5)
+  return 1 + 0.15 * Math.pow(countInCategory, 1.5)
 }

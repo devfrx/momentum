@@ -89,7 +89,7 @@ function sellAllFiltered(): void {
                 <select class="filter-select" v-model="filterRarity">
                     <option value="">{{ t('vault.all_rarities') }}</option>
                     <option v-for="r in ['common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic']"
-                        :key="r" :value="r" style="text-transform: capitalize">{{ r }}</option>
+                        :key="r" :value="r" class="text-capitalize">{{ r }}</option>
                 </select>
 
                 <select class="filter-select" v-model="filterSource">
@@ -110,7 +110,8 @@ function sellAllFiltered(): void {
                     {{ filteredItems.length }} {{ t('vault.items_label') }} —
                     {{ t('vault.total_value') }}: {{ formatCash(totalValue) }}
                 </span>
-                <UButton v-if="filteredItems.length > 0" variant="danger" size="sm" icon="mdi:currency-usd" @click="sellAllFiltered()">
+                <UButton v-if="filteredItems.length > 0" variant="danger" size="sm" icon="mdi:currency-usd"
+                    @click="sellAllFiltered()">
                     {{ t('vault.sell_all_filtered') }}
                 </UButton>
             </div>
@@ -208,5 +209,9 @@ function sellAllFiltered(): void {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--t-space-3);
+}
+
+.text-capitalize {
+    text-transform: capitalize;
 }
 </style>

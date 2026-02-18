@@ -8,11 +8,13 @@ import BusinessAdvisorCard from './BusinessAdvisorCard.vue'
 import BusinessBranchPanel from './BusinessBranchPanel.vue'
 import BusinessSynergyBadge from './BusinessSynergyBadge.vue'
 import BusinessMilestoneList from './BusinessMilestoneList.vue'
-import { UTooltip, UAccordion, UButton } from '@renderer/components/ui'
+import BuyAmountSelector from './BuyAmountSelector.vue'
+import { UTooltip, UAccordion, UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 import { mul } from '@renderer/core/BigNum'
 import { getGeoTier } from '@renderer/data/businesses'
+import { economySim } from '@renderer/core/EconomySim'
 
 const props = defineProps<{
     business: OwnedBusiness
@@ -30,9 +32,35 @@ const hasPending = computed(() => props.business.pendingProfit.gt(0))
 const isQualityMaxed = computed(() => props.business.quality >= 100)
 const displayName = computed(() => props.business.customName || props.business.name)
 const levelCost = computed(() => store.getLevelCost(props.business))
+const bulkLevelCost = computed(() => store.getBulkLevelCost(props.business, buyAmount.value))
+const levelCostFn = (amount: number) => store.getBulkLevelCost(props.business, amount)
 const geoTier = computed(() => getGeoTier(props.business.branches))
 const canCorp = computed(() => store.canBecomeCorporation(props.business))
 const catCount = computed(() => store.categoryCounts[props.business.category] || 1)
+const managerCost = computed(() => store.getManagerCost(props.business))
+
+// ── Bulk buy ──
+const buyAmount = ref(1)
+
+// ── Sell confirmation ──
+const showSellConfirm = ref(false)
+function confirmSell(): void {
+    store.sellBusiness(props.business.id)
+    showSellConfirm.value = false
+}
+
+// ── Effective cost display (accounts for multipliers) ──
+const effectiveWages = computed(() => {
+    const ecoState = economySim.getState()
+    return props.business.employees * props.business.baseSalary * ecoState.wageIndex
+})
+const effectiveRent = computed(() => {
+    const ecoState = economySim.getState()
+    return props.business.baseRent * (1 + props.business.branches * 0.3) * ecoState.inflationIndex
+})
+const effectiveSupplies = computed(() => {
+    return props.business.supplyCostPerUnit * props.business.unitsSold
+})
 
 // ── Rename ──
 const editing = ref(false)
@@ -86,7 +114,7 @@ function adjustMarketing(delta: number): void {
 </script>
 
 <template>
-    <div class="business-card"
+    <UCard class="business-card" size="lg"
         :class="{ profitable: isProfitable, loss: !isProfitable, 'is-corp': business.isCorporation }">
         <!-- Card Header -->
         <div class="card-header">
@@ -196,7 +224,7 @@ function adjustMarketing(delta: number): void {
             <UButton variant="primary" icon="mdi:account-tie" @click="store.hireManager(business.id)">
                 <div class="manager-btn-text">
                     <span class="manager-btn-title">{{ $t('business.hire_manager') }}</span>
-                    <span class="manager-btn-price">{{ formatCash(business.managerCost) }}</span>
+                    <span class="manager-btn-price">{{ formatCash(managerCost) }}</span>
                 </div>
                 <span class="manager-btn-hint">{{ $t('business.auto_collects') }}</span>
             </UButton>
@@ -208,14 +236,18 @@ function adjustMarketing(delta: number): void {
 
         <!-- Action buttons for NEW systems -->
         <div class="action-bar">
+            <!-- Bulk buy selector -->
+            <BuyAmountSelector v-model="buyAmount" :options="[1, 10, 100]" :cost-fn="levelCostFn" />
             <!-- Level Up -->
-            <UButton variant="primary" icon="mdi:arrow-up-bold" @click="store.levelUp(business.id)"
-                :title="$t('business.level_up')">
-                <span>{{ $t('business.level_up') }}</span>
-                <span class="action-cost">{{ formatCash(levelCost) }}</span>
+            <UButton variant="success" icon="mdi:arrow-up-bold"
+                @click="buyAmount === 1 ? store.levelUp(business.id) : store.levelUpBulk(business.id, buyAmount)"
+                class="level-up-btn" :title="$t('business.level_up')">
+                <span>{{ $t('business.level_up') }} ×{{ buyAmount }}</span>
+                <span class="action-cost"> - {{ formatCash(bulkLevelCost) }}</span>
             </UButton>
             <!-- Become Corporation -->
-            <UButton v-if="canCorp" variant="warning" icon="mdi:domain" @click="store.becomeCorporation(business.id)">
+            <UButton v-if="canCorp" variant="warning" icon="mdi:domain" @click="store.becomeCorporation(business.id)"
+                class="level-up-btn">
                 {{ $t('business.become_corp') }}
             </UButton>
         </div>
@@ -286,9 +318,9 @@ function adjustMarketing(delta: number): void {
                                     <span class="control-hint">(opt: ${{ business.optimalPrice.toFixed(0) }})</span>
                                 </div>
                                 <div class="control-actions">
-                                    <UButton variant="ghost" size="xs" @click="adjustPrice(-1)">−</UButton>
+                                    <UButton variant="secondary" size="xs" @click="adjustPrice(-1)">−</UButton>
                                     <span class="control-value">${{ business.pricePerUnit.toFixed(2) }}</span>
-                                    <UButton variant="ghost" size="xs" @click="adjustPrice(1)">+</UButton>
+                                    <UButton variant="primary" size="xs" @click="adjustPrice(1)">+</UButton>
                                 </div>
                             </div>
                             <!-- Marketing -->
@@ -299,10 +331,10 @@ function adjustMarketing(delta: number): void {
                                     <span class="control-hint">(×{{ business.marketingFactor.toFixed(2) }})</span>
                                 </div>
                                 <div class="control-actions">
-                                    <UButton variant="ghost" size="xs" :disabled="business.marketingBudget <= 0"
+                                    <UButton variant="secondary" size="xs" :disabled="business.marketingBudget <= 0"
                                         @click="adjustMarketing(-10)">−</UButton>
                                     <span class="control-value">${{ business.marketingBudget }}/t</span>
-                                    <UButton variant="ghost" size="xs" @click="adjustMarketing(10)">+</UButton>
+                                    <UButton variant="primary" size="xs" @click="adjustMarketing(10)">+</UButton>
                                 </div>
                             </div>
                             <!-- Quality -->
@@ -313,11 +345,11 @@ function adjustMarketing(delta: number): void {
                                     <span class="control-hint">(×{{ business.qualityFactor.toFixed(2) }})</span>
                                 </div>
                                 <div class="control-actions">
-                                    <span class="control-value">★ {{ business.quality.toFixed(1) }}</span>
+                                    <span class="control-value">★ {{ business.quality }}</span>
                                     <span v-if="isQualityMaxed" class="quality-max-badge">
                                         <AppIcon icon="mdi:check-decagram" /> {{ $t('common.max') }}
                                     </span>
-                                    <UButton v-else variant="ghost" size="sm"
+                                    <UButton v-else variant="success" size="sm"
                                         @click="store.upgradeQuality(business.id)">
                                         {{ formatCash(business.qualityUpgradeCost) }}
                                     </UButton>
@@ -331,17 +363,19 @@ function adjustMarketing(delta: number): void {
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.wages') }}</span>
-                                <span class="d-value">${{ (business.employees * business.baseSalary).toFixed(2)
-                                }}</span>
+                                <span class="d-value">${{ effectiveWages.toFixed(2) }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.rent') }}</span>
-                                <span class="d-value">${{ business.baseRent.toFixed(2) }}</span>
+                                <span class="d-value">${{ effectiveRent.toFixed(2) }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="d-label">{{ $t('business.supplies') }}</span>
-                                <span class="d-value">${{ (business.supplyCostPerUnit * business.unitsSold).toFixed(2)
-                                }}</span>
+                                <span class="d-value">${{ effectiveSupplies.toFixed(2) }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="d-label">{{ $t('business.marketing') }}</span>
+                                <span class="d-value">${{ business.marketingBudget.toFixed(2) }}</span>
                             </div>
                         </div>
                     </UAccordion>
@@ -378,11 +412,28 @@ function adjustMarketing(delta: number): void {
                     {{ $t('business.value_label', { value: formatCash(business.purchasePrice) }) }}
                 </span>
             </div>
-            <UButton variant="text" size="sm" icon="mdi:store-remove" @click="store.sellBusiness(business.id)">
+            <UButton variant="text" size="sm" icon="mdi:store-remove" @click="showSellConfirm = true">
                 {{ $t('common.sell') }}
             </UButton>
         </div>
-    </div>
+
+        <!-- Sell confirmation dialog -->
+        <Teleport to="body">
+            <div v-if="showSellConfirm" class="confirm-overlay" @click.self="showSellConfirm = false">
+                <div class="confirm-dialog">
+                    <p class="confirm-text">{{ $t('business.sell_confirm', { name: displayName }) }}</p>
+                    <div class="confirm-actions">
+                        <UButton variant="ghost" size="sm" @click="showSellConfirm = false">
+                            {{ $t('common.cancel') }}
+                        </UButton>
+                        <UButton variant="danger" size="sm" icon="mdi:store-remove" @click="confirmSell">
+                            {{ $t('common.sell') }}
+                        </UButton>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+    </UCard>
 </template>
 
 <style scoped>
@@ -390,15 +441,6 @@ function adjustMarketing(delta: number): void {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-3);
-    padding: var(--t-space-5);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    transition: border-color var(--t-transition-normal), box-shadow var(--t-transition-normal);
-}
-
-.business-card:hover {
-    border-color: var(--t-border-hover);
 }
 
 .business-card.is-corp {
@@ -684,8 +726,11 @@ function adjustMarketing(delta: number): void {
 }
 
 .action-cost {
-    font-family: var(--t-font-mono);
-    color: var(--t-text-muted);
+    font-family: var(--t-font-medium);
+}
+
+.level-up-btn {
+    width: 100%;
 }
 
 /* Panel tabs */
@@ -869,6 +914,40 @@ function adjustMarketing(delta: number): void {
 .valuation-label {
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
+}
+
+/* Sell confirmation */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-dialog {
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-lg);
+    padding: var(--t-space-5);
+    max-width: 360px;
+    width: 90%;
+    box-shadow: var(--t-shadow-lg);
+}
+
+.confirm-text {
+    font-size: var(--t-font-size-sm);
+    color: var(--t-text);
+    margin: 0 0 var(--t-space-4);
+    text-align: center;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--t-space-2);
 }
 
 /* Transitions */

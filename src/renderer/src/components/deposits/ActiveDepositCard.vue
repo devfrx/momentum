@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import ProgressBar from 'primevue/progressbar'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -69,14 +69,14 @@ const isEarlyWithdrawal = computed(() => {
 </script>
 
 <template>
-    <div class="item-card active-deposit-card" :class="{ matured: deposit.matured, loyalty: deposit.loyaltyActive }">
-        <div class="item-card-header">
+    <UCard class="active-deposit-card" :class="{ matured: deposit.matured, loyalty: deposit.loyaltyActive }">
+        <template #header>
             <div class="item-card-title">
                 <AppIcon :icon="def?.icon ?? 'mdi:bank'" class="item-card-icon" />
                 <h3 class="item-card-name">{{ def?.name ?? $t('deposits.unknown') }}</h3>
             </div>
             <Tag :value="$t(statusLabel)" :severity="tagSeverity" />
-        </div>
+        </template>
 
         <!-- Balance Section -->
         <div class="balance-section">
@@ -138,23 +138,17 @@ const isEarlyWithdrawal = computed(() => {
         </div>
 
         <!-- Actions -->
-        <div class="item-card-actions">
+        <template #footer>
             <UButton size="sm" :variant="isEarlyWithdrawal ? 'warning' : 'success'" icon="mdi:wallet"
                 @click="$emit('withdraw')">
                 {{ isEarlyWithdrawal ? $t('deposits.withdraw_early') :
                     $t('deposits.withdraw_all') }}
             </UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.active-deposit-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .balance-section {
     display: flex;
     flex-direction: column;
@@ -275,9 +269,5 @@ const isEarlyWithdrawal = computed(() => {
     padding: var(--t-space-2);
     background: var(--t-warning-muted);
     border-radius: var(--t-radius-sm);
-}
-
-.item-card-actions {
-    margin-top: auto;
 }
 </style>

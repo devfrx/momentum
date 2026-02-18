@@ -143,8 +143,10 @@ export class EventSystem {
 
   // ─── Tick ───────────────────────────────────────────────────────
 
-  /** Process one game tick. Call this every tick from GameEngine. */
-  tick(): void {
+  /** Process one game tick. Call this every tick from GameEngine.
+   *  @param suppressAuto  When true, skip automatic event evaluation (dev cheat).
+   */
+  tick(suppressAuto: boolean = false): void {
     this.state.totalTicks++
 
     // Decrement active event durations
@@ -165,8 +167,8 @@ export class EventSystem {
       if (def) this.onEventEnd?.(def)
     }
 
-    // Evaluate new events periodically
-    if (this.state.totalTicks % this.evalInterval === 0) {
+    // Evaluate new events periodically (skipped when suppressed)
+    if (!suppressAuto && this.state.totalTicks % this.evalInterval === 0) {
       this.evaluateNewEvents()
     }
   }
@@ -199,6 +201,22 @@ export class EventSystem {
         this.activateEvent(id)
       }
     }
+  }
+
+  /** Force-activate an event by ID (dev cheat — bypasses probability, cooldown & gating) */
+  forceActivateEvent(eventId: string): boolean {
+    const def = this.definitions.get(eventId)
+    if (!def) {
+      console.warn(`[EventSystem] forceActivateEvent: unknown id "${eventId}", ${this.definitions.size} defs registered`)
+      return false
+    }
+    this.activateEvent(eventId)
+    return true
+  }
+
+  /** Get all registered event definitions */
+  getAllDefinitions(): GameEventDef[] {
+    return Array.from(this.definitions.values())
   }
 
   /** Activate an event (start it) */

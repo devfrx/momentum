@@ -71,20 +71,6 @@ export function maxAffordable(
   return Math.max(0, Math.floor(n))
 }
 
-// ─── Income formulas ────────────────────────────────────────────────
-
-/**
- * Per-tick income for a single business (legacy compatibility).
- * income = baseIncome × level × allMultipliers
- */
-export function businessIncome(
-  baseIncome: Decimal,
-  level: number,
-  multipliers: Decimal
-): Decimal {
-  return mul(mul(baseIncome, level), multipliers)
-}
-
 // ─── Operational business formulas ──────────────────────────────────
 
 /**
@@ -121,23 +107,6 @@ export function customerDemand(
   return Math.max(0, Math.floor(
     baseCustomers * priceFactor * qualityFactor * marketingFactor * economyDemandMultiplier
   ))
-}
-
-/**
- * Revenue per tick for an operational business.
- * revenue = customersServed × pricePerUnit
- * customersServed = min(customerDemand, maxCapacity)
- * maxCapacity = employees × outputPerEmployee
- */
-export function businessRevenue(
-  customers: number,
-  employees: number,
-  outputPerEmployee: number,
-  pricePerUnit: number
-): Decimal {
-  const maxCapacity = employees * outputPerEmployee
-  const served = Math.min(customers, maxCapacity)
-  return D(served * pricePerUnit)
 }
 
 /**
@@ -589,9 +558,7 @@ export const Formulas = {
   exponentialCost,
   bulkCost,
   maxAffordable,
-  businessIncome,
   customerDemand,
-  businessRevenue,
   operatingCosts,
   businessValuation,
   loanInterestPerTick,

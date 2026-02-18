@@ -76,8 +76,7 @@ const utilColor = computed(() => {
                 <circle cx="60" cy="60" :r="gaugeArc.r" fill="none" stroke="var(--t-border)" stroke-width="5" />
                 <circle cx="60" cy="60" :r="gaugeArc.r" fill="none" :stroke="scoreColor" stroke-width="5"
                     stroke-linecap="round" :stroke-dasharray="gaugeArc.dasharray"
-                    :stroke-dashoffset="gaugeArc.dashoffset"
-                    style="transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 0.6s ease" />
+                    :stroke-dashoffset="gaugeArc.dashoffset" class="csw-ring-progress" />
             </svg>
             <div class="csw-score-inner">
                 <span class="csw-score-num" :style="{ color: scoreColor }">{{ loanStore.creditScore }}</span>
@@ -92,7 +91,7 @@ const utilColor = computed(() => {
                     <AppIcon :icon="f.icon" class="csw-factor-icon" />
                     <span class="csw-factor-name">{{ $t(f.label) }}</span>
                     <span class="csw-factor-val">{{ Math.round(f.value) }}<span class="csw-factor-max">/{{ f.max
-                            }}</span></span>
+                    }}</span></span>
                 </div>
                 <div class="csw-factor-track">
                     <div class="csw-factor-fill" :style="{ width: (f.value / f.max * 100) + '%' }" />
@@ -106,7 +105,7 @@ const utilColor = computed(() => {
                 <div class="csw-util-header">
                     <span class="csw-util-label">{{ $t('loans.debt_ratio') }}</span>
                     <span class="csw-util-pct" :style="{ color: utilColor }">{{ Math.round(loanStore.creditUtilization)
-                        }}%</span>
+                    }}%</span>
                 </div>
                 <div class="csw-util-track">
                     <div class="csw-util-fill"
@@ -212,14 +211,14 @@ const utilColor = computed(() => {
 .csw-factor-track {
     height: 3px;
     background: var(--t-bg-muted);
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
 }
 
 .csw-factor-fill {
     height: 100%;
     background: var(--t-accent);
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     transition: width 0.4s ease;
 }
 
@@ -253,13 +252,13 @@ const utilColor = computed(() => {
 .csw-util-track {
     height: 4px;
     background: var(--t-bg-muted);
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
 }
 
 .csw-util-fill {
     height: 100%;
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     transition: width 0.4s ease, background var(--t-transition-normal) ease;
 }
 
@@ -273,7 +272,7 @@ const utilColor = computed(() => {
 .csw-health-dot {
     width: 6px;
     height: 6px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     flex-shrink: 0;
 }
 
@@ -284,5 +283,11 @@ const utilColor = computed(() => {
 .csw-health-val {
     margin-left: auto;
     text-transform: capitalize;
+}
+
+.csw-ring-progress {
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 0.6s ease;
 }
 </style>

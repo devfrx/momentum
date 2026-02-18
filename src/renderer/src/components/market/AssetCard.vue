@@ -5,7 +5,7 @@
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UTooltip, UButton } from '@renderer/components/ui'
+import { UTooltip, UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import MiniChart from '@renderer/components/charts/MiniChart.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
@@ -78,16 +78,17 @@ function handleSell(amount: number) {
 </script>
 
 <template>
-    <div class="asset-card item-card" :class="{ 'has-position': !!position, 'is-pinned': pinned }">
+    <UCard class="asset-card" :class="{ 'has-position': !!position, 'is-pinned': pinned }">
         <!-- Header -->
-        <div class="item-card-header">
+        <template #header>
             <div class="item-card-title">
                 <div :class="symbolClass">{{ asset.id }}</div>
                 <h3 class="item-card-name">{{ asset.name }}</h3>
             </div>
             <div class="header-right">
-                <UButton variant="text" :active="pinned" @click="emit('pin', asset.id)"
-                    :title="pinned ? $t('market.unpin') : $t('market.pin_to_focus')" :icon="pinned ? 'mdi:pin' : 'mdi:pin-outline'">
+                <UButton variant="icon" :active="pinned" @click="emit('pin', asset.id)"
+                    :title="pinned ? $t('market.unpin') : $t('market.pin_to_focus')"
+                    :icon="pinned ? 'mdi:pin' : 'mdi:pin-outline'">
                 </UButton>
                 <div class="price-display">
                     <div class="current-price">{{ formatCash(asset.currentPrice) }}</div>
@@ -97,7 +98,7 @@ function handleSell(amount: number) {
                     </div>
                 </div>
             </div>
-        </div>
+        </template>
 
         <!-- ATH / ATL mini stats -->
         <div class="ath-atl-row">
@@ -120,14 +121,14 @@ function handleSell(amount: number) {
             :color="accentColor" :height="60" :buy-price="position?.averageBuyPrice ?? null" />
 
         <!-- Expand to full chart -->
-        <UButton variant="text" v-if="showChart && asset.priceHistory?.length > 1"
-            @click="expanded = !expanded" :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'">
+        <UButton variant="primary" v-if="showChart && asset.priceHistory?.length > 1" @click="expanded = !expanded"
+            :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'">
             {{ expanded ? $t('market.collapse_chart') : $t('market.expand_chart') }}
         </UButton>
 
         <!-- Expanded Interactive Chart -->
         <PriceChart v-if="expanded && asset.priceHistory?.length > 1" :data="asset.priceHistory" :color="accentColor"
-            :height="220" :buy-price="position?.averageBuyPrice ?? null" />
+            :height="220" :buy-price="position?.averageBuyPrice ?? null" class="chart" />
 
         <!-- Position Info -->
         <PositionInfo v-if="position && positionPnL" :position="position" :current-price="asset.currentPrice"
@@ -137,16 +138,10 @@ function handleSell(amount: number) {
         <TradePanel :asset-id="asset.id" :current-price="asset.currentPrice" :available-cash="availableCash"
             :has-position="!!position" :position-shares="position?.shares ?? 0" :type="type" @buy="handleBuy"
             @sell="handleSell" />
-    </div>
+    </UCard>
 </template>
 
 <style scoped>
-.asset-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .asset-card.has-position {
     border-color: var(--t-border-focus);
 }
@@ -157,7 +152,8 @@ function handleSell(amount: number) {
 
 .header-right {
     display: flex;
-    align-items: flex-start;
+    justify-content: center;
+    align-items: center;
     gap: var(--t-space-2);
 }
 
@@ -169,6 +165,10 @@ function handleSell(amount: number) {
     background: var(--t-bg-muted);
     color: var(--t-text);
     border-radius: var(--t-radius-sm);
+}
+
+.chart {
+    margin-bottom: var(--t-space-3);
 }
 
 .crypto-symbol {
@@ -224,5 +224,4 @@ function handleSell(amount: number) {
 .mini-stat-value.negative {
     color: var(--t-danger);
 }
-
 </style>

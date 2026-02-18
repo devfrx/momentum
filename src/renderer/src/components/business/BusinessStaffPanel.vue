@@ -32,10 +32,10 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
                 <span class="sr-hint">({{ business.employees }}/{{ maxEmployees }})</span>
             </div>
             <div class="sr-actions">
-                <UButton variant="ghost" size="xs" :disabled="business.employees <= 1"
+                <UButton variant="secondary" size="xs" :disabled="business.employees <= 1"
                     @click="store.fireEmployee(business.id)">−</UButton>
                 <span class="sr-value">{{ business.employees }}</span>
-                <UButton variant="ghost" size="xs" :disabled="business.employees >= maxEmployees"
+                <UButton variant="primary" size="xs" :disabled="business.employees >= maxEmployees"
                     @click="store.hireEmployee(business.id)">+</UButton>
             </div>
         </div>
@@ -49,8 +49,8 @@ const trainingCost = computed(() => store.getTrainingCost(props.business))
             </div>
             <div class="sr-actions">
                 <span class="sr-value">Lv.{{ business.trainingLevel }}</span>
-                <UButton variant="ghost" size="sm" @click="store.trainStaff(business.id)">
-                    {{ $t('business.train') }} — {{ formatCash(trainingCost) }}
+                <UButton variant="success" size="sm" @click="store.trainStaff(business.id)">
+                    {{ $t('business.train') }} - {{ formatCash(trainingCost) }}
                 </UButton>
             </div>
         </div>

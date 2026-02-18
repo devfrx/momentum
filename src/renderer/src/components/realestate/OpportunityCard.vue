@@ -172,7 +172,7 @@ function handleBuy(): void {
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.appreciation') }}</span>
                         <span class="d-value success">{{ formatPercent(opportunity.baseAppreciationRate * 100)
-                        }}</span>
+                            }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.maintenance') }}</span>
@@ -266,7 +266,7 @@ function handleBuy(): void {
     align-items: center;
     gap: 0.2rem;
     padding: 0.1rem 0.4rem;
-    border-radius: 4px;
+    border-radius: var(--t-radius-xs);
     background: var(--t-danger);
     color: var(--t-text-inverse);
     font-size: 0.6rem;
@@ -326,7 +326,7 @@ function handleBuy(): void {
     padding: 0.15rem 0.45rem;
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-secondary);
 }
@@ -361,7 +361,7 @@ function handleBuy(): void {
     align-items: center;
     gap: 0.2rem;
     padding: 0.15rem 0.5rem;
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
     font-weight: var(--t-font-medium);
 }
@@ -409,7 +409,7 @@ function handleBuy(): void {
     justify-content: center;
     width: 26px;
     height: 26px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     font-size: 0.75rem;
     border: 2px solid var(--t-border);
     color: var(--t-text-muted);

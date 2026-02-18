@@ -4,7 +4,7 @@
  * cost, effects, and accept action.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import type { BlackMarketDeal } from '@renderer/data/blackmarket'
@@ -51,18 +51,19 @@ function categoryIcon(category: string): string {
 </script>
 
 <template>
-    <div class="deal-card" :style="{ '--_risk-color': riskColor(deal.risk) }">
-        <!-- Head -->
-        <div class="deal-card__head">
-            <AppIcon :icon="deal.icon" class="deal-card__icon" />
-            <div class="deal-card__identity">
-                <span class="deal-card__name">{{ t(deal.nameKey) }}</span>
-                <span class="deal-card__category">
-                    <AppIcon :icon="categoryIcon(deal.category)" />
-                    {{ t(`blackmarket.cat_${deal.category}`) }}
-                </span>
+    <UCard class="deal-card" radius="md" :style="{ '--_risk-color': riskColor(deal.risk) }">
+        <template #header>
+            <div class="deal-card__head">
+                <AppIcon :icon="deal.icon" class="deal-card__icon" />
+                <div class="deal-card__identity">
+                    <span class="deal-card__name">{{ t(deal.nameKey) }}</span>
+                    <span class="deal-card__category">
+                        <AppIcon :icon="categoryIcon(deal.category)" />
+                        {{ t(`blackmarket.cat_${deal.category}`) }}
+                    </span>
+                </div>
             </div>
-        </div>
+        </template>
 
         <!-- Description -->
         <p class="deal-card__desc">{{ t(deal.descKey) }}</p>
@@ -103,31 +104,14 @@ function categoryIcon(category: string): string {
             </div>
         </div>
 
-        <!-- Action -->
-        <div class="deal-card__actions">
+        <template #footer>
             <UButton variant="primary" size="sm" icon="mdi:check" block :disabled="disabled"
                 @click="$emit('accept', deal.id)">{{ t('blackmarket.accept_deal') }}</UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.deal-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    transition: border-color var(--t-transition-normal);
-}
-
-.deal-card:hover {
-    border-color: var(--t-border-hover);
-}
-
 .deal-card__head {
     display: flex;
     align-items: center;
@@ -254,11 +238,5 @@ function categoryIcon(category: string): string {
     font-weight: var(--t-font-semibold);
     font-size: var(--t-font-size-sm);
     color: var(--t-text);
-}
-
-/* Actions */
-.deal-card__actions {
-    display: flex;
-    justify-content: flex-end;
 }
 </style>

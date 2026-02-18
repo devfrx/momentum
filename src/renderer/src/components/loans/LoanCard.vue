@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
 import { RISK_LEVEL_META, type LoanDef } from '@renderer/data/loans'
@@ -44,14 +44,14 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
 </script>
 
 <template>
-    <div class="item-card loan-card" :class="{ locked: !approved }">
-        <div class="item-card-header">
+    <UCard class="loan-card" :class="{ 'loan-card--locked': !approved }">
+        <template #header>
             <div class="item-card-title">
                 <AppIcon :icon="loan.icon" class="item-card-icon" />
                 <h3 class="item-card-name">{{ loan.name }}</h3>
             </div>
             <Tag :value="riskMeta.label" :severity="tagSeverity" />
-        </div>
+        </template>
 
         <p class="item-card-description">{{ loan.description }}</p>
 
@@ -79,7 +79,7 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
         <div v-if="loan.collateralType !== 'none'" class="loan-collateral">
             <AppIcon icon="mdi:lock" class="collateral-icon" />
             <span>{{ $t('loans.requires_collateral', { pct: loan.collateralRatio * 100, type: loan.collateralType })
-            }}</span>
+                }}</span>
         </div>
 
         <div v-if="!approved && reason" class="loan-rejection">
@@ -87,19 +87,14 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
             <span>{{ reason }}</span>
         </div>
 
-        <div class="item-card-actions">
-            <UButton variant="primary" size="sm" icon="mdi:send" :disabled="!approved || disabled" @click="$emit('apply')">{{ $t('loans.apply_loan') }}</UButton>
-        </div>
-    </div>
+        <template #footer>
+            <UButton variant="primary" size="sm" icon="mdi:send" :disabled="!approved || disabled"
+                @click="$emit('apply')">{{ $t('loans.apply_loan') }}</UButton>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.loan-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .loan-details {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -153,11 +148,8 @@ const tagSeverity = computed<'success' | 'warn' | 'danger' | 'info'>(() => {
     flex-shrink: 0;
 }
 
-.loan-card.locked {
+.loan-card--locked {
     opacity: 0.7;
-}
-
-.loan-card .item-card-actions {
-    margin-top: auto;
+    pointer-events: none;
 }
 </style>

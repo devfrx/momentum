@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -21,12 +21,12 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="upgrade-card item-card" :class="{
+    <UCard class="upgrade-card" :class="{
         'owned': purchased,
-        'locked': !unlocked,
+        'upgrade-card--locked': !unlocked,
         'available': unlocked && !purchased
     }">
-        <div class="upgrade-header">
+        <template #header>
             <div class="upgrade-icon-wrap" :class="{
                 'icon-purchased': purchased,
                 'icon-available': unlocked && !purchased,
@@ -38,7 +38,7 @@ defineEmits<{
                 <h3 class="upgrade-name">{{ name }}</h3>
                 <p class="upgrade-description">{{ description }}</p>
             </div>
-        </div>
+        </template>
 
         <div class="upgrade-effect">
             <AppIcon icon="mdi:flash" class="text-emerald" />
@@ -50,7 +50,7 @@ defineEmits<{
             <span>{{ $t('skilltree.requires', { list: prerequisites.join(', ') }) }}</span>
         </div>
 
-        <div class="upgrade-action">
+        <template #footer>
             <UButton v-if="!purchased" size="sm" block :variant="unlocked ? 'primary' : 'ghost'"
                 :disabled="!unlocked || !canAfford" :icon="unlocked ? 'mdi:cart' : 'mdi:lock'" @click="$emit('buy')">
                 {{ unlocked ? cost : $t('common.locked') }}
@@ -59,17 +59,11 @@ defineEmits<{
                 <AppIcon icon="mdi:check-circle" />
                 <span>{{ $t('skilltree.purchased') }}</span>
             </div>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.upgrade-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-2);
-}
-
 .upgrade-card.owned {
     border-color: var(--t-border-focus);
 }
@@ -79,13 +73,8 @@ defineEmits<{
     transform: translateY(-2px);
 }
 
-.upgrade-card.locked {
+.upgrade-card--locked {
     opacity: 0.5;
-}
-
-.upgrade-header {
-    display: flex;
-    gap: var(--t-space-3);
 }
 
 .upgrade-icon-wrap {
@@ -150,10 +139,6 @@ defineEmits<{
     gap: 0.5rem;
     font-size: 0.75rem;
     color: var(--t-text-muted);
-}
-
-.upgrade-action {
-    margin-top: auto;
 }
 
 .purchased-badge {

@@ -21,8 +21,8 @@ defineEmits<{ select: [] }>()
 </script>
 
 <template>
-    <UButton unstyled class="skill-node" :class="{ purchased, available, locked, selected }" :style="{ '--node-accent': accent }"
-        @click="$emit('select')">
+    <UButton unstyled class="skill-node" :class="{ purchased, available, locked, selected }"
+        :style="{ '--node-accent': accent }" @click="$emit('select')">
         <div class="node-ring">
             <div class="node-inner">
                 <AppIcon :icon="icon" class="node-icon" />
@@ -60,7 +60,7 @@ defineEmits<{ select: [] }>()
 .node-ring {
     width: 56px;
     height: 56px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     padding: 3px;
     background: var(--t-border);
     transition:
@@ -72,7 +72,7 @@ defineEmits<{ select: [] }>()
 .node-inner {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     background: var(--t-bg-card);
     display: flex;
     align-items: center;

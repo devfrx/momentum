@@ -31,8 +31,8 @@ export const ADVISOR_DEFS: AdvisorDef[] = [
     nameKey: 'business.adv_operations',
     descKey: 'business.adv_operations_desc',
     icon: 'mdi:account-tie',
-    baseCostMult: 0.5,
-    costGrowth: 2.0,
+    baseCostMult: 0.15,
+    costGrowth: 1.6,
     baseEffect: 0.05, // 5% cost reduction per level
   },
   {
@@ -40,8 +40,8 @@ export const ADVISOR_DEFS: AdvisorDef[] = [
     nameKey: 'business.adv_marketing',
     descKey: 'business.adv_marketing_desc',
     icon: 'mdi:bullhorn-variant',
-    baseCostMult: 0.4,
-    costGrowth: 2.0,
+    baseCostMult: 0.12,
+    costGrowth: 1.5,
     baseEffect: 0.10, // 10% marketing efficiency per level
   },
   {
@@ -49,8 +49,8 @@ export const ADVISOR_DEFS: AdvisorDef[] = [
     nameKey: 'business.adv_hr',
     descKey: 'business.adv_hr_desc',
     icon: 'mdi:account-group',
-    baseCostMult: 0.3,
-    costGrowth: 1.8,
+    baseCostMult: 0.08,
+    costGrowth: 1.5,
     baseEffect: 0.05, // 5% output boost + auto-training per level
   },
   {
@@ -58,8 +58,8 @@ export const ADVISOR_DEFS: AdvisorDef[] = [
     nameKey: 'business.adv_cfo',
     descKey: 'business.adv_cfo_desc',
     icon: 'mdi:chart-line',
-    baseCostMult: 0.6,
-    costGrowth: 2.2,
+    baseCostMult: 0.20,
+    costGrowth: 1.6,
     baseEffect: 0.02, // auto-optimizes pricing toward optimal
   },
 ]

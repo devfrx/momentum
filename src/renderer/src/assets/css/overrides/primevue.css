@@ -1,0 +1,265 @@
+/*
+ * PrimeVue Component Overrides
+ *
+ * Centralizes ALL third-party PrimeVue style overrides in one file.
+ * Extracted from App.vue and theme.css for maintainability.
+ *
+ * When upgrading PrimeVue, audit ONLY this file for breakage.
+ */
+
+/* ====================================
+   INPUT / TEXT FIELDS
+   ==================================== */
+.p-inputnumber,
+.p-inputtext {
+  border-radius: var(--t-radius-md) !important;
+  font-size: var(--t-font-size-sm) !important;
+  transition: border-color var(--t-transition-fast), box-shadow var(--t-transition-fast) !important;
+}
+
+.p-inputtext:hover {
+  border-color: var(--t-border-hover) !important;
+}
+
+.p-inputtext:focus {
+  box-shadow: var(--t-shadow-focus) !important;
+  border-color: transparent !important;
+}
+
+.p-inputtext:disabled {
+  opacity: var(--t-opacity-disabled) !important;
+  cursor: not-allowed !important;
+}
+
+/* ====================================
+   BUTTONS
+   ==================================== */
+.p-button {
+  border-radius: var(--t-radius-md) !important;
+  font-weight: var(--t-font-semibold) !important;
+  font-size: var(--t-font-size-sm) !important;
+  transition: all var(--t-transition-fast) !important;
+}
+
+.p-button:hover {
+  transform: translateY(-0.5px);
+}
+
+.p-button:active {
+  transform: translateY(0) !important;
+}
+
+.p-button:focus-visible {
+  outline: none !important;
+  box-shadow: var(--t-shadow-focus) !important;
+}
+
+.p-button:disabled {
+  opacity: var(--t-opacity-disabled) !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+.p-button.p-button-sm {
+  font-size: var(--t-font-size-xs) !important;
+}
+
+.p-button.p-button-loading {
+  pointer-events: none !important;
+}
+
+/* ====================================
+   DIALOG / MODAL
+   ==================================== */
+.p-dialog {
+  border-radius: var(--t-radius-xl) !important;
+  box-shadow: var(--t-shadow-lg) !important;
+  border: 1px solid var(--t-border) !important;
+}
+
+.p-dialog .p-dialog-header {
+  border-radius: var(--t-radius-xl) var(--t-radius-xl) 0 0 !important;
+}
+
+.p-dialog .p-dialog-content {
+  border-radius: 0 !important;
+}
+
+.p-dialog .p-dialog-footer {
+  border-radius: 0 0 var(--t-radius-xl) var(--t-radius-xl) !important;
+}
+
+/* ====================================
+   SELECT / DROPDOWN
+   ==================================== */
+.p-select {
+  background: var(--t-bg-input);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-md) !important;
+  color: var(--t-text);
+  font-family: var(--t-font-sans);
+  font-size: var(--t-font-size-sm) !important;
+  transition: border-color var(--t-transition-fast), box-shadow var(--t-transition-fast) !important;
+}
+
+.p-select:hover {
+  border-color: var(--t-border-hover) !important;
+}
+
+.p-select:focus,
+.p-select.p-focus {
+  box-shadow: var(--t-shadow-focus) !important;
+}
+
+.p-select.p-focus,
+.p-select:focus-within {
+  border-color: var(--t-cta);
+  box-shadow: 0 0 0 1px var(--t-cta-muted);
+}
+
+.p-select .p-select-label {
+  color: var(--t-text);
+  padding: var(--t-space-2) var(--t-space-3);
+}
+
+.p-select .p-select-dropdown {
+  color: var(--t-text-muted);
+}
+
+.p-select-overlay {
+  background: var(--t-bg-elevated);
+  border: 1px solid var(--t-border) !important;
+  border-radius: var(--t-radius-md) !important;
+  box-shadow: var(--t-shadow-lg) !important;
+}
+
+.p-select-overlay .p-select-option {
+  color: var(--t-text);
+  font-size: var(--t-font-size-sm);
+  padding: var(--t-space-2) var(--t-space-3);
+  border-radius: var(--t-radius-sm);
+  transition: background var(--t-transition-fast);
+}
+
+.p-select-overlay .p-select-option:hover,
+.p-select-overlay .p-select-option.p-focus {
+  background: var(--t-bg-muted);
+}
+
+.p-select-overlay .p-select-option.p-selected {
+  background: var(--t-cta-muted);
+  color: var(--t-cta);
+  font-weight: var(--t-font-semibold);
+}
+
+/* ====================================
+   SLIDER
+   ==================================== */
+.p-slider {
+  background: var(--t-border);
+  border-radius: var(--t-radius-full) !important;
+  height: 6px;
+  border: none;
+}
+
+.p-slider .p-slider-range {
+  background: var(--t-cta);
+  border-radius: var(--t-radius-full);
+}
+
+.p-slider .p-slider-handle {
+  width: 18px;
+  height: 18px;
+  background: var(--t-cta);
+  border: 2px solid var(--t-bg-card);
+  border-radius: var(--t-radius-full);
+  box-shadow: var(--t-shadow-sm);
+  transition: box-shadow var(--t-transition-fast), transform var(--t-transition-fast);
+  outline: none;
+}
+
+.p-slider .p-slider-handle:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--t-cta-muted);
+}
+
+.p-slider-handle:focus-visible {
+  box-shadow: var(--t-shadow-focus) !important;
+}
+
+/* ====================================
+   TOAST
+   ==================================== */
+.p-toast-message {
+  border-radius: var(--t-radius-md) !important;
+  box-shadow: var(--t-shadow-md) !important;
+  border: 1px solid var(--t-border) !important;
+}
+
+/* ====================================
+   PROGRESS BAR (PrimeVue)
+   ==================================== */
+.p-progressbar {
+  border-radius: var(--t-radius-full) !important;
+  height: 4px !important;
+}
+
+/* ====================================
+   TAG / BADGE
+   ==================================== */
+.p-tag {
+  border-radius: var(--t-radius-sm) !important;
+  font-size: var(--t-font-size-xs) !important;
+  font-weight: var(--t-font-semibold) !important;
+}
+
+.p-badge {
+  font-size: var(--t-font-size-xs) !important;
+  font-weight: var(--t-font-semibold) !important;
+}
+
+/* ====================================
+   MESSAGE
+   ==================================== */
+.p-message {
+  border-radius: var(--t-radius-md) !important;
+  font-size: var(--t-font-size-sm) !important;
+}
+
+/* ====================================
+   ACCORDION
+   ==================================== */
+.p-accordion-header-action {
+  border-radius: var(--t-radius-md) !important;
+  transition: background var(--t-transition-fast) !important;
+}
+
+.p-accordion-header-action:hover {
+  background: var(--t-bg-muted) !important;
+}
+
+/* ====================================
+   TOOLTIP
+   ==================================== */
+.p-tooltip .p-tooltip-text {
+  font-size: var(--t-font-size-xs) !important;
+  border-radius: var(--t-radius-sm) !important;
+  background: var(--t-bg-elevated) !important;
+  color: var(--t-text) !important;
+  border: 1px solid var(--t-border) !important;
+  box-shadow: var(--t-shadow-md) !important;
+  padding: var(--t-space-1) var(--t-space-2) !important;
+  max-width: 280px !important;
+  line-height: var(--t-leading-normal) !important;
+}
+
+/* ====================================
+   TOGGLE SWITCH
+   ==================================== */
+.p-toggleswitch {
+  transition: background var(--t-transition-fast) !important;
+}
+
+.p-toggleswitch:focus-visible {
+  box-shadow: var(--t-shadow-focus) !important;
+}

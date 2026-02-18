@@ -168,7 +168,7 @@ const milestoneProgress = computed(() =>
 .track-bar {
     height: 4px;
     background: var(--t-bg);
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
     margin-bottom: 0.2rem;
 }
@@ -176,7 +176,7 @@ const milestoneProgress = computed(() =>
 .track-fill {
     height: 100%;
     background: var(--t-accent);
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     transition: width var(--t-transition-normal);
 }
 

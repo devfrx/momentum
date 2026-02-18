@@ -214,7 +214,7 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
                     <div v-if="realEstate.availableOpportunities.length === 0" class="empty-state">
                         <AppIcon icon="mdi:map-search-outline" class="empty-icon" />
                         <p>{{ t('realestate.no_opportunities') }}</p>
-                        <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.scan_hint') }}
+                        <p class="text-muted text-sm">{{ t('realestate.scan_hint') }}
                         </p>
                     </div>
 
@@ -236,7 +236,7 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
                     <div v-if="realEstate.properties.length === 0" class="empty-state">
                         <AppIcon icon="mdi:home-outline" class="empty-icon" />
                         <p>{{ t('realestate.no_properties') }}</p>
-                        <p class="text-muted" style="font-size: var(--t-font-size-sm);">{{ t('realestate.buy_hint') }}
+                        <p class="text-muted text-sm">{{ t('realestate.buy_hint') }}
                         </p>
                     </div>
 
@@ -310,5 +310,9 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
 .slide-panel-leave-to {
     transform: translateX(20px);
     opacity: 0;
+}
+
+.text-sm {
+    font-size: var(--t-font-size-sm);
 }
 </style>

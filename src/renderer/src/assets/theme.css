@@ -230,6 +230,33 @@
   --t-transition-normal: 0.15s ease;
   --t-transition-slow: 0.25s ease;
 
+  /* -- Z-Index Scale -- */
+  --t-z-dropdown: 100;
+  --t-z-sticky: 200;
+  --t-z-modal: 500;
+  --t-z-popover: 600;
+  --t-z-tooltip: 700;
+  --t-z-toast: 800;
+  --t-z-max: 9999;
+
+  /* -- Icon / Element Sizes -- */
+  --t-icon-xs: 20px;
+  --t-icon-sm: 24px;
+  --t-icon-md: 32px;
+  --t-icon-lg: 40px;
+  --t-icon-xl: 48px;
+
+  /* -- Grid Column Breakpoints -- */
+  --t-grid-col-xs: 220px;
+  --t-grid-col-sm: 260px;
+  --t-grid-col-md: 320px;
+  --t-grid-col-lg: 400px;
+
+  /* -- Opacity Scale -- */
+  --t-opacity-disabled: 0.35;
+  --t-opacity-muted: 0.5;
+  --t-opacity-subtle: 0.7;
+
   /* -- Layout -- */
   --t-sidebar-width: 200px;
   --t-header-height: 48px;

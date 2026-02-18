@@ -375,12 +375,12 @@ function formatPrice(v: number): string {
         <div class="chart-toolbar">
             <div class="toolbar-row toolbar-row--top">
                 <div class="range-group">
-                    <UButton variant="ghost" size="xs" v-for="(opt, idx) in zoomOptions" :key="opt.label"
+                    <UButton variant="text" size="xs" v-for="(opt, idx) in zoomOptions" :key="opt.label"
                         :active="selectedRange === idx" @click="selectedRange = idx">
                         {{ opt.label }}
                     </UButton>
                 </div>
-                <UButton variant="text" @click="resetZoom" :title="$t('charts.reset_zoom')">
+                <UButton variant="icon" @click="resetZoom" :title="$t('charts.reset_zoom')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5">
                         <path d="M1 4v6h6M23 20v-6h-6" />
@@ -435,7 +435,8 @@ function formatPrice(v: number): string {
     flex-direction: column;
     gap: 0.25rem;
     padding: 0.4rem 0.75rem;
-    border-bottom: 1px solid var(--t-border);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md, 12px) var(--t-radius-md, 12px) 0 0;
     background: var(--t-bg-card);
 }
 
@@ -458,7 +459,7 @@ function formatPrice(v: number): string {
 .range-group {
     display: flex;
     gap: 1px;
-    background: var(--t-border);
+    background: var(--t-bg-muted);
     border-radius: var(--t-radius-lg);
     overflow: hidden;
 }

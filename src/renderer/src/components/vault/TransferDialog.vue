@@ -130,7 +130,7 @@ function getRarityClass(rarity: string): string {
                 </div>
                 <div class="item-info">
                     <span class="item-name">{{ resolveItemName(item, t) }}</span>
-                    <span class="item-meta" style="text-transform: capitalize">{{ item.rarity }} · {{
+                    <span class="item-meta">{{ item.rarity }} · {{
                         formatCash(item.appraisedValue ?? item.baseValue) }}</span>
                 </div>
             </div>
@@ -251,5 +251,6 @@ function getRarityClass(rarity: string): string {
 .item-meta {
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
+    text-transform: capitalize;
 }
 </style>

@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import ProgressBar from 'primevue/progressbar'
 import Tag from 'primevue/tag'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -67,14 +67,14 @@ const hasEarlyPenalty = computed(() => {
 </script>
 
 <template>
-    <div class="item-card active-loan-card" :class="{ defaulted: loan.isDefaulted }">
-        <div class="item-card-header">
+    <UCard class="active-loan-card" :class="{ defaulted: loan.isDefaulted }">
+        <template #header>
             <div class="item-card-title">
                 <AppIcon :icon="loanDef?.icon ?? 'mdi:cash'" class="item-card-icon" />
                 <h3 class="item-card-name">{{ loanDef?.name ?? $t('loans.loan') }}</h3>
             </div>
             <Tag :value="$t(statusLabel)" :severity="statusSeverity" />
-        </div>
+        </template>
 
         <div class="loan-balance-section">
             <div class="balance-row">
@@ -96,7 +96,7 @@ const hasEarlyPenalty = computed(() => {
                 <span class="progress-label">{{ $t('loans.term_progress') }}</span>
                 <span class="progress-time">{{ (timeRemaining ?? $t('loans.revolving')) }} {{ $t('loans.left') }}</span>
             </div>
-            <ProgressBar :value="progress" :showValue="false" style="height: 6px" />
+            <ProgressBar :value="progress" :showValue="false" class="progress-thin" />
         </div>
 
         <div class="loan-stats">
@@ -132,22 +132,18 @@ const hasEarlyPenalty = computed(() => {
             }) }}</span>
         </div>
 
-        <div class="item-card-actions">
-            <UButton variant="ghost" size="sm" icon="mdi:minus" :disabled="loan.isDefaulted" @click="$emit('repay', 100)">{{ $t('loans.pay_amount', { amount: '$100' }) }}</UButton>
-            <UButton variant="success" size="sm" icon="mdi:check" :disabled="loan.isDefaulted" @click="$emit('repayFull')">{{ $t('loans.pay_off', { amount: formatCash(payoffAmount) }) }}</UButton>
+        <template #footer>
+            <UButton variant="ghost" size="sm" icon="mdi:minus" :disabled="loan.isDefaulted"
+                @click="$emit('repay', 100)">{{ $t('loans.pay_amount', { amount: '$100' }) }}</UButton>
+            <UButton variant="success" size="sm" icon="mdi:check" :disabled="loan.isDefaulted"
+                @click="$emit('repayFull')">{{ $t('loans.pay_off', { amount: formatCash(payoffAmount) }) }}</UButton>
             <UButton v-if="loanDef?.canRefinance && !loan.isDefaulted" variant="ghost" size="sm" icon="mdi:refresh"
                 @click="$emit('refinance')">{{ $t('loans.refinance') }}</UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.active-loan-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .loan-balance-section {
     display: flex;
     flex-direction: column;
@@ -230,10 +226,7 @@ const hasEarlyPenalty = computed(() => {
     background: var(--t-warning-muted);
 }
 
-.item-card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--t-space-2);
-    margin-top: auto;
+.progress-thin {
+    height: 6px;
 }
 </style>

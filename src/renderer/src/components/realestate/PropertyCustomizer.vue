@@ -66,13 +66,13 @@ function apply(): void {
                     <div class="trait-header">
                         <Tag :severity="tr.isPositive ? 'success' : 'warn'" size="small">
                             <AppIcon :icon="tr.icon" size="0.7rem" />
-                            <span style="margin-left: 0.2rem;">{{ t(tr.nameKey) }}</span>
+                            <span class="trait-name-text">{{ t(tr.nameKey) }}</span>
                         </Tag>
                     </div>
                     <p class="trait-desc">{{ t(tr.descriptionKey) }}</p>
                     <div class="trait-mods">
                         <span v-if="tr.rentMod !== 0">Rent: {{ formatPercent(tr.rentMod * 100)
-                        }}</span>
+                            }}</span>
                         <span v-if="tr.occupancyMod !== 0">Occ: {{
                             formatPercent(tr.occupancyMod * 100) }}</span>
                         <span v-if="tr.wearMod !== 1">Wear: {{ tr.wearMod }}×</span>
@@ -116,7 +116,7 @@ function apply(): void {
 
         <!-- Apply -->
         <UButton variant="success" icon="mdi:check" class="apply-btn" @click="apply">{{ t('realestate.apply')
-            }}</UButton>
+        }}</UButton>
     </div>
 </template>
 
@@ -277,5 +277,9 @@ function apply(): void {
 .apply-btn {
     width: 100%;
     font-weight: var(--t-font-bold);
+}
+
+.trait-name-text {
+    margin-left: 0.2rem;
 }
 </style>

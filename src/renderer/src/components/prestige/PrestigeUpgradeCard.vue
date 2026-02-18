@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PrestigeEffectType } from '@renderer/data/prestige'
@@ -66,8 +66,8 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 </script>
 
 <template>
-    <div class="upgrade-card item-card" :class="{ owned: level > 0, maxed: level >= maxLevel }">
-        <div class="upgrade-header">
+    <UCard class="upgrade-card" :class="{ owned: level > 0, maxed: level >= maxLevel }">
+        <template #header>
             <div class="upgrade-icon-wrap" :class="{ owned: level > 0 }">
                 <AppIcon :icon="icon || 'mdi:diamond'" class="upgrade-icon" />
             </div>
@@ -75,7 +75,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
                 <h3 class="upgrade-name">{{ name }}</h3>
                 <p class="upgrade-description">{{ description }}</p>
             </div>
-        </div>
+        </template>
 
         <div class="upgrade-stats">
             <div v-if="level > 0" class="current-effect">
@@ -88,7 +88,7 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
             </div>
         </div>
 
-        <div class="upgrade-footer">
+        <template #footer>
             <div class="level-display">
                 <span class="level-current">{{ $t('common.level', { n: level }) }}</span>
                 <span class="level-max">/{{ maxLevel }}</span>
@@ -103,17 +103,11 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
                     {{ $t('common.max') }}
                 </div>
             </div>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.upgrade-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .upgrade-card.owned {
     border-color: var(--t-border-focus);
 }
@@ -121,11 +115,6 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
 .upgrade-card.maxed {
     border-color: var(--t-success);
     background: color-mix(in srgb, var(--t-success) 5%, transparent);
-}
-
-.upgrade-header {
-    display: flex;
-    gap: var(--t-space-3);
 }
 
 .upgrade-icon-wrap {
@@ -204,11 +193,9 @@ const nextEffect = computed(() => formatEffect(props.effectType, props.effectVal
     color: var(--t-text-secondary);
 }
 
-.upgrade-footer {
-    display: flex;
+.upgrade-card :deep(.u-card__footer) {
     justify-content: space-between;
     align-items: center;
-    margin-top: auto;
 }
 
 .level-display {

@@ -1,0 +1,62 @@
+/*
+ * Utility Classes — Text colors, backgrounds, semantic values
+ */
+
+/* ====================================
+   TEXT COLOR UTILITIES
+   ==================================== */
+.text-success { color: var(--t-success) !important; }
+.text-warning { color: var(--t-warning) !important; }
+.text-danger  { color: var(--t-danger) !important; }
+.text-info    { color: var(--t-info) !important; }
+.text-muted   { color: var(--t-text-muted) !important; }
+.text-secondary { color: var(--t-text-secondary) !important; }
+.text-purple  { color: var(--t-purple) !important; }
+.text-orange  { color: var(--t-orange) !important; }
+.text-cyan    { color: var(--t-cyan) !important; }
+.text-blue    { color: var(--t-blue) !important; }
+.text-pink    { color: var(--t-pink) !important; }
+.text-gold    { color: var(--t-gold) !important; }
+.text-accent  { color: var(--t-accent) !important; }
+.text-green   { color: var(--t-success) !important; }
+.text-red     { color: var(--t-danger) !important; }
+
+/* ====================================
+   BACKGROUND UTILITIES
+   ==================================== */
+.bg-success-muted { background: var(--t-success-muted) !important; }
+.bg-warning-muted { background: var(--t-warning-muted) !important; }
+.bg-danger-muted  { background: var(--t-danger-muted) !important; }
+.bg-info-muted    { background: var(--t-info-muted) !important; }
+.bg-purple-muted  { background: var(--t-purple-muted) !important; }
+.bg-blue-muted    { background: var(--t-blue-muted) !important; }
+
+/* ====================================
+   SEMANTIC VALUE COLORS
+   ==================================== */
+.positive { color: var(--t-success) !important; }
+.negative { color: var(--t-danger) !important; }
+
+/* ====================================
+   TRUNCATE
+   ==================================== */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ====================================
+   SR-ONLY (accessibility)
+   ==================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

@@ -272,7 +272,7 @@ watch(() => props.result, () => startReveal())
                                 :icon="jackpotTier === 'cosmic' ? 'mdi:creation' : jackpotTier === 'mega' ? 'mdi:fire' : jackpotTier === 'grand' ? 'mdi:crown' : isJackpot ? 'mdi:trophy' : 'mdi:party-popper'"
                                 class="win-trophy" :class="`trophy-${jackpotTier}`" />
                             <span class="win-tier" :class="`tier-text-${jackpotTier}`">{{ activeResult.prizeTier.label
-                                }}</span>
+                            }}</span>
                             <span class="win-rarity-tag">{{ activeResult.prizeTier.rarity.toUpperCase() }}</span>
                         </div>
                         <div class="win-details">
@@ -282,7 +282,7 @@ watch(() => props.result, () => startReveal())
                                 <template v-if="activeResult.bonusMatched"> {{ $t('gambling.lt_bonus') }}</template>
                             </span>
                             <span class="win-payout" :class="`payout-${jackpotTier}`">{{ formatCash(activeResult.payout)
-                                }}</span>
+                            }}</span>
                             <span class="win-multi">{{ $t('gambling.lt_payout_multi', {
                                 n:
                                     activeResult.prizeTier.payoutMultiplier.toLocaleString()
@@ -431,7 +431,7 @@ watch(() => props.result, () => startReveal())
     position: relative;
     width: 44px;
     height: 44px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -789,7 +789,7 @@ watch(() => props.result, () => startReveal())
     position: absolute;
     width: 6px;
     height: 6px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     top: 50%;
     left: 50%;
     background: var(--rarity-color);

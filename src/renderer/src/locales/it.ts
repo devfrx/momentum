@@ -272,6 +272,25 @@ export default {
     no_available: 'Nessuna Attività Disponibile',
     market_hint: 'Aumenta il tuo patrimonio per sbloccare nuove attività.',
     advisors_hint: 'Compra prima un\'attività per assumere consulenti.',
+    size_stand: 'Bancarella',
+    size_workshop: 'Laboratorio',
+    size_store: 'Negozio',
+    size_shop: 'Bottega',
+    size_venture: 'Attività',
+    size_business: 'Impresa',
+    size_company: 'Azienda',
+    size_firm: 'Ditta',
+    size_corporation: 'Società',
+    size_enterprise: 'Corporazione',
+    size_conglomerate: 'Conglomerato',
+    size_holding: 'Holding',
+    size_empire: 'Impero',
+    est_profit: 'Profitto stimato',
+    est_margin: 'Margine',
+    roi_tooltip: 'ROI stimato con 1 dipendente (stato iniziale)',
+    customize_title: 'Dai un Nome alla Tua Attività',
+    custom_name: 'Nome Attività',
+    custom_icon: 'Scegli Icona',
 
     // ── Livello & Scaling ──
     level: 'Livello',
@@ -280,6 +299,7 @@ export default {
     become_corp: 'Diventa Corporazione',
     corporation: 'Corporazione',
     reputation: 'Reputazione',
+    sell_confirm: 'Sei sicuro di voler vendere "{name}"? Questa azione non può essere annullata. Tutti i livelli, potenziamenti e consulenti andranno persi.',
 
     // ── Filiali ──
     branches: 'Filiali',
@@ -377,6 +397,8 @@ export default {
     adv_hr_desc: 'Aumenta la produzione e forma automaticamente il personale.',
     adv_cfo: 'Direttore Finanziario',
     adv_cfo_desc: 'Ottimizza automaticamente i prezzi verso il livello ottimale.',
+    auto_pricing: 'Prezzo automatico',
+    faster_pricing: 'Convergenza più rapida',
 
     // ── Traguardi ──
     milestones: 'Traguardi',

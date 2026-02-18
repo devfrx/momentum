@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UCard } from '@renderer/components/ui'
 
 defineProps<{
     label: string
@@ -10,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-    <div class="stat-card">
+    <UCard class="stat-card">
         <div class="stat-icon-wrap" :class="colorClass">
             <AppIcon :icon="icon" class="stat-icon" />
         </div>
@@ -18,23 +19,13 @@ defineProps<{
             <span class="stat-value">{{ value }}</span>
             <span class="stat-label">{{ label }}</span>
         </div>
-    </div>
+    </UCard>
 </template>
 
 <style scoped>
-.stat-card {
-    display: flex;
+.stat-card :deep(.u-card__body) {
+    flex-direction: row;
     align-items: center;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    transition: border-color var(--t-transition-normal);
-}
-
-.stat-card:hover {
-    border-color: var(--t-border-hover);
 }
 
 .stat-icon-wrap {

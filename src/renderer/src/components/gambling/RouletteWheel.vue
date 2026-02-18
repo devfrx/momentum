@@ -140,7 +140,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
 .wheel {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     overflow: hidden;
     box-shadow: 0 0 0 6px var(--t-border), 0 0 0 10px var(--t-bg-muted);
 }
@@ -172,7 +172,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
     transform: translateX(-50%);
     min-width: 48px;
     height: 48px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;

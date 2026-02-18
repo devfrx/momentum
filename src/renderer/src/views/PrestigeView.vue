@@ -495,14 +495,14 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
     width: 100%;
     height: 6px;
     background: var(--t-bg-muted);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
 }
 
 .ach-progress-fill {
     height: 100%;
     background: var(--t-success);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     transition: width 0.5s ease;
 }
 

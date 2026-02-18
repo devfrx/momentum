@@ -125,8 +125,10 @@ const tierColors: Record<string, string> = {
                 <AppIcon icon="mdi:radar" /> {{ t('realestate.scan.title') }}
             </h4>
             <p class="dp-hint">{{ t('realestate.scan.desc') }}</p>
-            <UButton v-if="!isCooldown" variant="info" size="sm" icon="mdi:magnify" class="dp-scan-btn" :disabled="!canAffordScan"
-                @click="handleScan">{{ t('realestate.scan.action', { cost: scanCostFormatted }) }}</UButton>
+            <UButton v-if="!isCooldown" variant="info" size="sm" icon="mdi:magnify" class="dp-scan-btn"
+                :disabled="!canAffordScan" @click="handleScan">{{ t('realestate.scan.action', {
+                    cost: scanCostFormatted
+                }) }}</UButton>
             <div v-else class="dp-cooldown">
                 <AppIcon icon="mdi:timer-sand" />
                 <span>{{ t('realestate.scan.cooldown', { time: scanCooldownFormatted }) }}</span>
@@ -285,7 +287,7 @@ const tierColors: Record<string, string> = {
     font-size: var(--t-font-size-sm);
     padding: var(--t-space-1) var(--t-space-2);
     background: var(--t-success-muted);
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
 }
 
 .dp-synergy-bonus {
@@ -331,7 +333,7 @@ const tierColors: Record<string, string> = {
     align-items: center;
     gap: var(--t-space-2);
     padding: var(--t-space-2);
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
     cursor: pointer;
     font-size: var(--t-font-size-sm);
     color: var(--t-text-secondary);

@@ -284,14 +284,14 @@ function buySelected(): void {
 .st-cat-progress-bar {
     flex: 1;
     height: 4px;
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     background: var(--t-bg-muted);
     overflow: hidden;
 }
 
 .st-cat-progress-fill {
     height: 100%;
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     background: var(--_cat-accent, var(--t-accent));
     transition: width var(--t-transition-normal);
 }

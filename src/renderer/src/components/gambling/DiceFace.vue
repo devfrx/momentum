@@ -151,7 +151,7 @@ onBeforeUnmount(() => { currentAnim?.cancel(); currentAnim = null })
 .pip {
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     background: radial-gradient(circle at 35% 35%, var(--t-text-inverse), var(--t-text-inverse));
     box-shadow: 0 1px 3px var(--t-overlay-light);
 }

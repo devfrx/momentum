@@ -144,7 +144,8 @@ function confirmPlay(): void {
         </template>
 
         <!-- Confirm button -->
-        <UButton variant="primary" :disabled="!isComplete || disabled" @click="confirmPlay" icon="mdi:ticket-confirmation">
+        <UButton variant="primary" :disabled="!isComplete || disabled" @click="confirmPlay"
+            icon="mdi:ticket-confirmation">
             {{ $t('gambling.lt_buy_draw', { cost: ticket.ticketCost }) }}
         </UButton>
     </div>
@@ -272,7 +273,7 @@ function confirmPlay(): void {
 .number-ball {
     width: 38px;
     height: 38px;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -343,6 +344,4 @@ function confirmPlay(): void {
     color: var(--t-text);
     box-shadow: 0 0 10px color-mix(in srgb, var(--t-warning) 40%, transparent);
 }
-
-
 </style>

@@ -128,7 +128,7 @@ function leave(): void {
                             <div class="bidder-info">
                                 <span class="bidder-name">{{ bidder.name }}</span>
                                 <span class="bidder-status" v-if="bidder.droppedOut">{{ t('storage.dropped_out')
-                                }}</span>
+                                    }}</span>
                                 <span class="bidder-status bidder-status--leading"
                                     v-else-if="auction.currentBidder === bidder.id">{{ t('storage.leading') }}</span>
                             </div>
@@ -169,7 +169,7 @@ function leave(): void {
                         @click="placeBid">{{ t('storage.place_bid') }}</UButton>
 
                     <UButton variant="text" size="sm" class="leave-button" @click="leave">{{ t('storage.leave_auction')
-                        }}</UButton>
+                    }}</UButton>
                 </div>
 
                 <!-- Auction Result -->
@@ -204,7 +204,7 @@ function leave(): void {
                     <AppIcon :icon="item.icon" class="found-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
                     <span class="found-item__name">{{ resolveItemName(item, t) }}</span>
                     <span class="found-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity
-                    }}</span>
+                        }}</span>
                 </div>
             </div>
             <UButton variant="primary" icon="mdi:check" @click="$emit('back')">{{ t('storage.collect_items') }}
@@ -261,7 +261,7 @@ function leave(): void {
 .timer-bar {
     height: 4px;
     background: var(--t-bg-muted);
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
 }
 
@@ -269,7 +269,7 @@ function leave(): void {
     height: 100%;
     background: var(--t-warning);
     transition: width var(--t-transition-normal) linear;
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
 }
 
 .timer-bar__fill--going {

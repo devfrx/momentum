@@ -202,7 +202,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                 <div v-if="showResult" class="result-badge" :class="won ? 'badge-win' : 'badge-lose'">
                     <AppIcon :icon="won ? 'mdi:trophy' : 'mdi:emoticon-sad'" class="badge-icon" />
                     <span class="badge-side">{{ result === 'heads' ? $t('gambling.cf_heads') : $t('gambling.cf_tails')
-                        }}</span>
+                    }}</span>
                     <span v-if="won" class="badge-payout">{{ formatCash(payout) }}</span>
                     <span v-else class="badge-text">{{ $t('gambling.cf_you_lose') }}</span>
                 </div>
@@ -248,7 +248,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="flipping">{{ $t('gambling.max')
-                        }}</UButton>
+                    }}</UButton>
                 </div>
             </div>
 
@@ -393,7 +393,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 .coin-face {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
     display: flex;
     flex-direction: column;
     align-items: center;

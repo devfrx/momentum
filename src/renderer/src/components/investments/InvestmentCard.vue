@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue'
 import Tag from 'primevue/tag'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 
 const props = defineProps<{
@@ -42,23 +42,28 @@ const remainingTime = computed(() => {
     const remainingSeconds = remaining / 10 // 10 ticks per second
     return formatTime(remainingSeconds)
 })
+
+const investmentBorderStatus = computed(() => {
+    if (props.status === 'succeeded') return 'success'
+    if (props.status === 'failed') return 'danger'
+    return 'none'
+})
 </script>
 
 <template>
-    <div class="item-card" :class="{
-        'border-success': status === 'succeeded',
-        'border-danger': status === 'failed',
+    <UCard :borderStatus="investmentBorderStatus" :class="{
         'border-exited': status === 'exited'
     }">
-        <div class="item-card-header">
+        <template #header>
             <h3 class="item-card-name">{{ name }}</h3>
             <Tag :value="status" :severity="statusSeverity" />
-        </div>
+        </template>
 
         <div class="item-card-stats">
             <span>{{ $t('investments.invested') }} <strong class="text-gold">{{ investedAmount }}</strong></span>
             <span v-if="status === 'active' && successChance">{{ $t('investments.success') }} <strong
-                    class="text-sky">{{ successChance
+                    class="text-sky">{{
+                        successChance
                     }}</strong></span>
             <span v-if="returnMultiplier">{{ $t('investments.return_label') }} <strong class="text-emerald">{{
                 returnMultiplier
@@ -81,7 +86,7 @@ const remainingTime = computed(() => {
         <div v-if="status === 'succeeded'" class="result-section success-result">
             <p class="result-text">{{ $t('investments.succeeded') }}</p>
             <p v-if="returnAmount" class="result-amount">{{ $t('investments.returns') }} <strong>{{ returnAmount
-                    }}</strong></p>
+            }}</strong></p>
             <UButton variant="success" size="sm" icon="mdi:wallet" class="collect-btn" @click="$emit('collect')">
                 {{ $t('investments.collect_returns') }}
             </UButton>
@@ -96,7 +101,7 @@ const remainingTime = computed(() => {
         <div v-if="status === 'exited'" class="result-section exited-result">
             <span class="text-emerald">{{ $t('investments.exited', { multiplier: returnMultiplier }) }}</span>
         </div>
-    </div>
+    </UCard>
 </template>
 
 <style scoped>

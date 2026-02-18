@@ -4,6 +4,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { EventSystem, type GameEventDef, type ActiveEvent, type EventEffectType } from '@renderer/core/EventSystem'
+import { EVENTS } from '@renderer/data/events'
 
 export const useEventStore = defineStore('events', () => {
   const eventSystem = new EventSystem(100) // evaluate every 100 ticks (10s)
@@ -14,6 +15,9 @@ export const useEventStore = defineStore('events', () => {
 
   const hasActiveEvents = computed(() => activeEvents.value.length > 0)
   const hasPendingChoices = computed(() => pendingChoices.value.length > 0)
+
+  /** Dev cheat: suppress automatic event evaluation */
+  const suppressAutoEvents = ref(false)
 
   function initEvents(definitions: GameEventDef[]): void {
     eventSystem.registerEvents(definitions)
@@ -34,7 +38,7 @@ export const useEventStore = defineStore('events', () => {
   }
 
   function tick(): void {
-    eventSystem.tick()
+    eventSystem.tick(suppressAutoEvents.value)
     syncState()
   }
 
@@ -55,6 +59,23 @@ export const useEventStore = defineStore('events', () => {
 
   function getMultiplier(effectType: EventEffectType, target?: string): number {
     return eventSystem.getMultiplier(effectType, target)
+  }
+
+  /** Force-activate an event by ID (dev cheat) */
+  function forceActivateEvent(eventId: string): boolean {
+    // Ensure definitions are registered (defensive fallback)
+    if (eventSystem.getAllDefinitions().length === 0) {
+      console.warn('[EventStore] Definitions not loaded, re-registering EVENTS')
+      eventSystem.registerEvents(EVENTS)
+    }
+    const ok = eventSystem.forceActivateEvent(eventId)
+    syncState()
+    return ok
+  }
+
+  /** Get all registered event definitions */
+  function getAllDefinitions(): GameEventDef[] {
+    return eventSystem.getAllDefinitions()
   }
 
   function popRecentEvent(): GameEventDef | null {
@@ -90,8 +111,9 @@ export const useEventStore = defineStore('events', () => {
 
   return {
     activeEvents, pendingChoices, recentEvents,
-    hasActiveEvents, hasPendingChoices,
+    hasActiveEvents, hasPendingChoices, suppressAutoEvents,
     initEvents, tick, acceptChoice, declineChoice,
-    getMultiplier, popRecentEvent, getSystem, loadFromSave, prestigeReset
+    getMultiplier, popRecentEvent, getSystem, loadFromSave, prestigeReset,
+    forceActivateEvent, getAllDefinitions
   }
 })

@@ -1,4 +1,5 @@
 export { default as UButton } from './UButton.vue'
+export { default as UCard } from './UCard.vue'
 export { default as UModal } from './UModal.vue'
 export { default as UAccordion } from './UAccordion.vue'
 export { default as UPopover } from './UPopover.vue'

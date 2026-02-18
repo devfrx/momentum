@@ -6,7 +6,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getDistrict, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UAccordion, UButton } from '@renderer/components/ui'
+import { UAccordion, UButton, UCard } from '@renderer/components/ui'
 import { THEME } from '@renderer/assets/theme/colors'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -77,7 +77,7 @@ function handleRentSlider(val: number | number[]): void {
 </script>
 
 <template>
-    <div class="prop-card" :style="{ '--_accent': district?.color ?? 'var(--t-accent)' }">
+    <UCard class="prop-card" :accent="district?.color ?? 'var(--t-accent)'">
         <!-- ── Header ── -->
         <div class="prop-card__head">
             <AppIcon :icon="property.icon" class="prop-card__icon" />
@@ -264,7 +264,7 @@ function handleRentSlider(val: number | number[]): void {
             <!-- Rent Slider -->
             <div class="detail-section">
                 <div class="prop-card__slider-head">
-                    <h4 class="detail-title" style="margin:0">
+                    <h4 class="detail-title">
                         <AppIcon icon="mdi:cash-multiple" /> {{ t('realestate.rent_multiplier') }}
                     </h4>
                     <span class="prop-card__rent-val">{{ property.rentMultiplier.toFixed(2) }}&#215;</span>
@@ -293,7 +293,7 @@ function handleRentSlider(val: number | number[]): void {
                     }}</UButton>
             </div>
         </UAccordion>
-    </div>
+    </UCard>
 </template>
 
 <style scoped>
@@ -301,15 +301,6 @@ function handleRentSlider(val: number | number[]): void {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-3);
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    transition: border-color var(--t-transition-normal);
-}
-
-.prop-card:hover {
-    border-color: var(--t-border-hover);
 }
 
 /* ── Head ── */
@@ -407,7 +398,7 @@ function handleRentSlider(val: number | number[]): void {
     padding: 0.15rem 0.45rem;
     background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-secondary);
 }
@@ -450,13 +441,13 @@ function handleRentSlider(val: number | number[]): void {
     flex: 1;
     height: 6px;
     background: var(--t-bg-muted);
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: var(--t-radius-xs);
     transition: width 0.5s ease;
 }
 
@@ -480,7 +471,7 @@ function handleRentSlider(val: number | number[]): void {
     align-items: center;
     gap: 0.2rem;
     padding: 0.15rem 0.5rem;
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
     font-weight: var(--t-font-medium);
 }
@@ -682,7 +673,7 @@ function handleRentSlider(val: number | number[]): void {
     gap: 0.2rem;
     padding: 0.15rem 0.5rem;
     background: var(--t-bg-muted);
-    border-radius: 6px;
+    border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-secondary);
 }

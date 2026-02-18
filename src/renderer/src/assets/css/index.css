@@ -1,0 +1,24 @@
+/*
+ * Business Tycoon — Design System v3 (Modular)
+ *
+ * Import order matters:
+ *   1. Tokens (variables) — must load first
+ *   2. Primitives (component styles)
+ *   3. Utilities (helper classes)
+ *   4. Overrides (third-party patches)
+ */
+
+/* Tokens */
+@import './tokens/colors.css';
+@import './tokens/spacing.css';
+
+/* Primitives */
+@import './primitives/layout.css';
+@import './primitives/cards.css';
+@import './primitives/buttons.css';
+
+/* Utilities */
+@import './utilities/helpers.css';
+
+/* Third-party overrides */
+@import './overrides/primevue.css';

@@ -1,0 +1,270 @@
+/*
+ * Primitives — Button System & CTA Hierarchy
+ */
+
+/* Base button reset */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--t-space-2);
+  padding: var(--t-space-2) var(--t-space-4);
+  font-size: var(--t-font-size-sm);
+  font-weight: var(--t-font-semibold);
+  font-family: var(--t-font-sans);
+  border-radius: var(--t-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--t-transition-fast);
+  white-space: nowrap;
+  user-select: none;
+  line-height: var(--t-leading-normal);
+  position: relative;
+}
+
+/* -- Interaction states -- */
+.btn:hover {
+  transform: translateY(-0.5px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: var(--t-opacity-disabled);
+  pointer-events: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--t-shadow-focus);
+}
+
+/* -- Sizes -- */
+.btn-xs {
+  padding: 0.15rem var(--t-space-2);
+  font-size: var(--t-font-size-2xs);
+  border-radius: var(--t-radius-sm);
+}
+
+.btn-sm {
+  padding: var(--t-space-1) var(--t-space-3);
+  font-size: var(--t-font-size-xs);
+}
+
+.btn-lg {
+  padding: var(--t-space-3) var(--t-space-6);
+  font-size: var(--t-font-size-base);
+}
+
+/* -- Primary CTA (solid) -- */
+.btn-primary {
+  background: var(--t-cta);
+  color: var(--t-cta-text);
+  border-color: var(--t-cta);
+}
+.btn-primary:hover {
+  background: var(--t-cta-hover);
+  border-color: var(--t-cta-hover);
+}
+.btn-primary:active {
+  background: var(--t-cta-active);
+  border-color: var(--t-cta-active);
+}
+
+/* -- Secondary CTA (outlined) -- */
+.btn-secondary {
+  background: var(--t-cta-secondary-bg);
+  color: var(--t-cta-secondary-text);
+  border-color: var(--t-cta-secondary-border);
+}
+.btn-secondary:hover {
+  background: var(--t-cta-secondary-hover-bg);
+  border-color: var(--t-cta);
+}
+
+/* -- Tertiary CTA (text only) -- */
+.btn-tertiary {
+  background: transparent;
+  color: var(--t-cta-tertiary-text);
+  border-color: transparent;
+  padding: var(--t-space-1) var(--t-space-2);
+}
+.btn-tertiary:hover {
+  background: var(--t-cta-tertiary-hover-bg);
+}
+
+/* -- Status variants -- */
+.btn-success {
+  background: var(--t-success);
+  color: var(--t-text-inverse);
+  border-color: var(--t-success);
+}
+.btn-success:hover {
+  background: var(--t-success-hover);
+  border-color: var(--t-success-hover);
+}
+
+.btn-danger {
+  background: var(--t-danger);
+  color: var(--t-text-inverse);
+  border-color: var(--t-danger);
+}
+.btn-danger:hover {
+  background: var(--t-danger-hover);
+  border-color: var(--t-danger-hover);
+}
+
+.btn-warning {
+  background: var(--t-warning);
+  color: var(--t-text-inverse);
+  border-color: var(--t-warning);
+}
+.btn-warning:hover {
+  background: var(--t-warning-hover);
+  border-color: var(--t-warning-hover);
+}
+
+.btn-info {
+  background: var(--t-info);
+  color: var(--t-text-inverse);
+  border-color: var(--t-info);
+}
+.btn-info:hover {
+  background: var(--t-info-hover);
+  border-color: var(--t-info-hover);
+}
+
+/* -- Ghost (outlined neutral) -- */
+.btn-ghost {
+  background: transparent;
+  color: var(--t-text);
+  border-color: var(--t-border);
+}
+.btn-ghost:hover {
+  background: var(--t-bg-muted);
+  border-color: var(--t-border-hover);
+}
+
+/* -- Muted -- */
+.btn-muted {
+  background: var(--t-bg-muted);
+  color: var(--t-text-secondary);
+  border-color: transparent;
+}
+.btn-muted:hover {
+  background: var(--t-border);
+  color: var(--t-text);
+}
+
+/* -- Contrast -- */
+.btn-contrast {
+  background: var(--t-text);
+  color: var(--t-bg-base);
+  border-color: var(--t-text);
+}
+.btn-contrast:hover {
+  opacity: 0.85;
+}
+
+/* -- Text (minimal) -- */
+.btn-text {
+  background: transparent;
+  color: var(--t-text-secondary);
+  border-color: transparent;
+  padding: var(--t-space-1) var(--t-space-2);
+}
+.btn-text:hover {
+  color: var(--t-text);
+  background: var(--t-bg-muted);
+}
+
+/* -- Icon-only -- */
+.btn-icon {
+  background: transparent;
+  color: var(--t-text-secondary);
+  border-color: transparent;
+  padding: var(--t-space-1);
+  border-radius: var(--t-radius-sm);
+  line-height: 1;
+}
+.btn-icon:hover {
+  color: var(--t-text);
+  background: var(--t-bg-muted);
+}
+
+/* -- Full width -- */
+.btn-block {
+  width: 100%;
+}
+
+/* -- Loading state -- */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.5s linear infinite;
+  inset: 0;
+  margin: auto;
+  color: var(--t-text-secondary);
+}
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ====================================
+   TAB BUTTON (used by UButton variant="tab")
+   ==================================== */
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-1);
+  padding: var(--t-space-3) var(--t-space-4);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--t-text-muted);
+  font-size: var(--t-font-size-sm);
+  font-weight: var(--t-font-medium);
+  font-family: var(--t-font-sans);
+  cursor: pointer;
+  transition: color var(--t-transition-fast),
+              background var(--t-transition-fast),
+              border-color var(--t-transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tab-btn:hover {
+  color: var(--t-text);
+  background: var(--t-bg-muted);
+}
+
+.tab-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--t-shadow-focus);
+}
+
+.tab-btn.active {
+  color: var(--t-text);
+  border-bottom-color: var(--t-text);
+  font-weight: var(--t-font-semibold);
+}
+
+.tab-btn:disabled {
+  opacity: var(--t-opacity-disabled);
+  pointer-events: none;
+}

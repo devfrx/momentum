@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
+import { UCard } from '@renderer/components/ui'
 import { useI18n } from 'vue-i18n'
 import type { MilestoneReward } from '@renderer/data/prestige'
 
@@ -42,7 +43,7 @@ function formatReward(reward: MilestoneReward): string {
 </script>
 
 <template>
-    <div class="milestone-card" :class="{ unlocked }">
+    <UCard class="milestone-card" :class="{ unlocked }" size="sm" radius="lg">
         <div class="milestone-icon-wrap" :class="{ unlocked }">
             <AppIcon :icon="icon" class="milestone-icon" />
             <AppIcon v-if="unlocked" icon="mdi:check-circle" class="check-icon" />
@@ -56,18 +57,13 @@ function formatReward(reward: MilestoneReward): string {
                 </span>
             </div>
         </div>
-    </div>
+    </UCard>
 </template>
 
 <style scoped>
-.milestone-card {
-    display: flex;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    transition: all var(--t-transition-fast) ease;
+.milestone-card :deep(.u-card__body) {
+    flex-direction: row;
+    align-items: flex-start;
 }
 
 .milestone-card.unlocked {
@@ -108,7 +104,7 @@ function formatReward(reward: MilestoneReward): string {
     font-size: 1rem;
     color: var(--t-success);
     background: var(--t-bg-card);
-    border-radius: 50%;
+    border-radius: var(--t-radius-full);
 }
 
 .milestone-content {

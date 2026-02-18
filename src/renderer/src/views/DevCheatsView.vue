@@ -26,6 +26,7 @@ import Tag from 'primevue/tag'
 import { LOTTERY_TICKETS } from '@renderer/data/lottery'
 import { DIVINE_ABILITIES } from '@renderer/data/lottery'
 import { REPUTATION_TIERS, MAX_HEAT } from '@renderer/data/blackmarket'
+import { EVENTS } from '@renderer/data/events'
 
 const player = usePlayerStore()
 const business = useBusinessStore()
@@ -101,14 +102,38 @@ function givePrestigePoints() {
 
 // ─── Businesses ────────────────────────
 
+/** All businesses sorted by price, shown as tiers */
+const sortedBusinessDefs = computed(() =>
+    [...BUSINESS_DEFS].sort((a, b) => a.purchasePrice.cmp(b.purchasePrice))
+)
+
+const SIZE_KEYS = [
+    'business.size_stand', 'business.size_workshop', 'business.size_store', 'business.size_shop',
+    'business.size_venture', 'business.size_business', 'business.size_company', 'business.size_firm',
+    'business.size_corporation', 'business.size_enterprise', 'business.size_conglomerate',
+    'business.size_holding', 'business.size_empire',
+]
+
+const selectedBusinessId = ref(BUSINESS_DEFS[0].id)
+
+function buySelectedBusiness() {
+    const def = BUSINESS_DEFS.find(d => d.id === selectedBusinessId.value)
+    if (!def) { addLog('Business def not found'); return }
+    if (player.cash.lt(def.purchasePrice)) player.earnCash(def.purchasePrice)
+    const tierIdx = sortedBusinessDefs.value.findIndex(d => d.id === def.id)
+    const label = t(SIZE_KEYS[tierIdx] ?? 'business.size_stand')
+    if (business.buyBusiness(def.id)) {
+        addLog(`Bought ${label} (${formatCash(def.purchasePrice)})`)
+    } else {
+        addLog(`Failed to buy ${label}`)
+    }
+}
+
 function buyAllBusinesses() {
     let count = 0
     for (const def of BUSINESS_DEFS) {
-        // Force-give cash to afford it, then buy
         const cost = def.purchasePrice
-        if (player.cash.lt(cost)) {
-            player.earnCash(cost)
-        }
+        if (player.cash.lt(cost)) player.earnCash(cost)
         if (business.buyBusiness(def.id)) count++
     }
     addLog(`Bought ${count} new businesses (${BUSINESS_DEFS.length} total defs)`)
@@ -276,6 +301,28 @@ function resetAllSkills() {
 }
 
 // ─── Events ────────────────────────────
+
+const eventSearchQuery = ref('')
+const filteredEventDefs = computed(() => {
+    const q = eventSearchQuery.value.toLowerCase()
+    if (!q) return EVENTS
+    return EVENTS.filter(e => e.id.includes(q) || e.name.toLowerCase().includes(q) || e.category.includes(q))
+})
+
+function toggleEventSuppression() {
+    events.suppressAutoEvents = !events.suppressAutoEvents
+    addLog(events.suppressAutoEvents ? 'Auto-events DISABLED' : 'Auto-events ENABLED')
+}
+
+function forceActivateEvent(eventId: string) {
+    const ok = events.forceActivateEvent(eventId)
+    const def = EVENTS.find(e => e.id === eventId)
+    if (ok) {
+        addLog(`✓ Activated: ${def?.name ?? eventId}`)
+    } else {
+        addLog(`✗ Failed to activate: ${def?.name ?? eventId}`)
+    }
+}
 
 function triggerRandomEvent() {
     // Force multiple ticks to increase chance of event firing
@@ -634,12 +681,24 @@ const multiplierInfo = computed(() => {
             </section>
 
             <!-- Business Section -->
-            <section class="cheat-section">
+            <section class="cheat-section cheat-section-wide">
                 <h2 class="section-header">
                     <AppIcon icon="mdi:domain" class="section-icon" /> {{ t('dev.section_business') }}
                 </h2>
+                <div class="cheat-row">
+                    <div class="input-group">
+                        <select v-model="selectedBusinessId" class="cheat-input">
+                            <option v-for="(def, idx) in sortedBusinessDefs" :key="def.id" :value="def.id">
+                                {{ t(SIZE_KEYS[idx] ?? 'business.size_stand') }} — {{ formatCash(def.purchasePrice) }}
+                            </option>
+                        </select>
+                        <UButton variant="warning" size="sm" icon="mdi:cart" @click="buySelectedBusiness">
+                            Buy
+                        </UButton>
+                    </div>
+                </div>
                 <div class="cheat-buttons">
-                    <UButton variant="warning" size="sm" icon="mdi:cart" @click="buyAllBusinesses">
+                    <UButton variant="warning" size="sm" icon="mdi:cart-plus" @click="buyAllBusinesses">
                         {{ t('dev.buy_all') }}
                     </UButton>
                 </div>
@@ -694,9 +753,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                                }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                         }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                                }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -714,7 +773,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                        }}%</span>
+                            }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -737,9 +796,9 @@ const multiplierInfo = computed(() => {
                     <UButton variant="ghost" size="sm" @click="tickMarket100">{{ t('dev.tick_markets') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="clearAllLoans">{{ t('dev.clear_loans') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="fastForward(100)">{{ t('dev.plus_100_ticks')
-                        }}</UButton>
+                    }}</UButton>
                     <UButton variant="warning" size="sm" @click="fastForward(1000)">{{ t('dev.plus_1000_ticks')
-                        }}</UButton>
+                    }}</UButton>
                     <UButton variant="danger" size="sm" @click="fastForward(10000)">+10K ticks</UButton>
                 </div>
             </section>
@@ -787,16 +846,44 @@ const multiplierInfo = computed(() => {
             </section>
 
             <!-- Events Section -->
-            <section class="cheat-section">
+            <section class="cheat-section cheat-section-wide">
                 <h2 class="section-header">
                     <AppIcon icon="mdi:lightning-bolt" class="section-icon text-gold" /> Events
                 </h2>
                 <div class="cheat-buttons">
+                    <UButton :variant="events.suppressAutoEvents ? 'danger' : 'success'" size="sm"
+                        @click="toggleEventSuppression">
+                        {{ events.suppressAutoEvents ? '🔴 Auto OFF' : '🟢 Auto ON' }}
+                    </UButton>
                     <UButton variant="warning" size="sm" @click="triggerRandomEvent">Trigger Random</UButton>
                     <UButton variant="ghost" size="sm" @click="clearAllEvents">Clear Events</UButton>
                 </div>
                 <div class="debug-row">
                     <span>Active: <strong>{{ events.activeEvents?.length ?? 0 }}</strong></span>
+                    <span>Auto: <strong :class="events.suppressAutoEvents ? 'text-red' : 'text-emerald'">{{
+                        events.suppressAutoEvents ? 'DISABLED' : 'ENABLED' }}</strong></span>
+                </div>
+
+                <!-- Manual Event List -->
+                <div style="margin-top: 0.75rem">
+                    <input v-model="eventSearchQuery" type="text" class="cheat-input" placeholder="Search events..."
+                        style="width: 100%; margin-bottom: 0.5rem" />
+                    <div class="event-catalog">
+                        <div v-for="ev in filteredEventDefs" :key="ev.id" class="event-catalog-item"
+                            :class="{ 'event-active': events.activeEvents.some(a => a.eventId === ev.id) }"
+                            @click="forceActivateEvent(ev.id)">
+                            <AppIcon :icon="ev.icon" class="event-catalog-icon" />
+                            <div class="event-catalog-info">
+                                <span class="event-catalog-name">{{ ev.name }}</span>
+                                <span class="event-catalog-meta">
+                                    <Tag :value="ev.category"
+                                        :severity="ev.effects[0]?.value >= 1 ? 'success' : 'danger'"
+                                        style="font-size: 0.65rem" />
+                                    {{ (ev.durationTicks / 10).toFixed(0) }}s
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -843,7 +930,7 @@ const multiplierInfo = computed(() => {
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                            }}</span>
+                        }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
                 </div>
@@ -884,10 +971,10 @@ const multiplierInfo = computed(() => {
                     <UButton variant="ghost" size="sm" @click="bmClearInvestigations">{{
                         t('dev.bm_clear_investigations') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="bmClearEffects">{{ t('dev.bm_clear_effects')
-                        }}</UButton>
+                    }}</UButton>
                     <UButton variant="warning" size="sm" @click="bmMaxLoyalty">{{ t('dev.bm_max_loyalty') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="bmResetContacts">{{ t('dev.bm_reset_contacts')
-                        }}</UButton>
+                    }}</UButton>
                     <UButton variant="danger" size="sm" icon="mdi:delete" @click="bmFullReset">
                         {{ t('dev.bm_full_reset') }}
                     </UButton>
@@ -904,7 +991,7 @@ const multiplierInfo = computed(() => {
                             :class="blackmarket.activeInvestigations.length > 0 ? 'text-red' : ''">{{
                                 blackmarket.activeInvestigations.length }}</strong></span>
                     <span>{{ t('dev.bm_contacts_label') }} <strong>{{ blackmarket.unlockedContacts.length
-                            }}</strong></span>
+                    }}</strong></span>
                 </div>
             </section>
 
@@ -1179,7 +1266,7 @@ const multiplierInfo = computed(() => {
 
 .debug-trait {
     padding: 0 4px;
-    border-radius: 2px;
+    border-radius: var(--t-radius-xs);
     background: color-mix(in srgb, var(--t-text) 5%, transparent);
 }
 
@@ -1190,6 +1277,66 @@ const multiplierInfo = computed(() => {
 
 .text-pink {
     color: var(--t-pink);
+}
+
+/* ── Event catalog ── */
+.event-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--t-space-2);
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: var(--t-space-1);
+}
+
+.event-catalog-item {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-bg-secondary);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.event-catalog-item:hover {
+    border-color: var(--t-primary);
+    background: color-mix(in srgb, var(--t-primary) 8%, var(--t-bg-secondary));
+}
+
+.event-catalog-item.event-active {
+    border-color: var(--t-success);
+    background: color-mix(in srgb, var(--t-success) 10%, var(--t-bg-secondary));
+}
+
+.event-catalog-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.event-catalog-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.event-catalog-name {
+    font-size: var(--t-font-size-sm);
+    font-weight: var(--t-font-semibold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-catalog-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
 }
 
 /* Multiplier Grid */

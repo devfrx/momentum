@@ -54,7 +54,8 @@ const advisorItems = computed(() =>
                     </div>
                     <div class="stat-row" v-if="adv.hired">
                         <span class="stat-lbl">{{ $t('business.effect') }}</span>
-                        <span class="stat-val">+{{ (adv.effect * 100).toFixed(0) }}%</span>
+                        <span class="stat-val" v-if="adv.def.type === 'cfo'">{{ $t('business.auto_pricing') }}</span>
+                        <span class="stat-val" v-else>+{{ (adv.effect * 100).toFixed(0) }}%</span>
                     </div>
                     <div class="stat-row">
                         <span class="stat-lbl">{{ adv.hired ? $t('business.upgrade_cost') : $t('business.hire_cost')
@@ -63,11 +64,14 @@ const advisorItems = computed(() =>
                     </div>
                     <div class="stat-row" v-if="!adv.hired || adv.lvl > 0">
                         <span class="stat-lbl">{{ $t('business.next_effect') }}</span>
-                        <span class="stat-val accent">+{{ (adv.nextEffect * 100).toFixed(0) }}%</span>
+                        <span class="stat-val accent" v-if="adv.def.type === 'cfo'">{{ $t('business.faster_pricing')
+                            }}</span>
+                        <span class="stat-val accent" v-else>+{{ (adv.nextEffect * 100).toFixed(0) }}%</span>
                     </div>
                 </div>
 
-                <UButton variant="ghost" :icon="adv.hired ? 'mdi:arrow-up-bold' : 'mdi:account-plus'" @click="store.hireAdvisor(business.id, adv.def.type)">
+                <UButton variant="primary" :icon="adv.hired ? 'mdi:arrow-up-bold' : 'mdi:account-plus'"
+                    @click="store.hireAdvisor(business.id, adv.def.type)">
                     {{ adv.hired ? $t('business.upgrade') : $t('business.hire') }} — {{ formatCash(adv.cost) }}
                 </UButton>
             </div>
@@ -106,6 +110,7 @@ const advisorItems = computed(() =>
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     display: flex;
+    justify-content: space-between;
     flex-direction: column;
     gap: var(--t-space-2);
     transition: border-color var(--t-transition-fast);
@@ -169,5 +174,4 @@ const advisorItems = computed(() =>
 .stat-val.accent {
     color: var(--t-accent);
 }
-
 </style>

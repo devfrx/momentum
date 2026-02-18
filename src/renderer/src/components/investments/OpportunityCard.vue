@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 
 defineProps<{
     name: string
@@ -18,13 +18,13 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="item-card opportunity-card">
-        <div class="item-card-header">
+    <UCard class="opportunity-card">
+        <template #header>
             <div class="item-card-title">
                 <AppIcon :icon="icon" class="item-card-icon" />
                 <h3 class="item-card-name">{{ name }}</h3>
             </div>
-        </div>
+        </template>
 
         <p class="item-card-description">{{ description }}</p>
 
@@ -32,24 +32,15 @@ defineEmits<{
             <span>{{ $t('investments.min_label') }} <strong class="text-gold">{{ minInvestment }}</strong></span>
             <span>{{ $t('investments.success') }} <strong class="text-sky">{{ successChance }}</strong></span>
             <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ returnMultiplier
-            }}x</strong></span>
+                    }}x</strong></span>
         </div>
 
-        <div class="item-card-actions">
+        <template #footer>
             <UButton variant="primary" size="sm" icon="mdi:send" :disabled="disabled" @click="$emit('invest')">
                 {{ $t('investments.invest_amount', { amount: minInvestment }) }}
             </UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
-<style scoped>
-.opportunity-card {
-    display: flex;
-    flex-direction: column;
-}
-
-.opportunity-card .item-card-actions {
-    margin-top: auto;
-}
-</style>
+<style scoped></style>

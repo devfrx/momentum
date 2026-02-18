@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UTabs } from '@renderer/components/ui'
+import { UTabs, UCard } from '@renderer/components/ui'
 import type { TabDef } from '@renderer/components/ui'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
@@ -26,8 +26,10 @@ const businessTabs = computed<TabDef[]>(() => [
     { id: 'advisors', label: t('business.tab_advisors'), icon: 'mdi:account-tie' },
 ])
 
-// ── Market ── (always show all businesses)
-const availableBusinesses = computed(() => [...BUSINESS_DEFS])
+// ── Market ── (always show all businesses, sorted by price as tiers)
+const availableBusinesses = computed(() =>
+    [...BUSINESS_DEFS].sort((a, b) => a.purchasePrice.cmp(b.purchasePrice))
+)
 
 // ── Overview KPIs ──
 const totalLevels = computed(() => business.totalLevels)
@@ -151,30 +153,30 @@ const businessInfoSections = computed<InfoSection[]>(() => [
                 <section class="section">
                     <div class="overview-grid">
                         <!-- Profit Summary -->
-                        <div class="kpi-card">
+                        <UCard class="kpi-card" size="sm">
                             <div class="kpi-label">{{ $t('business.kpi_profit') }}</div>
                             <div class="kpi-value success">{{ formatCash(business.profitPerSecond) }}/s</div>
-                        </div>
-                        <div class="kpi-card">
+                        </UCard>
+                        <UCard class="kpi-card" size="sm">
                             <div class="kpi-label">{{ $t('business.kpi_value') }}</div>
                             <div class="kpi-value gold">{{ formatCash(business.totalBusinessValue) }}</div>
-                        </div>
-                        <div class="kpi-card">
+                        </UCard>
+                        <UCard class="kpi-card" size="sm">
                             <div class="kpi-label">{{ $t('business.kpi_businesses') }}</div>
                             <div class="kpi-value">{{ totalBiz }}</div>
-                        </div>
-                        <div class="kpi-card">
+                        </UCard>
+                        <UCard class="kpi-card" size="sm">
                             <div class="kpi-label">{{ $t('business.kpi_levels') }}</div>
                             <div class="kpi-value">{{ totalLevels }}</div>
-                        </div>
-                        <div class="kpi-card">
+                        </UCard>
+                        <UCard class="kpi-card" size="sm">
                             <div class="kpi-label">{{ $t('business.kpi_branches') }}</div>
                             <div class="kpi-value">{{ totalBranches }}</div>
-                        </div>
-                        <div class="kpi-card">
+                        </UCard>
+                        <UCard class="kpi-card" size="sm">
                             <div class="kpi-label">{{ $t('business.kpi_corps') }}</div>
                             <div class="kpi-value">{{ corpCount }}</div>
-                        </div>
+                        </UCard>
                     </div>
 
                     <!-- Quick business list -->
@@ -245,8 +247,8 @@ const businessInfoSections = computed<InfoSection[]>(() => [
                     </div>
 
                     <div v-else class="card-grid">
-                        <BusinessPurchaseCard v-for="def in availableBusinesses" :key="def.id" :def="def" :owned="false"
-                            @buy="business.buyBusiness" />
+                        <BusinessPurchaseCard v-for="(def, idx) in availableBusinesses" :key="def.id" :def="def"
+                            :tier="idx + 1" @buy="(id, name, icon) => business.buyBusiness(id, name, icon)" />
                     </div>
                 </section>
             </template>
@@ -322,10 +324,6 @@ const businessInfoSections = computed<InfoSection[]>(() => [
 }
 
 .kpi-card {
-    padding: var(--t-space-4);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
     text-align: center;
 }
 

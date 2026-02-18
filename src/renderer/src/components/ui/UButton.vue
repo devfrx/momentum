@@ -26,6 +26,7 @@ export type ButtonVariant =
     | 'warning'
     | 'info'
     | 'tab'
+    | 'icon'
 
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 

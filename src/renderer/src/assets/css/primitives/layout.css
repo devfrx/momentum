@@ -1,0 +1,131 @@
+/*
+ * Primitives — Page layout, sections, stat bars
+ */
+
+/* ====================================
+   PAGE LAYOUT
+   ==================================== */
+.page-container {
+  padding: var(--t-space-6);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--t-space-5);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--t-space-4);
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-2);
+  font-size: var(--t-font-size-2xl);
+  font-weight: var(--t-font-bold);
+  color: var(--t-text);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: var(--t-leading-tight);
+}
+
+.page-title-icon {
+  font-size: 1.4rem;
+  color: var(--t-text-secondary);
+}
+
+.page-subtitle {
+  color: var(--t-text-muted);
+  font-size: var(--t-font-size-sm);
+  margin-top: var(--t-space-0-5);
+  line-height: var(--t-leading-normal);
+}
+
+/* ====================================
+   STAT BAR / STAT CHIPS
+   ==================================== */
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--t-space-2);
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--t-space-1);
+  padding: var(--t-space-1) var(--t-space-2);
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-md);
+  font-size: var(--t-font-size-sm);
+  transition: border-color var(--t-transition-fast);
+}
+
+.stat-chip:hover {
+  border-color: var(--t-border-hover);
+}
+
+.stat-chip-label {
+  color: var(--t-text-muted);
+  font-size: var(--t-font-size-xs);
+}
+
+.stat-chip-value {
+  font-family: var(--t-font-mono);
+  font-weight: var(--t-font-semibold);
+  color: var(--t-text);
+}
+
+/* ====================================
+   SECTIONS
+   ==================================== */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-1);
+  font-size: var(--t-font-size-lg);
+  font-weight: var(--t-font-semibold);
+  color: var(--t-text);
+  margin-bottom: var(--t-space-4);
+}
+
+.section-icon {
+  color: var(--t-text-muted);
+  font-size: 1.1rem;
+}
+
+/* ====================================
+   CHANGE INDICATOR
+   ==================================== */
+.change-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--t-space-0-5);
+  font-size: var(--t-font-size-sm);
+}
+.change-indicator.up   { color: var(--t-success); }
+.change-indicator.down { color: var(--t-danger); }
+
+/* ====================================
+   RESULT OVERLAYS (gambling)
+   ==================================== */
+.result-win {
+  background: var(--t-success-muted);
+  border: 1px solid color-mix(in srgb, var(--t-success) 25%, transparent);
+  color: var(--t-success);
+}
+.result-lose {
+  background: var(--t-danger-muted);
+  border: 1px solid color-mix(in srgb, var(--t-danger) 25%, transparent);
+  color: var(--t-danger);
+}
+.result-push {
+  background: var(--t-gold-muted);
+  border: 1px solid color-mix(in srgb, var(--t-gold) 25%, transparent);
+  color: var(--t-gold);
+}

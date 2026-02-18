@@ -4,7 +4,7 @@
  * Shows rarity-colored border, appraisal status, value, and action buttons.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -71,22 +71,6 @@ const { t } = useI18n()
 </template>
 
 <style scoped>
-.inv-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-2);
-    padding: var(--t-space-3);
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    /* border-left: 3px solid var(--_rarity, var(--t-border)); */
-    border-radius: var(--t-radius-md);
-    transition: border-color var(--t-transition-normal);
-}
-
-.inv-item:hover {
-    border-color: var(--t-border-hover);
-}
-
 .inv-item__header {
     display: flex;
     align-items: center;
@@ -182,11 +166,5 @@ const { t } = useI18n()
 .value-text--unknown {
     color: var(--t-text-muted);
     font-style: italic;
-}
-
-.inv-item__actions {
-    display: flex;
-    gap: var(--t-space-2);
-    justify-content: flex-end;
 }
 </style>

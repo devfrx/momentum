@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UCard } from '@renderer/components/ui'
 import { useI18n } from 'vue-i18n'
 import type { PerkEffect } from '@renderer/data/prestige'
 import { THEME } from '@renderer/assets/theme/colors'
@@ -69,8 +69,8 @@ function formatEffect(effect: PerkEffect): string {
 </script>
 
 <template>
-    <div class="perk-card item-card" :class="{ purchased, locked: !prerequisitesMet && !purchased }">
-        <div class="perk-header">
+    <UCard class="perk-card" :class="{ purchased, 'perk-card--locked': !prerequisitesMet && !purchased }">
+        <template #header>
             <div class="perk-icon-wrap" :style="{ borderColor: categoryColors[category] }">
                 <AppIcon :icon="icon" class="perk-icon" :style="{ color: categoryColors[category] }" />
             </div>
@@ -84,7 +84,7 @@ function formatEffect(effect: PerkEffect): string {
                 </div>
                 <p class="perk-description">{{ description }}</p>
             </div>
-        </div>
+        </template>
 
         <div class="perk-effect">
             <AppIcon icon="mdi:flash" />
@@ -96,7 +96,7 @@ function formatEffect(effect: PerkEffect): string {
             <span>{{ $t('prestige.requires', { list: prerequisites.join(', ') }) }}</span>
         </div>
 
-        <div class="perk-action">
+        <template #footer>
             <div v-if="purchased" class="purchased-badge">
                 <AppIcon icon="mdi:check-circle" />
                 <span>{{ $t('common.owned') }}</span>
@@ -104,29 +104,18 @@ function formatEffect(effect: PerkEffect): string {
             <UButton v-else variant="primary" size="sm" block icon="mdi:cart" :disabled="!canBuy" @click="$emit('buy')">
                 {{ $t('prestige.cost_pp', { n: cost }) }}
             </UButton>
-        </div>
-    </div>
+        </template>
+    </UCard>
 </template>
 
 <style scoped>
-.perk-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-3);
-}
-
 .perk-card.purchased {
     border-color: var(--t-border-focus);
     background: var(--t-bg-card-hover);
 }
 
-.perk-card.locked {
+.perk-card--locked {
     opacity: 0.6;
-}
-
-.perk-header {
-    display: flex;
-    gap: var(--t-space-3);
 }
 
 .perk-icon-wrap {
@@ -204,10 +193,6 @@ function formatEffect(effect: PerkEffect): string {
 
 .perk-prerequisites svg {
     font-size: 0.9rem;
-}
-
-.perk-action {
-    margin-top: auto;
 }
 
 .purchased-badge {

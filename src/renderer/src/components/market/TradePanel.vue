@@ -76,10 +76,10 @@ function formatCost(v: number): string {
     <div class="trade-panel">
         <!-- Mode toggle -->
         <div class="mode-toggle">
-            <UButton variant="ghost" size="sm" :active="mode === 'qty'" @click="mode = 'qty'" icon="mdi:numeric">
+            <UButton variant="tab" size="sm" :active="mode === 'qty'" @click="mode = 'qty'" icon="mdi:numeric">
                 {{ $t('market.qty') }}
             </UButton>
-            <UButton variant="ghost" size="sm" :active="mode === 'pct'" @click="mode = 'pct'" icon="mdi:percent">
+            <UButton variant="tab" size="sm" :active="mode === 'pct'" @click="mode = 'pct'" icon="mdi:percent">
                 {{ $t('market.pct_cash') }}
             </UButton>
         </div>
@@ -98,8 +98,8 @@ function formatCost(v: number): string {
         <!-- Percent mode -->
         <div v-else class="trade-row-pct">
             <div class="pct-presets">
-                <UButton variant="ghost" size="xs" v-for="pct in percentPresets" :key="pct" :active="percentValue === pct"
-                    @click="percentValue = pct">
+                <UButton variant="ghost" size="xs" v-for="pct in percentPresets" :key="pct"
+                    :active="percentValue === pct" @click="percentValue = pct">
                     {{ pct }}%
                 </UButton>
             </div>

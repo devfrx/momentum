@@ -8,8 +8,8 @@ import Tooltip from 'primevue/tooltip'
 // Load bundled icons BEFORE app initialization
 import './plugins/iconify'
 
-// Global theme system
-import './assets/theme.css'
+// Global theme system (modular)
+import './assets/css/index.css'
 
 import App from './App.vue'
 import router from './router'
