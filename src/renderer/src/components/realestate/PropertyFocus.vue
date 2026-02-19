@@ -95,11 +95,25 @@ const sellPrice = computed(() =>
     property.value ? realEstate.getSellPrice(property.value) : undefined,
 )
 
-const roi = computed(() => {
-    if (!property.value || !netRent.value) return 0
-    const purchase = property.value.purchasePrice.toNumber()
-    if (purchase <= 0) return 0
-    return (netRent.value.toNumber() * 10 * 3600 * 24 * 365) / purchase
+const TICKS_PER_SECOND = 10
+const SECONDS_PER_DAY = 86_400
+
+const paybackDays = computed(() => {
+    if (!property.value || !netRent.value) return Infinity
+    const netPerSec = netRent.value.toNumber() * TICKS_PER_SECOND
+    if (netPerSec <= 0) return Infinity
+    return property.value.purchasePrice.toNumber() / (netPerSec * SECONDS_PER_DAY)
+})
+
+const paybackLabel = computed(() => {
+    const d = paybackDays.value
+    if (!isFinite(d)) return '\u221e'
+    if (d < 1) {
+        const hrs = d * 24
+        if (hrs < 1) return `${Math.round(hrs * 60)}m`
+        return `${hrs.toFixed(1)}h`
+    }
+    return `~${Math.ceil(d)}d`
 })
 
 const valueChange = computed(() => {
@@ -312,7 +326,7 @@ watch(
                                 :style="{ width: property.condition + '%', background: conditionColor }" />
                         </div>
                         <span class="pf-strip__val" :style="{ color: conditionColor }">{{ Math.round(property.condition)
-                            }}%</span>
+                        }}%</span>
                     </div>
                 </div>
             </UTooltip>
@@ -336,7 +350,9 @@ watch(
 
             <div class="pf-strip__cell">
                 <span class="pf-strip__label">{{ t('realestate.roi') }}</span>
-                <span class="pf-strip__val" :class="roi > 0 ? 'c-green' : 'c-red'">{{ formatPercent(roi) }}</span>
+                <span class="pf-strip__val"
+                    :class="paybackDays < 30 ? 'c-green' : paybackDays === Infinity ? 'c-red' : ''">{{
+                    paybackLabel }}</span>
             </div>
         </div>
 
@@ -345,7 +361,7 @@ watch(
             <AppIcon icon="mdi:briefcase-check" />
             <span>{{ t('realestate.portfolio_bonus') }}: +{{ formatPercent(categoryBonus * 100) }} {{
                 t('realestate.rent')
-                }}</span>
+            }}</span>
         </div>
 
         <!-- ══════════════════════════════════════
@@ -398,7 +414,10 @@ watch(
                     </div>
                     <div class="pf-row">
                         <span class="pf-row__l">{{ t('realestate.roi') }}</span>
-                        <span class="pf-row__v" :class="roi > 0 ? 'c-green' : 'c-red'">{{ formatPercent(roi) }}</span>
+                        <span class="pf-row__v"
+                            :class="paybackDays < 30 ? 'c-green' : paybackDays === Infinity ? 'c-red' : ''">{{
+                            paybackLabel
+                            }}</span>
                     </div>
                     <div class="pf-row">
                         <span class="pf-row__l">{{ t('realestate.appreciation') }}</span>
@@ -412,7 +431,7 @@ watch(
                 </div>
                 <div class="pf-lifetime">
                     <span>{{ t('realestate.total_rent_collected') }}: {{ formatCash(property.totalRentCollected)
-                        }}</span>
+                    }}</span>
                     <span>{{ t('realestate.total_maint_paid') }}: {{ formatCash(property.totalMaintenancePaid) }}</span>
                 </div>
             </UAccordion>
@@ -459,7 +478,7 @@ watch(
                     <UButton v-if="property.improvements.length < property.maxImprovements" variant="text" size="sm"
                         icon="mdi:plus-circle-outline" @click="$emit('open-improvements', property.id)">
                         {{ t('realestate.add_improvement') }} ({{ property.improvements.length }}/{{
-                        property.maxImprovements
+                            property.maxImprovements
                         }})
                     </UButton>
                 </div>
@@ -486,7 +505,7 @@ watch(
                         <span class="pf-row__l">{{ t('realestate.appreciation') }}</span>
                         <span class="pf-row__v">{{ formatPercent(property.baseAppreciationRate * 100) }}/{{
                             t('common.cycle')
-                            }}</span>
+                        }}</span>
                     </div>
                 </div>
             </UAccordion>

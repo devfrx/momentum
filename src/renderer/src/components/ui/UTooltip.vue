@@ -2,8 +2,9 @@
 /**
  * UTooltip — Enhanced tooltip wrapper component.
  *
- * Wraps PrimeVue's v-tooltip with consistent styling.
- * Use native v-tooltip for simple cases; use this for rich tooltips.
+ * Uses Teleport to render at body level so tooltips are never clipped
+ * by parent overflow. Position is calculated dynamically from the
+ * trigger element's bounding rect.
  *
  * Usage:
  *   <UTooltip text="Simple tooltip">
@@ -17,9 +18,9 @@
  *     </template>
  *   </UTooltip>
  */
-import { ref } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         /** Simple text tooltip */
         text?: string
@@ -35,12 +36,57 @@ withDefaults(
 )
 
 const visible = ref(false)
+const wrapperRef = ref<HTMLElement | null>(null)
+const tooltipRef = ref<HTMLElement | null>(null)
+const pos = reactive({ top: '0px', left: '0px' })
 let showTimeout: ReturnType<typeof setTimeout> | null = null
 
-function onEnter(delay: number): void {
-    showTimeout = setTimeout(() => {
+const GAP = 6
+
+function updatePosition(): void {
+    if (!wrapperRef.value || !tooltipRef.value) return
+    const rect = wrapperRef.value.getBoundingClientRect()
+    const tt = tooltipRef.value.getBoundingClientRect()
+
+    let top = 0
+    let left = 0
+
+    switch (props.placement) {
+        case 'top':
+            top = rect.top - tt.height - GAP
+            left = rect.left + rect.width / 2 - tt.width / 2
+            break
+        case 'bottom':
+            top = rect.bottom + GAP
+            left = rect.left + rect.width / 2 - tt.width / 2
+            break
+        case 'left':
+            top = rect.top + rect.height / 2 - tt.height / 2
+            left = rect.left - tt.width - GAP
+            break
+        case 'right':
+            top = rect.top + rect.height / 2 - tt.height / 2
+            left = rect.right + GAP
+            break
+    }
+
+    // Clamp to viewport
+    const margin = 8
+    if (left < margin) left = margin
+    if (left + tt.width > window.innerWidth - margin) left = window.innerWidth - margin - tt.width
+    if (top < margin) top = margin
+    if (top + tt.height > window.innerHeight - margin) top = window.innerHeight - margin - tt.height
+
+    pos.top = `${top}px`
+    pos.left = `${left}px`
+}
+
+function onEnter(): void {
+    showTimeout = setTimeout(async () => {
         visible.value = true
-    }, delay)
+        await nextTick()
+        updatePosition()
+    }, props.delay)
 }
 
 function onLeave(): void {
@@ -50,18 +96,20 @@ function onLeave(): void {
 </script>
 
 <template>
-    <div class="u-tooltip-wrapper" @mouseenter="onEnter(delay)" @mouseleave="onLeave" @focus="onEnter(delay)"
+    <div ref="wrapperRef" class="u-tooltip-wrapper" @mouseenter="onEnter" @mouseleave="onLeave" @focus="onEnter"
         @blur="onLeave">
         <slot />
 
-        <Transition name="tooltip-fade">
-            <div v-if="visible && (text || $slots.content)" class="u-tooltip" :class="`u-tooltip--${placement}`"
-                role="tooltip">
-                <slot name="content">
-                    <span>{{ text }}</span>
-                </slot>
-            </div>
-        </Transition>
+        <Teleport to="body">
+            <Transition name="tooltip-fade">
+                <div v-if="visible && (text || $slots.content)" ref="tooltipRef" class="u-tooltip" role="tooltip"
+                    :style="{ top: pos.top, left: pos.left }">
+                    <slot name="content">
+                        <span>{{ text }}</span>
+                    </slot>
+                </div>
+            </Transition>
+        </Teleport>
     </div>
 </template>
 
@@ -70,10 +118,13 @@ function onLeave(): void {
     position: relative;
     display: inline-flex;
 }
+</style>
 
+<style>
+/* Global styles — tooltip is teleported to body */
 .u-tooltip {
-    position: absolute;
-    z-index: 1100;
+    position: fixed;
+    z-index: 10000;
     background: var(--t-bg-elevated);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-sm);
@@ -86,31 +137,8 @@ function onLeave(): void {
     word-wrap: break-word;
     overflow-wrap: break-word;
     pointer-events: none;
-    max-width: 260px;
-}
-
-.u-tooltip--top {
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.u-tooltip--bottom {
-    top: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.u-tooltip--left {
-    right: calc(100% + 6px);
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.u-tooltip--right {
-    left: calc(100% + 6px);
-    top: 50%;
-    transform: translateY(-50%);
+    max-width: 320px;
+    width: max-content;
 }
 
 /* Transition */

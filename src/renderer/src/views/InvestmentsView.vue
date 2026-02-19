@@ -13,7 +13,7 @@ import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
-import { UButton, UModal, UTooltip, UAccordion } from '@renderer/components/ui'
+import { UButton, UCard, UModal, UTooltip, UAccordion } from '@renderer/components/ui'
 import ProgressBar from 'primevue/progressbar'
 import {
     SECTORS,
@@ -244,31 +244,41 @@ const investInfoSections = computed<InfoSection[]>(() => [
                 <AppIcon icon="mdi:check-circle" class="section-icon text-emerald" />
                 {{ $t('investments.ready_collect') }}
             </h2>
-            <div class="card-grid">
-                <div v-for="inv in pendingInvestments" :key="inv.id" class="investment-card success-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <AppIcon :icon="inv.icon" class="card-icon" />
-                            <span>{{ inv.name }}</span>
-                            <Tag v-if="inv.isHotDeal" :value="$t('investments.hot')" severity="danger"
-                                class="hot-tag" />
+            <div class="collect-grid">
+                <UCard v-for="inv in pendingInvestments" :key="inv.id" class="collect-card" borderStatus="success"
+                    :size="'md'">
+                    <div class="collect-card__left">
+                        <div class="collect-card__check-circle">
+                            <AppIcon icon="mdi:check-bold" />
                         </div>
-                        <Tag :value="inv.status" severity="success" />
                     </div>
-                    <div class="card-stats">
-                        <span>{{ $t('investments.invested') }} <strong>{{
-                            formatCash(inv.investedAmount) }}</strong></span>
-                        <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{ inv.returnMultiplier
-                                }}x</strong></span>
+                    <div class="collect-card__center">
+                        <div class="collect-card__name-row">
+                            <AppIcon :icon="inv.icon" class="collect-card__sector-icon" />
+                            <span class="collect-card__name">{{ inv.name }}</span>
+                            <Tag v-if="inv.isHotDeal" :value="$t('investments.hot')" severity="danger" />
+                        </div>
+                        <div class="collect-card__flow">
+                            <span class="collect-card__amount">
+                                {{ formatCash(inv.investedAmount) }}
+                            </span>
+                            <span class="collect-card__arrow">
+                                <AppIcon icon="mdi:chevron-triple-right" />
+                            </span>
+                            <span class="collect-card__profit">
+                                {{ formatCash(mul(inv.investedAmount, inv.returnMultiplier)) }}
+                            </span>
+                            <span class="collect-card__mult">
+                                {{ inv.returnMultiplier }}x
+                            </span>
+                        </div>
                     </div>
-                    <div class="success-result">
-                        <p>{{ $t('investments.returns') }} <strong class="text-emerald">{{
-                            formatCash(mul(inv.investedAmount, inv.returnMultiplier)) }}</strong></p>
+                    <div class="collect-card__right">
                         <UButton variant="success" icon="mdi:wallet" @click="collectReturns(inv.id)">
                             {{ $t('investments.collect_returns') }}
                         </UButton>
                     </div>
-                </div>
+                </UCard>
             </div>
         </section>
 
@@ -278,35 +288,53 @@ const investInfoSections = computed<InfoSection[]>(() => [
                 <AppIcon icon="mdi:progress-clock" class="section-icon text-sky" />
                 {{ $t('investments.active_investments') }}
             </h2>
-            <div class="card-grid">
-                <div v-for="inv in startups.activeInvestments" :key="inv.id" class="investment-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <AppIcon :icon="inv.icon" class="card-icon" />
-                            <span>{{ inv.name }}</span>
-                            <Tag v-if="inv.isHotDeal" :value="$t('investments.hot')" severity="danger"
-                                class="hot-tag" />
+            <div class="inv-grid">
+                <UCard v-for="inv in startups.activeInvestments" :key="inv.id" class="inv-card" :size="'md'">
+                    <!-- Circular Progress Ring -->
+                    <div class="inv-card__ring-wrap">
+                        <svg class="inv-card__ring" viewBox="0 0 88 88">
+                            <circle class="inv-card__ring-track" cx="44" cy="44" r="36" />
+                            <circle class="inv-card__ring-fill" cx="44" cy="44" r="36" :stroke-dasharray="226.2"
+                                :stroke-dashoffset="226.2 * (1 - getInvestmentProgress(inv) / 100)" />
+                        </svg>
+                        <span class="inv-card__ring-pct">{{ getInvestmentProgress(inv).toFixed(0)
+                            }}<small>%</small></span>
+                    </div>
+                    <!-- Info -->
+                    <div class="inv-card__info">
+                        <div class="inv-card__header">
+                            <div class="inv-card__name-row">
+                                <AppIcon :icon="inv.icon" class="inv-card__icon" />
+                                <span class="inv-card__name">{{ inv.name }}</span>
+                                <Tag v-if="inv.isHotDeal" :value="$t('investments.hot')" severity="danger" />
+                            </div>
+                            <Tag :value="inv.status" severity="info" />
                         </div>
-                        <Tag :value="inv.status" severity="secondary" />
-                    </div>
-                    <div class="card-stats">
-                        <span>{{ $t('investments.invested') }} <strong class="text-gold">{{
-                            formatCash(inv.investedAmount) }}</strong></span>
-                        <span>{{ $t('investments.success') }} <strong class="text-sky">{{ formatRate(inv.successChance *
-                            100)
-                                }}</strong></span>
-                        <span>{{ $t('investments.return_label') }} <strong class="text-emerald">{{
-                            inv.returnMultiplier.toFixed(1)
-                                }}x</strong></span>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-info">
-                            <span>{{ $t('investments.maturity_progress') }}</span>
+                        <div class="inv-card__metrics">
+                            <div class="inv-card__metric">
+                                <span class="inv-card__metric-lbl">{{ $t('investments.invested') }}</span>
+                                <span class="inv-card__metric-val text-gold">{{ formatCash(inv.investedAmount) }}</span>
+                            </div>
+                            <div class="inv-card__metric">
+                                <span class="inv-card__metric-lbl">{{ $t('investments.success') }}</span>
+                                <span class="inv-card__metric-val text-sky">{{ formatRate(inv.successChance * 100)
+                                    }}</span>
+                            </div>
+                            <div class="inv-card__metric">
+                                <span class="inv-card__metric-lbl">{{ $t('investments.return_label') }}</span>
+                                <span class="inv-card__metric-val text-emerald">{{ inv.returnMultiplier.toFixed(1)
+                                    }}x</span>
+                            </div>
+                        </div>
+                        <div class="inv-card__time">
+                            <AppIcon icon="mdi:clock-outline" />
                             <span>{{ formatTime(getInvestmentTimeLeft(inv)) }} {{ $t('investments.left') }}</span>
+                            <div class="inv-card__bar">
+                                <div class="inv-card__bar-fill" :style="{ width: getInvestmentProgress(inv) + '%' }" />
+                            </div>
                         </div>
-                        <ProgressBar :value="getInvestmentProgress(inv)" :showValue="false" class="maturity-progress" />
                     </div>
-                </div>
+                </UCard>
             </div>
         </section>
 
@@ -324,144 +352,153 @@ const investInfoSections = computed<InfoSection[]>(() => [
             </div>
 
             <div v-else class="opp-grid">
-                <div v-for="opp in startups.opportunities" :key="opp.id" class="opp-card"
-                    :class="{ 'opp-card--hot': opp.isHotDeal }" :style="{ '--_accent': SECTORS[opp.sector].color }">
+                <article v-for="opp in startups.opportunities" :key="opp.id" class="opp-card"
+                    :class="{ 'opp-card--hot': opp.isHotDeal }" :style="{ '--_ac': SECTORS[opp.sector].color }">
 
-                    <!-- Top row: icon + name + stage -->
-                    <div class="opp-card__head">
-                        <AppIcon :icon="SECTORS[opp.sector].icon" class="opp-card__icon" />
-                        <div class="opp-card__identity">
-                            <div class="opp-card__name-row">
-                                <span class="opp-card__name">{{ opp.name }}</span>
-                                <span v-if="opp.isHotDeal" class="opp-card__hot">
-                                    <AppIcon icon="mdi:fire" /> {{ $t('investments.hot') }}
-                                </span>
+                    <!-- Gradient header band -->
+                    <div class="opp-card__header">
+                        <div class="opp-card__header-top">
+                            <div class="opp-card__identity">
+                                <div class="opp-card__icon-wrap">
+                                    <AppIcon :icon="SECTORS[opp.sector].icon" />
+                                </div>
+                                <div class="opp-card__titles">
+                                    <h3 class="opp-card__name">
+                                        {{ opp.name }}
+                                        <span v-if="opp.isHotDeal" class="opp-card__fire">
+                                            <AppIcon icon="mdi:fire" />
+                                        </span>
+                                    </h3>
+                                    <p class="opp-card__tagline">{{ opp.tagline }}</p>
+                                </div>
                             </div>
-                            <span class="opp-card__tagline">{{ opp.tagline }}</span>
-                        </div>
-                        <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">{{ STAGES[opp.stage].name
-                            }}</span>
-                    </div>
-
-                    <!-- Meta row: sector + timer -->
-                    <div class="opp-card__meta">
-                        <span class="opp-card__sector">{{ SECTORS[opp.sector].name }}</span>
-                        <span class="opp-card__timer"
-                            :class="{ 'opp-card__timer--urgent': getOpportunityTimeLeft(opp) < 600 }">
-                            <AppIcon icon="mdi:clock-outline" />
-                            {{ formatTime(getOpportunityTimeLeft(opp)) }}
-                        </span>
-                    </div>
-
-                    <!-- Traits row -->
-                    <div v-if="opp.traits.length" class="opp-card__traits">
-                        <UTooltip v-for="trait in opp.traits" :key="trait"
-                            :text="getTraitData(trait).description ?? getTraitData(trait).name" placement="bottom">
-                            <span class="opp-card__trait"
-                                :class="getTraitData(trait).isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
-                                <AppIcon :icon="getTraitData(trait).icon" />
-                                {{ getTraitData(trait).name }}
-                            </span>
-                        </UTooltip>
-                    </div>
-
-                    <!-- Stats grid -->
-                    <div class="opp-card__stats">
-                        <div class="opp-card__kpi">
-                            <span class="opp-card__kpi-label">{{ $t('investments.investment') }}</span>
-                            <span class="opp-card__kpi-value opp-card__kpi-value--gold">
-                                {{ formatCash(D(opp.minInvestment)) }}&thinsp;–&thinsp;{{
-                                    formatCash(D(opp.maxInvestment)) }}
+                            <span class="opp-card__stage" :class="`opp-card__stage--${opp.stage}`">
+                                {{ STAGES[opp.stage].name }}
                             </span>
                         </div>
-                        <div class="opp-card__kpi">
-                            <span class="opp-card__kpi-label">{{ $t('investments.success') }}</span>
-                            <!-- Phase 0: nothing -->
-                            <span v-if="getPhaseIndex(opp) === 0"
-                                class="opp-card__kpi-value opp-card__kpi-value--muted">
-                                {{ $t('investments.unknown_success') }}
+                        <div class="opp-card__badges">
+                            <span class="opp-card__sector-badge">
+                                <AppIcon :icon="SECTORS[opp.sector].icon" />
+                                {{ SECTORS[opp.sector].name }}
                             </span>
-                            <!-- Phase 1 (basic): approximate range -->
-                            <span v-else-if="getPhaseIndex(opp) === 1"
-                                class="opp-card__kpi-value opp-card__kpi-value--blue">
-                                ~{{ formatRate(Math.max(0, opp.baseSuccessChance - 0.10) * 100) }}�{{
-                                    formatRate(Math.min(1, opp.baseSuccessChance + 0.10) * 100) }}
-                            </span>
-                            <!-- Phase 2+ (detailed/deep): exact -->
-                            <span v-else class="opp-card__kpi-value opp-card__kpi-value--blue">
-                                {{ formatRate(opp.baseSuccessChance * 100) }}
-                            </span>
+                            <UTooltip v-for="trait in opp.traits" :key="trait"
+                                :text="getTraitData(trait).description ?? getTraitData(trait).name" placement="bottom">
+                                <span class="opp-card__trait"
+                                    :class="getTraitData(trait).isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
+                                    <AppIcon :icon="getTraitData(trait).icon" />
+                                    {{ getTraitData(trait).name }}
+                                </span>
+                            </UTooltip>
                         </div>
-                        <UTooltip
-                            :text="`${$t('investments.potential_return')}: ${formatCash(D(opp.minInvestment * opp.baseReturnMultiplier))} – ${formatCash(D(opp.maxInvestment * opp.baseReturnMultiplier))}`"
-                            placement="bottom">
+                    </div>
+
+                    <!-- Card body -->
+                    <div class="opp-card__body">
+                        <!-- KPI tiles -->
+                        <div class="opp-card__kpis">
                             <div class="opp-card__kpi">
-                                <span class="opp-card__kpi-label">{{ $t('investments.return_label') }}</span>
-                                <span class="opp-card__kpi-value opp-card__kpi-value--green">
+                                <span class="opp-card__kpi-val kpi--cash">
+                                    {{ formatCash(D(opp.minInvestment)) }}&thinsp;&ndash;&thinsp;{{
+                                        formatCash(D(opp.maxInvestment)) }}
+                                </span>
+                                <span class="opp-card__kpi-lbl">{{ $t('investments.investment') }}</span>
+                            </div>
+                            <div class="opp-card__kpi opp-card__kpi--hero">
+                                <span class="opp-card__kpi-val kpi--return">
                                     {{ opp.baseReturnMultiplier.toFixed(1) }}x
                                 </span>
+                                <span class="opp-card__kpi-lbl">{{ $t('investments.return_label') }}</span>
                             </div>
-                        </UTooltip>
-                    </div>
-
-                    <!-- Research reveals (risk rating & founder score) -->
-                    <div v-if="getPhaseIndex(opp) >= 2" class="opp-card__reveals">
-                        <div class="opp-card__reveal-item">
-                            <AppIcon icon="mdi:shield-alert" />
-                            <span class="opp-card__reveal-label">{{ $t('investments.risk_rating') }}</span>
-                            <span class="opp-card__reveal-value"
-                                :class="opp.hiddenRiskRating >= 4 ? 'text-red' : opp.hiddenRiskRating >= 3 ? 'text-gold' : 'text-emerald'">
-                                {{ opp.hiddenRiskRating }}/5
-                            </span>
-                        </div>
-                        <div v-if="getPhaseIndex(opp) >= 3" class="opp-card__reveal-item">
-                            <AppIcon icon="mdi:account-star" />
-                            <span class="opp-card__reveal-label">{{ $t('investments.founder_score') }}</span>
-                            <span class="opp-card__reveal-value"
-                                :class="opp.hiddenFounderScore >= 70 ? 'text-emerald' : opp.hiddenFounderScore >= 40 ? 'text-gold' : 'text-red'">
-                                {{ opp.hiddenFounderScore }}/100
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Research Phase Indicator -->
-                    <div class="opp-card__research">
-                        <div class="research-phases">
-                            <div v-for="(phase, idx) in RESEARCH_PHASES.slice(1)" :key="phase"
-                                class="research-phase-dot" :class="{
-                                    'research-phase-dot--done': getPhaseIndex(opp) > idx,
-                                    'research-phase-dot--current': getPhaseIndex(opp) === idx,
-                                    'research-phase-dot--locked': getPhaseIndex(opp) < idx
-                                }" :title="RESEARCH_PHASE_DATA[phase].name">
-                                <AppIcon :icon="RESEARCH_PHASE_DATA[phase].icon" />
+                            <div class="opp-card__kpi">
+                                <span v-if="getPhaseIndex(opp) === 0" class="opp-card__kpi-val kpi--hidden">? ? ?</span>
+                                <span v-else-if="getPhaseIndex(opp) === 1" class="opp-card__kpi-val kpi--range">
+                                    ~{{ formatRate(Math.max(0, opp.baseSuccessChance - 0.10) * 100) }}&ndash;{{
+                                        formatRate(Math.min(1, opp.baseSuccessChance + 0.10) * 100) }}
+                                </span>
+                                <span v-else class="opp-card__kpi-val kpi--exact">
+                                    {{ formatRate(opp.baseSuccessChance * 100) }}
+                                </span>
+                                <span class="opp-card__kpi-lbl">{{ $t('investments.success') }}</span>
                             </div>
-                            <span v-if="getPhaseIndex(opp) > 0" class="research-phase-label">
-                                {{ RESEARCH_PHASE_DATA[opp.researchPhase].name }}
-                            </span>
+                        </div>
+
+                        <!-- Success gauge (phase >= 2) -->
+                        <div v-if="getPhaseIndex(opp) >= 2" class="opp-card__gauge">
+                            <div class="opp-card__gauge-fill" :style="{ width: (opp.baseSuccessChance * 100) + '%' }"
+                                :class="opp.baseSuccessChance >= 0.5 ? 'gauge--hi'
+                                    : opp.baseSuccessChance >= 0.25 ? 'gauge--mid' : 'gauge--lo'" />
+                        </div>
+
+                        <!-- Intel chips -->
+                        <div v-if="getPhaseIndex(opp) >= 2" class="opp-card__intel">
+                            <div class="opp-card__intel-tag">
+                                <AppIcon icon="mdi:shield-alert" />
+                                <span>{{ $t('investments.risk_rating') }}</span>
+                                <strong
+                                    :class="opp.hiddenRiskRating >= 4 ? 'text-red' : opp.hiddenRiskRating >= 3 ? 'text-gold' : 'text-emerald'">
+                                    {{ opp.hiddenRiskRating }}/5
+                                </strong>
+                            </div>
+                            <div v-if="getPhaseIndex(opp) >= 3" class="opp-card__intel-tag">
+                                <AppIcon icon="mdi:account-star" />
+                                <span>{{ $t('investments.founder_score') }}</span>
+                                <strong
+                                    :class="opp.hiddenFounderScore >= 70 ? 'text-emerald' : opp.hiddenFounderScore >= 40 ? 'text-gold' : 'text-red'">
+                                    {{ opp.hiddenFounderScore }}/100
+                                </strong>
+                            </div>
+                        </div>
+
+                        <!-- Research stepper -->
+                        <div class="opp-card__research">
+                            <div class="opp-card__steps">
+                                <template v-for="(phase, idx) in RESEARCH_PHASES.slice(1)" :key="phase">
+                                    <div v-if="idx > 0" class="opp-card__connector"
+                                        :class="{ 'opp-card__connector--done': getPhaseIndex(opp) > idx }" />
+                                    <div class="opp-card__step" :class="{
+                                        'opp-card__step--done': getPhaseIndex(opp) > idx,
+                                        'opp-card__step--current': getPhaseIndex(opp) === idx,
+                                        'opp-card__step--locked': getPhaseIndex(opp) < idx
+                                    }">
+                                        <div class="opp-card__step-dot">
+                                            <AppIcon
+                                                :icon="getPhaseIndex(opp) > idx ? 'mdi:check' : RESEARCH_PHASE_DATA[phase].icon" />
+                                        </div>
+                                        <span class="opp-card__step-name">{{ RESEARCH_PHASE_DATA[phase].name }}</span>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="opp-card__actions">
-                        <UButton v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1" variant="ghost" size="xs"
-                            icon="mdi:magnify"
-                            :disabled="!gte(player.cash, D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))"
-                            @click="doResearch(opp.id)">
-                            {{ $t('investments.research_phase', {
-                                phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
-                                cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
-                            }) }}
-                        </UButton>
-                        <span v-else class="opp-card__research-complete">
-                            <AppIcon icon="mdi:check-decagram" />
-                            {{ $t('investments.fully_researched') }}
-                        </span>
-                        <UButton variant="primary" size="xs" icon="mdi:send"
-                            :disabled="!gte(player.cash, D(opp.minInvestment))" @click="openInvestDialog(opp)">
-                            {{ $t('investments.invest') }}
-                        </UButton>
+                    <!-- Footer -->
+                    <div class="opp-card__footer">
+                        <div class="opp-card__timer"
+                            :class="{ 'opp-card__timer--urgent': getOpportunityTimeLeft(opp) < 600 }">
+                            <AppIcon icon="mdi:clock-outline" />
+                            <span>{{ formatTime(getOpportunityTimeLeft(opp)) }}</span>
+                        </div>
+                        <div class="opp-card__actions">
+                            <UButton v-if="getPhaseIndex(opp) < RESEARCH_PHASES.length - 1" variant="ghost" size="xs"
+                                icon="mdi:magnify"
+                                :disabled="!gte(player.cash, D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))"
+                                @click="doResearch(opp.id)">
+                                {{ $t('investments.research_phase', {
+                                    phase: RESEARCH_PHASE_DATA[RESEARCH_PHASES[getPhaseIndex(opp) + 1]].name,
+                                    cost: formatCash(D(opp.researchCosts[RESEARCH_PHASES[getPhaseIndex(opp) + 1]]))
+                                }) }}
+                            </UButton>
+                            <span v-else class="opp-card__fully-done">
+                                <AppIcon icon="mdi:check-decagram" />
+                                {{ $t('investments.fully_researched') }}
+                            </span>
+                            <UButton variant="primary" size="xs" icon="mdi:send"
+                                :disabled="!gte(player.cash, D(opp.minInvestment))" @click="openInvestDialog(opp)">
+                                {{ $t('investments.invest') }}
+                            </UButton>
+                        </div>
                     </div>
-                </div>
+                </article>
             </div>
         </section>
 
@@ -553,11 +590,11 @@ const investInfoSections = computed<InfoSection[]>(() => [
     align-items: center;
     gap: var(--t-space-2);
     margin-bottom: var(--t-space-4);
-    font-size: 1.1rem;
+    font-size: var(--t-font-size-lg);
 }
 
 .section-icon {
-    font-size: 1.2rem;
+    font-size: var(--t-font-size-xl);
 }
 
 .section-icon.text-emerald {
@@ -574,8 +611,8 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .opp-count {
     font-weight: normal;
-    opacity: 0.6;
-    font-size: 0.9rem;
+    opacity: var(--t-opacity-muted);
+    font-size: var(--t-font-size-base);
 }
 
 /* Refresh Timer */
@@ -590,7 +627,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-md);
-    font-size: 0.9rem;
+    font-size: var(--t-font-size-base);
 }
 
 .refresh-icon {
@@ -599,177 +636,211 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .refresh-progress {
     flex: 1;
-    height: 6px;
+    height: var(--t-space-1-5);
 }
 
-/* Card Grids */
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--t-space-4);
-}
+/* ═══════════════════════════════════════════════════════════════
+   OPPORTUNITY CARDS — "Venture Dossier" design
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Opportunity Grid */
 .opp-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: var(--t-space-4);
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: var(--t-space-5);
 }
 
-/* --- Opportunity Card --- */
 .opp-card {
-    --_accent: var(--t-accent);
+    --_ac: var(--t-accent);
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--t-space-3);
-    padding: var(--t-space-4) var(--t-space-4) var(--t-space-4) calc(var(--t-space-4) + 4px);
+    border-radius: var(--t-radius-lg);
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-md);
-    transition: border-color var(--t-transition-normal);
+    overflow: hidden;
+    transition: transform var(--t-transition-slow), box-shadow var(--t-transition-slow);
 }
 
 .opp-card:hover {
-    border-color: var(--t-border-hover);
+    transform: translateY(-3px);
+    /* box-shadow:
+        0 12px 40px -12px color-mix(in srgb, var(--_ac) 18%, rgba(0, 0, 0, 0.4)),
+        0 0 0 1px color-mix(in srgb, var(--_ac) 20%, transparent); */
 }
 
+/* Hot deal */
 .opp-card--hot {
-    background: color-mix(in srgb, var(--t-danger) 3%, var(--t-bg-card));
+    border: 1.5px solid transparent;
+    background:
+        linear-gradient(var(--t-bg-card), var(--t-bg-card)) padding-box,
+        linear-gradient(135deg, var(--t-danger), var(--t-warning), var(--t-danger)) border-box;
+    animation: opp-hot-glow 3s ease-in-out infinite alternate;
 }
 
-/* Head */
-.opp-card__head {
+@keyframes opp-hot-glow {
+    from {
+        box-shadow: 0 0 12px -4px color-mix(in srgb, var(--t-danger) 20%, transparent);
+    }
+
+    to {
+        box-shadow: 0 0 24px -4px color-mix(in srgb, var(--t-danger) 35%, transparent);
+    }
+}
+
+/* --- Header band with gradient tint --- */
+.opp-card__header {
+    padding: var(--t-space-4) var(--t-space-5) var(--t-space-3);
+    background: var(--t-bg-card);
+    border-bottom: 1px solid color-mix(in srgb, var(--_ac) 10%, var(--t-border));
+}
+
+.opp-card__header-top {
     display: flex;
     align-items: flex-start;
+    justify-content: space-between;
     gap: var(--t-space-3);
-}
-
-.opp-card__icon {
-    font-size: 1.4rem;
-    color: var(--_accent);
-    flex-shrink: 0;
-    margin-top: 1px;
+    margin-bottom: var(--t-space-3);
 }
 
 .opp-card__identity {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-3);
     min-width: 0;
 }
 
-.opp-card__name-row {
+.opp-card__icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--t-radius-lg);
     display: flex;
     align-items: center;
-    gap: var(--t-space-2);
+    justify-content: center;
+    background: color-mix(in srgb, var(--_ac) 15%, transparent);
+    color: var(--_ac);
+    font-size: var(--t-font-size-2xl);
+    flex-shrink: 0;
+    box-shadow: 0 0 20px -6px color-mix(in srgb, var(--_ac) 30%, transparent);
+}
+
+.opp-card__titles {
+    min-width: 0;
 }
 
 .opp-card__name {
-    font-weight: var(--t-font-semibold);
-    font-size: var(--t-font-size-base);
+    font-weight: var(--t-font-bold);
+    font-size: var(--t-font-size-xl);
+    letter-spacing: -0.02em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.opp-card__hot {
-    display: inline-flex;
+    margin: 0;
+    display: flex;
     align-items: center;
     gap: var(--t-space-1);
-    font-size: var(--t-font-size-sm);
-    font-weight: var(--t-font-bold);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+}
+
+.opp-card__fire {
     color: var(--t-danger);
-    flex-shrink: 0;
+    font-size: var(--t-font-size-lg);
+    animation: fire-dance 1.5s ease-in-out infinite;
+}
+
+@keyframes fire-dance {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(-5deg);
+    }
+
+    50% {
+        transform: scale(1.15) rotate(5deg);
+    }
 }
 
 .opp-card__tagline {
-    display: block;
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
+    font-style: italic;
+    margin: 2px 0 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 1px;
 }
 
+/* Stage badge */
 .opp-card__stage {
-    flex-shrink: 0;
-    font-size: var(--t-font-size-xs);
-    font-weight: var(--t-font-semibold);
+    font-size: var(--t-font-size-2xs);
+    font-weight: var(--t-font-bold);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: var(--t-space-1) var(--t-space-2);
+    letter-spacing: 0.1em;
+    padding: var(--t-space-0-5) var(--t-space-2);
     border-radius: var(--t-radius-sm);
-    background: var(--t-bg-muted);
-    color: var(--t-text-secondary);
+    flex-shrink: 0;
+    white-space: nowrap;
+    border: 1px solid transparent;
 }
 
 .opp-card__stage--seed {
     background: var(--t-danger-muted);
     color: var(--t-danger);
-}
-
-.opp-card__stage--angel {
-    background: var(--t-warning-muted);
-    color: var(--t-warning);
+    border-color: color-mix(in srgb, var(--t-danger) 20%, transparent);
 }
 
 .opp-card__stage--seriesA {
-    background: var(--t-info-muted);
-    color: var(--t-info);
+    background: var(--t-orange-muted);
+    color: var(--t-orange);
+    border-color: color-mix(in srgb, var(--t-orange) 20%, transparent);
 }
 
 .opp-card__stage--seriesB {
-    background: var(--t-info-muted);
-    color: var(--t-info);
+    background: var(--t-blue-muted);
+    color: var(--t-blue);
+    border-color: color-mix(in srgb, var(--t-blue) 20%, transparent);
+}
+
+.opp-card__stage--seriesC {
+    background: var(--t-purple-muted);
+    color: var(--t-purple);
+    border-color: color-mix(in srgb, var(--t-purple) 20%, transparent);
 }
 
 .opp-card__stage--preIPO {
     background: var(--t-success-muted);
     color: var(--t-success);
+    border-color: color-mix(in srgb, var(--t-success) 20%, transparent);
 }
 
-/* Meta row */
-.opp-card__meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-}
-
-.opp-card__sector {
-    color: var(--t-text-muted);
-}
-
-.opp-card__timer {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.opp-card__timer--urgent {
-    color: var(--t-danger);
-    font-weight: var(--t-font-semibold);
-}
-
-/* Traits */
-.opp-card__traits {
+/* Badges row */
+.opp-card__badges {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    gap: var(--t-space-1-5);
+}
+
+.opp-card__sector-badge {
+    display: inline-flex;
+    align-items: center;
     gap: var(--t-space-1);
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-semibold);
+    color: var(--_ac);
+    background: color-mix(in srgb, var(--_ac) 10%, transparent);
+    padding: var(--t-space-0-5) var(--t-space-2);
+    border-radius: var(--t-radius-full);
 }
 
 .opp-card__trait {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    padding: 1px 6px;
-    border-radius: var(--t-radius-xs);
-    font-size: 0.68rem;
-    font-weight: var(--t-font-medium);
+    gap: var(--t-space-0-5);
+    padding: var(--t-space-0-5) var(--t-space-2);
+    border-radius: var(--t-radius-full);
+    font-size: var(--t-font-size-2xs);
+    font-weight: var(--t-font-semibold);
     line-height: 1.5;
+    cursor: default;
 }
 
 .opp-card__trait--pos {
@@ -782,226 +853,550 @@ const investInfoSections = computed<InfoSection[]>(() => [
     color: var(--t-danger);
 }
 
-/* Stats */
-.opp-card__stats {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
+/* --- Card body --- */
+.opp-card__body {
+    padding: var(--t-space-4) var(--t-space-5);
+    display: flex;
+    flex-direction: column;
     gap: var(--t-space-3);
-    padding: var(--t-space-3);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-sm);
+    flex: 1;
+}
+
+/* KPI tiles */
+.opp-card__kpis {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    border-radius: var(--t-radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--t-border);
 }
 
 .opp-card__kpi {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    align-items: center;
+    justify-content: center;
+    gap: var(--t-space-1);
+    padding: var(--t-space-3) var(--t-space-2);
+    background: var(--t-bg-muted);
+    min-width: 0;
 }
 
-.opp-card__kpi:not(:first-child) {
-    text-align: right;
-    padding-left: var(--t-space-3);
+.opp-card__kpi--hero {
+    background: var(--t-bg-muted);
     border-left: 1px solid var(--t-border);
+    border-right: 1px solid var(--t-border);
 }
 
-.opp-card__kpi-label {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--t-text-muted);
-}
-
-.opp-card__kpi-value {
+.opp-card__kpi-val {
     font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
+    white-space: nowrap;
     font-size: var(--t-font-size-sm);
-    font-weight: var(--t-font-semibold);
 }
 
-.opp-card__kpi-value--gold {
-    /* color: var(--t-warning); */
-}
-
-.opp-card__kpi-value--blue {
-    color: var(--t-info);
-}
-
-.opp-card__kpi-value--green {
-    color: var(--t-success);
-}
-
-.opp-card__kpi-value--muted {
+.opp-card__kpi-lbl {
+    font-size: var(--t-font-size-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     color: var(--t-text-muted);
+    white-space: nowrap;
 }
 
-/* Research reveals (risk rating, founder score) */
-.opp-card__reveals {
-    display: flex;
-    gap: var(--t-space-3);
-    padding: var(--t-space-2) var(--t-space-3);
-    background: color-mix(in srgb, var(--_accent) 5%, var(--t-bg-muted));
-    border-radius: var(--t-radius-sm);
-    border-left: 2px solid var(--_accent);
+.kpi--cash {
+    color: var(--t-gold);
 }
 
-.opp-card__reveal-item {
+.kpi--return {
+    color: var(--t-success);
+    font-size: var(--t-font-size-2xl);
+    text-shadow: 0 0 16px color-mix(in srgb, var(--t-success) 30%, transparent);
+}
+
+.kpi--hidden {
+    color: var(--t-text-muted);
+    letter-spacing: 0.2em;
+}
+
+.kpi--range {
+    color: var(--t-blue);
+    font-size: var(--t-font-size-xs);
+}
+
+.kpi--exact {
+    color: var(--t-blue);
+}
+
+/* Success gauge */
+.opp-card__gauge {
+    height: 5px;
+    border-radius: var(--t-radius-full);
+    background: color-mix(in srgb, var(--t-text-muted) 12%, transparent);
+    overflow: hidden;
+}
+
+.opp-card__gauge-fill {
+    height: 100%;
+    border-radius: var(--t-radius-full);
+    transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+}
+
+.gauge--hi {
+    background: var(--t-success);
+}
+
+.gauge--mid {
+    background: var(--t-warning);
+}
+
+.gauge--lo {
+    background: var(--t-danger);
+}
+
+/* Intel tags */
+.opp-card__intel {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-2);
+}
+
+.opp-card__intel-tag {
+    display: inline-flex;
     align-items: center;
     gap: var(--t-space-1);
     font-size: var(--t-font-size-xs);
+    padding: var(--t-space-1) var(--t-space-2);
+    border-radius: var(--t-radius-sm);
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
 }
 
-.opp-card__reveal-label {
+.opp-card__intel-tag span {
     color: var(--t-text-muted);
 }
 
-.opp-card__reveal-value {
+.opp-card__intel-tag strong {
     font-family: var(--t-font-mono);
-    font-weight: var(--t-font-semibold);
 }
 
-/* Research phase indicator */
+/* Research stepper */
 .opp-card__research {
-    display: flex;
-    align-items: center;
+    padding-top: var(--t-space-1);
 }
 
-.research-phases {
+.opp-card__steps {
     display: flex;
     align-items: center;
-    gap: var(--t-space-2);
+    gap: 0;
 }
 
-.research-phase-dot {
+.opp-card__connector {
+    flex: 1;
+    height: 2px;
+    background: var(--t-border);
+    min-width: var(--t-space-3);
+    transition: background var(--t-transition-slow);
+}
+
+.opp-card__connector--done {
+    background: var(--t-success);
+}
+
+.opp-card__step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--t-space-1);
+    position: relative;
+}
+
+.opp-card__step-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--t-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: var(--t-radius-full);
-    font-size: 0.75rem;
+    font-size: var(--t-font-size-xs);
     border: 2px solid var(--t-border);
+    background: var(--t-bg-card);
     color: var(--t-text-muted);
-    transition: all var(--t-transition-normal);
+    transition: all var(--t-transition-slow);
 }
 
-.research-phase-dot--done {
+.opp-card__step--done .opp-card__step-dot {
     background: var(--t-success);
     border-color: var(--t-success);
-    color: var(--t-text);
+    color: var(--t-text-inverse);
 }
 
-.research-phase-dot--current {
-    border-color: var(--t-accent);
-    color: var(--t-accent);
-    animation: phase-pulse 2s ease-in-out infinite;
+.opp-card__step--current .opp-card__step-dot {
+    border-color: var(--_ac);
+    color: var(--_ac);
+    /* box-shadow: 0 0 0 4px color-mix(in srgb, var(--_ac) 15%, transparent); */
+    /* animation: step-pulse 2s ease-in-out infinite; */
 }
 
-.research-phase-dot--locked {
-    opacity: 0.35;
+.opp-card__step--locked .opp-card__step-dot {
+    opacity: var(--t-opacity-disabled);
 }
 
-@keyframes phase-pulse {
+/* @keyframes step-pulse {
 
     0%,
     100% {
-        box-shadow: 0 0 0 0 transparent;
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--_ac) 15%, transparent);
     }
 
     50% {
-        box-shadow: 0 0 6px 1px color-mix(in srgb, var(--t-accent) 40%, transparent);
+        box-shadow: 0 0 0 8px color-mix(in srgb, var(--_ac) 8%, transparent);
+    }
+} */
+
+.opp-card__step-name {
+    font-size: var(--t-font-size-2xs);
+    font-weight: var(--t-font-semibold);
+    color: var(--t-text-muted);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.opp-card__step--done .opp-card__step-name {
+    color: var(--t-success);
+}
+
+.opp-card__step--current .opp-card__step-name {
+    color: var(--_ac);
+}
+
+/* --- Footer --- */
+.opp-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--t-space-3) var(--t-space-5);
+    margin-top: auto;
+    border-top: 1px solid var(--t-border);
+    background: color-mix(in srgb, var(--t-bg-muted) 50%, transparent);
+}
+
+.opp-card__timer {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--t-space-1);
+    font-size: var(--t-font-size-xs);
+    font-family: var(--t-font-mono);
+    color: var(--t-text-muted);
+}
+
+.opp-card__timer--urgent {
+    color: var(--t-danger);
+    font-weight: var(--t-font-bold);
+    animation: urgent-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes urgent-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
     }
 }
 
-.research-phase-label {
-    font-size: 0.7rem;
-    font-weight: var(--t-font-medium);
-    color: var(--t-text-secondary);
-    margin-left: var(--t-space-1);
+.opp-card__actions {
+    display: flex;
+    gap: var(--t-space-2);
+    align-items: center;
 }
 
-.opp-card__research-complete {
+.opp-card__fully-done {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--t-space-1);
     font-size: var(--t-font-size-xs);
     font-weight: var(--t-font-semibold);
     color: var(--t-success);
 }
 
-/* Actions */
-.opp-card__actions {
+/* ═══════════════════════════════════════════════════════════════
+   ACTIVE INVESTMENT CARDS — "Live Monitor" with ring
+   ═══════════════════════════════════════════════════════════════ */
+
+.inv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: var(--t-space-4);
+}
+
+.inv-card {
     display: flex;
+    align-items: stretch;
+    gap: var(--t-space-4);
+    flex-direction: row;
+}
+
+.inv-card:hover {
+    border-color: color-mix(in srgb, var(--t-info) 30%, var(--t-border));
+    box-shadow: var(--t-shadow-md);
+}
+
+/* SVG Ring */
+.inv-card__ring-wrap {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inv-card__ring {
+    width: 88px;
+    height: 88px;
+    transform: rotate(-90deg);
+}
+
+.inv-card__ring-track {
+    fill: none;
+    stroke: var(--t-bg-muted);
+    stroke-width: 5;
+}
+
+.inv-card__ring-fill {
+    fill: none;
+    stroke: var(--t-blue);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s cubic-bezier(.4, 0, .2, 1);
+}
+
+.inv-card__ring-pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-lg);
+    font-weight: var(--t-font-bold);
+    color: var(--t-blue);
+}
+
+.inv-card__ring-pct small {
+    font-size: var(--t-font-size-2xs);
+    opacity: var(--t-opacity-subtle);
+}
+
+/* Info panel */
+.inv-card__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     gap: var(--t-space-2);
-    justify-content: flex-end;
-    margin-top: auto;
+    min-width: 0;
 }
 
-/* Investment Cards */
-.investment-card {
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    padding: var(--t-space-4);
-}
-
-.investment-card.success-card {
-    /* background: color-mix(in srgb, var(--t-success) 5%, var(--t-bg-card)); */
-}
-
-.card-header {
+.inv-card__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--t-space-3);
 }
 
-.card-title {
+.inv-card__name-row {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
+    min-width: 0;
+}
+
+.inv-card__icon {
+    font-size: var(--t-font-size-lg);
+    opacity: var(--t-opacity-muted);
+}
+
+.inv-card__name {
     font-weight: var(--t-font-semibold);
+    font-size: var(--t-font-size-base);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.card-icon {
-    font-size: 1.2rem;
-    color: var(--t-info);
-}
-
-.hot-tag {
-    font-size: 0.65rem;
-}
-
-.card-stats {
+.inv-card__metrics {
     display: flex;
+    gap: var(--t-space-4);
     flex-wrap: wrap;
-    gap: var(--t-space-3);
-    font-size: 0.85rem;
-    margin-bottom: var(--t-space-3);
 }
 
-.progress-section {
-    margin-top: var(--t-space-3);
-}
-
-.progress-info {
+.inv-card__metric {
     display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    margin-bottom: var(--t-space-1);
+    flex-direction: column;
+    gap: var(--t-space-px);
+}
+
+.inv-card__metric-lbl {
+    font-size: var(--t-font-size-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: var(--t-text-muted);
 }
 
-.maturity-progress {
-    height: 8px;
+.inv-card__metric-val {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-sm);
+    font-weight: var(--t-font-bold);
 }
 
-.success-result {
+.inv-card__time {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: var(--t-space-3);
-    padding-top: var(--t-space-3);
-    border-top: 1px solid var(--t-border);
+    gap: var(--t-space-2);
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    margin-top: auto;
+}
+
+.inv-card__bar {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--t-radius-full);
+    background: var(--t-bg-muted);
+    overflow: hidden;
+}
+
+.inv-card__bar-fill {
+    height: 100%;
+    border-radius: var(--t-radius-full);
+    background: var(--t-blue);
+    transition: width var(--t-transition-slow);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COLLECTION CARDS — "Payday" with success glow
+   ═══════════════════════════════════════════════════════════════ */
+
+.collect-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: var(--t-space-4);
+}
+
+.collect-card {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-4);
+    flex-direction: row;
+    background: color-mix(in srgb, var(--t-success) 4%, var(--t-bg-card));
+    box-shadow: 0 0 24px -8px color-mix(in srgb, var(--t-success) 15%, transparent);
+    animation: collect-glow 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes collect-glow {
+    from {
+        box-shadow: 0 0 16px -8px color-mix(in srgb, var(--t-success) 15%, transparent);
+    }
+
+    to {
+        box-shadow: 0 0 32px -8px color-mix(in srgb, var(--t-success) 25%, transparent);
+    }
+}
+
+.collect-card__left {
+    flex-shrink: 0;
+}
+
+.collect-card__check-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--t-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--t-success);
+    color: var(--t-text-inverse);
+    font-size: var(--t-font-size-2xl);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--t-success) 40%, transparent);
+}
+
+.collect-card__center {
+    flex: 1;
+    min-width: 0;
+}
+
+.collect-card__name-row {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    margin-bottom: var(--t-space-1);
+}
+
+.collect-card__sector-icon {
+    font-size: var(--t-font-size-lg);
+    opacity: var(--t-opacity-muted);
+}
+
+.collect-card__name {
+    font-weight: var(--t-font-bold);
+    font-size: var(--t-font-size-base);
+}
+
+.collect-card__flow {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    flex-wrap: wrap;
+}
+
+.collect-card__amount {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-sm);
+    color: var(--t-text-muted);
+}
+
+.collect-card__arrow {
+    color: var(--t-success);
+    font-size: var(--t-font-size-base);
+    animation: arrow-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes arrow-slide {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
+}
+
+.collect-card__profit {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-sm);
+    font-weight: var(--t-font-bold);
+    color: var(--t-success);
+}
+
+.collect-card__mult {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-bold);
+    color: var(--t-success);
+    background: var(--t-success-muted);
+    padding: var(--t-space-px) var(--t-space-1-5);
+    border-radius: var(--t-radius-sm);
+}
+
+.collect-card__right {
+    flex-shrink: 0;
 }
 
 /* History */
@@ -1020,16 +1415,16 @@ const investInfoSections = computed<InfoSection[]>(() => [
     padding: var(--t-space-2) var(--t-space-3);
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-sm);
-    font-size: 0.85rem;
+    font-size: var(--t-font-size-sm);
 }
 
 .history-item.failed {
-    opacity: 0.7;
+    opacity: var(--t-opacity-subtle);
 }
 
 .history-icon {
-    font-size: 1.1rem;
-    opacity: 0.6;
+    font-size: var(--t-font-size-lg);
+    opacity: var(--t-opacity-muted);
 }
 
 .history-name {
@@ -1042,7 +1437,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .history-return {
     font-weight: var(--t-font-semibold);
-    min-width: 80px;
+    min-width: var(--t-space-16);
     text-align: right;
 }
 
@@ -1054,7 +1449,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .empty-icon {
-    font-size: 3rem;
+    font-size: var(--t-font-size-4xl);
     margin-bottom: var(--t-space-3);
 }
 
@@ -1072,7 +1467,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 }
 
 .dialog-icon {
-    font-size: 2.5rem;
+    font-size: var(--t-font-size-4xl);
 }
 
 .dialog-opp-info h3 {
@@ -1081,7 +1476,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .dialog-opp-info p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: var(--t-font-size-sm);
     color: var(--t-text-muted);
 }
 
@@ -1100,9 +1495,9 @@ const investInfoSections = computed<InfoSection[]>(() => [
 
 .dialog-stat span {
     display: block;
-    font-size: 0.75rem;
+    font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
-    margin-bottom: 4px;
+    margin-bottom: var(--t-space-1);
 }
 
 .invest-slider-section {

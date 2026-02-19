@@ -11,7 +11,8 @@
  *        dominating.  All values assume grade-B (multiplier 1.0).
  *
  * Appreciation rates are tuned for the 6 000-tick period (~10 min).
- * A rate of 0.0012 gives ~+9 %/day; 0.0025 gives ~+38 %/day.
+ * A rate of 0.0012 gives ~+18.9 %/day; 0.0025 gives ~+43 %/day.
+ * (formula: (1 + rate)^144 − 1, with 144 periods per day)
  * This makes long-term holding a meaningful strategy.
  */
 import type { PropertyCategory } from './locations'
@@ -230,8 +231,8 @@ export const PROPERTY_TEMPLATES: PropertyTemplate[] = [
     icon: 'mdi:star-circle',
     categories: ['Hospitality', 'Luxury'],
     priceRange: [140_000_000, 700_000_000],
-    baseRentRange: [68.0, 138.0],
-    unitRange: [80, 200],
+    baseRentRange: [55.0, 112.0],
+    unitRange: [60, 150],
     conditionRange: [70, 100],
     wearRateRange: [0.002, 0.003],
     taxRateRange: [0.015, 0.021],
@@ -250,13 +251,13 @@ export const PROPERTY_TEMPLATES: PropertyTemplate[] = [
     icon: 'mdi:crown',
     categories: ['Luxury', 'Residential'],
     priceRange: [28_000_000, 112_000_000],
-    baseRentRange: [35.0, 72.0],
-    unitRange: [1, 4],
+    baseRentRange: [55.0, 115.0],
+    unitRange: [4, 12],
     conditionRange: [80, 100],
     wearRateRange: [0.001, 0.002],
     taxRateRange: [0.012, 0.017],
     baseAppreciationRate: 0.0018,
-    maintenanceRatio: 0.13,
+    maintenanceRatio: 0.12,
     maxRenovationLevel: 4,
     renovationCostMultiplier: 2.5,
     maxImprovements: 10,
@@ -306,13 +307,13 @@ export const PROPERTY_TEMPLATES: PropertyTemplate[] = [
     icon: 'mdi:warehouse',
     categories: ['Industrial'],
     priceRange: [280_000, 1_120_000],
-    baseRentRange: [5.5, 11.0],
+    baseRentRange: [4.5, 9.0],
     unitRange: [1, 4],
     conditionRange: [40, 85],
     wearRateRange: [0.0005, 0.001],
     taxRateRange: [0.009, 0.014],
     baseAppreciationRate: 0.0008,
-    maintenanceRatio: 0.04,
+    maintenanceRatio: 0.06,
     maxRenovationLevel: 6,
     renovationCostMultiplier: 1.4,
     maxImprovements: 6,
@@ -344,8 +345,8 @@ export const PROPERTY_TEMPLATES: PropertyTemplate[] = [
     icon: 'mdi:palm-tree',
     categories: ['Hospitality', 'Luxury'],
     priceRange: [140_000_000, 420_000_000],
-    baseRentRange: [85.0, 175.0],
-    unitRange: [60, 150],
+    baseRentRange: [50.0, 105.0],
+    unitRange: [40, 100],
     conditionRange: [65, 100],
     wearRateRange: [0.0018, 0.0028],
     taxRateRange: [0.015, 0.021],
@@ -362,7 +363,7 @@ export const PROPERTY_TEMPLATES: PropertyTemplate[] = [
     icon: 'mdi:office-building-marker',
     categories: ['Commercial', 'Mixed'],
     priceRange: [280_000_000, 840_000_000],
-    baseRentRange: [120.0, 245.0],
+    baseRentRange: [155.0, 315.0],
     unitRange: [30, 80],
     conditionRange: [70, 100],
     wearRateRange: [0.001, 0.0018],

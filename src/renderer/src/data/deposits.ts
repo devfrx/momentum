@@ -8,7 +8,7 @@
  *  - Players lock cash into a deposit account for a fixed or flexible term.
  *  - Interest accrues every tick based on the effective rate (modified by
  *    credit score, skill tree, prestige, and events).
- *  - Rates are **per hour** of real time (see Formulas.TICKS_PER_RATE_PERIOD).
+ *  - Rates are **per 6-hour period** of real time (see Formulas.TICKS_PER_RATE_PERIOD).
  *  - Early withdrawal incurs a penalty (partial loss of accrued interest).
  *  - Compound frequency affects how often interest is reinvested into principal.
  *  - Higher-tier accounts require minimum net worth / level / credit score.
@@ -41,7 +41,7 @@ export interface DepositDef {
   category: DepositCategory
   icon: string
 
-  /** Base interest rate per hour (e.g. 0.05 = 5%/h) */
+  /** Base interest rate per 6-hour period (e.g. 0.05 = 5%/6h) */
   baseAPY: number
   /** Whether rate scales with credit score (higher score → better rate) */
   apyScalesWithCredit: boolean
@@ -73,7 +73,6 @@ export interface DepositDef {
   /** Player requirements */
   minNetWorth: Decimal
   minCreditScore: number
-  minLevel: number
 
   /** Max simultaneous accounts of this type */
   maxActive: number
@@ -161,7 +160,6 @@ export const DEPOSITS: DepositDef[] = [
     volatilityChance: 0,
     minNetWorth: D(0),
     minCreditScore: 0,
-    minLevel: 1,
     maxActive: 2,
     completionXp: 0,
     creditImpactOnMaturity: 0,
@@ -186,8 +184,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'insured',
     volatilityChance: 0,
     minNetWorth: D(5_000),
-    minCreditScore: 20,
-    minLevel: 3,
+    minCreditScore: 25,
     maxActive: 2,
     completionXp: 0,
     creditImpactOnMaturity: 0,
@@ -215,7 +212,6 @@ export const DEPOSITS: DepositDef[] = [
     volatilityChance: 0,
     minNetWorth: D(2_000),
     minCreditScore: 15,
-    minLevel: 2,
     maxActive: 3,
     completionXp: 25,
     creditImpactOnMaturity: 1,
@@ -240,8 +236,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'insured',
     volatilityChance: 0,
     minNetWorth: D(10_000),
-    minCreditScore: 30,
-    minLevel: 4,
+    minCreditScore: 40,
     maxActive: 3,
     completionXp: 75,
     creditImpactOnMaturity: 2,
@@ -266,8 +261,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'insured',
     volatilityChance: 0,
     minNetWorth: D(50_000),
-    minCreditScore: 45,
-    minLevel: 6,
+    minCreditScore: 55,
     maxActive: 2,
     completionXp: 200,
     creditImpactOnMaturity: 3,
@@ -294,8 +288,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'standard',
     volatilityChance: 0,
     minNetWorth: D(500_000),
-    minCreditScore: 60,
-    minLevel: 8,
+    minCreditScore: 75,
     maxActive: 2,
     completionXp: 500,
     creditImpactOnMaturity: 4,
@@ -320,8 +313,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'standard',
     volatilityChance: 0,
     minNetWorth: D(2_000_000),
-    minCreditScore: 70,
-    minLevel: 10,
+    minCreditScore: 85,
     maxActive: 1,
     completionXp: 1500,
     creditImpactOnMaturity: 5,
@@ -348,8 +340,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'volatile',
     volatilityChance: 0.00001,
     minNetWorth: D(20_000),
-    minCreditScore: 35,
-    minLevel: 5,
+    minCreditScore: 50,
     maxActive: 2,
     completionXp: 0,
     creditImpactOnMaturity: 0,
@@ -374,8 +365,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'volatile',
     volatilityChance: 0.00005,
     minNetWorth: D(200_000),
-    minCreditScore: 50,
-    minLevel: 7,
+    minCreditScore: 65,
     maxActive: 1,
     completionXp: 750,
     creditImpactOnMaturity: 3,
@@ -400,8 +390,7 @@ export const DEPOSITS: DepositDef[] = [
     risk: 'insured',
     volatilityChance: 0,
     minNetWorth: D(25_000),
-    minCreditScore: 25,
-    minLevel: 4,
+    minCreditScore: 30,
     maxActive: 3,
     completionXp: 100,
     creditImpactOnMaturity: 2,
@@ -421,12 +410,10 @@ export function getDepositsByCategory(category: DepositCategory): DepositDef[] {
  * Get deposits available to the player given their stats
  */
 export function getAvailableDeposits(
-  level: number,
   creditScore: number,
   netWorth: Decimal
 ): DepositDef[] {
   return DEPOSITS.filter(d =>
-    level >= d.minLevel &&
     creditScore >= d.minCreditScore &&
     netWorth.gte(d.minNetWorth)
   )

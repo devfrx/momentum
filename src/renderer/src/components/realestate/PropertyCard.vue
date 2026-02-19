@@ -36,10 +36,25 @@ const maintenance = computed(() => realEstate.computePropertyMaintenance(props.p
 const categoryBonus = computed(() => realEstate.getCategoryRentBonus(props.property.category))
 const displayName = computed(() => props.property.customName || props.property.name)
 
-const roi = computed(() => {
-    const purchase = props.property.purchasePrice.toNumber()
-    if (purchase <= 0) return 0
-    return (netRent.value.toNumber() * 10 * 3600 * 24 * 365) / purchase
+const TICKS_PER_SECOND = 10
+const SECONDS_PER_DAY = 86_400
+
+const netRentPerSecond = computed(() => netRent.value.toNumber() * TICKS_PER_SECOND)
+
+const paybackDays = computed(() => {
+    if (netRentPerSecond.value <= 0) return Infinity
+    return props.property.purchasePrice.toNumber() / (netRentPerSecond.value * SECONDS_PER_DAY)
+})
+
+const paybackLabel = computed(() => {
+    const d = paybackDays.value
+    if (!isFinite(d)) return '\u221e'
+    if (d < 1) {
+        const hrs = d * 24
+        if (hrs < 1) return `${Math.round(hrs * 60)}m`
+        return `${hrs.toFixed(1)}h`
+    }
+    return `~${Math.ceil(d)}d`
 })
 
 const repairCost = computed(() => realEstate.getRepairCost(props.property))
@@ -215,8 +230,9 @@ function handleRentSlider(val: number | number[]): void {
                     </div>
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.roi') }}</span>
-                        <span class="d-value" :class="roi > 0 ? 'success' : 'danger'">{{ formatPercent(roi)
-                            }}</span>
+                        <span class="d-value"
+                            :class="paybackDays < 30 ? 'success' : paybackDays === Infinity ? 'danger' : ''">{{
+                            paybackLabel }}</span>
                     </div>
                 </div>
             </div>
@@ -234,7 +250,7 @@ function handleRentSlider(val: number | number[]): void {
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.appreciation') }}</span>
                         <span class="d-value success">{{ formatPercent(property.baseAppreciationRate * 100)
-                            }}/{{ t('common.cycle') }}</span>
+                        }}/{{ t('common.cycle') }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.rent_multiplier') }}</span>
@@ -281,7 +297,7 @@ function handleRentSlider(val: number | number[]): void {
                 <h4 class="detail-title">
                     <AppIcon icon="mdi:puzzle" /> {{ t('realestate.improvements_label') }}
                     <span class="detail-count">{{ property.improvements.length }}/{{ property.maxImprovements
-                        }}</span>
+                    }}</span>
                 </h4>
                 <div v-if="improvements.length > 0" class="prop-card__improvements">
                     <span v-for="im in improvements" :key="im.id" class="imp-badge">

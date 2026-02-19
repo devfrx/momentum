@@ -728,7 +728,7 @@ export default {
     asking_price: 'Prezzo Richiesto',
     true_value: 'Valore Reale',
     net_rent: 'Affitto Netto',
-    roi: 'ROI stimato/anno',
+    roi: 'Payback',
     units: 'unità',
     neighborhood: 'Vicinato',
     structural: 'Struttura',
@@ -893,7 +893,7 @@ export default {
     tip: {
       base_rent: 'Affitto iniziale per tick al 100% di occupazione, prima dei bonus.',
       units: 'Numero di unità affittabili. Più unità = più inquilini.',
-      roi: 'Rendimento annuo basato sull\'affitto netto vs. prezzo d\'acquisto.',
+      roi: 'Tempo stimato per recuperare il prezzo d\'acquisto dall\'affitto netto.',
       true_value: 'Valore di mercato stimato in base all\'economia e alle condizioni.',
       net_rent: 'Affitto al netto di manutenzione, tasse e assicurazione.',
       value_change: 'Variazione percentuale del valore dall\'acquisto.',

@@ -728,7 +728,7 @@ export default {
     asking_price: 'Asking Price',
     true_value: 'True Value',
     net_rent: 'Net Rent',
-    roi: 'Est. ROI/yr',
+    roi: 'Payback',
     units: 'units',
     neighborhood: 'Neighborhood',
     structural: 'Structure',
@@ -906,7 +906,7 @@ export default {
     tip: {
       base_rent: 'Starting rent per tick at 100% occupancy, before bonuses.',
       units: 'Number of rentable units. More units = more tenants.',
-      roi: 'Annual return-on-investment based on net rent vs. purchase price.',
+      roi: 'Estimated time to recoup the purchase price from net rental income.',
       true_value: 'Estimated market value based on economy and conditions.',
       net_rent: 'Rent after subtracting maintenance, tax, and insurance.',
       value_change: 'Percentage change in value since purchase.',

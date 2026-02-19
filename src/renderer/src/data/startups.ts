@@ -45,18 +45,19 @@ export interface ResearchPhaseData {
 
 /**
  * Research cost scales per phase.
- * basic =  8% of minInvestment, detailed = 18%, deep = 35%.
- * This makes deep research a serious financial commitment.
+ * basic =  5% of minInvestment, detailed = 12%, deep = 25%.
+ * Total = 42% of minInvestment — a meaningful commitment that
+ * pays off through information + the deep-analysis success bonus.
  */
 export const RESEARCH_PHASE_DATA: Record<ResearchPhase, ResearchPhaseData> = {
   none:     { id: 'none',     name: 'None',            icon: 'mdi:help-circle-outline', costMultiplier: 0,    reveals: '' },
-  basic:    { id: 'basic',    name: 'Quick Scan',      icon: 'mdi:magnify',             costMultiplier: 0.08, reveals: 'Approximate success range' },
-  detailed: { id: 'detailed', name: 'Due Diligence',   icon: 'mdi:file-search',         costMultiplier: 0.18, reveals: 'Exact success chance + Risk rating' },
-  deep:     { id: 'deep',     name: 'Deep Analysis',   icon: 'mdi:brain',               costMultiplier: 0.35, reveals: 'Founder score + Success bonus' },
+  basic:    { id: 'basic',    name: 'Quick Scan',      icon: 'mdi:magnify',             costMultiplier: 0.05, reveals: 'Approximate success range' },
+  detailed: { id: 'detailed', name: 'Due Diligence',   icon: 'mdi:file-search',         costMultiplier: 0.12, reveals: 'Exact success chance + Risk rating' },
+  deep:     { id: 'deep',     name: 'Deep Analysis',   icon: 'mdi:brain',               costMultiplier: 0.25, reveals: 'Founder score + Success bonus' },
 }
 
 /** Success chance bonus granted by deep analysis */
-export const DEEP_ANALYSIS_BONUS = 0.04
+export const DEEP_ANALYSIS_BONUS = 0.06
 
 export type StartupTrait =
   | 'experienced_team'
@@ -702,15 +703,24 @@ export function generateOpportunity(
   const maxSpread = 3 + Math.random() * 3
   const maxInvestment = Math.round((minInvestment * maxSpread) / roundTo) * roundTo
 
-  // Risk-adjusted return: higher risk sectors/stages have higher potential returns
-  const baseReturn = 2 + (sectorData.baseReturnMod * stageData.returnMod * traitReturnMod - 1) * 3
-  // Clamp to minimum 1.5x — a successful investment must always be profitable
-  const returnMultiplier = Math.max(1.5, Math.round(baseReturn * 10) / 10)
+  // ═══ RETURN MULTIPLIER (capped, softer scaling) ════════════════
+  // Raw composite from sector×stage×traits, then linear scale + hard cap.
+  // Range: 1.5x (safest) to 8.0x (riskiest with great traits).
+  const baseReturn = 2 + (sectorData.baseReturnMod * stageData.returnMod * traitReturnMod - 1) * 2
+  const returnMultiplier = Math.min(8, Math.max(1.5, Math.round(baseReturn * 10) / 10))
 
-  // Success chance: inverse of return potential, modified by traits and stage
-  const baseSuccessChance = 1 / (1 + Math.log(returnMultiplier))
-  const riskAdjusted = baseSuccessChance / (sectorData.baseRiskMod * stageData.riskMod)
-  const successChance = Math.min(0.95, Math.max(0.05, riskAdjusted + traitSuccessMod))
+  // ═══ SUCCESS CHANCE (EV-targeted) ══════════════════════════════
+  // Instead of guaranteeing positive EV, we target a specific EV
+  // that depends on composite risk.  Risky combos have EV < 1
+  // (need research / skill-tree bonuses to profit), while safe
+  // combos have modest inherent profit.
+  //   compositeRisk  [0.35 … 3.0]
+  //   targetEV       [~1.17 … ~0.61]   (safe→profit, risky→loss)
+  //   P = targetEV / R                 (higher return → lower chance)
+  const compositeRisk = sectorData.baseRiskMod * stageData.riskMod
+  const targetEV = 0.85 / Math.pow(compositeRisk, 0.3)
+  const rawSuccessChance = targetEV / returnMultiplier
+  const successChance = Math.min(0.80, Math.max(0.05, rawSuccessChance + traitSuccessMod))
 
   // Maturity time (in ticks, 10 ticks = 1 second)
   const baseMaturity = 6000 * stageData.maturityMult // ~10 minutes base
@@ -721,7 +731,7 @@ export function generateOpportunity(
   const expiresAtTick = currentTick + Math.round(refreshIntervalTicks * windowMultiplier)
 
   // ═══ RESEARCH COSTS (multi-phase) ════════════════════════════════
-  // Each phase costs a % of minInvestment — basic(8%), detailed(18%), deep(35%)
+  // Each phase costs a % of minInvestment — basic(5%), detailed(12%), deep(25%)
   // Legacy dueDiligenceCost kept for backward compatibility
   // ═════════════════════════════════════════════════════════════════
   const ddRoundTo = minInvestment >= 1_000_000 ? 100_000 : minInvestment >= 10_000 ? 1_000 : 100
@@ -740,7 +750,7 @@ export function generateOpportunity(
 
   // ═══ HIDDEN ATTRIBUTES (revealed through research) ═════════════
   // Risk rating (1–5): derived from sector risk × stage risk, plus some randomness
-  const compositeRisk = sectorData.baseRiskMod * stageData.riskMod
+  // (reuse compositeRisk computed above for success chance)
   // Map composite risk [0.35 .. 3.0] → [1 .. 5]
   const riskNorm = Math.min(1, Math.max(0, (compositeRisk - 0.3) / 2.7))
   const riskBase = 1 + riskNorm * 4

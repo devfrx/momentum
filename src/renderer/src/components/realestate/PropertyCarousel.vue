@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
                             <div class="carousel-card__kpi">
                                 <AppIcon icon="mdi:cash" class="carousel-card__kpi-icon text-emerald" />
                                 <span class="text-emerald">{{ formatCash(realEstate.computePropertyNetRent(prop))
-                                    }}/t</span>
+                                }}/t</span>
                             </div>
                             <div class="carousel-card__kpi">
                                 <AppIcon icon="mdi:tag-text-outline" class="carousel-card__kpi-icon text-gold" />
@@ -239,12 +239,12 @@ onBeforeUnmount(() => {
 .carousel-card:hover {
     transform: translateY(-3px);
     border-color: var(--t-border-hover);
-    box-shadow: var(--t-shadow-md);
+    /* box-shadow: var(--t-shadow-md); */
 }
 
 .carousel-card--active {
     border-color: var(--t-cta);
-    box-shadow: 0 0 0 1px var(--t-cta);
+    /* box-shadow: 0 0 0 1px var(--t-cta); */
 }
 
 /* ── Visual zone (silhouette) ── */

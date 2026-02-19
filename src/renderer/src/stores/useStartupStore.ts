@@ -500,7 +500,7 @@ export const useStartupStore = defineStore('startups', () => {
           return {
             ...opp,
             researchPhase: (opp.dueDiligenceDone ? 'basic' : 'none') as ResearchPhase,
-            researchCosts: { none: 0, basic: rc(0.08), detailed: rc(0.18), deep: rc(0.35) },
+            researchCosts: { none: 0, basic: rc(0.05), detailed: rc(0.12), deep: rc(0.25) },
             hiddenRiskRating: Math.round(1 + Math.random() * 4),
             hiddenFounderScore: Math.round(20 + Math.random() * 60)
           }

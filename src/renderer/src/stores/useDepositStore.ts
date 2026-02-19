@@ -131,9 +131,6 @@ export const useDepositStore = defineStore('deposits', () => {
     const player = usePlayerStore()
     const loanStore = useLoanStore()
 
-    if (player.level < def.minLevel) {
-      return { eligible: false, reason: `Requires level ${def.minLevel}`, effectiveAPY: 0 }
-    }
     if (loanStore.creditScore < def.minCreditScore) {
       return { eligible: false, reason: `Requires credit score ${def.minCreditScore}`, effectiveAPY: 0 }
     }
@@ -344,12 +341,11 @@ export const useDepositStore = defineStore('deposits', () => {
 
         // Compound check — add all accrued interest since last compound to balance
         const compoundInterval = getCompoundIntervalTicks(def.compoundFrequency)
-        dep.ticksSinceLastCompound++
         if (dep.ticksSinceLastCompound >= compoundInterval) {
-          // Compound: add accumulated per-tick interest over the interval
+          // Compound: add accumulated per-tick interest over the interval.
           // Each tick accrued `interest` (calculated on current balance),
-          // so total accrued ≈ interest × compoundInterval
-          const accruedInterest = interest.mul(dep.ticksSinceLastCompound)
+          // so total accrued ≈ interest × compoundInterval ticks.
+          const accruedInterest = interest.mul(compoundInterval)
           dep.currentBalance = add(dep.currentBalance, accruedInterest)
           dep.ticksSinceLastCompound = 0
           dep.totalCompounds++

@@ -400,6 +400,8 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
 
 /* ── Card Grid Polish ── */
 .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     animation: fadeInGrid 0.3s ease;
 }
 
