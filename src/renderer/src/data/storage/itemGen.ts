@@ -34,6 +34,7 @@ import {
   SELL_TAX,
   UNAPPRAISED_SELL_PENALTY,
 } from './balance'
+import { applyRarityShift } from './auctionTiers'
 
 // ─── Condition System ───────────────────────────────────────────
 
@@ -263,13 +264,17 @@ export function generateUnitContents(
   luckBonus: number = 0,
   boostedCategories: string[] = [],
   categoryBoost: number = 1,
+  rarityShift: number = 0,
 ): StorageItem[] {
   const count = minItems + Math.floor(Math.random() * (maxItems - minItems + 1))
   const items: StorageItem[] = []
 
   // Determine if this is a "dud" unit (mostly junk)
   const isDud = Math.random() < DUD_UNIT_CHANCE
-  const baseWeights = isDud ? { ...DUD_RARITY_WEIGHTS } : { ...BASE_RARITY_WEIGHTS }
+  const rawWeights = isDud ? { ...DUD_RARITY_WEIGHTS } : { ...BASE_RARITY_WEIGHTS }
+
+  // Apply lot tier rarity shift (shifts weight toward rarer tiers)
+  const baseWeights = rarityShift !== 0 ? applyRarityShift(rawWeights, rarityShift) : rawWeights
 
   // Adjust rarity weights based on location rare chance + luck bonus
   const adjustedWeights = { ...baseWeights }

@@ -13,6 +13,8 @@ import {
   NPC_MIN_CEILING_FRAC,
   NPC_DROPOUT_DAMPENER,
 } from './balance'
+import { rollAuctionLotTier, type AuctionLotTier } from './auctionTiers'
+import { rollLotEvents, type ActiveLotEvent } from './lotEvents'
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -69,6 +71,10 @@ export interface StorageAuction {
   hiddenTotalValue: Decimal
   /** Lot theme id */
   lotTheme: string
+  /** Quality tier of the lot (junk → legendary) */
+  lotTier: AuctionLotTier
+  /** Random events attached to this lot */
+  lotEvents: ActiveLotEvent[]
 }
 
 export interface AuctionConfig {
@@ -248,15 +254,33 @@ export function generateAuction(
 ): StorageAuction {
   const theme = pickLotTheme()
 
-  // Generate hidden items with theme category bias
+  // Roll lot tier (quality grade)
+  const lotTierDef = rollAuctionLotTier(location.tier, luckBonus)
+
+  // Roll lot events
+  const lotEvents = rollLotEvents(
+    location.tier,
+    luckBonus,
+    lotTierDef.eventChanceMultiplier,
+  )
+
+  // Apply lot tier extra items
+  const [extraMin, extraMax] = lotTierDef.extraItems
+  const tierExtraItems = extraMin + Math.floor(Math.random() * (extraMax - extraMin + 1))
+
+  // Apply lot tier rareChance multiplier
+  const adjustedRareChance = location.rareChance * lotTierDef.rareChanceMultiplier
+
+  // Generate hidden items with theme category bias + lot tier rarity shift
   const items = generateUnitContents(
     location.minItems,
-    location.maxItems,
+    location.maxItems + tierExtraItems,
     location.valueMultiplier,
-    location.rareChance,
+    adjustedRareChance,
     luckBonus,
     theme.boostedCategories,
     theme.categoryBoost,
+    lotTierDef.rarityShift,
   )
 
   // Hidden total value
@@ -294,8 +318,8 @@ export function generateAuction(
 
     const personality = personalities[Math.floor(Math.random() * personalities.length)]
     const cfg = PERSONALITY_CONFIG[personality]
-    const adjMin = cfg.maxBidFactor[0] * NPC_AGGRESSION_MULT
-    const adjMax = cfg.maxBidFactor[1] * NPC_AGGRESSION_MULT
+    const adjMin = cfg.maxBidFactor[0] * NPC_AGGRESSION_MULT * lotTierDef.npcAggressionBoost
+    const adjMax = cfg.maxBidFactor[1] * NPC_AGGRESSION_MULT * lotTierDef.npcAggressionBoost
     const factor = adjMin + Math.random() * (adjMax - adjMin)
     const maxBid = hiddenTotal.mul(factor).max(location.minBid.mul(1.5))
 
@@ -338,6 +362,8 @@ export function generateAuction(
     phase: 'bidding',
     hiddenTotalValue: hiddenTotal,
     lotTheme: theme.id,
+    lotTier: lotTierDef.id,
+    lotEvents,
   }
 }
 

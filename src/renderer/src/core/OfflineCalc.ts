@@ -114,9 +114,9 @@ export function calculateOfflineProgress(
   // Loan interest: full rate (debt always accrues)
   const loanInterestPaid = mul(incomePerSecond.loanInterest, creditedSeconds)
 
-  // Net cash earned = all income - loan interest (deposits don't go to cash)
-  const totalIncome = add(add(add(jobIncome, businessIncome), realEstateIncome), dividendIncome)
-  const cashEarned = Decimal.max(ZERO, totalIncome.sub(loanInterestPaid))
+  // Net cash earned = all income (loan interest is NOT subtracted — it only accrues
+  // on debt via loan.remaining, mirroring the online tick behaviour)
+  const cashEarned = add(add(add(jobIncome, businessIncome), realEstateIncome), dividendIncome)
 
   return {
     elapsedSeconds,

@@ -65,6 +65,8 @@ export const useStockStore = defineStore('stocks', () => {
    */
   const dividendIncomePerSecond = computed(() => {
     const SECONDS_PER_GAME_YEAR = 252 * 12 // 252 trading days × 12 seconds per day at 10 ticks/s
+    const upgrades = useUpgradeStore()
+    const stockReturnsMul = upgrades.getMultiplier('stock_returns')
     let total = ZERO
     for (const pos of portfolio.value) {
       const asset = assets.value.find((a) => a.id === pos.assetId)
@@ -73,7 +75,8 @@ export const useStockStore = defineStore('stocks', () => {
       const annualDividend = asset.currentPrice * pos.shares * config.dividendYield
       total = add(total, D(annualDividend / SECONDS_PER_GAME_YEAR))
     }
-    return total
+    // Apply stock_returns skill-tree multiplier (matches online payDividends behaviour)
+    return mul(total, stockReturnsMul)
   })
 
   function tick(): void {

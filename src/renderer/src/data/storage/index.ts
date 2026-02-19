@@ -65,3 +65,63 @@ export {
   INVENTORY_SOFT_CAP,
   STORAGE_FEE_PER_ITEM,
 } from './balance'
+
+export {
+  // Constants
+  INTIMIDATE_MAX_USES,
+  BLUFF_MAX_USES,
+  SNIPER_MAX_USES,
+  SNIPER_PREMIUM,
+  TACTIC_MIN_ROUND,
+  TACTIC_COOLDOWN_ROUNDS,
+  SNIPER_RESPONSE_FRACTION,
+  // Types
+  type BiddingTactics,
+  type TacticLogEntry,
+  type TacticReaction,
+  type NpcTell,
+  type TellMood,
+  type IntimidateResult,
+  type BluffResult,
+  type IntimidateEffect,
+  type BluffEffect,
+  // Functions
+  createBiddingTactics,
+  resolveIntimidate,
+  resolveBluff,
+  canSniperBid,
+  calcSniperBidAmount,
+  getNpcTell,
+  canUseTactic,
+} from './biddingTactics'
+
+export {
+  // Types
+  type LotEventTiming,
+  type LotEventEffectType,
+  type LotEventMood,
+  type LotEventEffect,
+  type LotEventDef,
+  type ActiveLotEvent,
+  // Constants
+  LOT_EVENT_DEFS,
+  // Functions
+  rollLotEvents,
+  getRevealEvents,
+  getBidEvents,
+  getWinEvents,
+  hasUnappliedEvent,
+} from './lotEvents'
+
+export {
+  // Types
+  type AuctionLotTier,
+  type AuctionLotTierDef,
+  // Constants
+  AUCTION_LOT_TIERS,
+  LOT_TIER_ORDER,
+  // Functions
+  rollAuctionLotTier,
+  getLotTierDef,
+  applyRarityShift,
+} from './auctionTiers'

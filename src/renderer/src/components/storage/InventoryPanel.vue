@@ -6,7 +6,7 @@
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
-import InventoryItem from './InventoryItem.vue'
+import GarageItemCard from './GarageItemCard.vue'
 import AppraiseDialog from './AppraiseDialog.vue'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -65,19 +65,22 @@ function sellAllItems(): void {
         <div class="inventory-toolbar" v-if="storage.inventoryCount > 0">
             <div class="filter-row">
                 <UButton v-for="cat in categories" :key="cat" size="sm"
-                    :variant="filterCategory === cat ? 'primary' : 'ghost'"
-                    @click="filterCategory = cat">{{ cat === 'all' ? t('common.all') : cat }}</UButton>
+                    :variant="filterCategory === cat ? 'primary' : 'ghost'" @click="filterCategory = cat">{{ cat ===
+                        'all' ? t('common.all') : cat }}</UButton>
             </div>
             <div class="bulk-actions">
                 <UButton v-if="unappraisedCount > 0" variant="ghost" size="sm" icon="mdi:magnify"
-                    @click="showAppraiseDialog = true; appraiseTargetId = null">{{ t('storage.appraise_all', { n: unappraisedCount }) }}</UButton>
-                <UButton variant="warning" size="sm" icon="mdi:currency-usd" @click="sellAllItems">{{ t('storage.sell_all') }}</UButton>
+                    @click="showAppraiseDialog = true; appraiseTargetId = null">{{ t('storage.appraise_all', {
+                        n:
+                    unappraisedCount }) }}</UButton>
+                <UButton variant="warning" size="sm" icon="mdi:currency-usd" @click="sellAllItems">{{
+                    t('storage.sell_all') }}</UButton>
             </div>
         </div>
 
         <!-- Items Grid -->
         <div v-if="filteredItems.length > 0" class="inventory-grid">
-            <InventoryItem v-for="item in filteredItems" :key="item.id" :item="item" @appraise="onAppraise"
+            <GarageItemCard v-for="item in filteredItems" :key="item.id" :item="item" @appraise="onAppraise"
                 @sell="onSell" />
         </div>
 

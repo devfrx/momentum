@@ -175,7 +175,7 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
       { key: '5', icon: 'mdi:table-furniture', weight: 5, dropWeight: 7 },  // Table
       { key: '6', icon: 'mdi:bed',           weight: 10, dropWeight: 4 },   // Bed Frame
       { key: '7', icon: 'mdi:dresser',       weight: 8,  dropWeight: 5 },   // Dresser
-      { key: '8', icon: 'mdi:cabinet',       weight: 7,  dropWeight: 6 },   // Cabinet
+      { key: '8', icon: 'mdi:file-cabinet',   weight: 7,  dropWeight: 6 },   // Cabinet
       { key: '9', icon: 'mdi:mirror',        weight: 4,  dropWeight: 7 },   // Mirror
     ],
     valueCurves: {
@@ -228,7 +228,7 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
       { key: '4', icon: 'mdi:sunglasses',    weight: 1, dropWeight: 5 },   // Sunglasses
       { key: '5', icon: 'mdi:shoe-heel',     weight: 2, dropWeight: 5 },   // Shoes
       { key: '6', icon: 'mdi:hat-fedora',    weight: 1, dropWeight: 6 },   // Hat
-      { key: '7', icon: 'mdi:scarf',         weight: 1, dropWeight: 7 },   // Scarf
+      { key: '7', icon: 'mdi:bow-tie',        weight: 1, dropWeight: 7 },   // Scarf
       { key: '8', icon: 'mdi:bow-tie',       weight: 1, dropWeight: 4 },   // Tie Collection
     ],
     valueCurves: {
@@ -250,7 +250,7 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
       { key: '0', icon: 'mdi:toolbox',         weight: 5, dropWeight: 8 },   // Toolbox
       { key: '1', icon: 'mdi:screwdriver',      weight: 4, dropWeight: 5 },   // Drill Set
       { key: '2', icon: 'mdi:fire',             weight: 12, dropWeight: 2 },  // Welder
-      { key: '3', icon: 'mdi:sewing-machine',   weight: 7, dropWeight: 4 },   // Sewing Machine
+      { key: '3', icon: 'mdi:content-cut',       weight: 7, dropWeight: 4 },   // Sewing Machine
       { key: '4', icon: 'mdi:saw-blade',        weight: 6, dropWeight: 5 },   // Saw
       { key: '5', icon: 'mdi:hammer',           weight: 3, dropWeight: 7 },   // Hand Tools
       { key: '6', icon: 'mdi:wrench',           weight: 4, dropWeight: 6 },   // Wrench Set
@@ -331,9 +331,9 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
       { key: '2', icon: 'mdi:watch',           weight: 1, dropWeight: 4 },   // Watch
       { key: '3', icon: 'mdi:diamond-stone',   weight: 1, dropWeight: 2 },   // Diamond Piece
       { key: '4', icon: 'mdi:crown',           weight: 1, dropWeight: 1 },   // Crown
-      { key: '5', icon: 'mdi:diversity',       weight: 1, dropWeight: 5 },   // Bracelet
+      { key: '5', icon: 'mdi:necklace',        weight: 1, dropWeight: 5 },   // Bracelet
       { key: '6', icon: 'mdi:star-four-points', weight: 1, dropWeight: 4 },  // Brooch
-      { key: '7', icon: 'mdi:locket-outline',  weight: 1, dropWeight: 6 },   // Locket
+      { key: '7', icon: 'mdi:heart-outline',   weight: 1, dropWeight: 6 },   // Locket
       { key: '8', icon: 'mdi:earbuds-outline', weight: 1, dropWeight: 5 },   // Earrings
     ],
     valueCurves: {
@@ -478,12 +478,12 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
   {
     category: 'luxury',
     baseNames: [
-      { key: '0', icon: 'mdi:scarf',           weight: 1, dropWeight: 7 },   // Silk Scarf
+      { key: '0', icon: 'mdi:bow-tie',          weight: 1, dropWeight: 7 },   // Silk Scarf
       { key: '1', icon: 'mdi:glass-cocktail',  weight: 3, dropWeight: 4 },   // Decanter
       { key: '2', icon: 'mdi:hanger',          weight: 2, dropWeight: 3 },   // Designer Coat
       { key: '3', icon: 'mdi:bag-personal',    weight: 1, dropWeight: 1 },   // Designer Bag
       { key: '4', icon: 'mdi:egg-easter',      weight: 2, dropWeight: 2 },   // Decorative Egg
-      { key: '5', icon: 'mdi:perfume',         weight: 1, dropWeight: 5 },   // Perfume
+      { key: '5', icon: 'mdi:bottle-tonic',    weight: 1, dropWeight: 5 },   // Perfume
       { key: '6', icon: 'mdi:cigar',           weight: 1, dropWeight: 4 },   // Cigar Box
     ],
     valueCurves: {
@@ -660,7 +660,7 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
     baseNames: [
       { key: '0', icon: 'mdi:circle-multiple',  weight: 1, dropWeight: 7 },  // Coin Set
       { key: '1', icon: 'mdi:cash-100',         weight: 1, dropWeight: 5 },  // Gold Coin
-      { key: '2', icon: 'mdi:coin',             weight: 1, dropWeight: 4 },  // Ancient Coin
+      { key: '2', icon: 'mdi:hand-coin',         weight: 1, dropWeight: 4 },  // Ancient Coin
       { key: '3', icon: 'mdi:currency-usd-circle', weight: 1, dropWeight: 3 }, // Rare Mint
     ],
     valueCurves: {
@@ -701,9 +701,9 @@ export const CATEGORY_BLUEPRINTS: CategoryBlueprint[] = [
     category: 'manuscripts',
     baseNames: [
       { key: '0', icon: 'mdi:book-lock',       weight: 1, dropWeight: 4 },   // Manuscript
-      { key: '1', icon: 'mdi:scroll',          weight: 1, dropWeight: 3 },   // Scroll
+      { key: '1', icon: 'mdi:script-text',     weight: 1, dropWeight: 3 },   // Scroll
       { key: '2', icon: 'mdi:book-open-page-variant', weight: 1, dropWeight: 5 }, // Codex
-      { key: '3', icon: 'mdi:quill',           weight: 1, dropWeight: 2 },   // Original Script
+      { key: '3', icon: 'mdi:fountain-pen-tip', weight: 1, dropWeight: 2 },   // Original Script
     ],
     valueCurves: {
       common:    { min: 8,      max: 50 },

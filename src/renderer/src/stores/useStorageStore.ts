@@ -23,6 +23,27 @@ import {
   type AppraiserDef,
 } from '@renderer/data/storage'
 import {
+  createBiddingTactics,
+  resolveIntimidate,
+  resolveBluff,
+  canSniperBid,
+  calcSniperBidAmount,
+  canUseTactic,
+  SNIPER_RESPONSE_FRACTION,
+  type BiddingTactics,
+} from '@renderer/data/storage/biddingTactics'
+import {
+  getRevealEvents,
+  getBidEvents,
+  getWinEvents,
+  type ActiveLotEvent,
+  type LotEventEffect,
+} from '@renderer/data/storage/lotEvents'
+import {
+  getLotTierDef,
+} from '@renderer/data/storage/auctionTiers'
+import { generateItem } from '@renderer/data/storage/itemGen'
+import {
   type StorageLocation,
   getUnlockedLocations,
   findLocationInPool,
@@ -35,6 +56,7 @@ import {
   INVENTORY_SOFT_CAP,
   STORAGE_FEE_PER_ITEM,
   LOCATION_RESHUFFLE_TICKS,
+  NPC_AGGRESSION_MULT,
 } from '@renderer/data/storage/balance'
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -95,6 +117,9 @@ export const useStorageStore = defineStore('storage', () => {
   // ── Auctions ───────────────────────────────────────────────
   const availableAuctions = ref<StorageAuction[]>([])
   const activeAuction = ref<StorageAuction | null>(null)
+
+  // ── Bidding Tactics ────────────────────────────────────────
+  const biddingTactics = ref<BiddingTactics | null>(null)
 
   // ── Procedural Locations ───────────────────────────────────
   const locationPool = ref<StorageLocation[]>(generateLocationPool())
@@ -278,6 +303,12 @@ export const useStorageStore = defineStore('storage', () => {
     auction.roundsElapsed = 0
     activeAuction.value = auction
 
+    // Initialize bidding tactics for this auction
+    biddingTactics.value = createBiddingTactics()
+
+    // Process on_reveal lot events
+    applyRevealEvents(auction)
+
     // Remove from available
     availableAuctions.value = availableAuctions.value.filter(a => a.id !== auctionId)
 
@@ -406,26 +437,19 @@ export const useStorageStore = defineStore('storage', () => {
     const anyNpcBid = processNpcBids()
     auction.roundsElapsed++
 
-    // All NPCs out and someone leads → going phases
-    if (allBiddersDropped(auction.bidders) && auction.currentBidder !== '') {
+    // Process on_bid lot events
+    applyBidEvents(auction)
+
+    // No new bid this round (player didn't bid, NPCs passed or all dropped).
+    // Start going-phase countdown so whoever leads gets the hammer – and the
+    // other side has a last chance to counter-bid during going_once / going_twice.
+    if (!anyNpcBid && auction.currentBidder !== '') {
       auction.phase = 'going_once'
       auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
       return
     }
 
-    // No NPC bid but some are still active → shorter wait
-    // (they might bid next round)
-    if (!anyNpcBid && auction.currentBidder !== '') {
-      // If player leads and NPCs passed, fast-track to going
-      const activeNpcs = auction.bidders.filter(b => !b.droppedOut)
-      if (activeNpcs.length === 0) {
-        auction.phase = 'going_once'
-        auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
-        return
-      }
-    }
-
-    // Continue normal bidding
+    // NPCs placed a new bid → continue normal bidding (player gets a chance to respond)
     auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
   }
 
@@ -450,6 +474,231 @@ export const useStorageStore = defineStore('storage', () => {
     }
   }
 
+  // ── Lot Event Processing ────────────────────────────────────
+
+  /** Effect types that modify items and must be deferred to win-time */
+  const ITEM_EFFECT_TYPES = new Set<string>([
+    'extra_item', 'item_upgrade', 'item_damage', 'hidden_treasure', 'rarity_boost',
+  ])
+
+  /**
+   * Apply on_reveal lot events when the auction starts.
+   * These modify auction state before the first bid.
+   * Events with item-level effects are NOT marked as applied here —
+   * their item effects are deferred to applyWinEvents.
+   */
+  function applyRevealEvents(auction: StorageAuction): void {
+    const reveals = getRevealEvents(auction.lotEvents)
+    for (const ev of reveals) {
+      for (const fx of ev.def.effects) {
+        applyLotEffect(auction, fx)
+      }
+      // Only mark fully applied if no item-level effects need deferred processing
+      const hasDeferredEffects = ev.def.effects.some(fx => ITEM_EFFECT_TYPES.has(fx.type))
+      if (!hasDeferredEffects) ev.applied = true
+    }
+  }
+
+  /**
+   * Apply on_bid lot events that trigger at the current round.
+   * Same deferred logic as applyRevealEvents.
+   */
+  function applyBidEvents(auction: StorageAuction): void {
+    const bidEvs = getBidEvents(auction.lotEvents, auction.roundsElapsed)
+    for (const ev of bidEvs) {
+      for (const fx of ev.def.effects) {
+        applyLotEffect(auction, fx)
+      }
+      const hasDeferredEffects = ev.def.effects.some(fx => ITEM_EFFECT_TYPES.has(fx.type))
+      if (!hasDeferredEffects) ev.applied = true
+    }
+  }
+
+  /**
+   * Apply on_win lot events when the player wins.
+   * Modifies auction items in-place before they're added to inventory.
+   */
+  function applyWinEvents(auction: StorageAuction): void {
+    // Process ALL unapplied events: dedicated on_win + deferred item effects from reveal/bid
+    const pendingEvs = auction.lotEvents.filter(e => !e.applied)
+    const player = usePlayerStore()
+    const condOrder = ['damaged', 'poor', 'fair', 'good', 'excellent', 'mint', 'pristine']
+
+    for (const ev of pendingEvs) {
+      const isWinTiming = ev.def.timing === 'on_win'
+
+      for (const fx of ev.def.effects) {
+        // For non-win events, only process item-level effects (NPC effects already applied)
+        if (!isWinTiming && !ITEM_EFFECT_TYPES.has(fx.type)) continue
+
+        switch (fx.type) {
+          case 'extra_item': {
+            // Generate a bonus item using the lot's location stats
+            const loc = getLocation(auction.locationId)
+            if (loc) {
+              const bonusItem = generateItem(
+                'uncommon', // base rarity for bonus items
+                loc.valueMultiplier,
+              )
+              auction.items.push(bonusItem)
+            }
+            break
+          }
+          case 'hidden_treasure': {
+            // Generate a rare/epic+ hidden item — the "treasure" feeling
+            const rarityRoll = Math.random()
+            const treasureRarity = rarityRoll < 0.05 ? 'mythic'
+              : rarityRoll < 0.15 ? 'legendary'
+              : rarityRoll < 0.35 ? 'epic'
+              : 'rare'
+            const loc = getLocation(auction.locationId)
+            const bonusTreasure = generateItem(
+              treasureRarity,
+              loc?.valueMultiplier ?? 1.0,
+            )
+            auction.items.push(bonusTreasure)
+            break
+          }
+          case 'item_upgrade': {
+            // Upgrade ONE random item's condition by fx.value steps
+            const upgradeable = auction.items.filter(i => i.condition && i.condition !== 'pristine')
+            if (upgradeable.length > 0) {
+              const item = upgradeable[Math.floor(Math.random() * upgradeable.length)]
+              const curIdx = condOrder.indexOf(item.condition ?? 'good')
+              const newIdx = Math.min(condOrder.length - 1, curIdx + fx.value)
+              item.condition = condOrder[newIdx] as any
+            }
+            break
+          }
+          case 'item_damage': {
+            // Damage up to fx.value distinct items, each by 1 condition step
+            const damageable = auction.items.filter(i => i.condition && i.condition !== 'damaged')
+            const toDamage = Math.min(fx.value, damageable.length)
+            // Shuffle to pick distinct items
+            const shuffled = [...damageable].sort(() => Math.random() - 0.5)
+            for (let j = 0; j < toDamage; j++) {
+              const item = shuffled[j]
+              const curIdx = condOrder.indexOf(item.condition ?? 'good')
+              const newIdx = Math.max(0, curIdx - 1)
+              item.condition = condOrder[newIdx] as any
+            }
+            break
+          }
+          case 'bonus_xp': {
+            player.addXp(D(fx.value))
+            break
+          }
+          case 'rarity_boost': {
+            // Chance to upgrade the rarity of one random item
+            const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic']
+            const boostable = auction.items.filter(i => {
+              const idx = rarityOrder.indexOf(i.rarity)
+              return idx >= 0 && idx < rarityOrder.length - 1
+            })
+            if (boostable.length > 0) {
+              const item = boostable[Math.floor(Math.random() * boostable.length)]
+              const curIdx = rarityOrder.indexOf(item.rarity)
+              item.rarity = rarityOrder[curIdx + 1] as any
+              // Also bump base value accordingly
+              item.baseValue = item.baseValue.mul(1.8)
+            }
+            break
+          }
+          default:
+            // fee_refund, npc-related effects are handled at other timings
+            break
+        }
+      }
+      ev.applied = true
+    }
+  }
+
+  /**
+   * Apply a single lot event effect to the active auction.
+   * Used for on_reveal and on_bid effects (NPC/bidding modifications).
+   */
+  function applyLotEffect(auction: StorageAuction, fx: LotEventEffect): void {
+    const player = usePlayerStore()
+
+    switch (fx.type) {
+      case 'npc_dropout': {
+        // Force weakest N NPCs to drop out
+        const active = auction.bidders
+          .filter(b => !b.droppedOut)
+          .sort((a, b) => a.maxBid.cmp(b.maxBid))
+        const toDrop = Math.min(fx.value, active.length)
+        for (let i = 0; i < toDrop; i++) {
+          active[i].droppedOut = true
+        }
+        break
+      }
+      case 'npc_frenzy': {
+        // Boost all active NPC max bids by factor
+        for (const b of auction.bidders) {
+          if (!b.droppedOut) {
+            b.maxBid = b.maxBid.mul(fx.value)
+          }
+        }
+        break
+      }
+      case 'bid_increment_change': {
+        // Multiply bid increment
+        auction.bidIncrement = auction.bidIncrement.mul(fx.value).max(D(1))
+        break
+      }
+      case 'fee_refund': {
+        // Partial refund of the entry fee (60%)
+        const loc = getLocation(auction.locationId)
+        if (loc) {
+          const refundAmount = loc.entryFee.mul(0.6)
+          player.earnCash(refundAmount)
+        }
+        break
+      }
+      case 'npc_latecomer': {
+        // Add a new NPC bidder mid-auction, scaled by aggression multiplier + lot tier
+        const personality = (fx.target ?? 'aggressive') as any
+        const tierDef = getLotTierDef(auction.lotTier)
+        const baseFactor = 0.8 + Math.random() * 0.5 // 0.8–1.3
+        const adjustedFactor = baseFactor * NPC_AGGRESSION_MULT * tierDef.npcAggressionBoost
+        const newBidder: AuctionBidder = {
+          id: `bidder_late_${Math.random().toString(36).slice(2, 6)}`,
+          name: 'Late Arrival',
+          personality,
+          maxBid: auction.hiddenTotalValue.mul(adjustedFactor),
+          currentBid: D(0),
+          droppedOut: false,
+          avatar: 'mdi:account-alert',
+          bidCount: 0,
+        }
+        auction.bidders.push(newBidder)
+        break
+      }
+      case 'bidder_reveal': {
+        // Mark the event result key with the strongest bidder's budget
+        // (the UI reads this from the event's resultKeys)
+        const strongest = auction.bidders
+          .filter(b => !b.droppedOut)
+          .sort((a, b) => b.maxBid.cmp(a.maxBid))[0]
+        if (strongest) {
+          // Store revealed info in the event's resultKeys for UI
+          const ev = auction.lotEvents.find(e => e.def.effects.includes(fx))
+          if (ev) {
+            ev.resultKeys.push(`${strongest.name}:${strongest.maxBid.toString()}`)
+          }
+        }
+        break
+      }
+      case 'bonus_xp': {
+        player.addXp(D(fx.value))
+        break
+      }
+      default:
+        // item-level effects handled in applyWinEvents
+        break
+    }
+  }
+
   // ── Close Auction ──────────────────────────────────────────
 
   function closeAuction(): void {
@@ -466,6 +715,9 @@ export const useStorageStore = defineStore('storage', () => {
       totalSpentOnAuctions.value = add(totalSpentOnAuctions.value, auction.currentBid)
       session.value.bidSpend = add(session.value.bidSpend, auction.currentBid)
       session.value.auctionsWon++
+
+      // Apply on_win lot events (modifies items in-place before inventory)
+      applyWinEvents(auction)
 
       // Add items to inventory
       for (const item of auction.items) {
@@ -514,6 +766,7 @@ export const useStorageStore = defineStore('storage', () => {
     }
 
     activeAuction.value = null
+    biddingTactics.value = null
   }
 
   // ── Skip / Leave Auction ───────────────────────────────────
@@ -523,6 +776,193 @@ export const useStorageStore = defineStore('storage', () => {
     // Mark as lost and close
     activeAuction.value.currentBidder = ''
     closeAuction()
+  }
+
+  // ── Intimidate ─────────────────────────────────────────────
+
+  function useIntimidate(): BiddingTactics['tacticLog'][number] | null {
+    if (!activeAuction.value || activeAuction.value.status !== 'active') return null
+    if (!biddingTactics.value) return null
+
+    const tactics = biddingTactics.value
+    const auction = activeAuction.value
+
+    if (!canUseTactic(tactics, 'intimidate', auction.roundsElapsed)) return null
+
+    tactics.intimidateUsesLeft--
+    tactics.lastTacticRound = auction.roundsElapsed
+
+    const result = resolveIntimidate(
+      auction.bidders,
+      auction.currentBid,
+      auction.bidIncrement,
+    )
+
+    // Apply counter-bids: highest counter-bidder wins
+    if (result.counterBids.length > 0) {
+      const best = result.counterBids.reduce(
+        (top, cb) => cb.amount.gt(top.amount) ? cb : top,
+        result.counterBids[0],
+      )
+      if (best.amount.gt(auction.currentBid)) {
+        auction.currentBid = best.amount
+        auction.currentBidder = best.bidder.id
+        best.bidder.currentBid = best.amount
+      }
+    }
+
+    // Check if all bidders now dropped → go to going phases
+    if (allBiddersDropped(auction.bidders) && auction.currentBidder !== '') {
+      auction.phase = 'going_once'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+    }
+
+    const entry: BiddingTactics['tacticLog'][number] = {
+      tactic: 'intimidate',
+      round: auction.roundsElapsed,
+      reactions: result.reactions,
+    }
+    tactics.tacticLog.push(entry)
+    return entry
+  }
+
+  // ── Bluff ──────────────────────────────────────────────────
+
+  function useBluff(): BiddingTactics['tacticLog'][number] | null {
+    if (!activeAuction.value || activeAuction.value.status !== 'active') return null
+    if (!biddingTactics.value) return null
+
+    const tactics = biddingTactics.value
+    const auction = activeAuction.value
+
+    if (!canUseTactic(tactics, 'bluff', auction.roundsElapsed)) return null
+
+    tactics.bluffUsesLeft--
+    tactics.lastTacticRound = auction.roundsElapsed
+
+    const result = resolveBluff(
+      auction.bidders,
+      auction.currentBid,
+      auction.bidIncrement,
+    )
+
+    // Apply caller bids: highest caller wins
+    if (result.callerBids.length > 0) {
+      const best = result.callerBids.reduce(
+        (top, cb) => cb.amount.gt(top.amount) ? cb : top,
+        result.callerBids[0],
+      )
+      if (best.amount.gt(auction.currentBid)) {
+        auction.currentBid = best.amount
+        auction.currentBidder = best.bidder.id
+        best.bidder.currentBid = best.amount
+      }
+    }
+
+    // Check if all dropped out
+    if (allBiddersDropped(auction.bidders) && auction.currentBidder !== '') {
+      auction.phase = 'going_once'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+    }
+
+    const entry: BiddingTactics['tacticLog'][number] = {
+      tactic: 'bluff',
+      round: auction.roundsElapsed,
+      reactions: result.reactions,
+    }
+    tactics.tacticLog.push(entry)
+    return entry
+  }
+
+  // ── Sniper Bid ─────────────────────────────────────────────
+
+  function placeSniperBid(): boolean {
+    if (!activeAuction.value || activeAuction.value.status !== 'active') return false
+    if (!biddingTactics.value) return false
+
+    const tactics = biddingTactics.value
+    const auction = activeAuction.value
+
+    if (!canSniperBid(auction.phase, tactics.sniperUsesLeft)) return false
+
+    const sniperAmount = calcSniperBidAmount(auction.currentBid, auction.bidIncrement)
+    const player = usePlayerStore()
+    if (player.cash.lt(sniperAmount)) return false
+
+    tactics.sniperUsesLeft--
+    tactics.lastTacticRound = auction.roundsElapsed
+
+    // Place the sniper bid
+    auction.currentBid = sniperAmount
+    auction.currentBidder = 'player'
+
+    // NPCs get very little time to respond — most will fail to react
+    // We give each active NPC reduced chance to respond
+    const reactions: BiddingTactics['tacticLog'][number]['reactions'] = []
+    for (const b of auction.bidders) {
+      if (b.droppedOut) continue
+      // Only SNIPER_RESPONSE_FRACTION chance to even react
+      if (Math.random() > SNIPER_RESPONSE_FRACTION) {
+        reactions.push({
+          bidderId: b.id,
+          bidderName: b.name,
+          outcome: 'sniped',
+          i18nKey: 'sniper_caught_off_guard',
+        })
+        continue
+      }
+      // Those who react, normal bidding logic
+      const npcBid = calculateBidderBehavior(
+        b, auction.currentBid, auction.bidIncrement, auction.roundsElapsed,
+      )
+      if (npcBid === null) {
+        b.droppedOut = true
+        reactions.push({
+          bidderId: b.id,
+          bidderName: b.name,
+          outcome: 'dropped',
+          i18nKey: 'sniper_dropped',
+        })
+      } else if (npcBid.gt(auction.currentBid)) {
+        auction.currentBid = npcBid
+        auction.currentBidder = b.id
+        b.currentBid = npcBid
+        b.bidCount++
+        reactions.push({
+          bidderId: b.id,
+          bidderName: b.name,
+          outcome: 'counter_bid',
+          i18nKey: 'sniper_countered',
+        })
+      } else {
+        reactions.push({
+          bidderId: b.id,
+          bidderName: b.name,
+          outcome: 'sniped',
+          i18nKey: 'sniper_caught_off_guard',
+        })
+      }
+    }
+
+    tactics.tacticLog.push({
+      tactic: 'sniper',
+      round: auction.roundsElapsed,
+      reactions,
+    })
+
+    // After sniper bid, reset going phase to going_once
+    // (gives the hammer auctioneer pause to process the last-second bid)
+    if (auction.currentBidder === 'player') {
+      auction.phase = 'going_once'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerGoing
+    } else {
+      // NPC countered — back to bidding
+      auction.phase = 'bidding'
+      auction.roundTicksLeft = AUCTION_CONFIG.ticksPerRound
+    }
+    auction.roundsElapsed++
+
+    return true
   }
 
   // ── Appraise Item ──────────────────────────────────────────
@@ -651,6 +1091,7 @@ export const useStorageStore = defineStore('storage', () => {
   function prestigeReset(): void {
     availableAuctions.value = []
     activeAuction.value = null
+    biddingTactics.value = null
     inventory.value = []
     locationPool.value = generateLocationPool()
     lastLocationReshuffle.value = 0
@@ -735,6 +1176,7 @@ export const useStorageStore = defineStore('storage', () => {
     // State
     availableAuctions,
     activeAuction,
+    biddingTactics,
     inventory,
     locationPool,
     totalAuctionsWon,
@@ -769,6 +1211,9 @@ export const useStorageStore = defineStore('storage', () => {
     refreshAuctions,
     startAuction,
     placeBid,
+    placeSniperBid,
+    useIntimidate,
+    useBluff,
     leaveAuction,
     closeAuction,
     appraiseItem,

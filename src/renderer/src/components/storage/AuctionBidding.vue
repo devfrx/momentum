@@ -2,7 +2,8 @@
 /**
  * AuctionBidding — Active auction bidding interface.
  * Shows the bidding war in real-time: hints, bidder avatars,
- * current bid, timer, and player bid controls.
+ * current bid, timer, player bid controls, and tactical actions
+ * (intimidate, bluff, sniper bid).
  */
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
@@ -15,6 +16,15 @@ import { D, add } from '@renderer/core/BigNum'
 import { AUCTION_CONFIG } from '@renderer/data/storage'
 import { rarityCssVar } from '@renderer/data/rarity'
 import { resolveItemName } from '@renderer/data/storage/items'
+import {
+    getNpcTell,
+    canUseTactic,
+    canSniperBid,
+    calcSniperBidAmount,
+    type TacticLogEntry,
+} from '@renderer/data/storage/biddingTactics'
+import { getLotTierDef } from '@renderer/data/storage/auctionTiers'
+import LotEventBanner from './LotEventBanner.vue'
 
 defineEmits<{ back: [] }>()
 
@@ -24,6 +34,7 @@ const { formatCash } = useFormat()
 const { t } = useI18n()
 
 const auction = computed(() => storage.activeAuction)
+const tactics = computed(() => storage.biddingTactics)
 const location = computed(() =>
     auction.value ? storage.getLocation(auction.value.locationId) : null
 )
@@ -62,13 +73,114 @@ const phaseLabel = computed(() => {
     }
 })
 
+// ── Tactic computed ─────────────────────────────────────────
+const canIntimidate = computed(() => {
+    if (!auction.value || !tactics.value) return false
+    return auction.value.status === 'active'
+        && canUseTactic(tactics.value, 'intimidate', auction.value.roundsElapsed)
+})
+
+const canBluff = computed(() => {
+    if (!auction.value || !tactics.value) return false
+    return auction.value.status === 'active'
+        && canUseTactic(tactics.value, 'bluff', auction.value.roundsElapsed)
+})
+
+const canSniper = computed(() => {
+    if (!auction.value || !tactics.value) return false
+    return auction.value.status === 'active'
+        && canSniperBid(auction.value.phase, tactics.value.sniperUsesLeft)
+        && player.cash.gte(sniperAmount.value)
+})
+
+const sniperAmount = computed(() => {
+    if (!auction.value) return D(0)
+    return calcSniperBidAmount(auction.value.currentBid, auction.value.bidIncrement)
+})
+
+const latestTacticEntry = ref<TacticLogEntry | null>(null)
+const showTacticFeedback = ref(false)
+let tacticFeedbackTimer: ReturnType<typeof setTimeout> | null = null
+
+function showTacticResult(entry: TacticLogEntry | null): void {
+    if (!entry) return
+    latestTacticEntry.value = entry
+    showTacticFeedback.value = true
+    if (tacticFeedbackTimer) clearTimeout(tacticFeedbackTimer)
+    tacticFeedbackTimer = setTimeout(() => {
+        showTacticFeedback.value = false
+    }, 4000)
+}
+
+/** NPC tells — computed from current auction state */
+const bidderTells = computed(() => {
+    if (!auction.value) return new Map<string, ReturnType<typeof getNpcTell>>()
+    const map = new Map<string, ReturnType<typeof getNpcTell>>()
+    for (const b of auction.value.bidders) {
+        map.set(b.id, getNpcTell(b, auction.value.currentBid))
+    }
+    return map
+})
+
+const activeBidders = computed(() =>
+    auction.value?.bidders.filter(b => !b.droppedOut).length ?? 0
+)
+
+// ── Lot tier + events computed ──────────────────────────────
+const lotTier = computed(() =>
+    auction.value ? getLotTierDef(auction.value.lotTier) : null
+)
+const showLotTierBadge = computed(() =>
+    auction.value && auction.value.lotTier !== 'standard'
+)
+const revealEvents = computed(() =>
+    auction.value?.lotEvents.filter(e => e.def.timing === 'on_reveal') ?? []
+)
+const activeEvents = computed(() =>
+    auction.value?.lotEvents.filter(e => e.applied) ?? []
+)
+const pendingBidEvents = computed(() =>
+    auction.value?.lotEvents.filter(
+        e => e.def.timing === 'on_bid' && !e.applied
+    ) ?? []
+)
+const winEvents = computed(() =>
+    auction.value?.lotEvents.filter(e => e.def.timing === 'on_win') ?? []
+)
+
 function placeBid(): void {
     if (!canBid.value) return
     storage.placeBid(bidAmount.value)
 }
 
+function doIntimidate(): void {
+    const result = storage.useIntimidate()
+    showTacticResult(result)
+}
+
+function doBluff(): void {
+    const result = storage.useBluff()
+    showTacticResult(result)
+}
+
+function doSniper(): void {
+    storage.placeSniperBid()
+    if (tactics.value && tactics.value.tacticLog.length > 0) {
+        showTacticResult(tactics.value.tacticLog[tactics.value.tacticLog.length - 1])
+    }
+}
+
 function leave(): void {
     storage.leaveAuction()
+}
+
+/** Map tactic reaction outcomes to CSS modifier class */
+function reactionClass(outcome: string): string {
+    switch (outcome) {
+        case 'dropped': case 'fooled': case 'sniped': return 'reaction--positive'
+        case 'counter_bid': case 'called_bluff': return 'reaction--negative'
+        default: return 'reaction--neutral'
+    }
 }
 </script>
 
@@ -85,6 +197,14 @@ function leave(): void {
                 </div>
             </div>
             <div class="bidding-header__right">
+                <!-- Lot Tier Badge -->
+                <UTooltip v-if="showLotTierBadge && lotTier" :text="t(`storage.lot_tier_${lotTier.id}_desc`)"
+                    placement="top">
+                    <span class="lot-tier-badge" :style="{ '--_tier-color': lotTier.cssVar }">
+                        <AppIcon :icon="lotTier.icon" />
+                        {{ t(`storage.lot_tier_${lotTier.id}`) }}
+                    </span>
+                </UTooltip>
                 <span class="bidding-round">{{ t('storage.round_n', { n: auction.roundsElapsed }) }} / {{ 10 }}</span>
             </div>
         </div>
@@ -101,6 +221,9 @@ function leave(): void {
             <AppIcon icon="mdi:gavel" class="going-icon" />
             <span class="going-text">{{ phaseLabel }}</span>
         </div>
+
+        <!-- Lot Events Banner (on_reveal + applied on_bid) -->
+        <LotEventBanner v-if="activeEvents.length > 0" :events="activeEvents" compact />
 
         <!-- Two-column layout: Auction info + Bidding controls -->
         <div class="bidding-body">
@@ -119,8 +242,8 @@ function leave(): void {
                 </div>
 
                 <!-- Bidders -->
-                <UAccordion :title="t('storage.competitors')" icon="mdi:account-group" :badge="auction.bidders.length"
-                    variant="ghost" compact defaultOpen>
+                <UAccordion :title="t('storage.competitors')" icon="mdi:account-group"
+                    :badge="`${activeBidders}/${auction.bidders.length}`" variant="ghost" compact defaultOpen>
                     <div class="bidder-list">
                         <div v-for="bidder in auction.bidders" :key="bidder.id" class="bidder-chip"
                             :class="{ 'bidder-chip--dropped': bidder.droppedOut, 'bidder-chip--leading': auction.currentBidder === bidder.id }">
@@ -128,13 +251,39 @@ function leave(): void {
                             <div class="bidder-info">
                                 <span class="bidder-name">{{ bidder.name }}</span>
                                 <span class="bidder-status" v-if="bidder.droppedOut">{{ t('storage.dropped_out')
-                                    }}</span>
+                                }}</span>
                                 <span class="bidder-status bidder-status--leading"
                                     v-else-if="auction.currentBidder === bidder.id">{{ t('storage.leading') }}</span>
                             </div>
+                            <!-- NPC Tell indicator -->
+                            <UTooltip v-if="bidderTells.get(bidder.id) && !bidder.droppedOut"
+                                :text="t(`storage.tell_${bidderTells.get(bidder.id)?.i18nKey}`)" placement="right">
+                                <span class="bidder-tell" :class="`bidder-tell--${bidderTells.get(bidder.id)?.mood}`">
+                                    <AppIcon :icon="bidderTells.get(bidder.id)?.icon ?? ''" />
+                                </span>
+                            </UTooltip>
                         </div>
                     </div>
                 </UAccordion>
+
+                <!-- Tactic Feedback Toast -->
+                <Transition name="tactic-toast">
+                    <div v-if="showTacticFeedback && latestTacticEntry" class="tactic-feedback">
+                        <div class="tactic-feedback__header">
+                            <AppIcon :icon="latestTacticEntry.tactic === 'intimidate' ? 'mdi:arm-flex'
+                                : latestTacticEntry.tactic === 'bluff' ? 'mdi:cards-playing-outline'
+                                    : 'mdi:target'" />
+                            <span>{{ t(`storage.tactic_${latestTacticEntry.tactic}`) }}</span>
+                        </div>
+                        <div class="tactic-feedback__reactions">
+                            <div v-for="(r, i) in latestTacticEntry.reactions" :key="i" class="tactic-reaction"
+                                :class="reactionClass(r.outcome)">
+                                <span class="tactic-reaction__name">{{ r.bidderName }}</span>
+                                <span class="tactic-reaction__outcome">{{ t(`storage.${r.i18nKey}`) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </Transition>
             </div>
 
             <!-- Right: Current bid + Controls -->
@@ -168,8 +317,32 @@ function leave(): void {
                     <UButton variant="primary" size="lg" icon="mdi:currency-usd" class="bid-button" :disabled="!canBid"
                         @click="placeBid">{{ t('storage.place_bid') }}</UButton>
 
+                    <!-- Tactics Row -->
+                    <div class="tactics-row" v-if="tactics">
+                        <UTooltip :text="t('storage.tactic_intimidate_desc')" placement="top">
+                            <UButton variant="warning" size="sm" icon="mdi:arm-flex" :disabled="!canIntimidate"
+                                @click="doIntimidate"
+                                :subtitle="tactics.intimidateUsesLeft > 0 ? `${tactics.intimidateUsesLeft}` : '0'">
+                                {{ t('storage.tactic_intimidate') }}
+                            </UButton>
+                        </UTooltip>
+                        <UTooltip :text="t('storage.tactic_bluff_desc')" placement="top">
+                            <UButton variant="info" size="sm" icon="mdi:cards-playing-outline" :disabled="!canBluff"
+                                @click="doBluff"
+                                :subtitle="tactics.bluffUsesLeft > 0 ? `${tactics.bluffUsesLeft}` : '0'">
+                                {{ t('storage.tactic_bluff') }}
+                            </UButton>
+                        </UTooltip>
+                        <UTooltip v-if="isGoingPhase" :text="t('storage.tactic_sniper_desc')" placement="top">
+                            <UButton variant="danger" size="sm" icon="mdi:target" :disabled="!canSniper"
+                                @click="doSniper" :subtitle="formatCash(sniperAmount)">
+                                {{ t('storage.tactic_sniper') }}
+                            </UButton>
+                        </UTooltip>
+                    </div>
+
                     <UButton variant="text" size="sm" class="leave-button" @click="leave">{{ t('storage.leave_auction')
-                    }}</UButton>
+                        }}</UButton>
                 </div>
 
                 <!-- Auction Result -->
@@ -195,6 +368,9 @@ function leave(): void {
 
         <!-- Won Items (if auction is won) -->
         <div v-if="auction.status === 'won'" class="won-items">
+            <!-- Win lot events -->
+            <LotEventBanner v-if="winEvents.length > 0" :events="winEvents" />
+
             <h3 class="section-label">
                 <AppIcon icon="mdi:package-variant" /> {{ t('storage.items_found') }}
             </h3>
@@ -204,7 +380,7 @@ function leave(): void {
                     <AppIcon :icon="item.icon" class="found-item__icon" :style="{ color: rarityCssVar(item.rarity) }" />
                     <span class="found-item__name">{{ resolveItemName(item, t) }}</span>
                     <span class="found-item__rarity" :style="{ color: rarityCssVar(item.rarity) }">{{ item.rarity
-                        }}</span>
+                    }}</span>
                 </div>
             </div>
             <UButton variant="primary" icon="mdi:check" @click="$emit('back')">{{ t('storage.collect_items') }}
@@ -615,5 +791,163 @@ function leave(): void {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: var(--t-font-bold);
+}
+
+/* ── NPC Tells ─────────────────────────────────────────── */
+.bidder-tell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: var(--t-radius-full);
+    font-size: 0.75rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: color var(--t-transition-normal), background var(--t-transition-normal);
+}
+
+.bidder-tell--nervous {
+    color: var(--t-warning);
+    background: var(--t-warning-muted);
+}
+
+.bidder-tell--confident {
+    color: var(--t-success);
+    background: var(--t-success-muted);
+}
+
+.bidder-tell--disinterested {
+    color: var(--t-text-muted);
+    background: var(--t-bg-muted);
+}
+
+.bidder-tell--aggressive {
+    color: var(--t-danger);
+    background: var(--t-danger-muted);
+}
+
+.bidder-tell--smirking {
+    color: var(--t-purple);
+    background: var(--t-purple-muted);
+}
+
+.bidder-tell--neutral {
+    color: var(--t-text-muted);
+    background: var(--t-bg-muted);
+}
+
+/* ── Tactics Row ───────────────────────────────────────── */
+.tactics-row {
+    display: flex;
+    gap: var(--t-space-2);
+    flex-wrap: wrap;
+    padding-top: var(--t-space-2);
+    border-top: 1px dashed var(--t-border);
+}
+
+/* ── Tactic Feedback Toast ─────────────────────────────── */
+.tactic-feedback {
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border-hover);
+    border-radius: var(--t-radius-md);
+    padding: var(--t-space-3);
+    margin-top: var(--t-space-2);
+    box-shadow: var(--t-shadow-md);
+}
+
+.tactic-feedback__header {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    font-weight: var(--t-font-bold);
+    font-size: var(--t-font-size-sm);
+    color: var(--t-text);
+    margin-bottom: var(--t-space-2);
+}
+
+.tactic-feedback__reactions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--t-space-1);
+}
+
+.tactic-reaction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--t-space-1) var(--t-space-2);
+    border-radius: var(--t-radius-sm);
+    font-size: var(--t-font-size-xs);
+}
+
+.tactic-reaction__name {
+    font-weight: var(--t-font-semibold);
+    color: var(--t-text);
+}
+
+.tactic-reaction__outcome {
+    font-weight: var(--t-font-medium);
+}
+
+.reaction--positive {
+    background: var(--t-success-muted);
+}
+
+.reaction--positive .tactic-reaction__outcome {
+    color: var(--t-success);
+}
+
+.reaction--negative {
+    background: var(--t-danger-muted);
+}
+
+.reaction--negative .tactic-reaction__outcome {
+    color: var(--t-danger);
+}
+
+.reaction--neutral {
+    background: var(--t-bg-muted);
+}
+
+.reaction--neutral .tactic-reaction__outcome {
+    color: var(--t-text-muted);
+}
+
+/* ── Lot Tier Badge ────────────────────────────────────────── */
+
+.lot-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-semibold);
+    color: var(--_tier-color);
+    background: color-mix(in srgb, var(--_tier-color) 12%, transparent);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--t-radius-sm);
+    border: 1px solid color-mix(in srgb, var(--_tier-color) 25%, transparent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+/* Tactic toast transition */
+.tactic-toast-enter-active {
+    transition: all 0.3s ease;
+}
+
+.tactic-toast-leave-active {
+    transition: all 0.4s ease;
+}
+
+.tactic-toast-enter-from {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.tactic-toast-leave-to {
+    opacity: 0;
+    transform: translateY(4px);
 }
 </style>

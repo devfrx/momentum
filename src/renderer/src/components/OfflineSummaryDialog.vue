@@ -18,6 +18,7 @@ const emit = defineEmits<{
 const { formatCash, formatRate } = useFormat()
 const { t } = useI18n()
 
+/** Cash income lines (contribute to cashEarned total) */
 const incomeLines = computed(() => {
     const lines: { label: string; icon: string; value: string; positive: boolean }[] = []
     const s = props.summary
@@ -33,54 +34,74 @@ const incomeLines = computed(() => {
     if (s.dividendIncome.gt(ZERO)) {
         lines.push({ label: t('offline.dividends'), icon: 'mdi:chart-line', value: formatCash(s.dividendIncome), positive: true })
     }
+    return lines
+})
+
+/** Side-effect lines (deposit interest → balances, loan interest → debt; not included in cash total) */
+const sideEffectLines = computed(() => {
+    const lines: { label: string; icon: string; value: string; positive: boolean }[] = []
+    const s = props.summary
     if (s.depositInterest.gt(ZERO)) {
         lines.push({ label: t('offline.deposit_interest'), icon: 'mdi:piggy-bank', value: '+' + formatCash(s.depositInterest), positive: true })
     }
     if (s.loanInterestPaid.gt(ZERO)) {
-        lines.push({ label: t('offline.loan_interest'), icon: 'mdi:bank-minus', value: '-' + formatCash(s.loanInterestPaid), positive: false })
+        lines.push({ label: t('offline.loan_interest'), icon: 'mdi:bank-minus', value: '+' + formatCash(s.loanInterestPaid), positive: false })
     }
     return lines
 })
 </script>
 
 <template>
-    <UModal :modelValue="true" @update:modelValue="emit('close')" :title="t('offline.welcome_back')" icon="mdi:clock-outline" size="sm" :closable="false">
-                <div class="offline-time">
-                    <span class="away-label">{{ t('offline.time_away') }}</span>
-                    <span class="away-value">{{ summary.timeAwayFormatted }}</span>
-                </div>
+    <UModal :modelValue="true" @update:modelValue="emit('close')" :title="t('offline.welcome_back')"
+        icon="mdi:clock-outline" size="sm" :closable="false">
+        <div class="offline-time">
+            <span class="away-label">{{ t('offline.time_away') }}</span>
+            <span class="away-value">{{ summary.timeAwayFormatted }}</span>
+        </div>
 
-                <div class="offline-efficiency">
-                    <span>{{ t('offline.efficiency') }}</span>
-                    <span class="eff-value">{{ formatRate(summary.efficiency * 100, 0) }}</span>
-                </div>
+        <div class="offline-efficiency">
+            <span>{{ t('offline.efficiency') }}</span>
+            <span class="eff-value">{{ formatRate(summary.efficiency * 100, 0) }}</span>
+        </div>
 
-                <div class="offline-breakdown">
-                    <div v-if="incomeLines.length === 0" class="no-income">
-                        {{ t('offline.no_income') }}
-                    </div>
-                    <div v-for="line in incomeLines" :key="line.label" class="income-line"
-                        :class="{ negative: !line.positive }">
-                        <div class="line-left">
-                            <AppIcon :icon="line.icon" class="line-icon" />
-                            <span>{{ line.label }}</span>
-                        </div>
-                        <span class="line-value" :class="{ success: line.positive, danger: !line.positive }">
-                            {{ line.value }}
-                        </span>
-                    </div>
+        <div class="offline-breakdown">
+            <div v-if="incomeLines.length === 0 && sideEffectLines.length === 0" class="no-income">
+                {{ t('offline.no_income') }}
+            </div>
+            <div v-for="line in incomeLines" :key="line.label" class="income-line">
+                <div class="line-left">
+                    <AppIcon :icon="line.icon" class="line-icon" />
+                    <span>{{ line.label }}</span>
                 </div>
+                <span class="line-value success">
+                    {{ line.value }}
+                </span>
+            </div>
+        </div>
 
-                <div class="offline-total">
-                    <span>{{ t('offline.total_earned') }}</span>
-                    <span class="total-value">{{ formatCash(summary.cashEarned) }}</span>
+        <div class="offline-total">
+            <span>{{ t('offline.total_earned') }}</span>
+            <span class="total-value">{{ formatCash(summary.cashEarned) }}</span>
+        </div>
+
+        <div v-if="sideEffectLines.length > 0" class="offline-breakdown side-effects">
+            <div v-for="line in sideEffectLines" :key="line.label" class="income-line"
+                :class="{ negative: !line.positive }">
+                <div class="line-left">
+                    <AppIcon :icon="line.icon" class="line-icon" />
+                    <span>{{ line.label }}</span>
                 </div>
+                <span class="line-value" :class="{ success: line.positive, danger: !line.positive }">
+                    {{ line.value }}
+                </span>
+            </div>
+        </div>
 
-                <template #footer>
-                    <UButton variant="primary" block icon="mdi:check" @click="emit('close')">
-                        {{ t('offline.collect') }}
-                    </UButton>
-                </template>
+        <template #footer>
+            <UButton variant="primary" block icon="mdi:check" @click="emit('close')">
+                {{ t('offline.collect') }}
+            </UButton>
+        </template>
     </UModal>
 </template>
 
@@ -126,6 +147,12 @@ const incomeLines = computed(() => {
     flex-direction: column;
     gap: 0.35rem;
     margin-bottom: 0.75rem;
+}
+
+.offline-breakdown.side-effects {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--t-border);
 }
 
 .income-line {

@@ -4,11 +4,14 @@
  * Shows location, peek hints, bidder count, starting bid.
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton } from '@renderer/components/ui'
+import { UButton, UTooltip } from '@renderer/components/ui'
+import LotEventBanner from './LotEventBanner.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import type { StorageAuction } from '@renderer/data/storage'
+import { getLotTierDef } from '@renderer/data/storage/auctionTiers'
+import { computed } from 'vue'
 
 const props = defineProps<{
     auction: StorageAuction
@@ -21,10 +24,17 @@ const { t } = useI18n()
 const storage = useStorageStore()
 
 const location = storage.getLocation(props.auction.locationId)
+
+const lotTier = computed(() => getLotTierDef(props.auction.lotTier))
+const showTierBadge = computed(() => props.auction.lotTier !== 'standard')
+const revealEvents = computed(() =>
+    props.auction.lotEvents.filter(e => e.def.timing === 'on_reveal')
+)
+const hasEvents = computed(() => props.auction.lotEvents.length > 0)
 </script>
 
 <template>
-    <div class="auction-card" :style="{ '--_accent': 'var(--t-warning)' }">
+    <div class="auction-card" :style="{ '--_accent': lotTier.cssVar }">
         <!-- Head -->
         <div class="auction-card__head">
             <AppIcon :icon="location?.icon ?? 'mdi:warehouse'" class="auction-card__icon" />
@@ -32,11 +42,29 @@ const location = storage.getLocation(props.auction.locationId)
                 <span class="auction-card__name">{{ location?.name ?? t('storage.unknown_location') }}</span>
                 <span class="auction-card__tier">{{ location?.tier?.toUpperCase() }}</span>
             </div>
-            <span class="auction-card__badge">
-                <AppIcon icon="mdi:account-group" />
-                {{ auction.bidders.length }} {{ t('storage.bidders') }}
-            </span>
+            <div class="auction-card__badges">
+                <!-- Lot Tier Badge -->
+                <UTooltip v-if="showTierBadge" :text="t(`storage.lot_tier_${lotTier.id}_desc`)" placement="top">
+                    <span class="lot-tier-badge" :style="{ '--_tier-color': lotTier.cssVar }">
+                        <AppIcon :icon="lotTier.icon" />
+                        {{ t(`storage.lot_tier_${lotTier.id}`) }}
+                    </span>
+                </UTooltip>
+                <!-- Event indicator -->
+                <UTooltip v-if="hasEvents" :text="t('storage.lot_has_events')" placement="top">
+                    <span class="lot-event-indicator">
+                        <AppIcon icon="mdi:lightning-bolt" />
+                    </span>
+                </UTooltip>
+                <span class="auction-card__badge">
+                    <AppIcon icon="mdi:account-group" />
+                    {{ auction.bidders.length }} {{ t('storage.bidders') }}
+                </span>
+            </div>
         </div>
+
+        <!-- Lot Events (on_reveal only) -->
+        <LotEventBanner v-if="revealEvents.length > 0" :events="revealEvents" timing="on_reveal" compact />
 
         <!-- Peek Hints -->
         <div class="auction-card__hints">
@@ -88,6 +116,15 @@ const location = storage.getLocation(props.auction.locationId)
     display: flex;
     align-items: center;
     gap: var(--t-space-3);
+    flex-wrap: wrap;
+}
+
+.auction-card__badges {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    margin-left: auto;
+    flex-wrap: wrap;
 }
 
 .auction-card__icon {
@@ -182,5 +219,44 @@ const location = storage.getLocation(props.auction.locationId)
 .auction-card__actions {
     display: flex;
     justify-content: flex-end;
+}
+
+/* ── Lot Tier Badge ────────────────────────────────────────── */
+
+.lot-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-semibold);
+    color: var(--_tier-color);
+    background: color-mix(in srgb, var(--_tier-color) 12%, transparent);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--t-radius-sm);
+    border: 1px solid color-mix(in srgb, var(--_tier-color) 25%, transparent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.lot-event-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: var(--t-warning);
+    animation: event-pulse 2s ease-in-out infinite;
+}
+
+@keyframes event-pulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 </style>

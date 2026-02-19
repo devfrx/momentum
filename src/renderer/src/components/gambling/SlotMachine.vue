@@ -43,11 +43,10 @@ const SYMBOLS: SlotSymbol[] = [
 const TOTAL_WEIGHT = SYMBOLS.reduce((s, sym) => s + sym.weight, 0)
 
 // ─── Paytable ────────────────────────────────────────────────
-// New rules:
-// - 2 horizontal match → ×1
-// - Pyramid (row 0+2 same + row 1 center same) → ×2
+// Rules (EV ≈ 0.97, ~3% house edge):
+// - Pyramid (row 0+2 same + row 1 center same) → ×1.5
 // - 3 horizontal top/bottom or diagonal → ×5
-// - 3 horizontal center → ×10
+// - 3 horizontal center → ×9
 // - 777 horizontal center → ×100
 interface PaytableEntry {
     description: string
@@ -57,11 +56,10 @@ interface PaytableEntry {
 
 const PAYTABLE: PaytableEntry[] = [
     { description: '777 on center row', multiplier: 100, pattern: '7-7-7 center' },
-    { description: '3 match — center row', multiplier: 10, pattern: 'X-X-X center' },
+    { description: '3 match — center row', multiplier: 9, pattern: 'X-X-X center' },
     { description: '3 match — top/bottom row', multiplier: 5, pattern: 'X-X-X top/bottom' },
     { description: '3 match — diagonal', multiplier: 5, pattern: 'X-X-X diagonal' },
-    { description: 'Pyramid (top+bottom & center match)', multiplier: 2, pattern: 'pyramid' },
-    { description: '2 adjacent match — horizontal', multiplier: 1, pattern: 'X-X adjacent' },
+    { description: 'Pyramid (top+bottom & center match)', multiplier: 1.5, pattern: 'pyramid' },
 ]
 
 // ─── Reel configuration ──────────────────────────────────────
@@ -151,12 +149,6 @@ function evaluateGrid(grid: SlotSymbol[][]): WinLine[] {
 
     // Helper: check if 3 symbols match
     const match3 = (a: SlotSymbol, b: SlotSymbol, c: SlotSymbol) => a.id === b.id && b.id === c.id
-    // Helper: check if 2 ADJACENT symbols match (only pos 0-1 or 1-2, never 0-2)
-    const match2adjacent = (syms: SlotSymbol[]): number[] => {
-        if (syms[0].id === syms[1].id) return [0, 1]
-        if (syms[1].id === syms[2].id) return [1, 2]
-        return []
-    }
 
     // ── 1. 777 center row (×100) ──
     const centerRow = [grid[0][1], grid[1][1], grid[2][1]]
@@ -169,10 +161,10 @@ function evaluateGrid(grid: SlotSymbol[][]): WinLine[] {
         return wins // Jackpot overrides everything
     }
 
-    // ── 2. 3 match center row (×10) ──
+    // ── 2. 3 match center row (×9) ──
     if (match3(centerRow[0], centerRow[1], centerRow[2])) {
         wins.push({
-            multiplier: 10,
+            multiplier: 9,
             description: `3x ${centerRow[0].label} — center`,
             cells: [[0, 1], [1, 1], [2, 1]],
         })
@@ -218,13 +210,13 @@ function evaluateGrid(grid: SlotSymbol[][]): WinLine[] {
         })
     }
 
-    // ── 7. Pyramid (×2) ──
+    // ── 7. Pyramid (×1.5) ──
     // Center column center slot + two lateral slots from top or bottom row, all 3 equal
     // V-down: left-top [0,0], right-top [2,0], center [1,1]
     const vDown = [grid[0][0], grid[2][0], grid[1][1]]
     if (match3(vDown[0], vDown[1], vDown[2])) {
         wins.push({
-            multiplier: 2,
+            multiplier: 1.5,
             description: `Pyramid ${vDown[0].label}`,
             cells: [[0, 0], [2, 0], [1, 1]],
         })
@@ -233,36 +225,10 @@ function evaluateGrid(grid: SlotSymbol[][]): WinLine[] {
     const vUp = [grid[0][2], grid[2][2], grid[1][1]]
     if (match3(vUp[0], vUp[1], vUp[2])) {
         wins.push({
-            multiplier: 2,
+            multiplier: 1.5,
             description: `Pyramid ${vUp[0].label}`,
             cells: [[0, 2], [2, 2], [1, 1]],
         })
-    }
-
-    // ── 8. 2 match horizontal — any row (×1) ──
-    // Only if no 3-match was found on that row
-    const rows: { row: number; syms: SlotSymbol[] }[] = [
-        { row: 0, syms: topRow },
-        { row: 1, syms: centerRow },
-        { row: 2, syms: bottomRow },
-    ]
-    for (const { row, syms } of rows) {
-        // Skip if this row already has a 3-match win
-        const has3 = wins.some(w =>
-            w.cells.length === 3 &&
-            w.cells.every(([, r]) => r === row) &&
-            w.multiplier >= 5
-        )
-        if (has3) continue
-
-        const pair = match2adjacent(syms)
-        if (pair.length === 2) {
-            wins.push({
-                multiplier: 1,
-                description: `2x ${syms[pair[0]].label}`,
-                cells: pair.map(i => [i, row] as [number, number]),
-            })
-        }
     }
 
     return wins
@@ -464,7 +430,7 @@ const slotInfo = computed<InfoSection[]>(() => [
             { term: t('gambling.info.slots.jackpot'), desc: t('gambling.info.slots.jackpot_desc'), icon: 'mdi:numeric-7-box' },
             { term: t('gambling.info.slots.center3'), desc: t('gambling.info.slots.center3_desc'), icon: 'mdi:arrow-right-bold' },
             { term: t('gambling.info.slots.row3'), desc: t('gambling.info.slots.row3_desc'), icon: 'mdi:arrow-expand-horizontal' },
-            { term: t('gambling.info.slots.pair'), desc: t('gambling.info.slots.pair_desc'), icon: 'mdi:equal' },
+            { term: t('gambling.info.slots.pyramid'), desc: t('gambling.info.slots.pyramid_desc'), icon: 'mdi:triangle' },
         ]
     },
 ])
@@ -562,7 +528,7 @@ watch(() => player.cash, (cash) => {
                         <span class="win-desc">{{ winResult.description }}</span>
                         <span class="win-amount">{{ formatCash(winResult.payout) }}</span>
                         <span class="win-multi">x{{ winResult.multiplier }} {{ $t('gambling.sl_multiplier_suffix')
-                            }}</span>
+                        }}</span>
                     </div>
                 </div>
                 <div v-else class="lose-banner">
@@ -598,7 +564,7 @@ watch(() => player.cash, (cash) => {
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="spinning">{{ $t('gambling.max')
-                        }}</UButton>
+                    }}</UButton>
                 </div>
             </div>
 

@@ -174,7 +174,7 @@ export function processAuctionBids(auction: ResaleAuction): ResaleAuction {
   const updatedBidders = auction.bidders.map(bidder => {
     if (!bidder.active) return bidder
 
-    const maxBid = mul(fairValue, D(bidder.maxBidFraction * auction.demandMultiplier))
+    const maxBid = mul(fairValue, D(bidder.maxBidFraction))
 
     // Drop out if current bid already exceeds their max
     if (currentBid.gte(maxBid)) {

@@ -95,29 +95,29 @@ const isRed = computed(() => props.card.suit === 'hearts' || props.card.suit ===
 
 /* Back */
 .card-back {
-    background: var(--t-blue);
-    border: 2px solid var(--t-border);
+    background: #1a5276;
+    border: 2px solid #f0e6d3;
 }
 
 .card-pattern {
     width: 60%;
     height: 70%;
-    border: 2px solid var(--t-border);
+    border: 2px solid #f0e6d3;
     border-radius: var(--t-radius-sm);
-    background: var(--t-bg-muted);
+    background: #1f3a52;
 }
 
 /* Front */
 .card-front {
-    background: var(--t-bg-card);
-    border: 2px solid var(--t-border);
+    background: #f5f0e8;
+    border: 2px solid #c9bfaa;
     transform: rotateY(180deg);
-    color: var(--t-text-inverse);
+    color: #1a1a1a;
     padding: 6px;
 }
 
 .card-front.red {
-    color: var(--t-danger);
+    color: #c0392b;
 }
 
 .card-rank {

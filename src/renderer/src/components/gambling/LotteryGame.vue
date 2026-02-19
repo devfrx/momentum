@@ -354,10 +354,7 @@ async function handlePlay(numbers: number[], bonus: number | null): Promise<void
         const abilities: DivineAbilityDef[] = []
 
         for (let i = 0; i < drawCount; i++) {
-            const nums = i === 0 ? numbers : generateQuickPick(ticket).numbers
-            const bn = i === 0 ? bonus : generateQuickPick(ticket).bonus
-
-            const { result, ability, luckyIndices, luckChances, originalLuckyIndices, originalLuckChances, secondChance, originalResult } = executeSingleDrawWithLuck(ticket, nums, bn)
+            const { result, ability, luckyIndices, luckChances, originalLuckyIndices, originalLuckChances, secondChance, originalResult } = executeSingleDrawWithLuck(ticket, numbers, bonus)
             entries.push({ result, luckyIndices, luckChances, originalLuckyIndices, originalLuckChances, secondChance, originalResult })
             if (result.prizeTier) {
                 wins++
@@ -571,7 +568,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                     <span class="divine-gallery-title">{{ $t('gambling.lt_divine_gallery') }}</span>
                     <span class="divine-gallery-count">{{ gambling.divineAbilities.length }} / {{
                         DIVINE_ABILITIES.length
-                    }}</span>
+                        }}</span>
                 </div>
                 <div class="divine-gallery-grid">
                     <div v-for="ability in DIVINE_ABILITIES" :key="ability.id" class="divine-gallery-card"
@@ -580,7 +577,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                             <AppIcon :icon="gambling.hasDivineAbility(ability.id) ? ability.icon : 'mdi:lock-outline'"
                                 class="dg-icon" />
                             <span class="dg-name">{{ gambling.hasDivineAbility(ability.id) ? ability.name : '???'
-                            }}</span>
+                                }}</span>
                             <span v-if="gambling.hasDivineAbility(ability.id)" class="dg-value"
                                 :style="{ color: rarityCssVar(ability.rarity) }">+{{ Math.round((ability.effect.value -
                                     1) *
@@ -640,12 +637,12 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                             <div class="multi-stat">
                                 <span class="multi-stat-label">{{ $t('gambling.lt_total_cost') }}</span>
                                 <span class="multi-stat-value negative">-{{ formatCash(D(multiDrawSummary.totalCost))
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="multi-stat">
                                 <span class="multi-stat-label">{{ $t('gambling.lt_total_payout') }}</span>
                                 <span class="multi-stat-value positive">+{{ formatCash(D(multiDrawSummary.totalPayout))
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="multi-stat">
                                 <span class="multi-stat-label">{{ $t('gambling.stats_net') }}</span>
@@ -736,7 +733,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                 <div class="stat-item">
                     <span class="stat-label">{{ $t('gambling.stats_win_rate') }}</span>
                     <span class="stat-value">{{ stats.played > 0 ? Math.round(stats.won / stats.played * 100) : 0
-                        }}%</span>
+                    }}%</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">{{ $t('gambling.stats_net') }}</span>
@@ -761,7 +758,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                         <span class="history-ticket">{{ entry.ticketName }}</span>
                         <span class="history-matches">{{ entry.result.matchedCount }}/{{
                             LOTTERY_TICKETS.find(t => t.name === entry.ticketName)?.pickCount ?? '?'
-                            }}</span>
+                        }}</span>
                         <span v-if="entry.result.prizeTier" class="history-prize"
                             :style="{ color: rarityCssVar(entry.result.prizeTier.rarity) }">
                             {{ entry.result.prizeTier.label }} — {{ formatCash(entry.result.payout) }}

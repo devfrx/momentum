@@ -43,10 +43,10 @@ export const GAMBLING_GAMES: GamblingGameDef[] = [
     icon: 'mdi:slot-machine',
     minBet: 10,
     maxBetMultiplier: 1,
-    odds: 0.25,
-    payoutMultiplier: 4,
+    odds: 0.17,
+    payoutMultiplier: 5.7,
     category: 'Machine',
-    rules: 'Match 2 symbols = 2x. Match 3 = 10x. Jackpot (777) = 100x.'
+    rules: 'Match 3 center = 9x. Match 3 top/bottom/diagonal = 5x. Pyramid = 1.5x. Jackpot (777) = 100x.'
   },
   {
     id: 'roulette',
