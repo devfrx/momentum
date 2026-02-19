@@ -135,8 +135,8 @@ const refinanceOptions = computed(() => {
     if (!currentLoan) return []
 
     return LOANS.filter(l => {
-        if (!l.canRefinance) return false
-        const app = loanStore.canApplyForLoan(l.id)
+        if (l.id === currentLoan.loanDefId) return false // skip same type
+        const app = loanStore.canApplyForLoan(l.id, loanToRefinance.value!)
         if (!app.approved) return false
         if ((app.maxApproved?.toNumber() ?? 0) < currentLoan.remaining.toNumber()) return false
         return true
@@ -318,7 +318,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                         <div class="sidebar-stat">
                             <span class="sidebar-stat-label">{{ $t('loans.total_interest_paid') }}</span>
                             <span class="sidebar-stat-value text-warning">{{ formatCash(loanStore.totalInterestPaidEver)
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -371,9 +371,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                                 </div>
                                 <div class="history-details">
                                     <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                    }}</span>
+                                        }}</span>
                                     <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                    }} {{ entry.latePayments
+                                        }} {{ entry.latePayments
                                         }}</span>
                                     <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                 </div>
@@ -448,7 +448,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
                 <div class="dialog-actions">
                     <UButton variant="ghost" @click="showRefinanceDialog = false">{{ $t('common.cancel')
-                    }}</UButton>
+                        }}</UButton>
                     <UButton variant="ghost" :disabled="!refinanceTarget" @click="confirmRefinance">{{
                         $t('loans.refinance') }}</UButton>
                 </div>

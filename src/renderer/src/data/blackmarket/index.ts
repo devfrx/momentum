@@ -28,7 +28,7 @@ export type {
 } from './types'
 
 // Reputation
-export { REPUTATION_TIERS, getReputationTier, calculateTier, getTierProgress } from './reputation'
+export { REPUTATION_TIERS, getReputationTier, calculateTier, getTierProgress, effectiveDealScore } from './reputation'
 
 // Heat
 export { HEAT_THRESHOLDS, getHeatLevel, getHeatPenalty } from './heat'

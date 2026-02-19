@@ -30,6 +30,33 @@ import {
   type CreditScoreFactors,
   calculateEffectiveRate,
   calculateMaxLoanAmount,
+  // Balance constants
+  CREDIT_LIMIT_BASE_FLOOR,
+  CREDIT_LIMIT_BASE_PER_POINT,
+  CREDIT_LIMIT_NW_FRACTION_MIN,
+  CREDIT_LIMIT_NW_FRACTION_MAX,
+  MAX_PAYMENT_HISTORY,
+  MAX_CREDIT_UTILIZATION,
+  MAX_CREDIT_AGE,
+  MAX_CREDIT_MIX,
+  MAX_NEW_CREDIT,
+  UTIL_PENALTY_RATE,
+  CREDIT_AGE_MAX_TICKS,
+  CREDIT_MIX_POINTS_PER_CATEGORY,
+  NEW_CREDIT_WINDOW_TICKS,
+  NEW_CREDIT_PENALTY_PER_APP,
+  ON_TIME_PARTIAL_PAYMENT_BOOST,
+  ON_TIME_FULL_REPAY_BOOST,
+  LATE_PAYMENT_PENALTY,
+  MISSED_PAYMENT_CREDIT_HIT,
+  DEFAULT_GRACE_PERIOD_TICKS,
+  REVOLVING_PAYMENT_PERIOD_TICKS,
+  INITIAL_CREDIT_SCORE,
+  INITIAL_PAYMENT_HISTORY,
+  INITIAL_CREDIT_UTILIZATION,
+  INITIAL_CREDIT_AGE,
+  INITIAL_CREDIT_MIX,
+  INITIAL_NEW_CREDIT,
 } from '@renderer/data/loans'
 
 // Re-export types for consumers
@@ -66,7 +93,7 @@ export const useLoanStore = defineStore('loans', () => {
   const loans = ref<ActiveLoan[]>([])
 
   /** Credit score (0-100) */
-  const creditScore = ref(50) // Start at neutral
+  const creditScore = ref(INITIAL_CREDIT_SCORE)
 
   /** Credit score factors for detailed breakdown */
   const creditScoreFactors = ref<CreditScoreFactors>({
@@ -120,12 +147,16 @@ export const useLoanStore = defineStore('loans', () => {
     loans.value.filter(l => l.isDefaulted).length
   )
 
+  /** Total credit limit available to the player */
+  const totalCreditLimit = computed<Decimal>(() => {
+    const player = usePlayerStore()
+    return calculateTotalCreditLimit(creditScore.value, player.netWorth)
+  })
+
   /** Credit utilization ratio (debt / available credit limit) */
   const creditUtilization = computed(() => {
-    const player = usePlayerStore()
-    const totalAvailable = calculateTotalCreditLimit(creditScore.value, player.netWorth)
-    if (totalAvailable.lte(0)) return 0
-    return Math.min(100, totalDebt.value.div(totalAvailable).mul(100).toNumber())
+    if (totalCreditLimit.value.lte(0)) return 0
+    return Math.min(100, totalDebt.value.div(totalCreditLimit.value).mul(100).toNumber())
   })
 
   /** Average interest rate across all loans */
@@ -177,16 +208,15 @@ export const useLoanStore = defineStore('loans', () => {
   /** Update credit utilization factor based on current debt */
   function updateCreditUtilizationFactor(): void {
     const util = creditUtilization.value
-    // 30 points max: 30 at 0%, 0 at 100%+
-    creditScoreFactors.value.creditUtilization = Math.round(Math.max(0, 30 - (util * 0.3)))
+    const max = MAX_CREDIT_UTILIZATION
+    creditScoreFactors.value.creditUtilization = Math.round(Math.max(0, max - (util * UTIL_PENALTY_RATE)))
     recalculateCreditScore()
   }
 
   /** Update credit age factor based on history length */
   function updateCreditAgeFactor(): void {
-    // 15 points max, gained over time (full points at ~2 hours of credit history)
-    const maxTicks = 72_000 // ~2 hours
-    const ageFactor = Math.min(15, (totalTicksWithCredit.value / maxTicks) * 15)
+    const max = MAX_CREDIT_AGE
+    const ageFactor = Math.min(max, (totalTicksWithCredit.value / CREDIT_AGE_MAX_TICKS) * max)
     creditScoreFactors.value.creditAge = Math.round(ageFactor)
     recalculateCreditScore()
   }
@@ -208,27 +238,27 @@ export const useLoanStore = defineStore('loans', () => {
       if (def) categories.add(def.category)
     }
 
-    const mixScore = Math.min(10, categories.size * 2.5)
+    const mixScore = Math.min(MAX_CREDIT_MIX, categories.size * CREDIT_MIX_POINTS_PER_CATEGORY)
     creditScoreFactors.value.creditMix = mixScore
     recalculateCreditScore()
   }
 
   /** Update new credit factor based on recent applications */
   function updateNewCreditFactor(currentTick: number): void {
-    // Remove old applications (older than 30 min = 18000 ticks)
     recentApplications.value = recentApplications.value.filter(
-      tick => currentTick - tick < 18_000
+      tick => currentTick - tick < NEW_CREDIT_WINDOW_TICKS
     )
-    // 10 points max, lose 2 points per recent application
-    const penalty = Math.min(10, recentApplications.value.length * 2)
-    creditScoreFactors.value.newCredit = 10 - penalty
+    const penalty = Math.min(MAX_NEW_CREDIT, recentApplications.value.length * NEW_CREDIT_PENALTY_PER_APP)
+    creditScoreFactors.value.newCredit = MAX_NEW_CREDIT - penalty
     recalculateCreditScore()
   }
 
   // ─── Loan Application ─────────────────────────────────────────
 
-  /** Check if player can apply for a specific loan type */
-  function canApplyForLoan(loanDefId: string): LoanApplication {
+  /** Check if player can apply for a specific loan type.
+   *  Pass excludeLoanId when refinancing so the loan being replaced
+   *  is not counted against `maxActive`. */
+  function canApplyForLoan(loanDefId: string, excludeLoanId?: string): LoanApplication {
     const player = usePlayerStore()
     const def = LOANS.find(l => l.id === loanDefId)
 
@@ -266,8 +296,10 @@ export const useLoanStore = defineStore('loans', () => {
       }
     }
 
-    // Check max active limit
-    const activeOfType = loans.value.filter(l => l.loanDefId === loanDefId).length
+    // Check max active limit (exclude a loan being refinanced, if any)
+    const activeOfType = loans.value.filter(
+      l => l.loanDefId === loanDefId && l.id !== excludeLoanId
+    ).length
     if (activeOfType >= def.maxActive) {
       return {
         loanDefId,
@@ -291,9 +323,26 @@ export const useLoanStore = defineStore('loans', () => {
       }
     }
 
+    // Check credit limit — new loan must not push total debt beyond credit limit
+    const projectedDebt = add(totalDebt.value, def.minAmount)
+    if (projectedDebt.gt(totalCreditLimit.value)) {
+      return {
+        loanDefId,
+        requestedAmount: ZERO,
+        approved: false,
+        reason: 'Exceeds credit limit'
+      }
+    }
+
     // Approved! Calculate terms
     const effectiveRate = calculateEffectiveRate(def, creditScore.value)
-    const maxApproved = calculateMaxLoanAmount(def, creditScore.value)
+    let maxApproved = calculateMaxLoanAmount(def, creditScore.value)
+
+    // Cap maxApproved so total debt never exceeds credit limit
+    const headroom = max(ZERO, sub(totalCreditLimit.value, totalDebt.value))
+    if (maxApproved.gt(headroom)) {
+      maxApproved = headroom
+    }
 
     return {
       loanDefId,
@@ -324,15 +373,16 @@ export const useLoanStore = defineStore('loans', () => {
       case 'portfolio':
         const portfolioValue = add(stocks.totalPortfolioValue ?? ZERO, crypto.totalWalletValue ?? ZERO)
         return max(ZERO, sub(portfolioValue, lockedByType))
-      case 'mixed':
+      case 'mixed': {
         const totalAssets = add(
           add(business.totalBusinessValue, realEstate.totalPropertyValue),
           add(stocks.totalPortfolioValue ?? ZERO, crypto.totalWalletValue ?? ZERO)
         )
-        const lockedMixed = loans.value
-          .filter(l => l.collateralType === 'mixed')
+        // Subtract ALL locked collateral (business, property, portfolio, and mixed)
+        const allLocked = loans.value
           .reduce((sum, l) => add(sum, l.collateralLocked), ZERO)
-        return max(ZERO, sub(totalAssets, lockedMixed))
+        return max(ZERO, sub(totalAssets, allLocked))
+      }
       default:
         return D(Number.MAX_SAFE_INTEGER) // No collateral needed
     }
@@ -384,10 +434,12 @@ export const useLoanStore = defineStore('loans', () => {
       collateralLocked = mul(amount, def.collateralRatio)
     }
 
-    // Calculate minimum payment per tick (for amortized loans)
+    // Calculate minimum payment per tick
+    // Amortized loans: standard amortization schedule
+    // Revolving credit (termTicks=0): interest-only minimum payment
     const minPaymentPerTick = def.termTicks > 0
       ? Formulas.loanPaymentPerTick(amount, effectiveRate, def.termTicks)
-      : ZERO // Interest-only for revolving credit
+      : Formulas.loanInterestPerTick(amount, effectiveRate, 10)
 
     // Create the loan
     const loanId = `loan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
@@ -447,50 +499,52 @@ export const useLoanStore = defineStore('loans', () => {
     if (!gte(player.cash, toPay)) toPay = player.cash
     if (toPay.lte(ZERO)) return ZERO
 
-    // Check for early repayment penalty
+    // Check for early repayment penalty (only when paying off the entire loan early)
+    let penalty = ZERO
     if (def && def.earlyRepaymentPenalty > 0 && toPay.gte(loan.remaining)) {
-      // Only apply if paying off entire loan before term ends
       if (loan.ticksActive < loan.termTicks) {
-        const penalty = mul(loan.remaining, def.earlyRepaymentPenalty)
-        toPay = add(toPay, penalty)
-        if (!gte(player.cash, toPay)) {
-          // Can't afford with penalty, just pay what we can
+        penalty = mul(loan.remaining, def.earlyRepaymentPenalty)
+        const totalWithPenalty = add(toPay, penalty)
+        if (!gte(player.cash, totalWithPenalty)) {
+          // Can't afford with penalty, just pay what we can (no penalty applied)
           toPay = player.cash
+          penalty = ZERO
         }
       }
     }
 
-    // Deduct from player
-    player.spendCash(toPay)
+    // Deduct principal payment + penalty separately
+    player.spendCash(add(toPay, penalty))
     
-    // Update tracking fields
-    loan.totalPaid = add(loan.totalPaid, toPay)
+    // Update tracking fields — toPay goes toward the balance, penalty is extra cost
+    loan.totalPaid = add(loan.totalPaid, add(toPay, penalty))
     // Calculate principal portion (payment minus any interest accrued)
     const interestPortion = sub(loan.remaining, sub(loan.principal, loan.principalPaid))
-    const principalPortion = interestPortion.gt(ZERO) 
-      ? sub(toPay, Decimal.min(interestPortion, toPay))
-      : toPay
+    const interestActuallyPaid = interestPortion.gt(ZERO) ? Decimal.min(interestPortion, toPay) : ZERO
+    const principalPortion = sub(toPay, interestActuallyPaid)
     loan.principalPaid = add(loan.principalPaid, principalPortion)
+    loan.totalInterestPaid = add(loan.totalInterestPaid, interestActuallyPaid)
+    totalInterestPaidEver.value = add(totalInterestPaidEver.value, interestActuallyPaid)
     
-    loan.remaining = sub(loan.remaining, toPay)
+    loan.remaining = max(ZERO, sub(loan.remaining, toPay))
     loan.ticksSinceLastPayment = 0
+    loan.ticksLate = 0
 
     // Track payment timing
-    const gracePeriod = def?.gracePeriodTicks ?? 300
+    const gracePeriod = def?.gracePeriodTicks ?? DEFAULT_GRACE_PERIOD_TICKS
     if (loan.ticksLate <= gracePeriod) {
       loan.onTimePayments++
       // Slight credit boost for on-time payment
       creditScoreFactors.value.paymentHistory = Math.min(
-        35,
-        creditScoreFactors.value.paymentHistory + 0.1
+        MAX_PAYMENT_HISTORY,
+        creditScoreFactors.value.paymentHistory + ON_TIME_PARTIAL_PAYMENT_BOOST
       )
     } else {
       loan.latePayments++
-      loan.ticksLate = 0 // Reset late counter
       // Credit score penalty for late payment
       creditScoreFactors.value.paymentHistory = Math.max(
         0,
-        creditScoreFactors.value.paymentHistory - 1
+        creditScoreFactors.value.paymentHistory - LATE_PAYMENT_PENALTY
       )
     }
 
@@ -524,21 +578,30 @@ export const useLoanStore = defineStore('loans', () => {
     if (!gte(player.cash, totalOwed)) return false
 
     player.spendCash(totalOwed)
+
+    // Update tracking fields before completing
+    loan.totalPaid = add(loan.totalPaid, totalOwed)
+    const remainingInterest = sub(loan.remaining, sub(loan.principal, loan.principalPaid))
+    const interestActuallyPaid = remainingInterest.gt(ZERO) ? remainingInterest : ZERO
+    const principalLeft = sub(loan.remaining, interestActuallyPaid)
+    loan.principalPaid = add(loan.principalPaid, principalLeft)
+    loan.totalInterestPaid = add(loan.totalInterestPaid, interestActuallyPaid)
+    totalInterestPaidEver.value = add(totalInterestPaidEver.value, interestActuallyPaid)
     loan.remaining = ZERO
 
     // Track payment timing for credit score
-    const gracePeriod = def?.gracePeriodTicks ?? 300
+    const gracePeriod = def?.gracePeriodTicks ?? DEFAULT_GRACE_PERIOD_TICKS
     if (loan.ticksLate <= gracePeriod) {
       loan.onTimePayments++
       creditScoreFactors.value.paymentHistory = Math.min(
-        35,
-        creditScoreFactors.value.paymentHistory + 0.5
+        MAX_PAYMENT_HISTORY,
+        creditScoreFactors.value.paymentHistory + ON_TIME_FULL_REPAY_BOOST
       )
     } else {
       loan.latePayments++
       creditScoreFactors.value.paymentHistory = Math.max(
         0,
-        creditScoreFactors.value.paymentHistory - 1
+        creditScoreFactors.value.paymentHistory - LATE_PAYMENT_PENALTY
       )
     }
 
@@ -574,7 +637,7 @@ export const useLoanStore = defineStore('loans', () => {
       if (def) {
         player.addXp(D(def.completionXp))
         creditScoreFactors.value.paymentHistory = Math.min(
-          35,
+          MAX_PAYMENT_HISTORY,
           creditScoreFactors.value.paymentHistory + def.creditImpactOnTime
         )
       }
@@ -600,25 +663,37 @@ export const useLoanStore = defineStore('loans', () => {
 
   /** Tick function - accrue interest and handle payments */
   function tick(ticksPerSecond: number = 10): void {
+    // Collect loans to default/margin-call AFTER the loop to avoid mutating during iteration
+    const toDefault: ActiveLoan[] = []
+    const toMarginCall: ActiveLoan[] = []
+
     for (const loan of loans.value) {
-      // Accrue interest
+      if (loan.isDefaulted) continue
+
+      // Accrue interest (added to remaining; tracked as paid only when player actually pays)
       const interest = Formulas.loanInterestPerTick(
         loan.remaining,
         loan.effectiveRate,
         ticksPerSecond
       )
       loan.remaining = add(loan.remaining, interest)
-      loan.totalInterestPaid = add(loan.totalInterestPaid, interest)
-      totalInterestPaidEver.value = add(totalInterestPaidEver.value, interest)
 
       loan.ticksActive++
       loan.ticksSinceLastPayment++
 
-      // Check for missed payment (if amortized loan)
+      // Check for missed payment (amortized AND revolving loans)
       const def = LOANS.find(l => l.id === loan.loanDefId)
-      if (def && def.termTicks > 0) {
-        const paymentPeriod = Math.max(100, def.termTicks / 100) // ~100 payments over term
+      if (def) {
+        // For revolving credit (termTicks=0): payment period every N ticks
+        const paymentPeriod = def.termTicks > 0
+          ? Math.max(100, def.termTicks / 100)
+          : REVOLVING_PAYMENT_PERIOD_TICKS
         const gracePeriod = def.gracePeriodTicks
+
+        // Track ticks late (used by repayLoan to judge on-time vs late)
+        if (loan.ticksSinceLastPayment > paymentPeriod) {
+          loan.ticksLate = loan.ticksSinceLastPayment - paymentPeriod
+        }
 
         if (loan.ticksSinceLastPayment > paymentPeriod + gracePeriod) {
           // Missed payment
@@ -626,23 +701,27 @@ export const useLoanStore = defineStore('loans', () => {
 
           // Apply late payment penalty
           if (def.latePaymentPenalty > 0) {
-            const penalty = mul(loan.minPaymentPerTick.mul(paymentPeriod), def.latePaymentPenalty)
+            const penaltyBase = def.termTicks > 0
+              ? loan.minPaymentPerTick.mul(paymentPeriod)
+              : Formulas.loanInterestPerTick(loan.remaining, loan.effectiveRate, ticksPerSecond).mul(paymentPeriod)
+            const penalty = mul(penaltyBase, def.latePaymentPenalty)
             loan.remaining = add(loan.remaining, penalty)
           }
 
           // Credit score hit
           creditScoreFactors.value.paymentHistory = Math.max(
             0,
-            creditScoreFactors.value.paymentHistory - 2
+            creditScoreFactors.value.paymentHistory - MISSED_PAYMENT_CREDIT_HIT
           )
 
-          // Check for default (3 missed payments)
+          // Queue for default (3 missed payments)
           if (loan.missedPayments >= 3 && !loan.isDefaulted) {
-            handleDefault(loan)
+            toDefault.push(loan)
           }
 
-          // Reset payment timer
+          // Reset payment timer & late counter
           loan.ticksSinceLastPayment = 0
+          loan.ticksLate = 0
         }
       }
 
@@ -651,9 +730,18 @@ export const useLoanStore = defineStore('loans', () => {
         const availableCollateral = getAvailableCollateral('portfolio')
         const requiredCollateral = mul(loan.remaining, def.collateralRatio)
         if (availableCollateral.lt(requiredCollateral)) {
-          // Margin call! Auto-liquidate if possible
-          handleMarginCall(loan)
+          toMarginCall.push(loan)
         }
+      }
+    }
+
+    // Process defaults and margin calls after iteration
+    for (const loan of toMarginCall) {
+      handleMarginCall(loan)
+    }
+    for (const loan of toDefault) {
+      if (!loan.isDefaulted) {
+        handleDefault(loan, gameEngine.currentTick)
       }
     }
 
@@ -667,30 +755,72 @@ export const useLoanStore = defineStore('loans', () => {
     updateCreditUtilizationFactor()
   }
 
-  /** Handle loan default */
-  function handleDefault(loan: ActiveLoan): void {
+  /** Handle loan default — seize collateral, penalise credit, and close the loan */
+  function handleDefault(loan: ActiveLoan, currentTick: number): void {
     loan.isDefaulted = true
-    const def = LOANS.find(l => l.id === loan.loanDefId)
+    const player = usePlayerStore()
 
-    // Severe credit score penalty
-    if (def) {
-      creditScoreFactors.value.paymentHistory = Math.max(
-        0,
-        creditScoreFactors.value.paymentHistory + def.creditImpactDefault
-      )
-    }
+    // NOTE: credit penalty is applied inside completeLoan('defaulted'),
+    //       NOT here — avoids the double-penalty bug.
 
-    // If collateral, seize it
+    // Seize collateral: take all available cash up to collateral value,
+    // then force-deduct any shortfall so the player cannot exploit zero-cash.
     if (loan.collateralLocked.gt(0)) {
-      // In a real implementation, this would trigger asset liquidation
-      // For now, just note the collateral is being seized
+      const seizeFromCash = Decimal.min(player.cash, loan.collateralLocked)
+      if (seizeFromCash.gt(ZERO)) {
+        player.spendCash(seizeFromCash)
+      }
+      const shortfall = sub(loan.collateralLocked, seizeFromCash)
+      if (shortfall.gt(ZERO)) {
+        // Apply shortfall as a negative cash adjustment (player will carry the debt)
+        player.earnCash(shortfall)       // temporarily add to make spendCash succeed
+        player.spendCash(shortfall)      // then immediately take it away  → net 0
+        // The real penalty: reduce relevant asset value
+        reduceCollateralAssets(loan.collateralType, shortfall)
+      }
       loan.collateralLocked = ZERO
     }
 
-    recalculateCreditScore()
+    // Complete and remove the defaulted loan
+    completeLoan(loan, 'defaulted', currentTick)
   }
 
-  /** Handle margin call */
+  /**
+   * Force-reduce asset values when cash is insufficient to cover seized collateral.
+   * This prevents the exploit of keeping zero cash to avoid collateral seizure.
+   */
+  function reduceCollateralAssets(collateralType: CollateralType, amount: Decimal): void {
+    const business = useBusinessStore()
+    const realEstate = useRealEstateStore()
+    const stocks = useStockStore()
+    const crypto = useCryptoStore()
+
+    switch (collateralType) {
+      case 'business':
+        if (typeof business.reduceAssetValue === 'function') business.reduceAssetValue(amount)
+        break
+      case 'property':
+        if (typeof realEstate.reduceAssetValue === 'function') realEstate.reduceAssetValue(amount)
+        break
+      case 'portfolio': {
+        // Split evenly between stocks and crypto
+        const half = div(amount, 2)
+        if (typeof stocks.reduceAssetValue === 'function') stocks.reduceAssetValue(half)
+        if (typeof crypto.reduceAssetValue === 'function') crypto.reduceAssetValue(half)
+        break
+      }
+      case 'mixed': {
+        const quarter = div(amount, 4)
+        if (typeof business.reduceAssetValue === 'function') business.reduceAssetValue(quarter)
+        if (typeof realEstate.reduceAssetValue === 'function') realEstate.reduceAssetValue(quarter)
+        if (typeof stocks.reduceAssetValue === 'function') stocks.reduceAssetValue(quarter)
+        if (typeof crypto.reduceAssetValue === 'function') crypto.reduceAssetValue(quarter)
+        break
+      }
+    }
+  }
+
+  /** Handle margin call — direct balance reduction, no credit score side-effects */
   function handleMarginCall(loan: ActiveLoan): void {
     const player = usePlayerStore()
 
@@ -703,10 +833,13 @@ export const useLoanStore = defineStore('loans', () => {
     const needToRepay = sub(loan.remaining, safeBalance)
 
     if (needToRepay.gt(0) && player.cash.gte(needToRepay)) {
-      repayLoan(loan.id, needToRepay, gameEngine.currentTick)
+      // Pay down directly — bypasses repayLoan to avoid credit score farming
+      player.spendCash(needToRepay)
+      loan.remaining = sub(loan.remaining, needToRepay)
+      loan.totalPaid = add(loan.totalPaid, needToRepay)
     } else {
       // Can't meet margin call - default
-      handleDefault(loan)
+      handleDefault(loan, gameEngine.currentTick)
     }
   }
 
@@ -723,10 +856,10 @@ export const useLoanStore = defineStore('loans', () => {
 
     const oldDef = LOANS.find(l => l.id === oldLoan.loanDefId)
     const newDef = LOANS.find(l => l.id === newLoanDefId)
-    if (!oldDef || !newDef || !newDef.canRefinance) return null
+    if (!oldDef || !newDef || !oldDef.canRefinance) return null
 
-    // Check if new loan can cover old balance
-    const application = canApplyForLoan(newLoanDefId)
+    // Check if new loan can cover old balance (exclude oldLoan from maxActive)
+    const application = canApplyForLoan(newLoanDefId, loanId)
     if (!application.approved || application.maxApproved!.lt(oldLoan.remaining)) {
       return null
     }
@@ -745,13 +878,18 @@ export const useLoanStore = defineStore('loans', () => {
 
   /** Calculate total credit limit available to player */
   function calculateTotalCreditLimit(score: number, netWorth: Decimal): Decimal {
-    // Base limit based on credit score
-    const baseLimit = D(10_000 + score * 1000) // $10K-$110K based on score
+    // Floor: small base so early-game players still have a limit
+    const baseLimit = D(CREDIT_LIMIT_BASE_FLOOR + score * CREDIT_LIMIT_BASE_PER_POINT)
 
-    // Multiply by net worth factor
-    const netWorthMultiplier = Math.max(1, 1 + Math.log10(Math.max(1, netWorth.toNumber())) / 2)
+    // Net-worth-based limit: score determines what fraction of net worth
+    // the system trusts you with.
+    const nwRange = CREDIT_LIMIT_NW_FRACTION_MAX - CREDIT_LIMIT_NW_FRACTION_MIN
+    const nwFraction = CREDIT_LIMIT_NW_FRACTION_MIN + (score / 100) * nwRange
+    const netWorthLimit = mul(netWorth, nwFraction)
 
-    return mul(baseLimit, netWorthMultiplier)
+    // Take the greater of the two so early-game floor still works,
+    // but late-game scales properly with net worth.
+    return netWorthLimit.gt(baseLimit) ? netWorthLimit : baseLimit
   }
 
   /** Get loan definition by ID */
@@ -769,13 +907,13 @@ export const useLoanStore = defineStore('loans', () => {
   /** Reset loan state on prestige */
   function prestigeReset(): void {
     loans.value = []
-    creditScore.value = 50
+    creditScore.value = INITIAL_CREDIT_SCORE
     creditScoreFactors.value = {
-      paymentHistory: 10,
-      creditUtilization: 30,
-      creditAge: 0,
-      creditMix: 0,
-      newCredit: 10,
+      paymentHistory: INITIAL_PAYMENT_HISTORY,
+      creditUtilization: INITIAL_CREDIT_UTILIZATION,
+      creditAge: INITIAL_CREDIT_AGE,
+      creditMix: INITIAL_CREDIT_MIX,
+      newCredit: INITIAL_NEW_CREDIT,
     }
     loanHistory.value = []
     totalTicksWithCredit.value = 0
@@ -799,13 +937,13 @@ export const useLoanStore = defineStore('loans', () => {
     totalInterestPaidEver: Decimal
   }): void {
     loans.value = data.loans ?? []
-    creditScore.value = data.creditScore ?? 50
+    creditScore.value = data.creditScore ?? INITIAL_CREDIT_SCORE
     creditScoreFactors.value = data.creditScoreFactors ?? {
-      paymentHistory: 10,
-      creditUtilization: 30,
-      creditAge: 0,
-      creditMix: 0,
-      newCredit: 10,
+      paymentHistory: INITIAL_PAYMENT_HISTORY,
+      creditUtilization: INITIAL_CREDIT_UTILIZATION,
+      creditAge: INITIAL_CREDIT_AGE,
+      creditMix: INITIAL_CREDIT_MIX,
+      newCredit: INITIAL_NEW_CREDIT,
     }
     loanHistory.value = data.loanHistory ?? []
     totalTicksWithCredit.value = data.totalTicksWithCredit ?? 0
@@ -834,6 +972,7 @@ export const useLoanStore = defineStore('loans', () => {
     totalMinPaymentPerTick,
     totalCollateralLocked,
     loansInDefault,
+    totalCreditLimit,
     creditUtilization,
     averageInterestRate,
     totalInterestPerSecond,

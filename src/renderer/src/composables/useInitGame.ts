@@ -271,6 +271,8 @@ export function useInitGame() {
               }
 
               // Apply loan interest (add to loan remaining balances, weighted by remaining × rate)
+              // Note: this is interest *accrued*, not *paid* — totalInterestPaid is only
+              // updated when the player actually makes a payment.
               if (summary.loanInterestPaid.gt(0)) {
                 let totalWeight = ZERO
                 for (const loan of loanStore.loans) {
@@ -282,7 +284,6 @@ export function useInitGame() {
                     const ratio = weight.div(totalWeight)
                     const share = mul(summary.loanInterestPaid, ratio)
                     loan.remaining = add(loan.remaining, share)
-                    loan.totalInterestPaid = add(loan.totalInterestPaid, share)
                   }
                 }
               }

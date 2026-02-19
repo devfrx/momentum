@@ -81,7 +81,7 @@ export const FIXER_COST_PER_SEVERITY = 500
 /** Broker: base accuracy for market intel */
 export const BROKER_BASE_ACCURACY = 0.5
 
-/** Broker: accuracy bonus per 10 loyalty points */
+/** Broker: accuracy bonus per 10 loyalty points (0.05 × loyalty/10) */
 export const BROKER_LOYALTY_ACCURACY_BONUS = 0.05
 
 /** Smuggler: contraband value multiplier range */

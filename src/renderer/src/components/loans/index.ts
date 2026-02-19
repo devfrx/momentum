@@ -1,3 +1,6 @@
 export { default as LoanCard } from './LoanCard.vue'
 export { default as ActiveLoanCard } from './ActiveLoanCard.vue'
 export { default as CreditScoreWidget } from './CreditScoreWidget.vue'
+export { default as CreditScoreGauge } from './CreditScoreGauge.vue'
+export { default as CreditFactorRow } from './CreditFactorRow.vue'
+export { default as CreditUtilizationBar } from './CreditUtilizationBar.vue'

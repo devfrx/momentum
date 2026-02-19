@@ -78,6 +78,7 @@ import {
   scaleDealConsequence,
   scaleContactCost,
   scaleContactReward,
+  scalePercentageCost,
   rollContactRisk,
   getBetrayalChance,
   getScamChance,
@@ -139,10 +140,10 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
   // ─── Computed ──────────────────────────────────────────────
 
-  const currentTier = computed((): ReputationTier => calculateTier(totalDealsCompleted.value))
+  const currentTier = computed((): ReputationTier => calculateTier(totalDealsCompleted.value, reputationPoints.value))
 
   const tierProgress = computed(() => {
-    const progress = getTierProgress(totalDealsCompleted.value)
+    const progress = getTierProgress(totalDealsCompleted.value, reputationPoints.value)
     const tier = currentTier.value
     const nextTier = tier < 5 ? getReputationTier((tier + 1) as ReputationTier) : null
     const dealsToNext = nextTier ? nextTier.dealsRequired - totalDealsCompleted.value : 0
@@ -263,8 +264,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           const scaledBaseCost = scaleDealCost(def.baseCost, wealth, def.impactTier, def.costWeight)
           const adjustedCost = D(scaledBaseCost * (1 - priceDiscount) * (1 + heatPenalty))
 
-          // Risk: base + random variance (-5 to +15) + heat — ensures variety
-          const riskVariance = randomInt(-5, 15)
+          // Risk: base + symmetric random variance + heat — ensures variety
+          const riskVariance = randomInt(-10, 10)
           const adjustedRisk = clamp(
             def.baseRisk + riskVariance - riskReduction + heatRiskIncrease,
             1, 95,
@@ -367,10 +368,16 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       deal.status = 'failed'
       totalDealsFailed.value++
 
-      // Apply failure consequences
-      for (const consequence of deal.failConsequences) {
-        if (Math.random() < consequence.probability) {
-          applyConsequence(consequence.type, consequence.value, consequence.durationTicks)
+      // Apply failure consequences — weighted exclusive pick (only one fires)
+      {
+        const roll = Math.random()
+        let cumulative = 0
+        for (const consequence of deal.failConsequences) {
+          cumulative += consequence.probability
+          if (roll < cumulative) {
+            applyConsequence(consequence.type, consequence.value, consequence.durationTicks)
+            break
+          }
         }
       }
 
@@ -647,7 +654,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     }
 
     // ── Execute ability (no risk triggered) ──
-    const result = executeAbility(contactId, abilityId, state)
+    const result = executeAbility(contactId, abilityId, state, scaledCost)
 
     // Update state
     state.totalInteractions++
@@ -666,7 +673,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     return { success: true, message: 'ability_used', result }
   }
 
-  function executeAbility(_contactId: ContactId, abilityId: string, state: ContactState): unknown {
+  function executeAbility(_contactId: ContactId, abilityId: string, state: ContactState, paidCost: Decimal): unknown {
     const player = usePlayerStore()
 
     switch (abilityId) {
@@ -681,7 +688,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const idx = randomInt(0, allAssets.length - 1)
         const asset = allAssets[idx]
         const config = STOCKS.find(s => s.id === asset.id)
-        const accuracy = BROKER_BASE_ACCURACY + (state.loyalty / 100) * BROKER_LOYALTY_ACCURACY_BONUS
+        const accuracy = Math.min(1, BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS)
         const recentChange = asset.changePercent
         const actualLikelihood = (config?.drift ?? 0) + recentChange
         const realDirection = actualLikelihood >= 0 ? 'up' : 'down'
@@ -711,7 +718,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const idx = randomInt(0, allCrypto.length - 1)
         const asset = allCrypto[idx]
         const config = CRYPTOS.find(c => c.id === asset.id)
-        const accuracy = BROKER_BASE_ACCURACY + (state.loyalty / 100) * BROKER_LOYALTY_ACCURACY_BONUS
+        const accuracy = Math.min(1, BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS)
         const recentChange = asset.changePercent
         const actualLikelihood = (config?.drift ?? 0) + recentChange
         const realDirection = actualLikelihood >= 0 ? 'up' : 'down'
@@ -991,8 +998,9 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const abilityDef = getContactDef('smuggler')?.abilities.find(a => a.id === 'smuggler_contraband')
         const roiRatio = abilityDef?.roiRatio ?? 2.0
         const valueRoll = SMUGGLER_VALUE_MIN + Math.random() * (SMUGGLER_VALUE_MAX - SMUGGLER_VALUE_MIN)
-        // Scaled cost was already paid; reward = scaledCost × ROI × random variance
-        const sCost = scaleContactCost(abilityDef?.cost ?? 2000, player.cash.toNumber(), abilityDef?.impactTier ?? 'standard', abilityDef?.costWeight ?? 0.4)
+        // Use the cost that was actually paid (paidCost) instead of recalculating
+        // after cash was deducted, to avoid systematic reward undercount.
+        const sCost = paidCost.gt(ZERO) ? paidCost.toNumber() : scaleContactCost(abilityDef?.cost ?? 2000, player.cash.toNumber(), abilityDef?.impactTier ?? 'standard', abilityDef?.costWeight ?? 0.4)
         const scaledValue = scaleContactReward(sCost, roiRatio * valueRoll)
         const cashGrant = D(scaledValue)
         player.earnCash(cashGrant)
@@ -1005,7 +1013,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       }
 
       case 'smuggler_supply_run': {
-        applyDealEffect('cost_reduction', 0.75, 3600, 'smuggler_supply')
+        applyDealEffect('cost_reduction', 1.33, 3600, 'smuggler_supply')
         applyDealEffect('business_boost', 1.3, 3600, 'smuggler_supply')
         addHeat(5)
         addLogEntry('info', 'mdi:truck-fast', 'blackmarket.log_supply_run', {
@@ -1026,7 +1034,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const idx = randomInt(0, allAssets.length - 1)
         const asset = allAssets[idx]
         const targetAsset = sim.getAsset(asset.id)
-        const direction = Math.random() > 0.5 ? 1 : -1
+        // Biased 75% up / 25% down — hacking should reward the player
+        const direction = Math.random() > 0.25 ? 1 : -1
         const changePct = Math.round(HACKER_MANIPULATION_RANGE * (0.5 + Math.random() * 0.5) * 100)
         if (targetAsset) {
           targetAsset.currentPrice *= (1 + (changePct / 100) * direction)
@@ -1057,7 +1066,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const idx = randomInt(0, allCrypto.length - 1)
         const asset = allCrypto[idx]
         const targetAsset = sim.getAsset(asset.id)
-        const direction = Math.random() > 0.5 ? 1 : -1
+        // Biased 75% up / 25% down — hacking should reward the player
+        const direction = Math.random() > 0.25 ? 1 : -1
         const changePct = Math.round(HACKER_MANIPULATION_RANGE * (0.5 + Math.random() * 0.5) * 100)
         if (targetAsset) {
           targetAsset.currentPrice *= (1 + (changePct / 100) * direction)
@@ -1098,7 +1108,10 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         })
         if (negativeEvents.length > 0) {
           const target = negativeEvents[0]
-          const cost = D(FIXER_COST_PER_SEVERITY * (target.ticksRemaining / 100))
+          // Percentage-based cost: scales with player wealth like the rest of the system
+          const eventDuration = target.ticksRemaining
+          const severityFactor = Math.max(1, Math.ceil(eventDuration / 600)) // higher for longer events
+          const cost = D(scalePercentageCost(player.cash, 'standard', Math.min(1, severityFactor * 0.15)))
           if (gte(player.cash, cost)) {
             player.spendCash(cost)
             totalCashSpent.value = add(totalCashSpent.value, cost)

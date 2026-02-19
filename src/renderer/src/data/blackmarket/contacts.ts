@@ -214,7 +214,7 @@ export const CONTACTS: ContactDef[] = [
     descKey: 'blackmarket.contact_fixer_desc',
     icon: 'mdi:wrench',
     color: '#ef5350',
-    unlockTier: 5,
+    unlockTier: 3,
     loyaltyPerUse: 5,
     maxLoyalty: 100,
     abilities: [
@@ -226,7 +226,7 @@ export const CONTACTS: ContactDef[] = [
         cost: 0,  // Dynamic cost based on event severity
         cooldownTicks: 9000,
         minLoyalty: 0,
-        minTier: 5,
+        minTier: 3,
       },
       {
         id: 'fixer_clear_heat',
@@ -238,7 +238,7 @@ export const CONTACTS: ContactDef[] = [
         costWeight: 0.5,
         cooldownTicks: 18000,
         minLoyalty: 30,
-        minTier: 5,
+        minTier: 3,
       },
       {
         id: 'fixer_dismiss_investigation',
@@ -248,7 +248,7 @@ export const CONTACTS: ContactDef[] = [
         cost: 0,  // Dynamic cost
         cooldownTicks: 36000, // 1 hour
         minLoyalty: 60,
-        minTier: 5,
+        minTier: 4,
       },
     ],
   },

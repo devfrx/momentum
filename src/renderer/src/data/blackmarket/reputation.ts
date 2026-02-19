@@ -18,8 +18,8 @@ export const REPUTATION_TIERS: ReputationTierDef[] = [
     tier: 1,
     nameKey: 'blackmarket.rep_tier_1',
     dealsRequired: 10,
-    riskReduction: 0,
-    priceDiscount: 0,
+    riskReduction: 3,
+    priceDiscount: 2,
     unlockedCategories: ['intel', 'goods', 'finance', 'boost'],
     icon: 'mdi:account-question',
     color: '#8bc34a',
@@ -29,7 +29,7 @@ export const REPUTATION_TIERS: ReputationTierDef[] = [
     nameKey: 'blackmarket.rep_tier_2',
     dealsRequired: 25,
     riskReduction: 5,
-    priceDiscount: 0,
+    priceDiscount: 3,
     unlockedCategories: ['intel', 'goods', 'finance', 'boost', 'special'],
     icon: 'mdi:account-check',
     color: '#2196f3',
@@ -71,10 +71,20 @@ export function getReputationTier(tier: ReputationTier): ReputationTierDef {
   return REPUTATION_TIERS[tier]
 }
 
-/** Calculate current tier from total completed deals */
-export function calculateTier(completedDeals: number): ReputationTier {
+/**
+ * Calculate an effective "deal score" combining completed deals and reputation points.
+ * Every 5 reputation points count as 1 extra deal for tier purposes.
+ * This ensures repReward, reputation_boost, and reputation_loss have tangible impact.
+ */
+export function effectiveDealScore(completedDeals: number, reputationPoints: number): number {
+  return completedDeals + Math.floor(Math.max(0, reputationPoints) / 5)
+}
+
+/** Calculate current tier from completed deals and reputation points */
+export function calculateTier(completedDeals: number, reputationPoints: number = 0): ReputationTier {
+  const score = effectiveDealScore(completedDeals, reputationPoints)
   for (let i = REPUTATION_TIERS.length - 1; i >= 0; i--) {
-    if (completedDeals >= REPUTATION_TIERS[i].dealsRequired) {
+    if (score >= REPUTATION_TIERS[i].dealsRequired) {
       return REPUTATION_TIERS[i].tier
     }
   }
@@ -82,12 +92,13 @@ export function calculateTier(completedDeals: number): ReputationTier {
 }
 
 /** Get progress to next tier (0–1) */
-export function getTierProgress(completedDeals: number): number {
-  const current = calculateTier(completedDeals)
+export function getTierProgress(completedDeals: number, reputationPoints: number = 0): number {
+  const score = effectiveDealScore(completedDeals, reputationPoints)
+  const current = calculateTier(completedDeals, reputationPoints)
   if (current >= 5) return 1
   const currentDef = REPUTATION_TIERS[current]
   const nextDef = REPUTATION_TIERS[current + 1]
   const range = nextDef.dealsRequired - currentDef.dealsRequired
-  const progress = completedDeals - currentDef.dealsRequired
+  const progress = score - currentDef.dealsRequired
   return Math.min(1, progress / range)
 }

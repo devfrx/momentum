@@ -100,7 +100,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     baseRisk: 40,
     successEffects: [
       { type: 'income_boost', value: 1.60, durationTicks: 3600 },
-      { type: 'cost_reduction', value: 0.80, durationTicks: 3600 },
+      { type: 'cost_reduction', value: 1.25, durationTicks: 3600 },
     ],
     failConsequences: [
       { probability: 0.4, type: 'cash_loss', value: 1.0, durationTicks: 0 },
@@ -227,7 +227,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     baseRisk: 20,
     successEffects: [
       { type: 'income_boost', value: 1.25, durationTicks: 3600 },
-      { type: 'cost_reduction', value: 0.90, durationTicks: 3600 },
+      { type: 'cost_reduction', value: 1.11, durationTicks: 3600 },
     ],
     failConsequences: [
       { probability: 0.5, type: 'cash_loss', value: 1.0, durationTicks: 0 },
@@ -485,7 +485,7 @@ export const DEAL_DEFS: BlackMarketDealDef[] = [
     successEffects: [
       { type: 'income_boost', value: 3.0, durationTicks: 3600 },
       { type: 'business_boost', value: 2.5, durationTicks: 3600 },
-      { type: 'cost_reduction', value: 0.70, durationTicks: 3600 },
+      { type: 'cost_reduction', value: 1.43, durationTicks: 3600 },
     ],
     failConsequences: [
       { probability: 0.3, type: 'cash_loss', value: 1.0, durationTicks: 0 },
