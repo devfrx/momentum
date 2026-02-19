@@ -756,14 +756,17 @@ export default {
     total_maint_paid: 'Total maintenance paid',
     opportunities: 'Opportunities',
     no_opportunities: 'No opportunities available right now.',
-    scan_hint: 'Try scanning districts on the map to find hidden deals.',
-    buy_hint: 'Browse opportunities or scan the map to find your next property.',
+    scan_hint: 'Try scouting the market to find hidden premium deals.',
+    buy_hint: 'Browse opportunities or scout the market to find your next property.',
     improvement_shop: 'Improvement Shop',
     slots_remaining: '{count} slot(s) remaining',
     improvements_full: 'All improvement slots are filled.',
     no_improvements_available: 'No improvements available for this property yet.',
 
     // Tabs
+    skyline_empty: 'No properties yet — your skyline is empty.',
+    back_to_skyline: 'Back to Skyline',
+
     tab: {
       map: 'City Map',
       opportunities: 'Opportunities',
@@ -791,73 +794,20 @@ export default {
       structural: 'Structure',
     },
 
-    // Districts
-    districts: {
-      downtown: 'Downtown',
-      downtown_desc: 'The financial heart of the city. Sky-high rents, premium tenants, and fierce competition for prime real estate.',
-      midtown: 'Midtown',
-      midtown_desc: 'The bustling commercial center. A mix of offices, shops, and hospitality venues with steady demand.',
-      uptown: 'Uptown',
-      uptown_desc: 'Quiet residential neighborhoods with steady appreciation. Perfect for starting your property empire.',
-      waterfront: 'Waterfront',
-      waterfront_desc: 'Exclusive waterfront properties with stunning views. High rents but volatile demand.',
-      industrial: 'Industrial Zone',
-      industrial_desc: 'Warehouses and factories at low prices. Modest rents but minimal maintenance costs.',
-      harbor: 'Harbor District',
-      harbor_desc: 'An ultra-luxury enclave by the harbor. The most expensive and prestigious addresses in the city.',
-      tech_quarter: 'Tech Quarter',
-      tech_quarter_desc: 'The innovation hub. Fast-appreciating commercial spaces popular with startups and tech companies.',
-      old_town: 'Old Town',
-      old_town_desc: 'Historic charm meets affordable living. Older buildings with character and loyal tenants.',
-      skyline_heights: 'Skyline Heights',
-      skyline_heights_desc: 'Ultra-premium skyscraper district with the most exclusive penthouses and corporate headquarters in the city.',
+    // Location Grades
+    grade: {
+      s: 'S — Prime',
+      a: 'A — Premium',
+      b: 'B — Standard',
+      c: 'C — Budget',
+      d: 'D — Economy',
     },
 
-    // District panel
-    district: {
-      rent_mult: 'Rent Multiplier',
-      appreciation_mul: 'Appreciation',
-      appreciation: 'Appreciation',
-      volatility: 'Volatility',
-      categories: 'Categories',
-      opportunities: 'Opportunities',
-      owned: 'Owned Here',
-      view_on_map: 'View on Map',
-      unlock_at: 'Unlocks at net worth {amount}',
-    },
-
-    // Synergies
-    synergy: {
-      title: 'District Synergies',
-      active_bonus: 'Synergy Active',
-      none: 'No synergies yet — buy more properties in this district.',
-      next: '{count} more property(ies) needed for next synergy',
-      neighborhood_presence: 'Neighborhood Presence',
-      local_monopoly: 'Local Monopoly',
-      heritage_district: 'Heritage District',
-      industrial_cluster: 'Industrial Cluster',
-      logistics_hub: 'Logistics Hub',
-      commercial_strip: 'Commercial Strip',
-      business_district: 'Business District',
-      prime_portfolio: 'Prime Portfolio',
-      downtown_empire: 'Downtown Empire',
-      tech_campus: 'Tech Campus',
-      innovation_hub: 'Innovation Hub',
-      waterfront_collection: 'Waterfront Collection',
-      marina_district: 'Marina District',
-      elite_enclave: 'Elite Enclave',
-      harbor_crown: 'Harbor Crown',
-      skyline_collection: 'Skyline Collection',
-      sky_empire: 'Sky Empire',
-    },
-
-    // Scanning
-    scan: {
-      title: 'District Scan',
-      desc: 'Scan this district for hidden premium opportunities not on the public market.',
-      action: 'Scan — {cost}',
-      cooldown: 'Cooldown: {time}',
-    },
+    // Portfolio bonus
+    portfolio_bonus: 'Portfolio Bonus',
+    scout_market: 'Scout Market',
+    location_grade: 'Location Grade',
+    scout_cooldown: 'Scout cooldown: {time}',
 
     // Stat bar
     stat: {
@@ -953,6 +903,18 @@ export default {
       management: 'Management Style',
     },
 
+    tip: {
+      base_rent: 'Starting rent per tick at 100% occupancy, before bonuses.',
+      units: 'Number of rentable units. More units = more tenants.',
+      roi: 'Annual return-on-investment based on net rent vs. purchase price.',
+      true_value: 'Estimated market value based on economy and conditions.',
+      net_rent: 'Rent after subtracting maintenance, tax, and insurance.',
+      value_change: 'Percentage change in value since purchase.',
+      portfolio_bonus: 'Owning multiple properties of the same category grants bonus rent.',
+      condition: 'Physical state of the building. Low condition = fewer tenants and higher costs.',
+      occupancy: 'Percentage of units currently rented. Depends on condition, rent price, and economy.',
+    },
+
     info: {
       basics: {
         title: 'Property Basics',
@@ -1004,6 +966,41 @@ export default {
         purchase_price: 'Purchase Price', purchase_price_desc: 'The original price you paid for this property.',
         base_stats: 'Base Stats', base_stats_desc: 'Shows base rent, wear rate, tax rate, and maintenance. Base rent increases with each renovation.',
         lifetime_totals: 'Lifetime Totals', lifetime_totals_desc: 'Total rent earned, expenses paid, and net income since you bought this property.',
+      },
+      scouting: {
+        title: 'Scouting',
+        how: 'How It Works', how_desc: 'Pay to scout the market. Each scout reveals a batch of new properties you can purchase.',
+        cost: 'Scout Cost', cost_desc: 'Cost increases with each scout. Resets slowly over time with a cooldown.',
+        cooldown: 'Cooldown', cooldown_desc: 'After scouting, there is a short cooldown before you can scout again.',
+        reveals: 'Reveals', reveals_desc: 'Each scout reveals 3 new property opportunities. Unseen properties disappear after a while.',
+      },
+      improvements_info: {
+        title: 'Improvements',
+        what: 'What Are They', what_desc: 'Permanent upgrades you install on a property to boost rent, reduce wear, or improve occupancy.',
+        slots: 'Slots', slots_desc: 'Each property has a limited number of improvement slots based on its template.',
+        install: 'Installing', install_desc: 'Open the improvements panel from the property detail view. Each improvement has a one-time cost.',
+      },
+      traits_info: {
+        title: 'Traits',
+        what: 'What Are They', what_desc: 'Random modifiers assigned when a property is generated. They cannot be changed.',
+        positive: 'Positive Traits', positive_desc: 'Green badges that boost rent, reduce wear, or improve occupancy.',
+        negative: 'Negative Traits', negative_desc: 'Red badges that increase costs, speed up wear, or reduce occupancy.',
+      },
+      grades: {
+        title: 'Location Grades',
+        what: 'What Are They', what_desc: 'Each property has a location grade from D (worst) to S (best). Higher grades mean more rent and faster appreciation.',
+        effect: 'Effect on Rent', effect_desc: 'Grade S gives ×1.50 rent, Grade A gives ×1.25, Grade B gives ×1.00, Grade C gives ×0.80, Grade D gives ×0.60.',
+      },
+      styles: {
+        title: 'Management Styles',
+        what: 'What Are They', what_desc: 'Choose how to manage each property. Style affects rent income, wear speed, and maintenance costs.',
+        budget: 'Budget', budget_desc: 'Lowest costs but faster wear and lower rents. Good for cheap properties.',
+        luxury: 'Luxury', luxury_desc: 'Highest costs but premium rents and slowest wear. Best for high-value properties.',
+      },
+      portfolio: {
+        title: 'Portfolio Bonus',
+        what: 'How It Works', what_desc: 'Owning multiple properties in the same category unlocks rent bonuses: +5% at 2, +12% at 5, +25% at 10 properties.',
+        categories: 'Categories', categories_desc: 'Residential, Commercial, Hospitality, and Luxury each have their own portfolio bonus track.',
       },
     },
   },

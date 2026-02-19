@@ -1,19 +1,27 @@
 <script setup lang="ts">
+/**
+ * RealEstateView — Main orchestrator
+ *
+ * 3-level flow:
+ *   Level 1  «Skyline»       Panoramic strip of all owned buildings
+ *   Level 2  «Focus»         Immersive single-property view (La Strada)
+ *   Sidebar  «Opportunities» Opportunity cards + District browser
+ *
+ * No map, no PixiJS. Pure DOM / SVG.
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
-import { type District } from '@renderer/data/realestate'
-import CityMap from '@renderer/components/realestate/CityMap.vue'
-import DistrictPanel from '@renderer/components/realestate/DistrictPanel.vue'
+import { getScoutMarketCost } from '@renderer/data/realestate'
+import PropertyCarousel from '@renderer/components/realestate/PropertyCarousel.vue'
+import PropertyFocus from '@renderer/components/realestate/PropertyFocus.vue'
 import OpportunityCard from '@renderer/components/realestate/OpportunityCard.vue'
-import PropertyCard from '@renderer/components/realestate/PropertyCard.vue'
 import ImprovementShop from '@renderer/components/realestate/ImprovementShop.vue'
 import PropertyCustomizer from '@renderer/components/realestate/PropertyCustomizer.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UTabs, UModal } from '@renderer/components/ui'
-import type { TabDef } from '@renderer/components/ui'
+import { UButton, UModal } from '@renderer/components/ui'
 import { EventImpactBanner } from '@renderer/components/events'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
@@ -23,52 +31,78 @@ const realEstate = useRealEstateStore()
 const player = usePlayerStore()
 const { formatCash } = useFormat()
 
-const activeTab = ref<string>('map')
-const reTabs = computed<TabDef[]>(() => [
-    { id: 'map', label: t('realestate.tab.map'), icon: 'mdi:map-outline' },
-    { id: 'opportunities', label: t('realestate.tab.opportunities'), icon: 'mdi:tag-multiple-outline', count: realEstate.hotDeals.length },
-    { id: 'portfolio', label: t('realestate.tab.portfolio'), icon: 'mdi:briefcase-outline', count: realEstate.properties.length },
-])
-const selectedDistrict = ref<District | null>(null)
+// ── View mode ──
+type ViewMode = 'overview' | 'focus'
+const viewMode = ref<ViewMode>('overview')
+const focusedPropertyId = ref<string | null>(null)
+
+// ── Scout market ──
+const scoutCost = computed(() => getScoutMarketCost(player.netWorth.toNumber()))
+const canScout = computed(() =>
+    !realEstate.isScoutOnCooldown() && player.cash.gte(scoutCost.value),
+)
+function handleScout(): void {
+    realEstate.scoutMarket()
+}
+
+// ── Modals ──
 const selectedPropertyId = ref<string | null>(null)
 const showImprovements = ref(false)
 const showCustomizer = ref(false)
 
 const improvementProperty = computed(() =>
     showImprovements.value && selectedPropertyId.value
-        ? realEstate.properties.find(p => p.id === selectedPropertyId.value) ?? null : null,
+        ? realEstate.properties.find((p) => p.id === selectedPropertyId.value) ?? null
+        : null,
 )
 
 const customizerProperty = computed(() =>
     showCustomizer.value && selectedPropertyId.value
-        ? realEstate.properties.find(p => p.id === selectedPropertyId.value) ?? null : null,
+        ? realEstate.properties.find((p) => p.id === selectedPropertyId.value) ?? null
+        : null,
 )
 
+// ── Lifecycle ──
 onMounted(() => {
     realEstate.ensureOpportunities(player.netWorth.toNumber(), Date.now())
 })
 
-function handleSelectDistrict(district: District): void {
-    selectedDistrict.value = district
-}
-function handleSelectOpportunity(_oppId: string): void {
-    activeTab.value = 'opportunities'
-}
+// ── Navigation ──
 function handleSelectProperty(propId: string): void {
-    selectedPropertyId.value = propId
-    activeTab.value = 'portfolio'
+    focusedPropertyId.value = propId
+    viewMode.value = 'focus'
 }
+
+function handleBackToSkyline(): void {
+    viewMode.value = 'overview'
+    focusedPropertyId.value = null
+}
+
+function handleNavigate(propId: string): void {
+    focusedPropertyId.value = propId
+}
+
 function handleBought(propId: string): void {
-    selectedPropertyId.value = propId
-    activeTab.value = 'portfolio'
+    focusedPropertyId.value = propId
+    viewMode.value = 'focus'
 }
+
 function handleSold(): void {
-    selectedPropertyId.value = null
+    viewMode.value = 'overview'
+    focusedPropertyId.value = null
 }
-function handleOpenImprovements(): void {
+
+function handleOpenImprovements(propId: string): void {
+    selectedPropertyId.value = propId
     showImprovements.value = true
 }
 
+function handleOpenCustomizer(propId: string): void {
+    selectedPropertyId.value = propId
+    showCustomizer.value = true
+}
+
+// ── Info Panel (unchanged) ──
 const realEstateInfoSections = computed<InfoSection[]>(() => [
     {
         title: t('realestate.info.basics.title'),
@@ -142,12 +176,65 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
             { term: t('realestate.info.details.lifetime_totals'), desc: t('realestate.info.details.lifetime_totals_desc'), icon: 'mdi:sigma' },
         ],
     },
+    {
+        title: t('realestate.info.scouting.title'),
+        icon: 'mdi:binoculars',
+        entries: [
+            { term: t('realestate.info.scouting.how'), desc: t('realestate.info.scouting.how_desc'), icon: 'mdi:magnify' },
+            { term: t('realestate.info.scouting.cost'), desc: t('realestate.info.scouting.cost_desc'), icon: 'mdi:cash' },
+            { term: t('realestate.info.scouting.cooldown'), desc: t('realestate.info.scouting.cooldown_desc'), icon: 'mdi:timer-sand' },
+            { term: t('realestate.info.scouting.reveals'), desc: t('realestate.info.scouting.reveals_desc'), icon: 'mdi:eye-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.improvements_info.title'),
+        icon: 'mdi:puzzle-plus-outline',
+        entries: [
+            { term: t('realestate.info.improvements_info.what'), desc: t('realestate.info.improvements_info.what_desc'), icon: 'mdi:star-plus-outline' },
+            { term: t('realestate.info.improvements_info.slots'), desc: t('realestate.info.improvements_info.slots_desc'), icon: 'mdi:checkbox-multiple-outline' },
+            { term: t('realestate.info.improvements_info.install'), desc: t('realestate.info.improvements_info.install_desc'), icon: 'mdi:download' },
+        ],
+    },
+    {
+        title: t('realestate.info.traits_info.title'),
+        icon: 'mdi:tag-multiple-outline',
+        entries: [
+            { term: t('realestate.info.traits_info.what'), desc: t('realestate.info.traits_info.what_desc'), icon: 'mdi:dice-multiple-outline' },
+            { term: t('realestate.info.traits_info.positive'), desc: t('realestate.info.traits_info.positive_desc'), icon: 'mdi:thumb-up-outline' },
+            { term: t('realestate.info.traits_info.negative'), desc: t('realestate.info.traits_info.negative_desc'), icon: 'mdi:thumb-down-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.grades.title'),
+        icon: 'mdi:map-marker-star-outline',
+        entries: [
+            { term: t('realestate.info.grades.what'), desc: t('realestate.info.grades.what_desc'), icon: 'mdi:alpha-s-circle-outline' },
+            { term: t('realestate.info.grades.effect'), desc: t('realestate.info.grades.effect_desc'), icon: 'mdi:percent-outline' },
+        ],
+    },
+    {
+        title: t('realestate.info.styles.title'),
+        icon: 'mdi:cog-outline',
+        entries: [
+            { term: t('realestate.info.styles.what'), desc: t('realestate.info.styles.what_desc'), icon: 'mdi:tune-vertical' },
+            { term: t('realestate.info.styles.budget'), desc: t('realestate.info.styles.budget_desc'), icon: 'mdi:currency-usd-off' },
+            { term: t('realestate.info.styles.luxury'), desc: t('realestate.info.styles.luxury_desc'), icon: 'mdi:diamond-stone' },
+        ],
+    },
+    {
+        title: t('realestate.info.portfolio.title'),
+        icon: 'mdi:briefcase-check-outline',
+        entries: [
+            { term: t('realestate.info.portfolio.what'), desc: t('realestate.info.portfolio.what_desc'), icon: 'mdi:chart-bell-curve-cumulative' },
+            { term: t('realestate.info.portfolio.categories'), desc: t('realestate.info.portfolio.categories_desc'), icon: 'mdi:shape-outline' },
+        ],
+    },
 ])
 </script>
 
 <template>
     <div class="page-container">
-        <!-- Header -->
+        <!-- ─── Header ─── -->
         <div class="page-header">
             <div>
                 <h1 class="page-title">
@@ -161,7 +248,7 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
         <!-- Event Impact -->
         <EventImpactBanner route-name="realestate" />
 
-        <!-- Stats Bar -->
+        <!-- ─── Stats Bar ─── -->
         <div class="stats-bar">
             <div class="stat-chip">
                 <span class="stat-chip-label">{{ t('realestate.stat.properties') }}</span>
@@ -185,75 +272,56 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
             </div>
         </div>
 
-        <!-- Tab Navigation -->
-        <UTabs v-model="activeTab" :tabs="reTabs">
-            <template #map>
-                <section class="section">
-                    <div class="map-layout">
-                        <div class="map-area">
-                            <CityMap @select-district="handleSelectDistrict"
-                                @select-opportunity="handleSelectOpportunity" @select-property="handleSelectProperty" />
-                        </div>
-                        <transition name="slide-panel">
-                            <DistrictPanel v-if="selectedDistrict" :district="selectedDistrict"
-                                @close="selectedDistrict = null" @view-property="handleSelectProperty"
-                                @view-opportunity="handleSelectOpportunity" />
-                        </transition>
-                    </div>
-                </section>
-            </template>
+        <!-- ════════════════════════════════════════════════════════════════
+         LEVEL 1 — Skyline Overview
+         ════════════════════════════════════════════════════════════════ -->
+        <template v-if="viewMode === 'overview'">
+            <!-- Property carousel -->
+            <section class="section re-section">
+                <PropertyCarousel :active-property-id="focusedPropertyId" @select="handleSelectProperty" />
+            </section>
 
-            <template #opportunities>
-                <section class="section">
+            <!-- Opportunities -->
+            <section class="section">
+                <div class="section-header-row">
                     <h2 class="section-header">
-                        <AppIcon icon="mdi:tag-multiple" class="section-icon text-gold" />
+                        <AppIcon icon="mdi:tag-multiple" class="section-icon" />
                         {{ t('realestate.opp.market_title') }}
                         <span class="opp-count">({{ realEstate.availableOpportunities.length }})</span>
                     </h2>
+                    <UButton variant="primary" size="sm" icon="mdi:binoculars" :disabled="!canScout"
+                        :label="t('realestate.scout_market')" :subtitle="formatCash(scoutCost)" @click="handleScout" />
+                </div>
 
-                    <div v-if="realEstate.availableOpportunities.length === 0" class="empty-state">
-                        <AppIcon icon="mdi:map-search-outline" class="empty-icon" />
-                        <p>{{ t('realestate.no_opportunities') }}</p>
-                        <p class="text-muted text-sm">{{ t('realestate.scan_hint') }}
-                        </p>
-                    </div>
+                <div v-if="realEstate.availableOpportunities.length === 0" class="empty-state">
+                    <AppIcon icon="mdi:map-search-outline" class="empty-icon" />
+                    <p>{{ t('realestate.no_opportunities') }}</p>
+                    <p class="text-muted text-sm">{{ t('realestate.scan_hint') }}</p>
+                </div>
 
-                    <div v-else class="card-grid">
-                        <OpportunityCard v-for="opp in realEstate.availableOpportunities" :key="opp.id"
-                            :opportunity="opp" @bought="handleBought" />
-                    </div>
-                </section>
-            </template>
+                <div v-else class="card-grid">
+                    <OpportunityCard v-for="opp in realEstate.availableOpportunities" :key="opp.id" :opportunity="opp"
+                        @bought="handleBought" />
+                </div>
+            </section>
+        </template>
 
-            <template #portfolio>
-                <section class="section">
-                    <h2 class="section-header">
-                        <AppIcon icon="mdi:briefcase" class="section-icon text-sky" />
-                        {{ t('realestate.portfolio') }}
-                        <span class="opp-count">({{ realEstate.properties.length }})</span>
-                    </h2>
+        <!-- ════════════════════════════════════════════════════════════════
+         LEVEL 2 — Property Focus (La Strada)
+         ════════════════════════════════════════════════════════════════ -->
+        <template v-else-if="viewMode === 'focus' && focusedPropertyId">
+            <section class="section re-section re-section--focus">
+                <PropertyFocus :property-id="focusedPropertyId" @back="handleBackToSkyline" @navigate="handleNavigate"
+                    @sold="handleSold" @open-improvements="handleOpenImprovements"
+                    @open-customizer="handleOpenCustomizer" />
+            </section>
+        </template>
 
-                    <div v-if="realEstate.properties.length === 0" class="empty-state">
-                        <AppIcon icon="mdi:home-outline" class="empty-icon" />
-                        <p>{{ t('realestate.no_properties') }}</p>
-                        <p class="text-muted text-sm">{{ t('realestate.buy_hint') }}
-                        </p>
-                    </div>
-
-                    <div v-else class="card-grid-lg">
-                        <PropertyCard v-for="prop in realEstate.properties" :key="prop.id" :property="prop"
-                            @sold="handleSold"
-                            @open-improvements="selectedPropertyId = prop.id; handleOpenImprovements()" />
-                    </div>
-                </section>
-            </template>
-        </UTabs>
-
-        <!-- Info Panel -->
+        <!-- ─── Info Panel ─── -->
         <InfoPanel :title="t('realestate.info_title')" :description="t('realestate.info_desc')"
             :sections="realEstateInfoSections" />
 
-        <!-- Dialogs -->
+        <!-- ─── Dialogs ─── -->
         <UModal v-model="showImprovements" :title="t('realestate.improvement_shop')" icon="mdi:hammer-wrench" size="md">
             <ImprovementShop v-if="improvementProperty" :property="improvementProperty"
                 @close="showImprovements = false" @installed="() => { }" />
@@ -267,15 +335,39 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
 </template>
 
 <style scoped>
-.map-layout {
-    display: flex;
-    gap: var(--t-space-4);
-    min-height: 520px;
+/* ── Real estate section spacing ── */
+.re-section {
+    margin-bottom: var(--t-space-4);
 }
 
-.map-area {
-    flex: 1;
-    min-width: 0;
+.re-section--focus {
+    animation: fadeInFocus 0.25s ease;
+}
+
+@keyframes fadeInFocus {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Misc ── */
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: var(--t-space-3);
+    gap: var(--t-space-2);
+}
+
+.section-header {
+    margin: 0;
 }
 
 .opp-count {
@@ -293,6 +385,7 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
     padding: var(--t-space-10) var(--t-space-4);
     color: var(--t-text-muted);
     text-align: center;
+    border-radius: var(--t-radius-lg);
 }
 
 .empty-icon {
@@ -301,18 +394,24 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
     margin-bottom: var(--t-space-2);
 }
 
-.slide-panel-enter-active,
-.slide-panel-leave-active {
-    transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-.slide-panel-enter-from,
-.slide-panel-leave-to {
-    transform: translateX(20px);
-    opacity: 0;
-}
-
 .text-sm {
     font-size: var(--t-font-size-sm);
+}
+
+/* ── Card Grid Polish ── */
+.card-grid {
+    animation: fadeInGrid 0.3s ease;
+}
+
+@keyframes fadeInGrid {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>

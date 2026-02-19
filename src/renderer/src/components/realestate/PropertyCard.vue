@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRealEstateStore, type Property } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
-import { getDistrict, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
+import { getLocationGrade, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UAccordion, UButton, UCard } from '@renderer/components/ui'
 import { THEME } from '@renderer/assets/theme/colors'
@@ -27,13 +27,13 @@ const showRename = ref(false)
 const newName = ref('')
 const confirmSell = ref(false)
 
-const district = computed(() => getDistrict(props.property.districtId))
+const gradeData = computed(() => getLocationGrade(props.property.locationGrade))
 const traits = computed(() => props.property.traits.map(tid => getTrait(tid)).filter(Boolean) as PropertyTrait[])
 const improvements = computed(() => props.property.improvements.map(id => getImprovement(id)).filter(Boolean) as ImprovementDef[])
 const netRent = computed(() => realEstate.computePropertyNetRent(props.property))
 const grossRent = computed(() => realEstate.computePropertyRent(props.property))
 const maintenance = computed(() => realEstate.computePropertyMaintenance(props.property))
-const synergy = computed(() => realEstate.getDistrictSynergy(props.property.districtId))
+const categoryBonus = computed(() => realEstate.getCategoryRentBonus(props.property.category))
 const displayName = computed(() => props.property.customName || props.property.name)
 
 const roi = computed(() => {
@@ -77,7 +77,7 @@ function handleRentSlider(val: number | number[]): void {
 </script>
 
 <template>
-    <UCard class="prop-card" :accent="district?.color ?? 'var(--t-accent)'">
+    <UCard class="prop-card" :accent="gradeData?.color ?? 'var(--t-accent)'">
         <!-- ── Header ── -->
         <div class="prop-card__head">
             <AppIcon :icon="property.icon" class="prop-card__icon" />
@@ -96,8 +96,8 @@ function handleRentSlider(val: number | number[]): void {
                 </div>
                 <div class="prop-card__meta">
                     <Tag :value="property.category" size="small" severity="secondary" />
-                    <span v-if="district" class="prop-card__district">
-                        <AppIcon :icon="district.icon" /> {{ t(district.nameKey) }}
+                    <span v-if="gradeData" class="prop-card__grade" :style="{ '--_grade-color': gradeData.color }">
+                        <AppIcon :icon="gradeData.icon" /> {{ t(gradeData.nameKey) }}
                     </span>
                 </div>
             </div>
@@ -157,10 +157,10 @@ function handleRentSlider(val: number | number[]): void {
             </span>
         </div>
 
-        <!-- ── Synergy banner ── -->
-        <div v-if="synergy.rentBonus > 0" class="prop-card__synergy">
-            <AppIcon icon="mdi:link-variant" />
-            <span>{{ t('realestate.synergy.active_bonus') }}: {{ formatPercent(synergy.rentBonus * 100) }}
+        <!-- ── Portfolio bonus banner ── -->
+        <div v-if="categoryBonus > 0" class="prop-card__portfolio-bonus">
+            <AppIcon icon="mdi:briefcase-check" />
+            <span>{{ t('realestate.portfolio_bonus') }}: +{{ formatPercent(categoryBonus * 100) }}
                 {{ t('realestate.rent') }}</span>
         </div>
 
@@ -216,7 +216,7 @@ function handleRentSlider(val: number | number[]): void {
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.roi') }}</span>
                         <span class="d-value" :class="roi > 0 ? 'success' : 'danger'">{{ formatPercent(roi)
-                        }}</span>
+                            }}</span>
                     </div>
                 </div>
             </div>
@@ -234,7 +234,7 @@ function handleRentSlider(val: number | number[]): void {
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.appreciation') }}</span>
                         <span class="d-value success">{{ formatPercent(property.baseAppreciationRate * 100)
-                        }}/{{ t('common.cycle') }}</span>
+                            }}/{{ t('common.cycle') }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.rent_multiplier') }}</span>
@@ -281,7 +281,7 @@ function handleRentSlider(val: number | number[]): void {
                 <h4 class="detail-title">
                     <AppIcon icon="mdi:puzzle" /> {{ t('realestate.improvements_label') }}
                     <span class="detail-count">{{ property.improvements.length }}/{{ property.maxImprovements
-                    }}</span>
+                        }}</span>
                 </h4>
                 <div v-if="improvements.length > 0" class="prop-card__improvements">
                     <span v-for="im in improvements" :key="im.id" class="imp-badge">
@@ -355,7 +355,7 @@ function handleRentSlider(val: number | number[]): void {
     margin-top: 0.15rem;
 }
 
-.prop-card__district {
+.prop-card__grade {
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
@@ -486,8 +486,8 @@ function handleRentSlider(val: number | number[]): void {
     color: var(--t-warning);
 }
 
-/* ── Synergy ── */
-.prop-card__synergy {
+/* ── Portfolio bonus ── */
+.prop-card__portfolio-bonus {
     display: flex;
     align-items: center;
     gap: var(--t-space-2);
@@ -676,5 +676,73 @@ function handleRentSlider(val: number | number[]): void {
     border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.style-opt:focus-visible {
+    box-shadow: var(--t-shadow-focus);
+    outline: none;
+}
+
+.style-opt:active {
+    transform: scale(0.97);
+}
+
+.style-opt.active {
+    border-color: var(--t-accent);
+    background: color-mix(in srgb, var(--t-accent) 8%, transparent);
+    color: var(--t-text);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--t-accent) 15%, transparent);
+}
+
+/* ── Slider ── */
+.prop-card__slider-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prop-card__rent-val {
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
+    font-size: var(--t-font-size-base);
+    color: var(--t-text);
+}
+
+.prop-card__slider {
+    width: 100%;
+}
+
+.prop-card__slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--t-text-muted);
+}
+
+/* ── Improvements ── */
+.prop-card__improvements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-1);
+}
+
+.imp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.18rem 0.5rem;
+    background: color-mix(in srgb, var(--t-accent) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--t-accent) 12%, transparent);
+    border-radius: var(--t-radius-sm);
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-secondary);
+    transition: transform 0.1s ease;
+}
+
+.imp-badge:hover {
+    transform: scale(1.04);
 }
 </style>

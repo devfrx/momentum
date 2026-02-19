@@ -2,7 +2,7 @@
  * useRealEstateStore — Full real estate management Pinia store
  *
  * Handles property ownership, opportunity generation, buying/selling,
- * rent collection, renovation, improvements, district scanning, synergies,
+ * rent collection, renovation, improvements, market scouting,
  * customization, save/load, and prestige resets.
  *
  * Compatible with: useGameLoop, useAutoSave, useInitGame, useMultipliers,
@@ -14,22 +14,24 @@ import Decimal from 'break_infinity.js'
 import { D, ZERO, add, mul, sub } from '@renderer/core/BigNum'
 import { Formulas } from '@renderer/core'
 import {
-  type PropertyDistrictCategory,
+  type PropertyCategory,
+  type LocationGrade,
   type ImprovementId,
   type ManagementStyle,
   type PropertyTrait,
   type PropertyOpportunity,
   type ScoutPhase,
-  getDistrict,
-  getUnlockedDistricts,
-  getCombinedSynergyBonus,
+  getLocationGrade,
+  getCategoryBonus,
   getManagementStyle,
   getImprovement,
   getTrait,
   SCOUT_PHASES,
   APPRAISAL_DISCOUNT,
+  SCOUT_COOLDOWN_MS,
+  getScoutMarketCost,
   generateOpportunity,
-  generateScanOpportunity,
+  generateScoutOpportunity,
   generateOpportunityBatch,
   OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES,
@@ -48,9 +50,8 @@ export interface Property {
   templateId: string
   name: string
   icon: string
-  category: PropertyDistrictCategory
-  districtId: string
-  location: [number, number]
+  category: PropertyCategory
+  locationGrade: LocationGrade
 
   /** Price originally paid */
   purchasePrice: Decimal
@@ -107,17 +108,11 @@ export interface Property {
   totalMaintenancePaid: Decimal
 }
 
-export interface ScanCooldown {
-  districtId: string
-  /** Cooldown expiry timestamp (Date.now()) */
-  expiresAt: number
-}
-
 export interface RealEstateStoreState {
   properties: Property[]
   opportunities: PropertyOpportunity[]
   lastRefreshTick: number
-  scannedDistricts: ScanCooldown[]
+  scoutCooldownExpiry: number
   totalPropertiesBought: number
   totalPropertiesSold: number
   totalRentEarned: Decimal
@@ -126,8 +121,7 @@ export interface RealEstateStoreState {
   totalImprovementsInstalled: number
 }
 
-// Scan cooldown duration: 5 minutes in real time
-const SCAN_COOLDOWN_MS = 5 * 60 * 1000
+// Scout Market cooldown is managed via a single timestamp
 // Occupancy is recalculated every 300 ticks (30s)
 const OCCUPANCY_RECALC_TICKS = 300
 // Appreciation period: every 6000 ticks (10 min)
@@ -143,7 +137,8 @@ export const useRealEstateStore = defineStore('realEstate', () => {
   const properties = ref<Property[]>([])
   const opportunities = ref<PropertyOpportunity[]>([])
   const lastRefreshTick = ref(0)
-  const scannedDistricts = ref<ScanCooldown[]>([])
+  /** Single global scout cooldown (Date.now() expiry timestamp) */
+  const scoutCooldownExpiry = ref(0)
 
   // Statistics
   const totalPropertiesBought = ref(0)
@@ -166,32 +161,27 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     return total
   })
 
-  /** Properties in each district (for synergy calculation) */
-  const propertiesByDistrict = computed<Map<string, Property[]>>(() => {
-    const map = new Map<string, Property[]>()
+  /** Properties grouped by category (for portfolio bonus calculation) */
+  const propertiesByCategory = computed<Map<PropertyCategory, Property[]>>(() => {
+    const map = new Map<PropertyCategory, Property[]>()
     for (const p of properties.value) {
-      const list = map.get(p.districtId) || []
+      const list = map.get(p.category) || []
       list.push(p)
-      map.set(p.districtId, list)
+      map.set(p.category, list)
     }
     return map
   })
 
-  /** Get synergy bonus for a specific district */
-  function getDistrictSynergy(districtId: string) {
-    const district = getDistrict(districtId)
-    if (!district) return { rentBonus: 0, appreciationBonus: 0, occupancyBonus: 0 }
-    const owned = propertiesByDistrict.value.get(districtId)?.length ?? 0
-    return getCombinedSynergyBonus(district, owned)
+  /** Get portfolio category bonus for a given category */
+  function getCategoryRentBonus(category: PropertyCategory): number {
+    const count = propertiesByCategory.value.get(category)?.length ?? 0
+    return getCategoryBonus(count)
   }
 
   /** Compute effective rent per tick for a single property */
   function computePropertyRent(p: Property): Decimal {
-    const district = getDistrict(p.districtId)
-    if (!district) return ZERO
-
     const mgmt = getManagementStyle(p.managementStyle)
-    const synergy = getDistrictSynergy(p.districtId)
+    const categoryBonus = getCategoryRentBonus(p.category)
 
     // Trait rent modifier (additive)
     let traitRentMod = 0
@@ -210,19 +200,20 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     // Condition factor: at 100 = 1.0, at 0 = 0.3
     const conditionFactor = 0.3 + (p.condition / 100) * 0.7
 
-    // Base formula (from Formulas.ts)
+    // Base formula — location grade multiplier is already baked into p.baseRent
+    // at generation time, so we pass 1.0 as locationMultiplier to avoid double-counting
     const baseRentValue = Formulas.propertyRent(
       p.baseRent,
       p.renovationLevel,
       0.15, // upgradeBonus per renovation level
-      district.rentMultiplier,
+      1.0,  // locationMultiplier = 1.0 (already in baseRent)
     )
 
     // Apply all modifiers
     const modifiedRent = baseRentValue
       .mul(1 + traitRentMod)
       .mul(1 + improvementRentBonus)
-      .mul(1 + synergy.rentBonus)
+      .mul(1 + categoryBonus)
       .mul(mgmt.rentMod)
       .mul(p.rentMultiplier)
       .mul(conditionFactor)
@@ -302,10 +293,8 @@ export const useRealEstateStore = defineStore('realEstate', () => {
   /** Generate initial opportunities if we have none */
   function ensureOpportunities(netWorth: number, currentTime: number): void {
     if (opportunities.value.length < MIN_OPPORTUNITIES) {
-      const unlocked = getUnlockedDistricts(netWorth)
-      if (unlocked.length === 0) return
       const count = MIN_OPPORTUNITIES + Math.floor(Math.random() * (MAX_OPPORTUNITIES - MIN_OPPORTUNITIES + 1))
-      const newOpps = generateOpportunityBatch(netWorth, unlocked, currentTime, count)
+      const newOpps = generateOpportunityBatch(netWorth, currentTime, count)
       opportunities.value.push(...newOpps)
     }
   }
@@ -315,72 +304,56 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     // On refresh, remove non-scanned opps to cycle in fresh ones
     opportunities.value = opportunities.value.filter((o) => o.isScanned)
     // Fill up to minimum
-    const unlocked = getUnlockedDistricts(netWorth)
-    if (unlocked.length === 0) return
     while (opportunities.value.length < MIN_OPPORTUNITIES) {
-      opportunities.value.push(generateOpportunity(netWorth, unlocked, currentTime))
+      opportunities.value.push(generateOpportunity(netWorth, currentTime))
     }
     // Chance to add extras
     if (opportunities.value.length < MAX_OPPORTUNITIES && Math.random() < 0.4) {
-      opportunities.value.push(generateOpportunity(netWorth, unlocked, currentTime))
+      opportunities.value.push(generateOpportunity(netWorth, currentTime))
     }
   }
 
-  /** Scan a district for a premium opportunity */
-  function scanDistrict(districtId: string): PropertyOpportunity[] {
+  /** Scout the Market — pay to generate premium opportunities (replaces district scan) */
+  function scoutMarket(): PropertyOpportunity[] {
     const player = usePlayerStore()
-    const district = getDistrict(districtId)
-    if (!district) return []
+    const now = Date.now()
 
     // Check cooldown
-    const now = Date.now()
-    const cd = scannedDistricts.value.find((s) => s.districtId === districtId)
-    if (cd && cd.expiresAt > now) return []
+    if (scoutCooldownExpiry.value > now) return []
 
     // Check cost
-    const cost = D(district.scanCost)
+    const cost = D(getScoutMarketCost(player.netWorth.toNumber()))
     if (player.cash.lt(cost)) return []
 
     // Pay
     player.spendCash(cost)
 
-    // Remove old scanned opportunities for this district (replaced by fresh scan)
-    opportunities.value = opportunities.value.filter(
-      (o) => !(o.isScanned && o.districtId === districtId),
-    )
+    // Remove old scouted opportunities (replaced by fresh scout)
+    opportunities.value = opportunities.value.filter((o) => !o.isScanned)
 
     // Set cooldown
-    const existing = scannedDistricts.value.findIndex((s) => s.districtId === districtId)
-    if (existing >= 0) {
-      scannedDistricts.value[existing].expiresAt = now + SCAN_COOLDOWN_MS
-    } else {
-      scannedDistricts.value.push({ districtId, expiresAt: now + SCAN_COOLDOWN_MS })
-    }
+    scoutCooldownExpiry.value = now + SCOUT_COOLDOWN_MS
 
-    // Generate 1-4 scan opportunities
-    const count = 1 + Math.floor(Math.random() * 4)
+    // Generate 2-4 premium scout opportunities
+    const count = 2 + Math.floor(Math.random() * 3)
     const found: PropertyOpportunity[] = []
     for (let i = 0; i < count; i++) {
-      const opp = generateScanOpportunity(player.netWorth.toNumber(), district, now)
+      const opp = generateScoutOpportunity(player.netWorth.toNumber(), now)
       found.push(opp)
     }
     opportunities.value.push(...found)
     return found
   }
 
-  /** Check if district scan is on cooldown */
-  function isScanOnCooldown(districtId: string): boolean {
-    const now = Date.now()
-    const cd = scannedDistricts.value.find((s) => s.districtId === districtId)
-    return !!cd && cd.expiresAt > now
+  /** Check if scout is on cooldown */
+  function isScoutOnCooldown(): boolean {
+    return scoutCooldownExpiry.value > Date.now()
   }
 
-  /** Get remaining cooldown ms for a district */
-  function getScanCooldownRemaining(districtId: string): number {
-    const now = Date.now()
-    const cd = scannedDistricts.value.find((s) => s.districtId === districtId)
-    if (!cd || cd.expiresAt <= now) return 0
-    return cd.expiresAt - now
+  /** Get remaining cooldown ms for scout */
+  function getScoutCooldownRemaining(): number {
+    const remaining = scoutCooldownExpiry.value - Date.now()
+    return remaining > 0 ? remaining : 0
   }
 
   /** Scout (reveal hidden info) on an opportunity */
@@ -428,8 +401,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       name: opp.name,
       icon: opp.icon,
       category: opp.category,
-      districtId: opp.districtId,
-      location: opp.location,
+      locationGrade: opp.locationGrade,
       purchasePrice: price,
       currentValue: opp.trueValue,
       baseRent: opp.baseRent,
@@ -622,9 +594,9 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       if (ctx.tick > 0 && ctx.tick % APPRECIATION_PERIOD_TICKS === 0) {
         let effectiveAppreciation = prop.baseAppreciationRate
 
-        // Synergy appreciation bonus
-        const synergy = getDistrictSynergy(prop.districtId)
-        effectiveAppreciation += synergy.appreciationBonus
+        // Category portfolio bonus adds to appreciation
+        const catBonus = getCategoryRentBonus(prop.category)
+        effectiveAppreciation *= (1 + catBonus)
 
         // Trait appreciation mods (multiplicative)
         for (const tid of prop.traits) {
@@ -655,15 +627,12 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       refreshOpportunities(netWorth, now)
       lastRefreshTick.value = ctx.tick
     }
-
-    // ── Prune expired scan cooldowns ──
-    scannedDistricts.value = scannedDistricts.value.filter((s) => s.expiresAt > now)
   }
 
   /** Recalculate occupancy based on property stats */
   function recalculateOccupancy(prop: Property): void {
     const mgmt = getManagementStyle(prop.managementStyle)
-    const synergy = getDistrictSynergy(prop.districtId)
+    const catBonus = getCategoryRentBonus(prop.category)
 
     // Base occupancy influenced by condition, rent multiplier, management
     let baseOccupancy = 0.75
@@ -674,8 +643,8 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     // Management style
     baseOccupancy += mgmt.occupancyMod
 
-    // Synergy bonus
-    baseOccupancy += synergy.occupancyBonus
+    // Category portfolio bonus
+    baseOccupancy += catBonus * 0.5 // half of rent bonus goes to occupancy
 
     // Trait occupancy mods
     for (const tid of prop.traits) {
@@ -689,9 +658,9 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       if (imp) baseOccupancy += imp.occupancyBonus
     }
 
-    // Rent multiplier inversely affects occupancy (higher rent = less demand)
+    // Rent multiplier inversely affects occupancy — steep penalty so 1.2-1.3 is optimal
     if (prop.rentMultiplier > 1.0) {
-      baseOccupancy -= (prop.rentMultiplier - 1.0) * 0.3
+      baseOccupancy -= (prop.rentMultiplier - 1.0) * 0.6
     } else if (prop.rentMultiplier < 1.0) {
       baseOccupancy += (1.0 - prop.rentMultiplier) * 0.15
     }
@@ -722,7 +691,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
         traits: o.traits,
       })),
       lastRefreshTick: lastRefreshTick.value,
-      scannedDistricts: scannedDistricts.value,
+      scoutCooldownExpiry: scoutCooldownExpiry.value,
       totalPropertiesBought: totalPropertiesBought.value,
       totalPropertiesSold: totalPropertiesSold.value,
       totalRentEarned: totalRentEarned.value,
@@ -756,8 +725,8 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       lastRefreshTick.value = state.lastRefreshTick
     }
 
-    if (state.scannedDistricts && Array.isArray(state.scannedDistricts)) {
-      scannedDistricts.value = state.scannedDistricts
+    if (typeof state.scoutCooldownExpiry === 'number') {
+      scoutCooldownExpiry.value = state.scoutCooldownExpiry
     }
 
     // Statistics
@@ -778,8 +747,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       name: saved.name ?? 'Property',
       icon: saved.icon ?? 'mdi:home',
       category: saved.category ?? 'Residential',
-      districtId: saved.districtId ?? 'uptown',
-      location: saved.location ?? [40.785, -73.968],
+      locationGrade: saved.locationGrade ?? saved.districtId ? 'B' : 'B',
       purchasePrice: D(saved.purchasePrice ?? 0),
       currentValue: D(saved.currentValue ?? saved.purchasePrice ?? 0),
       baseRent: D(saved.baseRent ?? 0),
@@ -838,7 +806,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     properties.value = []
     opportunities.value = []
     lastRefreshTick.value = 0
-    scannedDistricts.value = []
+    scoutCooldownExpiry.value = 0
     // Keep lifetime stats
   }
 
@@ -846,7 +814,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     properties.value = []
     opportunities.value = []
     lastRefreshTick.value = 0
-    scannedDistricts.value = []
+    scoutCooldownExpiry.value = 0
     totalPropertiesBought.value = 0
     totalPropertiesSold.value = 0
     totalRentEarned.value = ZERO
@@ -863,7 +831,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     properties,
     opportunities,
     lastRefreshTick,
-    scannedDistricts,
+    scoutCooldownExpiry,
     globalRentMultiplier,
 
     // Statistics
@@ -880,7 +848,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     rentPerSecond,
     hotDeals,
     availableOpportunities,
-    propertiesByDistrict,
+    propertiesByCategory,
 
     // Actions — Property management
     buyProperty,
@@ -892,19 +860,19 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     setRentMultiplier,
     renameProperty,
 
-    // Actions — Opportunities & scanning
+    // Actions — Opportunities & scouting
     ensureOpportunities,
     refreshOpportunities,
-    scanDistrict,
-    isScanOnCooldown,
-    getScanCooldownRemaining,
+    scoutMarket,
+    isScoutOnCooldown,
+    getScoutCooldownRemaining,
     scoutOpportunity,
 
     // Actions — Computation helpers (for UI)
     computePropertyRent,
     computePropertyMaintenance,
     computePropertyNetRent,
-    getDistrictSynergy,
+    getCategoryRentBonus,
     getRepairCost,
     getRenovateCost,
     getSellPrice,

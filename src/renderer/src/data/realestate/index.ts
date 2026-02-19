@@ -2,13 +2,12 @@
  * Real Estate Data — Barrel export
  */
 export {
-  DISTRICTS,
-  getDistrict,
-  getUnlockedDistricts,
-  getActiveSynergies,
-  getCombinedSynergyBonus,
-} from './districts'
-export type { District, DistrictTier, PropertyDistrictCategory, DistrictSynergyBonus } from './districts'
+  LOCATION_GRADES,
+  getLocationGrade,
+  rollLocationGrade,
+  getCategoryBonus,
+} from './locations'
+export type { LocationGrade, LocationGradeData, PropertyCategory } from './locations'
 
 export { PROPERTY_TEMPLATES } from './templates'
 export type { PropertyTemplate } from './templates'
@@ -31,8 +30,10 @@ export {
   SCOUT_PHASES,
   SCOUT_PHASE_DATA,
   APPRAISAL_DISCOUNT,
+  SCOUT_COOLDOWN_MS,
+  getScoutMarketCost,
   generateOpportunity,
-  generateScanOpportunity,
+  generateScoutOpportunity,
   generateOpportunityBatch,
 } from './generators'
 export type { ScoutPhase, ScoutPhaseData, PropertyOpportunity } from './generators'

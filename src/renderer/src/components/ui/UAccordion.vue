@@ -166,7 +166,7 @@ function toggle(): void {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-3);
-    padding: 0 var(--t-space-4) var(--t-space-4);
+    padding: var(--t-space-3) var(--t-space-4) var(--t-space-4);
     border-top: 1px solid var(--t-border);
     font-size: var(--t-font-size-sm);
     color: var(--t-text-secondary);
@@ -174,7 +174,7 @@ function toggle(): void {
 }
 
 .u-accordion--compact .u-accordion-content {
-    padding: 0 var(--t-space-3) var(--t-space-3);
+    padding: var(--t-space-2) var(--t-space-3) var(--t-space-3);
 }
 
 /* Transition */

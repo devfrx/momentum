@@ -47,9 +47,6 @@ export { STOCKS } from './stocks'
 
 export { CRYPTOS } from './cryptos'
 
-export { PROPERTIES } from './properties'
-export type { PropertyDef } from './properties'
-
 export { UPGRADES } from './upgrades'
 export type { UpgradeDef, UpgradeTarget } from './upgrades'
 
@@ -127,11 +124,10 @@ export type {
 
 // ─── Real Estate ────────────────────────────────────────────────
 export {
-  DISTRICTS,
-  getDistrict,
-  getUnlockedDistricts,
-  getActiveSynergies,
-  getCombinedSynergyBonus,
+  LOCATION_GRADES,
+  getLocationGrade,
+  rollLocationGrade,
+  getCategoryBonus,
   PROPERTY_TEMPLATES,
   PROPERTY_TRAITS,
   getTrait,
@@ -143,18 +139,19 @@ export {
   SCOUT_PHASES,
   SCOUT_PHASE_DATA,
   APPRAISAL_DISCOUNT,
+  SCOUT_COOLDOWN_MS,
+  getScoutMarketCost,
   OPPORTUNITY_REFRESH_TICKS as RE_OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES as RE_MIN_OPPORTUNITIES,
   MAX_OPPORTUNITIES as RE_MAX_OPPORTUNITIES,
   generateOpportunity as generatePropertyOpportunity,
-  generateScanOpportunity,
+  generateScoutOpportunity,
   generateOpportunityBatch as generatePropertyOpportunityBatch,
 } from './realestate'
 export type {
-  District,
-  DistrictTier,
-  PropertyDistrictCategory,
-  DistrictSynergyBonus,
+  LocationGrade,
+  LocationGradeData,
+  PropertyCategory,
   PropertyTemplate,
   PropertyTrait,
   ManagementStyle,

@@ -218,6 +218,24 @@ const tierColors: Record<string, string> = {
     color: var(--t-text-secondary);
     line-height: 1.45;
     margin: 0;
+    bg-muted);
+    color: var(--t-text-secondary);
+}
+
+.dp-trend--growing {
+    color: var(--t-success);
+}
+
+.dp-trend--booming {
+    color: var(--t-accent);
+}
+
+.dp-trend--bubble {
+    color: var(--t-warning);
+}
+
+.dp-trend--declining {
+    color: var(--t-danger);
 }
 
 /* ── Stats grid ── */

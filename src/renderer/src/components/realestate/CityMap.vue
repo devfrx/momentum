@@ -1,16 +1,46 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+/**
+ * CityMap — Isometric 2.5D city map powered by PixiJS + D3
+ *
+ * Renders an interactive isometric city with:
+ * - District zones as colored terrain tiles
+ * - Isometric buildings for owned properties & opportunities
+ * - Activity particles per district (spawned by zone activity level)
+ * - D3 SVG overlay for heatmap & trend indicators
+ * - Pan & zoom with mouse/touch
+ * - Click districts to select, click buildings to view property/opportunity
+ * - Neighborhood event banners rendered in-world
+ * - Trend border colors around each district
+ * - Lock icons for inaccessible districts
+ */
+import { ref, computed, onMounted, onBeforeUnmount, watch, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
-import { DISTRICTS, getUnlockedDistricts, type District } from '@renderer/data/realestate'
+import {
+    DISTRICTS,
+    getNeighborhoodEvent,
+    type District,
+    type ZoneActivity,
+} from '@renderer/data/realestate'
+import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import { UButton } from '@renderer/components/ui'
+import {
+    IsometricEngine,
+    type DistrictRenderData,
+    type BuildingSprite,
+} from '@renderer/core/IsometricEngine'
 
 const { t } = useI18n()
+const { formatCash } = useFormat()
 const realEstate = useRealEstateStore()
 const player = usePlayerStore()
+
+const props = defineProps<{
+    /** Whether the map tab is currently visible */
+    active?: boolean
+}>()
 
 const emit = defineEmits<{
     (e: 'select-district', district: District): void
@@ -18,545 +48,498 @@ const emit = defineEmits<{
     (e: 'select-property', propId: string): void
 }>()
 
-/* ── Grid layout (identical) ── */
-interface MapCell {
-    district: District
-    col: number
-    row: number
-    colSpan: number
-    rowSpan: number
-}
-
-const districtPositions: Record<string, { col: number; row: number; colSpan: number; rowSpan: number }> = {
-    skyline_heights: { col: 2, row: 0, colSpan: 2, rowSpan: 1 },
-    downtown: { col: 2, row: 1, colSpan: 2, rowSpan: 2 },
-    midtown: { col: 0, row: 1, colSpan: 2, rowSpan: 2 },
-    tech_quarter: { col: 4, row: 0, colSpan: 2, rowSpan: 2 },
-    uptown: { col: 0, row: 0, colSpan: 2, rowSpan: 1 },
-    waterfront: { col: 4, row: 2, colSpan: 2, rowSpan: 2 },
-    old_town: { col: 0, row: 3, colSpan: 2, rowSpan: 2 },
-    industrial: { col: 2, row: 3, colSpan: 2, rowSpan: 2 },
-    harbor: { col: 4, row: 4, colSpan: 2, rowSpan: 1 },
-}
-
+// ─── Refs ──────────────────────────────────────────────────────
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+const engine = ref<IsometricEngine | null>(null)
 const hoveredDistrict = ref<string | null>(null)
-const selectedDistrict = ref<string | null>(null)
-const unlockedIds = computed(() => new Set(getUnlockedDistricts(player.netWorth.toNumber()).map(d => d.id)))
+const isZoomed = ref(false)
+const selectedDistrictId = ref<string | null>(null)
 
-const mapCells = computed<MapCell[]>(() =>
-    DISTRICTS.map(d => ({
-        district: d,
-        ...(districtPositions[d.id] ?? { col: 0, row: 0, colSpan: 1, rowSpan: 1 }),
-    })),
-)
+// ─── Computed data for engine ──────────────────────────────────
+const districtRenderData = computed<DistrictRenderData[]>(() => {
+    return DISTRICTS.map(district => {
+        const ds = realEstate.getDistrictState(district.id)
+        const opps = realEstate.availableOpportunities.filter(o => o.districtId === district.id)
+        const owned = realEstate.propertiesByDistrict.get(district.id) ?? []
+        const evt = ds.activeEventId ? getNeighborhoodEvent(ds.activeEventId) : null
 
-function propertiesInDistrict(id: string): number {
-    return realEstate.propertiesByDistrict.get(id)?.length ?? 0
-}
-function opportunitiesInDistrict(id: string): number {
-    return realEstate.availableOpportunities.filter(o => o.districtId === id).length
-}
-function handleClick(d: District): void {
-    if (!unlockedIds.value.has(d.id)) return
-    selectedDistrict.value = d.id
-    emit('select-district', d)
-}
-
-const tierLabel: Record<string, string> = {
-    starter: '★',
-    mid: '★★',
-    premium: '★★★',
-    elite: '★★★★',
-}
-
-/* ═══ Leaflet map ═══ */
-const mapContainer = ref<HTMLDivElement | null>(null)
-let leafletMap: L.Map | null = null
-
-const MAP_CENTER: [number, number] = [40.730, -73.998]
-const MAP_ZOOM = 13
-
-function initMap(): void {
-    if (!mapContainer.value || leafletMap) return
-
-    leafletMap = L.map(mapContainer.value, {
-        center: MAP_CENTER,
-        zoom: MAP_ZOOM,
-        zoomControl: false,
-        attributionControl: false,
-        dragging: true,
-        scrollWheelZoom: true,
-        doubleClickZoom: true,
-        touchZoom: true,
-        boxZoom: false,
-        keyboard: false,
+        return {
+            district,
+            unlocked: true, // All districts always accessible
+            ownedCount: owned.length,
+            opportunityCount: opps.length,
+            hotDealCount: opps.filter(o => o.isHotDeal).length,
+            activity: ds.activity,
+            trend: ds.trend,
+            activeEventName: evt ? t(evt.nameKey) : null,
+            activeEventIcon: evt?.icon ?? null,
+        }
     })
-
-    // Zoom control — bottom-right to avoid grid overlap
-    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap)
-
-    // Dark tile layer (CartoDB Dark Matter — free, no key)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 19,
-    }).addTo(leafletMap)
-
-    // NO district circles — just the raw dark map
-}
-
-function destroyMap(): void {
-    if (leafletMap) {
-        leafletMap.remove()
-        leafletMap = null
-    }
-}
-
-onMounted(() => {
-    nextTick(() => initMap())
 })
-onBeforeUnmount(() => destroyMap())
 
-/* ═══ Dots inside district cells ═══ */
-
-/** Deterministic pseudo-random from string id → 0..1 */
+/** Deterministic pseudo-random for building placement within district */
 function hashPos(id: string, seed: number): number {
     let h = seed
     for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) | 0
-    return (((h >>> 0) % 10000) / 10000)
+    return ((h >>> 0) % 1000) / 1000
 }
 
-interface CellDot {
-    id: string
-    name: string
-    kind: 'opp' | 'hot' | 'owned'
-    top: number   // %
-    left: number  // %
-}
+const buildingSprites = computed<BuildingSprite[]>(() => {
+    const sprites: BuildingSprite[] = []
 
-function dotsForDistrict(districtId: string): CellDot[] {
-    const dots: CellDot[] = []
-
-    // All opportunities in this district
-    const opps = realEstate.availableOpportunities.filter(
-        o => o.districtId === districtId,
-    )
-    for (const opp of opps) {
-        dots.push({
-            id: opp.id,
-            name: opp.name,
-            kind: opp.isHotDeal ? 'hot' : 'opp',
-            top: 25 + hashPos(opp.id, 1) * 50,   // 25%-75% vertical
-            left: 10 + hashPos(opp.id, 2) * 80,  // 10%-90% horizontal
-        })
-    }
-
-    // Owned properties in this district
-    const props = realEstate.propertiesByDistrict.get(districtId) ?? []
-    for (const p of props) {
-        dots.push({
-            id: p.id,
-            name: p.customName ?? p.name,
+    // Owned properties
+    for (const prop of realEstate.properties) {
+        sprites.push({
+            id: prop.id,
+            districtId: prop.districtId,
+            name: prop.customName || prop.name,
             kind: 'owned',
-            top: 25 + hashPos(p.id, 3) * 50,
-            left: 10 + hashPos(p.id, 4) * 80,
+            col: Math.floor(hashPos(prop.id, 1) * 4) + 0.5,
+            row: Math.floor(hashPos(prop.id, 2) * 3) + 0.5,
         })
     }
 
-    return dots
-}
-
-function handleDotClick(dot: CellDot, ev: MouseEvent): void {
-    ev.stopPropagation()
-    if (dot.kind === 'owned') {
-        emit('select-property', dot.id)
-    } else {
-        emit('select-opportunity', dot.id)
+    // Opportunities
+    for (const opp of realEstate.availableOpportunities) {
+        sprites.push({
+            id: opp.id,
+            districtId: opp.districtId,
+            name: opp.name,
+            kind: opp.isHotDeal ? 'hot' : 'opportunity',
+            col: Math.floor(hashPos(opp.id, 3) * 4) + 0.5,
+            row: Math.floor(hashPos(opp.id, 4) * 3) + 0.5,
+        })
     }
+
+    return sprites
+})
+
+// ─── Engine lifecycle ──────────────────────────────────────────
+onMounted(async () => {
+    if (!canvasRef.value) return
+
+    try {
+        const eng = new IsometricEngine()
+        await eng.init(canvasRef.value, {
+            onDistrictClick: (id) => {
+                selectedDistrictId.value = id
+                const district = DISTRICTS.find(d => d.id === id)
+                if (district) emit('select-district', district)
+            },
+            onDistrictHover: (id) => {
+                hoveredDistrict.value = id
+            },
+            onBuildingClick: (id, kind) => {
+                if (kind === 'owned') {
+                    emit('select-property', id)
+                } else {
+                    emit('select-opportunity', id)
+                }
+            },
+        })
+
+        engine.value = eng
+
+        // Initial render
+        eng.updateDistricts(districtRenderData.value)
+        eng.updateBuildings(buildingSprites.value)
+    } catch (err) {
+        console.error('[CityMap] PixiJS init failed:', err)
+    }
+})
+
+onBeforeUnmount(() => {
+    engine.value?.destroy()
+    engine.value = null
+})
+
+// ─── Watchers ──────────────────────────────────────────────────
+
+/** Fingerprint to detect real changes, not every tick */
+function districtFingerprint(data: DistrictRenderData[]): string {
+    return data.map(d =>
+        `${d.district.id}:${d.ownedCount}:${d.opportunityCount}:${d.hotDealCount}:${d.activity}:${d.trend}:${d.activeEventName ?? ''}`
+    ).join('|')
 }
 
+let lastDistrictFP = ''
+watch(districtRenderData, (data) => {
+    const fp = districtFingerprint(data)
+    if (fp === lastDistrictFP) return
+    lastDistrictFP = fp
+    engine.value?.updateDistricts(data)
+}, { deep: true })
+
+let lastBuildingCount = -1
+watch(buildingSprites, (sprites) => {
+    // Only update when count or composition changes
+    const key = sprites.length + ':' + sprites.map(s => s.id).join(',')
+    if (key === String(lastBuildingCount)) return
+    lastBuildingCount = key as unknown as number
+    engine.value?.updateBuildings(sprites)
+}, { deep: true })
+
+// Pause / resume engine when tab visibility changes
+watch(toRef(props, 'active'), (visible) => {
+    if (visible) {
+        engine.value?.resume()
+    } else {
+        engine.value?.pause()
+    }
+})
+
+// ─── Actions ───────────────────────────────────────────────────
+function handleResetView(): void {
+    engine.value?.resetView()
+    isZoomed.value = false
+    selectedDistrictId.value = null
+}
+
+function handleZoomToDistrict(id: string): void {
+    engine.value?.zoomToDistrict(id)
+    isZoomed.value = true
+    selectedDistrictId.value = id
+}
+
+// ─── Tooltip data ──────────────────────────────────────────────
+const tooltipDistrict = computed(() => {
+    if (!hoveredDistrict.value) return null
+    const d = DISTRICTS.find(d => d.id === hoveredDistrict.value)
+    if (!d) return null
+    const ds = realEstate.getDistrictState(d.id)
+    const owned = realEstate.propertiesByDistrict.get(d.id)?.length ?? 0
+    const opps = realEstate.availableOpportunities.filter(o => o.districtId === d.id).length
+    return { ...d, ds, owned, opps }
+})
+
+// ─── City Scan ─────────────────────────────────────────────────
+const scanCooldownText = computed(() => {
+    const ms = realEstate.getCityScanCooldownRemaining()
+    if (ms <= 0) return ''
+    const s = Math.ceil(ms / 1000)
+    const m = Math.floor(s / 60)
+    return m > 0 ? `${m}m ${s % 60}s` : `${s}s`
+})
+
+function handleScanCity(): void {
+    realEstate.scanCity()
+}
+
+// Force reactivity on cooldown timer
+const scanCooldownTick = ref(0)
+let scanTimer: ReturnType<typeof setInterval> | null = null
+onMounted(() => {
+    scanTimer = setInterval(() => {
+        if (realEstate.isCityScanOnCooldown()) scanCooldownTick.value++
+    }, 1000)
+})
+onBeforeUnmount(() => {
+    if (scanTimer) clearInterval(scanTimer)
+})
+
+const activityIcons: Record<ZoneActivity, string> = {
+    dormant: 'mdi:moon-waning-crescent',
+    quiet: 'mdi:weather-night',
+    active: 'mdi:pulse',
+    booming: 'mdi:chart-line',
+    overheated: 'mdi:fire',
+}
 </script>
 
 <template>
-    <div class="city-map-wrapper">
-        <!-- ── Leaflet background ── -->
-        <div class="map-layer">
-            <div ref="mapContainer" class="leaflet-host"></div>
+    <div class="city-map">
+        <!-- PixiJS Canvas -->
+        <canvas ref="canvasRef" class="city-map__canvas" />
+
+        <!-- Controls overlay -->
+        <div class="city-map__controls">
+            <UButton v-if="isZoomed" variant="ghost" size="sm" icon="mdi:arrow-left" :label="t('realestate.map_back')"
+                @click="handleResetView" />
+            <UButton variant="ghost" size="sm" icon="mdi:fit-to-screen-outline" @click="handleResetView"
+                title="Reset view" />
         </div>
 
-        <!-- ── District grid overlay ── -->
-        <div class="city-grid">
-            <div v-for="cell in mapCells" :key="cell.district.id" class="district-cell" :class="{
-                locked: !unlockedIds.has(cell.district.id),
-                hovered: hoveredDistrict === cell.district.id,
-                selected: selectedDistrict === cell.district.id,
-                'has-properties': propertiesInDistrict(cell.district.id) > 0,
-            }" :style="{
-                '--d-color': cell.district.color,
-                gridColumn: `${cell.col + 1} / span ${cell.colSpan}`,
-                gridRow: `${cell.row + 1} / span ${cell.rowSpan}`,
-            }" @mouseenter="hoveredDistrict = cell.district.id" @mouseleave="hoveredDistrict = null"
-                @click="handleClick(cell.district)">
-                <div v-if="!unlockedIds.has(cell.district.id)" class="locked-overlay">
-                    <AppIcon icon="mdi:lock-outline" />
+        <!-- Tooltip -->
+        <transition name="tooltip-fade">
+            <div v-if="tooltipDistrict" class="city-map__tooltip">
+                <div class="tooltip-header">
+                    <span class="tooltip-name">{{ t(tooltipDistrict.nameKey) }}</span>
+                    <span class="tooltip-tier" :style="{ color: tooltipDistrict.color }">
+                        {{ tooltipDistrict.tier.toUpperCase() }}
+                    </span>
                 </div>
-
-                <template v-else>
-                    <div class="cell-header">
-                        <AppIcon :icon="cell.district.icon" class="cell-icon" />
-                        <span class="cell-name">{{ t(cell.district.nameKey) }}</span>
-                        <span class="cell-tier">{{ tierLabel[cell.district.tier] }}</span>
-                    </div>
-
-                    <!-- Dots: scanned opportunities + owned properties -->
-                    <div v-for="dot in dotsForDistrict(cell.district.id)" :key="dot.id" class="cell-dot"
-                        :class="'cell-dot--' + dot.kind" :style="{ top: dot.top + '%', left: dot.left + '%' }"
-                        :title="dot.name" @click="handleDotClick(dot, $event)" />
-
-                    <div class="cell-body">
-                        <div class="cell-stats">
-                            <span v-if="propertiesInDistrict(cell.district.id) > 0" class="cell-stat owned">
-                                <AppIcon icon="mdi:home" /> {{ propertiesInDistrict(cell.district.id) }}
-                            </span>
-                            <span v-if="opportunitiesInDistrict(cell.district.id) > 0" class="cell-stat opps">
-                                <AppIcon icon="mdi:tag" /> {{ opportunitiesInDistrict(cell.district.id) }}
-                            </span>
-                            <span v-if="realEstate.isScanOnCooldown(cell.district.id)" class="cell-stat cooldown">
-                                <AppIcon icon="mdi:timer-sand" />
-                            </span>
-                        </div>
-
-                        <div class="cell-mult">
-                            {{ cell.district.rentMultiplier }}×
-                        </div>
-                    </div>
-                </template>
+                <div class="tooltip-stats">
+                    <span>
+                        <AppIcon :icon="activityIcons[tooltipDistrict.ds.activity]" />
+                        {{ t('realestate.activity.' + tooltipDistrict.ds.activity) }}
+                    </span>
+                    <span>🏠 {{ tooltipDistrict.owned }}</span>
+                    <span>📋 {{ tooltipDistrict.opps }}</span>
+                </div>
             </div>
-        </div>
+        </transition>
 
         <!-- Legend -->
-        <div class="map-legend">
-            <div class="legend-item">
-                <span class="legend-swatch legend-swatch--owned"></span>
+        <div class="city-map__legend">
+            <div class="legend-title">{{ t('realestate.tab.map') }}</div>
+            <div class="legend-row">
+                <span class="legend-dot legend-dot--owned" />
                 <span>{{ t('realestate.map.owned') }}</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-swatch legend-swatch--opp"></span>
+            <div class="legend-row">
+                <span class="legend-dot legend-dot--opp" />
                 <span>{{ t('realestate.map.opportunity') }}</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-swatch legend-swatch--hot"></span>
+            <div class="legend-row">
+                <span class="legend-dot legend-dot--hot" />
                 <span>{{ t('realestate.map.hot_deal') }}</span>
             </div>
+            <div class="legend-divider" />
+            <div class="legend-row">
+                <span class="legend-swatch" style="background: var(--t-success)" />
+                <span>{{ t('realestate.trend.growing') }}</span>
+            </div>
+            <div class="legend-row">
+                <span class="legend-swatch" style="background: var(--t-danger)" />
+                <span>{{ t('realestate.trend.declining') }}</span>
+            </div>
+            <div class="legend-row">
+                <span class="legend-swatch" style="background: var(--t-warning)" />
+                <span>{{ t('realestate.trend.bubble') }}</span>
+            </div>
+        </div>
+
+        <!-- Scan City button -->
+        <div class="city-map__scan">
+            <UButton :disabled="realEstate.isCityScanOnCooldown() || player.cash.lt(5000)" icon="mdi:radar" :label="realEstate.isCityScanOnCooldown()
+                ? `${t('realestate.scan_city')} (${scanCooldownText})`
+                : `${t('realestate.scan_city')} \u2014 ${formatCash(5000)}`" size="sm" @click="handleScanCity" />
+            <span v-if="scanCooldownTick >= 0" style="display:none" />
+        </div>
+
+        <!-- District quick-access bar -->
+        <div class="city-map__district-bar">
+            <button v-for="d in DISTRICTS" :key="d.id" class="district-chip" :class="{
+                'district-chip--selected': selectedDistrictId === d.id,
+            }" :style="{ '--chip-color': d.color }" @click="handleZoomToDistrict(d.id)">
+                <span class="district-chip__dot" />
+                <span class="district-chip__name">{{ d.name }}</span>
+            </button>
         </div>
     </div>
 </template>
 
 <style scoped>
-.city-map-wrapper {
+.city-map {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--t-space-2);
+    width: 100%;
+    height: 520px;
+    background: radial-gradient(ellipse at center, #12121a 0%, #09090f 100%);
+    border-radius: var(--t-radius-lg);
+    border: 1px solid var(--t-border);
+    overflow: hidden;
+    user-select: none;
 }
 
-/* ── Leaflet background layer ── */
-.map-layer {
+.city-map__canvas {
     position: absolute;
     inset: 0;
-    bottom: 28px;
-    /* legend height */
-    z-index: 0;
-    border-radius: var(--t-radius-lg);
-    overflow: hidden;
-    /* pointer-events on map so it's interactive underneath the grid */
-    pointer-events: auto;
-}
-
-.leaflet-host {
     width: 100%;
     height: 100%;
 }
 
-/* Slightly darken tiles — no heavy filter so the map stays crisp */
-.leaflet-host :deep(.leaflet-tile-pane) {
-    filter: brightness(0.6) saturate(0.35);
-}
-
-/* Dark-themed zoom controls */
-.leaflet-host :deep(.leaflet-control-zoom) {
-    border: 1px solid var(--t-border) !important;
-    border-radius: var(--t-radius-sm) !important;
-    overflow: hidden;
-}
-
-.leaflet-host :deep(.leaflet-control-zoom a) {
-    background: var(--t-bg-card) !important;
-    color: var(--t-text-secondary) !important;
-    border-color: var(--t-border) !important;
-    width: 28px !important;
-    height: 28px !important;
-    line-height: 28px !important;
-    font-size: 14px !important;
-}
-
-.leaflet-host :deep(.leaflet-control-zoom a:hover) {
-    background: var(--t-bg-muted) !important;
-    color: var(--t-text) !important;
-}
-
-/* ── District grid ── */
-.city-grid {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: 3px;
-    aspect-ratio: 6 / 5;
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-lg);
-    padding: 3px;
-    overflow: hidden;
-    /* Let scroll/drag pass through to Leaflet underneath */
-    pointer-events: none;
-}
-
-/* ── District Cell ── */
-.district-cell {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: var(--t-space-2) var(--t-space-3);
-    border-radius: var(--t-radius-sm);
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform var(--t-transition-fast), box-shadow var(--t-transition-fast), border-color var(--t-transition-fast);
-    /* Re-enable pointer events on individual cells (grid is pointer-events:none) */
-    pointer-events: auto;
-
-    /* Light translucent tint — NO blur, map shows through clearly */
-    background: color-mix(in srgb, var(--d-color) 8%, color-mix(in srgb, var(--t-bg-base) 62%, transparent));
-    border: 1px solid color-mix(in srgb, var(--d-color) 18%, var(--t-border));
-}
-
-.district-cell:hover:not(.locked) {
-    background: color-mix(in srgb, var(--d-color) 14%, color-mix(in srgb, var(--t-bg-base) 72%, transparent));
-    border-color: color-mix(in srgb, var(--d-color) 40%, var(--t-border));
-    transform: scale(1.01);
-}
-
-.district-cell.selected {
-    border-color: var(--d-color);
-    background: color-mix(in srgb, var(--d-color) 12%, color-mix(in srgb, var(--t-bg-base) 72%, transparent));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--d-color) 25%, transparent),
-        0 0 30px color-mix(in srgb, var(--d-color) 15%, transparent);
-}
-
-.district-cell.locked {
-    background: color-mix(in srgb, var(--t-bg-base) 55%, transparent);
-    border-color: var(--t-border);
-    cursor: default;
-    opacity: 0.45;
-}
-
-.district-cell:focus-visible {
-    box-shadow: var(--t-shadow-focus);
-    outline: none;
-}
-
-.district-cell:active:not(.locked) {
-    transform: scale(0.98);
-}
-
-/* ── Locked overlay ── */
-.locked-overlay {
+/* ── Controls ── */
+.city-map__controls {
     position: absolute;
-    inset: 0;
+    top: var(--t-space-3);
+    left: var(--t-space-3);
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    background: var(--t-bg-base);
-    color: var(--t-text-muted);
+    gap: var(--t-space-2);
+    z-index: 10;
 }
 
-/* ── Cell header ── */
-.cell-header {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
+/* ── Scan City ── */
+.city-map__scan {
+    position: absolute;
+    top: var(--t-space-3);
+    right: var(--t-space-3);
+    z-index: 10;
 }
 
-.cell-icon {
-    font-size: 1rem;
-    color: var(--d-color);
-    flex-shrink: 0;
+/* ── Tooltip ── */
+.city-map__tooltip {
+    position: absolute;
+    top: var(--t-space-3);
+    right: var(--t-space-3);
+    padding: var(--t-space-3);
+    background: rgba(9, 9, 15, 0.92);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+    min-width: 180px;
 }
 
-.cell-name {
-    font-size: var(--t-font-size-xs);
-    font-weight: var(--t-font-semibold);
-    color: var(--t-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-shadow: 0 1px 3px var(--t-overlay);
-}
-
-.cell-tier {
-    font-size: 0.55rem;
-    color: var(--d-color);
-    margin-left: auto;
-    flex-shrink: 0;
-    letter-spacing: -1px;
-}
-
-/* ── Cell body ── */
-.cell-body {
+.tooltip-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-}
-
-.cell-stats {
-    display: flex;
-    gap: 0.3rem;
-}
-
-.cell-stat {
-    display: inline-flex;
     align-items: center;
-    gap: 0.15rem;
-    font-size: 0.6rem;
-    padding: 0.1rem 0.3rem;
-    border-radius: var(--t-radius-xs);
-    font-weight: var(--t-font-semibold);
+    gap: var(--t-space-2);
+    margin-bottom: var(--t-space-2);
 }
 
-.cell-stat.owned {
-    background: var(--t-success-muted);
-    color: var(--t-success);
+.tooltip-name {
+    font-weight: var(--t-font-bold);
+    font-size: var(--t-font-size-sm);
+    color: var(--t-text);
 }
 
-.cell-stat.opps {
-    background: var(--t-warning-muted);
-    color: var(--t-warning);
-}
-
-.cell-stat.cooldown {
-    color: var(--t-text-muted);
-}
-
-.cell-mult {
-    font-family: var(--t-font-mono);
+.tooltip-tier {
     font-size: var(--t-font-size-xs);
     font-weight: var(--t-font-bold);
-    color: var(--d-color);
-    text-shadow: 0 1px 3px var(--t-overlay);
+    letter-spacing: 0.06em;
 }
 
-/* ── Dots (scanned opps + owned props) ── */
-.cell-dot {
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    border-radius: var(--t-radius-sm);
-    border: 2px solid var(--t-border);
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-    z-index: 3;
-    transition: transform var(--t-transition-fast) ease, box-shadow var(--t-transition-fast) ease;
-    pointer-events: auto;
+.tooltip-stats {
+    display: flex;
+    gap: var(--t-space-3);
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-secondary);
 }
 
-.cell-dot:hover {
-    transform: translate(-50%, -50%) scale(1.2);
-    z-index: 5;
+.tooltip-fade-enter-active,
+.tooltip-fade-leave-active {
+    transition: opacity 0.15s ease;
 }
 
-.cell-dot:focus-visible {
-    box-shadow: var(--t-shadow-focus);
-    outline: none;
+.tooltip-fade-enter-from,
+.tooltip-fade-leave-to {
+    opacity: 0;
 }
-
-/* Scanned opportunity */
-.cell-dot--opp {
-    background: var(--t-warning);
-    /* box-shadow: 0 0 6px var(--t-warning), 0 0 12px rgba(245, 158, 11, 0.3); */
-    /* animation: dot-pulse 2s ease-in-out infinite; */
-}
-
-.cell-dot--opp:hover {
-    /* box-shadow: 0 0 10px var(--t-warning), 0 0 20px rgba(245, 158, 11, 0.5); */
-}
-
-/* Hot deal */
-.cell-dot--hot {
-    background: var(--t-danger);
-    /* box-shadow: 0 0 6px var(--t-danger), 0 0 12px rgba(239, 68, 68, 0.3); */
-    /* animation: dot-pulse 1.2s ease-in-out infinite; */
-}
-
-.cell-dot--hot:hover {
-    /* box-shadow: 0 0 10px var(--t-danger), 0 0 20px rgba(239, 68, 68, 0.5); */
-}
-
-/* Owned property */
-.cell-dot--owned {
-    background: var(--t-success);
-    /* box-shadow: 0 0 4px rgba(62, 207, 113, 0.4); */
-    animation: none;
-}
-
-.cell-dot--owned:hover {
-    /* box-shadow: 0 0 8px var(--t-success), 0 0 16px rgba(62, 207, 113, 0.4); */
-}
-
-/* @keyframes dot-pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
-} */
 
 /* ── Legend ── */
-.map-legend {
+.city-map__legend {
+    position: absolute;
+    bottom: 48px;
+    right: var(--t-space-3);
+    padding: var(--t-space-2) var(--t-space-3);
+    background: rgba(9, 9, 15, 0.85);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    backdrop-filter: blur(6px);
+    z-index: 5;
     display: flex;
-    gap: var(--t-space-4);
-    padding: var(--t-space-2) var(--t-space-1);
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
+    flex-direction: column;
+    gap: 4px;
 }
 
-.legend-item {
+.legend-title {
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-bold);
+    color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+}
+
+.legend-row {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 6px;
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-secondary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-dot--owned {
+    background: #4ade80;
+}
+
+.legend-dot--opp {
+    background: #60a5fa;
+}
+
+.legend-dot--hot {
+    background: #fbbf24;
 }
 
 .legend-swatch {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: var(--t-radius-xs);
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
 }
 
-.legend-swatch--owned {
-    background: var(--t-success);
+.legend-divider {
+    height: 1px;
+    background: var(--t-border);
+    margin: 2px 0;
 }
 
-.legend-swatch--opp {
-    background: var(--t-warning);
+/* ── District quick-access bar ── */
+.city-map__district-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 2px;
+    padding: var(--t-space-2) var(--t-space-3);
+    background: rgba(9, 9, 15, 0.88);
+    border-top: 1px solid var(--t-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    z-index: 10;
 }
 
-.legend-swatch--hot {
-    background: var(--t-danger);
+.city-map__district-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.district-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid color-mix(in srgb, var(--chip-color, #888) 30%, transparent);
+    border-radius: var(--t-radius-sm);
+    background: color-mix(in srgb, var(--chip-color, #888) 8%, transparent);
+    color: var(--t-text-secondary);
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.district-chip:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--chip-color) 20%, transparent);
+    border-color: color-mix(in srgb, var(--chip-color) 50%, transparent);
+    color: var(--t-text);
+}
+
+.district-chip--selected {
+    background: color-mix(in srgb, var(--chip-color) 25%, transparent);
+    border-color: var(--chip-color);
+    color: var(--t-text);
+}
+
+.district-chip__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--chip-color);
+    flex-shrink: 0;
+}
+
+.district-chip__name {
+    line-height: 1;
 }
 </style>

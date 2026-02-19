@@ -756,14 +756,17 @@ export default {
     total_maint_paid: 'Manutenzione totale pagata',
     opportunities: 'Opportunità',
     no_opportunities: 'Nessuna opportunità disponibile al momento.',
-    scan_hint: 'Prova a scansionare i distretti sulla mappa per trovare affari nascosti.',
-    buy_hint: 'Esplora le opportunità o scansiona la mappa per trovare la tua prossima proprietà.',
+    scan_hint: 'Prova a esplorare il mercato per trovare affari premium nascosti.',
+    buy_hint: 'Esplora le opportunità o perlustra il mercato per trovare la tua prossima proprietà.',
     improvement_shop: 'Negozio Migliorie',
     slots_remaining: '{count} slot rimanenti',
     improvements_full: 'Tutti gli slot migliorie sono occupati.',
     no_improvements_available: 'Nessuna miglioria disponibile per questa proprietà.',
 
     // Schede
+    skyline_empty: 'Nessuna proprietà — il tuo skyline è vuoto.',
+    back_to_skyline: 'Torna allo Skyline',
+
     tab: {
       map: 'Mappa Città',
       opportunities: 'Opportunità',
@@ -791,86 +794,20 @@ export default {
       structural: 'Struttura',
     },
 
-    // Distretti
-    districts: {
-      downtown: 'Centro',
-      downtown_desc: 'Il cuore finanziario della città. Affitti altissimi, inquilini premium e una competizione feroce per gli immobili migliori.',
-      midtown: 'Midtown',
-      midtown_desc: 'Il vivace centro commerciale. Un mix di uffici, negozi e locali di ospitalità con domanda stabile.',
-      uptown: 'Uptown',
-      uptown_desc: 'Quartieri residenziali tranquilli con apprezzamento costante. Perfetto per iniziare il tuo impero immobiliare.',
-      waterfront: 'Lungomare',
-      waterfront_desc: 'Proprietà esclusive sul lungomare con viste mozzafiato. Affitti alti ma domanda volatile.',
-      industrial: 'Zona Industriale',
-      industrial_desc: 'Magazzini e fabbriche a prezzi bassi. Affitti modesti ma costi di manutenzione minimi.',
-      harbor: 'Distretto Portuale',
-      harbor_desc: 'Un\'enclave di ultra-lusso vicino al porto. Gli indirizzi più costosi e prestigiosi della città.',
-      tech_quarter: 'Quartiere Tech',
-      tech_quarter_desc: 'Il polo dell\'innovazione. Spazi commerciali in rapido apprezzamento, popolari tra startup e aziende tech.',
-      old_town: 'Città Vecchia',
-      old_town_desc: 'Fascino storico e vita accessibile. Edifici antichi con carattere e inquilini fedeli.',
-      skyline_heights: 'Skyline Heights',
-      skyline_heights_desc: 'Distretto ultra-premium con grattacieli, attici esclusivi e sedi aziendali di prestigio.',
+    // Gradi Posizione
+    grade: {
+      s: 'S — Prime',
+      a: 'A — Premium',
+      b: 'B — Standard',
+      c: 'C — Economico',
+      d: 'D — Popolare',
     },
 
-    // Pannello distretto
-    district: {
-      rent_mul: 'Moltiplicatore Affitto',
-      appreciation_mul: 'Apprezzamento',
-      appreciation: 'Apprezzamento',
-      volatility: 'Volatilità',
-      categories: 'Categorie',
-      opportunities: 'Opportunità',
-      owned: 'Di proprietà qui',
-      view_on_map: 'Visualizza sulla Mappa',
-      unlock_at: 'Si sblocca con patrimonio {amount}',
-    },
-
-    // Perlustrazione
-    scout: {
-      none: 'Non perlustrato',
-      drive_by: 'Passata in auto',
-      drive_by_reveals: 'Rivela informazioni base e condizione della proprietà.',
-      inspection: 'Ispezione',
-      inspection_reveals: 'Rivela i tratti della proprietà e statistiche dettagliate.',
-      appraisal: 'Perizia',
-      appraisal_reveals: 'Rivela il valore reale, punteggi nascosti e sblocca uno sconto del 3%.',
-      hidden_info: 'Perlustra questa proprietà per rivelare più dettagli.',
-      action: '{phase} — {cost}',
-    },
-
-    // Sinergie distretto
-    synergy: {
-      title: 'Sinergie Distretto',
-      active_bonus: 'Sinergia Attiva',
-      none: 'Nessuna sinergia ancora — compra più proprietà in questo distretto.',
-      next: 'Servono ancora {count} proprietà per la prossima sinergia',
-      neighborhood_presence: 'Presenza nel Quartiere',
-      local_monopoly: 'Monopolio Locale',
-      heritage_district: 'Distretto Storico',
-      industrial_cluster: 'Cluster Industriale',
-      logistics_hub: 'Hub Logistico',
-      commercial_strip: 'Strip Commerciale',
-      business_district: 'Distretto Affari',
-      prime_portfolio: 'Portafoglio Premium',
-      downtown_empire: 'Impero Centrale',
-      tech_campus: 'Campus Tech',
-      innovation_hub: 'Hub Innovazione',
-      waterfront_collection: 'Collezione Lungomare',
-      marina_district: 'Distretto Marina',
-      elite_enclave: 'Enclave Élite',
-      harbor_crown: 'Corona del Porto',
-      skyline_collection: 'Collezione Skyline',
-      sky_empire: 'Impero del Cielo',
-    },
-
-    // Scansione
-    scan: {
-      title: 'Scansione Distretto',
-      desc: 'Scansiona questo distretto per trovare opportunità premium nascoste non presenti sul mercato pubblico.',
-      action: 'Scansiona — {cost}',
-      cooldown: 'Ricarica: {time}',
-    },
+    // Bonus portafoglio
+    portfolio_bonus: 'Bonus Portafoglio',
+    scout_market: 'Esplora Mercato',
+    location_grade: 'Grado Posizione',
+    scout_cooldown: 'Ricarica esplorazione: {time}',
 
     // Barra statistiche
     stat: {
@@ -953,6 +890,18 @@ export default {
       management: 'Stile di Gestione',
     },
 
+    tip: {
+      base_rent: 'Affitto iniziale per tick al 100% di occupazione, prima dei bonus.',
+      units: 'Numero di unità affittabili. Più unità = più inquilini.',
+      roi: 'Rendimento annuo basato sull\'affitto netto vs. prezzo d\'acquisto.',
+      true_value: 'Valore di mercato stimato in base all\'economia e alle condizioni.',
+      net_rent: 'Affitto al netto di manutenzione, tasse e assicurazione.',
+      value_change: 'Variazione percentuale del valore dall\'acquisto.',
+      portfolio_bonus: 'Possedere più proprietà della stessa categoria dà un bonus all\'affitto.',
+      condition: 'Stato fisico dell\'edificio. Condizione bassa = meno inquilini e costi maggiori.',
+      occupancy: 'Percentuale di unità attualmente affittate. Dipende da condizione, prezzo e economia.',
+    },
+
     info: {
       basics: {
         title: 'Basi Immobiliari',
@@ -1004,6 +953,41 @@ export default {
         purchase_price: 'Prezzo d\'Acquisto', purchase_price_desc: 'Il prezzo originale che hai pagato per questa proprietà.',
         base_stats: 'Statistiche Base', base_stats_desc: 'Mostra affitto base, tasso di usura, aliquota fiscale e manutenzione. L\'affitto base aumenta con ogni ristrutturazione.',
         lifetime_totals: 'Totali Vita', lifetime_totals_desc: 'Totale affitti riscossi, spese pagate e reddito netto da quando hai comprato questa proprietà.',
+      },
+      scouting: {
+        title: 'Perlustrazione',
+        how: 'Come Funziona', how_desc: 'Paga per perlustrare il mercato. Ogni perlustrazione rivela nuove proprietà acquistabili.',
+        cost: 'Costo Perlustrazione', cost_desc: 'Il costo aumenta ad ogni perlustrazione. Si riduce lentamente nel tempo con un cooldown.',
+        cooldown: 'Tempo di Attesa', cooldown_desc: 'Dopo la perlustrazione, c\'è un breve periodo di attesa prima di poter perlustrare di nuovo.',
+        reveals: 'Scoperte', reveals_desc: 'Ogni perlustrazione rivela 3 nuove opportunità immobiliari. Le proprietà non viste scompaiono dopo un po\'.',
+      },
+      improvements_info: {
+        title: 'Migliorie',
+        what: 'Cosa Sono', what_desc: 'Miglioramenti permanenti da installare su una proprietà per aumentare l\'affitto, ridurre l\'usura o migliorare l\'occupazione.',
+        slots: 'Slot', slots_desc: 'Ogni proprietà ha un numero limitato di slot per migliorie in base al suo modello.',
+        install: 'Installazione', install_desc: 'Apri il pannello migliorie dalla vista dettaglio della proprietà. Ogni miglioria ha un costo una tantum.',
+      },
+      traits_info: {
+        title: 'Tratti',
+        what: 'Cosa Sono', what_desc: 'Modificatori casuali assegnati quando una proprietà viene generata. Non possono essere cambiati.',
+        positive: 'Tratti Positivi', positive_desc: 'Badge verdi che aumentano l\'affitto, riducono l\'usura o migliorano l\'occupazione.',
+        negative: 'Tratti Negativi', negative_desc: 'Badge rossi che aumentano i costi, accelerano l\'usura o riducono l\'occupazione.',
+      },
+      grades: {
+        title: 'Gradi di Posizione',
+        what: 'Cosa Sono', what_desc: 'Ogni proprietà ha un grado di posizione da D (peggiore) a S (migliore). Gradi più alti significano più affitto e apprezzamento più veloce.',
+        effect: 'Effetto sull\'Affitto', effect_desc: 'Grado S dà ×1.50 affitto, Grado A dà ×1.25, Grado B dà ×1.00, Grado C dà ×0.80, Grado D dà ×0.60.',
+      },
+      styles: {
+        title: 'Stili di Gestione',
+        what: 'Cosa Sono', what_desc: 'Scegli come gestire ogni proprietà. Lo stile influisce su reddito, velocità di usura e costi di manutenzione.',
+        budget: 'Economico', budget_desc: 'Costi minimi ma usura più rapida e affitti più bassi. Buono per proprietà economiche.',
+        luxury: 'Lusso', luxury_desc: 'Costi massimi ma affitti premium e usura minima. Ideale per proprietà di alto valore.',
+      },
+      portfolio: {
+        title: 'Bonus Portafoglio',
+        what: 'Come Funziona', what_desc: 'Possedere più proprietà nella stessa categoria sblocca bonus affitto: +5% a 2, +12% a 5, +25% a 10 proprietà.',
+        categories: 'Categorie', categories_desc: 'Residenziale, Commerciale, Ricettivo e Lusso hanno ciascuno il proprio percorso bonus portafoglio.',
       },
     },
   },

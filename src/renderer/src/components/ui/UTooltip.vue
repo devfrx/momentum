@@ -82,7 +82,9 @@ function onLeave(): void {
     font-size: var(--t-font-size-xs);
     line-height: var(--t-leading-normal);
     color: var(--t-text);
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     pointer-events: none;
     max-width: 260px;
 }

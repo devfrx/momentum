@@ -4,9 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
-import { getDistrict, SCOUT_PHASES, SCOUT_PHASE_DATA, type PropertyOpportunity, type ScoutPhase } from '@renderer/data/realestate'
+import { getLocationGrade, SCOUT_PHASES, SCOUT_PHASE_DATA, type PropertyOpportunity, type ScoutPhase } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UAccordion, UButton } from '@renderer/components/ui'
+import { UAccordion, UButton, UTooltip } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 
 const { t } = useI18n()
@@ -17,7 +17,7 @@ const { formatCash, formatPercent, formatRate } = useFormat()
 const props = defineProps<{ opportunity: PropertyOpportunity }>()
 const emit = defineEmits<{ (e: 'bought', propId: string): void }>()
 
-const district = computed(() => getDistrict(props.opportunity.districtId))
+const gradeData = computed(() => getLocationGrade(props.opportunity.locationGrade))
 
 const canAfford = computed(() => player.cash.gte(props.opportunity.askingPrice))
 const currentScoutIdx = computed(() => SCOUT_PHASES.indexOf(props.opportunity.scoutPhase))
@@ -62,7 +62,7 @@ function handleBuy(): void {
 <template>
     <div class="opp-card"
         :class="{ 'opp-card--hot': opportunity.isHotDeal, 'opp-card--scanned': opportunity.isScanned }"
-        :style="{ '--_accent': district?.color ?? 'var(--t-accent)' }">
+        :style="{ '--_accent': gradeData?.color ?? 'var(--t-accent)' }">
 
         <!-- ── Header ── -->
         <div class="opp-card__head">
@@ -76,8 +76,8 @@ function handleBuy(): void {
                 </div>
                 <div class="opp-card__meta">
                     <Tag :value="opportunity.category" size="small" severity="secondary" />
-                    <span v-if="district" class="opp-card__district">
-                        <AppIcon :icon="district.icon" /> {{ t(district.nameKey) }}
+                    <span v-if="gradeData" class="opp-card__grade" :style="{ '--_grade-color': gradeData.color }">
+                        <AppIcon :icon="gradeData.icon" /> {{ t(gradeData.nameKey) }}
                     </span>
                 </div>
             </div>
@@ -90,27 +90,36 @@ function handleBuy(): void {
 
         <!-- ── Quick stats chips ── -->
         <div class="opp-card__chips">
-            <span class="chip chip--accent">
-                <AppIcon icon="mdi:cash-plus" /> {{ formatCash(opportunity.baseRent) }}/t
-            </span>
-            <span class="chip">
-                <AppIcon icon="mdi:door" /> {{ opportunity.units }} {{ t('realestate.units') }}
-            </span>
-            <span class="chip">
-                <AppIcon icon="mdi:percent" /> ~{{ formatPercent(estimatedRoi) }} ROI
-            </span>
-            <span v-if="showTrueValue" class="chip" :class="isGoodDeal ? 'chip--pos' : 'chip--neg'">
-                <AppIcon :icon="isGoodDeal ? 'mdi:check-circle' : 'mdi:alert'" />
-                {{ formatCash(opportunity.trueValue) }}
-            </span>
+            <UTooltip :text="t('realestate.tip.base_rent')" placement="bottom">
+                <span class="chip chip--accent">
+                    <AppIcon icon="mdi:cash-plus" /> {{ formatCash(opportunity.baseRent) }}/t
+                </span>
+            </UTooltip>
+            <UTooltip :text="t('realestate.tip.units')" placement="bottom">
+                <span class="chip">
+                    <AppIcon icon="mdi:door" /> {{ opportunity.units }} {{ t('realestate.units') }}
+                </span>
+            </UTooltip>
+            <UTooltip :text="t('realestate.tip.roi')" placement="bottom">
+                <span class="chip">
+                    <AppIcon icon="mdi:percent" /> ~{{ formatPercent(estimatedRoi) }} ROI
+                </span>
+            </UTooltip>
+            <UTooltip v-if="showTrueValue" :text="t('realestate.tip.true_value')" placement="bottom">
+                <span class="chip" :class="isGoodDeal ? 'chip--pos' : 'chip--neg'">
+                    <AppIcon :icon="isGoodDeal ? 'mdi:check-circle' : 'mdi:alert'" />
+                    {{ formatCash(opportunity.trueValue) }}
+                </span>
+            </UTooltip>
         </div>
 
         <!-- ── Traits ── -->
         <div v-if="traits.length > 0" class="opp-card__traits">
-            <span v-for="tr in traits" :key="tr.id" class="opp-card__trait"
-                :class="tr.isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
-                <AppIcon :icon="tr.icon" /> {{ t(tr.nameKey) }}
-            </span>
+            <UTooltip v-for="tr in traits" :key="tr.id" :text="t(tr.descriptionKey)" placement="bottom">
+                <span class="opp-card__trait" :class="tr.isPositive ? 'opp-card__trait--pos' : 'opp-card__trait--neg'">
+                    <AppIcon :icon="tr.icon" /> {{ t(tr.nameKey) }}
+                </span>
+            </UTooltip>
         </div>
 
         <!-- ── Hidden hint ── -->
@@ -282,7 +291,7 @@ function handleBuy(): void {
     margin-top: 0.15rem;
 }
 
-.opp-card__district {
+.opp-card__grade {
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
@@ -452,6 +461,89 @@ function handleBuy(): void {
     font-size: var(--t-font-size-sm);
     color: var(--t-text-secondary);
     font-weight: var(--t-font-medium);
+    border: 1px dashed rgba(255, 255, 255, 0.06);
+    border-radius: var(--t-radius-sm);
+    font-size: var(--t-font-size-sm);
+    color: var(--t-text-muted);
+    font-style: italic;
+}
+
+/* ── Scout row ── */
+.opp-card__scout-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--t-space-2);
+}
+
+.research-phases {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+}
+
+.research-phase-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--t-radius-full);
+    font-size: 0.75rem;
+    border: 2px solid var(--t-border);
+    color: var(--t-text-muted);
+    transition: all 0.2s ease;
+}
+
+.research-phase-dot--done {
+    border-color: var(--t-accent);
+    color: var(--t-accent);
+    background: color-mix(in srgb, var(--t-accent) 12%, transparent);
+}
+
+.research-phase-dot--current {
+    border-color: var(--t-accent);
+    color: var(--t-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-accent) 15%, transparent);
+    animation: scoutPulse 2s ease-in-out infinite;
+}
+
+@keyframes scoutPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-accent) 10%, transparent);
+    }
+
+    50% {
+        box-shadow: 0 0 0 5px color-mix(in srgb, var(--t-accent) 20%, transparent);
+    }
+}
+
+.research-phase-dot--locked {
+    opacity: 0.3;
+}
+
+.research-phase-label {
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    margin-left: var(--t-space-1);
+}
+
+.scout-cost {
+    font-family: var(--t-font-mono);
+    font-size: 0.6rem;
+    color: var(--t-text-muted);
+    margin-left: 0.2rem;
+}
+
+.opp-card__research-complete {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: var(--t-font-size-sm);
+    color: var(--t-success);
+    font-weight: var(--t-font-semibold);
 }
 
 .opp-card__buy-price {

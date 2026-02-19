@@ -411,10 +411,10 @@ export const MANAGEMENT_STYLES: ManagementStyleDef[] = [
     nameKey: 'realestate.style.budget',
     descKey: 'realestate.style.budget_desc',
     icon: 'mdi:currency-usd-off',
-    expenseMod: 0.7,
-    occupancyMod: -0.05,
-    wearMod: 1.3,
-    rentMod: 0.85,
+    expenseMod: 0.6,       // cheapest running cost
+    occupancyMod: -0.08,   // tenants notice
+    wearMod: 1.4,          // deferred‑maintenance penalty
+    rentMod: 0.80,         // can't charge much
   },
   {
     id: 'standard',
@@ -431,20 +431,20 @@ export const MANAGEMENT_STYLES: ManagementStyleDef[] = [
     nameKey: 'realestate.style.premium',
     descKey: 'realestate.style.premium_desc',
     icon: 'mdi:star',
-    expenseMod: 1.3,
-    occupancyMod: 0.08,
-    wearMod: 0.8,
-    rentMod: 1.2,
+    expenseMod: 1.5,       // noticeable expense jump
+    occupancyMod: 0.06,
+    wearMod: 0.85,
+    rentMod: 1.15,
   },
   {
     id: 'luxury',
     nameKey: 'realestate.style.luxury',
     descKey: 'realestate.style.luxury_desc',
     icon: 'mdi:diamond-stone',
-    expenseMod: 1.8,
-    occupancyMod: 0.12,
-    wearMod: 0.6,
-    rentMod: 1.5,
+    expenseMod: 2.2,       // disproportionately high — only profitable on big props
+    occupancyMod: 0.10,
+    wearMod: 0.70,
+    rentMod: 1.30,
   },
 ]
 
