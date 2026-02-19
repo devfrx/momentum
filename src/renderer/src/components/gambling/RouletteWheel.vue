@@ -142,7 +142,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
     height: 100%;
     border-radius: var(--t-radius-full);
     overflow: hidden;
-    box-shadow: 0 0 0 6px var(--t-border), 0 0 0 10px var(--t-bg-muted);
+    border: 6px solid var(--t-border);
 }
 
 .wheel-svg {
@@ -162,7 +162,6 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
     border-right: 10px solid transparent;
     border-top: 20px solid var(--t-accent);
     z-index: 5;
-    filter: drop-shadow(0 2px 4px var(--t-overlay-light));
 }
 
 .result-chip {
@@ -180,7 +179,6 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
     font-weight: 800;
     color: var(--t-text);
     border: 3px solid var(--t-bg-card);
-    box-shadow: 0 2px 12px var(--t-overlay-light);
     z-index: 6;
 }
 

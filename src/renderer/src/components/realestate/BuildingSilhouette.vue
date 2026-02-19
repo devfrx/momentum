@@ -50,7 +50,7 @@ type SilhouetteType =
     | 'hotel'
     | 'villa'
     | 'factory'
-    | 'island'
+    | 'castle'
 
 const silhouetteType = computed<SilhouetteType>(() => {
     const id = props.property.templateId
@@ -64,7 +64,7 @@ const silhouetteType = computed<SilhouetteType>(() => {
     if (id === 'boutique_hotel' || id === 'luxury_hotel') return 'hotel'
     if (id === 'penthouse') return 'villa'
     if (id === 'skyscraper') return 'skyscraper'
-    if (id === 'private_island') return 'island'
+    if (id === 'private_island') return 'castle'
     if (id === 'warehouse') return 'warehouse'
     if (id === 'factory') return 'factory'
     if (id === 'resort_complex') return 'hotel'
@@ -83,7 +83,7 @@ const svgWidth = computed(() => {
         hotel: 138,
         villa: 154,
         factory: 180,
-        island: 194,
+        castle: 200,
     }
     return widths[silhouetteType.value]
 })
@@ -918,133 +918,142 @@ const renovationLevel = computed(() => props.property.renovationLevel ?? 0)
                 </template>
             </template>
 
-            <!-- ═══ Island ═══ -->
-            <template v-if="silhouetteType === 'island'">
-                <!-- Water waves (background) -->
-                <path
-                    :d="`M 0 ${height - 6} Q ${svgWidth * 0.15} ${height - 10} ${svgWidth * 0.3} ${height - 6} T ${svgWidth * 0.6} ${height - 6} T ${svgWidth} ${height - 6}`"
-                    class="building-accent-stroke" fill="none" stroke-opacity="0.3" />
-                <path
-                    :d="`M 4 ${height - 2} Q ${svgWidth * 0.2} ${height - 5} ${svgWidth * 0.4} ${height - 2} T ${svgWidth * 0.8} ${height - 2}`"
-                    class="building-accent-stroke" fill="none" stroke-opacity="0.2" />
-                <!-- Island landmass (compact mound) -->
-                <path :d="`M ${svgWidth * 0.08} ${height - 11}
-                    Q ${svgWidth * 0.15} ${height - 20} ${svgWidth * 0.3} ${height - 22}
-                    Q ${svgWidth * 0.45} ${height - 25} ${svgWidth * 0.55} ${height - 25}
-                    Q ${svgWidth * 0.7} ${height - 24} ${svgWidth * 0.85} ${height - 20}
-                    Q ${svgWidth * 0.92} ${height - 15} ${svgWidth * 0.92} ${height - 11} Z`" class="building-fill" />
-                <!-- Beach strip -->
-                <path :d="`M ${svgWidth * 0.12} ${height - 11}
-                    Q ${svgWidth * 0.3} ${height - 16} ${svgWidth * 0.5} ${height - 16}
-                    Q ${svgWidth * 0.7} ${height - 16} ${svgWidth * 0.88} ${height - 11} Z`"
-                    class="building-accent-fill" opacity="0.5" />
-                <!-- Main villa -->
-                <rect :x="svgWidth * 0.36" :y="height * 0.3" width="28" :height="height * 0.35" rx="2"
+            <!-- ═══ Castle ═══ -->
+            <template v-if="silhouetteType === 'castle'">
+                <!-- Curtain wall (main body) -->
+                <rect :x="svgWidth * 0.2" :y="height * 0.32" :width="svgWidth * 0.6" :height="height * 0.6" rx="2"
                     class="building-fill" />
-                <!-- Roof -->
-                <polygon
-                    :points="`${svgWidth * 0.33},${height * 0.32} ${svgWidth * 0.5},${height * 0.14} ${svgWidth * 0.67},${height * 0.32}`"
+
+                <!-- Left tower -->
+                <rect :x="svgWidth * 0.1" :y="height * 0.18" :width="svgWidth * 0.16" :height="height * 0.74" rx="1"
                     class="building-fill" />
-                <!-- Chimney -->
-                <rect v-if="hasChimney" :x="svgWidth * 0.57" :y="height * 0.16" width="4" :height="height * 0.08" rx="1"
+                <!-- Left tower battlements -->
+                <rect :x="svgWidth * 0.1" :y="height * 0.14" width="5" :height="height * 0.06" class="building-fill" />
+                <rect :x="svgWidth * 0.1 + 8" :y="height * 0.14" width="5" :height="height * 0.06"
                     class="building-fill" />
-                <!-- Villa windows -->
-                <rect :x="svgWidth * 0.39" :y="height * 0.4" width="7" height="7" rx="1"
+                <rect :x="svgWidth * 0.1 + 16" :y="height * 0.14" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <!-- Left tower windows -->
+                <rect :x="svgWidth * 0.14" :y="height * 0.26" width="5" height="8" rx="2.5"
                     :class="isWindowLit(1, 1) ? 'building-window--lit' : 'building-window'" />
-                <rect :x="svgWidth * 0.54" :y="height * 0.4" width="7" height="7" rx="1"
+                <rect :x="svgWidth * 0.14" :y="height * 0.42" width="5" height="8" rx="2.5"
                     :class="isWindowLit(1, 2) ? 'building-window--lit' : 'building-window'" />
-                <!-- Upper windows -->
-                <template v-if="windowStyle !== 2">
-                    <rect :x="svgWidth * 0.44" :y="height * 0.33" width="5" height="5" rx="1"
-                        :class="isWindowLit(2, 1) ? 'building-window--lit' : 'building-window'" />
-                    <rect :x="svgWidth * 0.51" :y="height * 0.33" width="5" height="5" rx="1"
-                        :class="isWindowLit(2, 2) ? 'building-window--lit' : 'building-window'" />
-                </template>
-                <!-- Door -->
-                <rect :x="svgWidth * 0.47" :y="height * 0.5" width="6" height="10" rx="1" class="building-window" />
-                <!-- Porch / veranda -->
-                <template v-if="hasBalustrade">
-                    <line :x1="svgWidth * 0.36" :y1="height * 0.32" :x2="svgWidth * 0.36" :y2="height * 0.62"
-                        class="building-stroke" stroke-opacity="0.4" />
-                    <line :x1="svgWidth * 0.64" :y1="height * 0.32" :x2="svgWidth * 0.64" :y2="height * 0.62"
-                        class="building-stroke" stroke-opacity="0.4" />
-                </template>
-                <!-- Cabana / guest house -->
-                <template v-if="hasGarage">
-                    <rect :x="svgWidth * 0.7" :y="height * 0.46" width="14" height="14" rx="1" class="building-fill" />
+                <rect :x="svgWidth * 0.14" :y="height * 0.58" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(1, 3) ? 'building-window--lit' : 'building-window'" />
+
+                <!-- Right tower -->
+                <rect :x="svgWidth * 0.74" :y="height * 0.18" :width="svgWidth * 0.16" :height="height * 0.74" rx="1"
+                    class="building-fill" />
+                <!-- Right tower battlements -->
+                <rect :x="svgWidth * 0.74" :y="height * 0.14" width="5" :height="height * 0.06" class="building-fill" />
+                <rect :x="svgWidth * 0.74 + 8" :y="height * 0.14" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <rect :x="svgWidth * 0.74 + 16" :y="height * 0.14" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <!-- Right tower windows -->
+                <rect :x="svgWidth * 0.78" :y="height * 0.26" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(2, 1) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.78" :y="height * 0.42" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(2, 2) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.78" :y="height * 0.58" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(2, 3) ? 'building-window--lit' : 'building-window'" />
+
+                <!-- Central keep (taller middle tower) -->
+                <rect :x="svgWidth * 0.38" :y="height * 0.12" :width="svgWidth * 0.24" :height="height * 0.52" rx="2"
+                    class="building-fill" />
+                <!-- Keep battlements -->
+                <rect :x="svgWidth * 0.38" :y="height * 0.08" width="5" :height="height * 0.06" class="building-fill" />
+                <rect :x="svgWidth * 0.38 + 8" :y="height * 0.08" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <rect :x="svgWidth * 0.38 + 16" :y="height * 0.08" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <rect :x="svgWidth * 0.38 + 24" :y="height * 0.08" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <rect :x="svgWidth * 0.38 + 32" :y="height * 0.08" width="5" :height="height * 0.06"
+                    class="building-fill" />
+                <!-- Keep windows (arched) -->
+                <rect :x="svgWidth * 0.42" :y="height * 0.18" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(3, 1) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.53" :y="height * 0.18" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(3, 2) ? 'building-window--lit' : 'building-window'" />
+                <!-- Keep lower row windows -->
+                <rect :x="svgWidth * 0.42" :y="height * 0.34" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(4, 1) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.475" :y="height * 0.34" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(4, 2) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.53" :y="height * 0.34" width="5" height="8" rx="2.5"
+                    :class="isWindowLit(4, 3) ? 'building-window--lit' : 'building-window'" />
+
+                <!-- Center wall battlements -->
+                <rect :x="svgWidth * 0.26" :y="height * 0.28" width="4" :height="height * 0.06" class="building-fill" />
+                <rect :x="svgWidth * 0.32" :y="height * 0.28" width="4" :height="height * 0.06" class="building-fill" />
+                <rect :x="svgWidth * 0.64" :y="height * 0.28" width="4" :height="height * 0.06" class="building-fill" />
+                <rect :x="svgWidth * 0.70" :y="height * 0.28" width="4" :height="height * 0.06" class="building-fill" />
+
+                <!-- Gatehouse / main gate (arched) -->
+                <path :d="`M ${svgWidth * 0.43} ${height * 0.92}
+                    L ${svgWidth * 0.43} ${height * 0.72}
+                    A 8 8 0 0 1 ${svgWidth * 0.57} ${height * 0.72}
+                    L ${svgWidth * 0.57} ${height * 0.92} Z`" class="building-window" />
+                <!-- Portcullis lines -->
+                <line :x1="svgWidth * 0.47" :y1="height * 0.72" :x2="svgWidth * 0.47" :y2="height * 0.92"
+                    class="building-stroke" stroke-opacity="0.3" />
+                <line :x1="svgWidth * 0.53" :y1="height * 0.72" :x2="svgWidth * 0.53" :y2="height * 0.92"
+                    class="building-stroke" stroke-opacity="0.3" />
+                <line :x1="svgWidth * 0.43" :y1="height * 0.80" :x2="svgWidth * 0.57" :y2="height * 0.80"
+                    class="building-stroke" stroke-opacity="0.3" />
+                <line :x1="svgWidth * 0.43" :y1="height * 0.86" :x2="svgWidth * 0.57" :y2="height * 0.86"
+                    class="building-stroke" stroke-opacity="0.3" />
+
+                <!-- Wall windows (on main curtain wall) -->
+                <rect :x="svgWidth * 0.26" :y="height * 0.5" width="5" height="7" rx="2.5"
+                    :class="isWindowLit(5, 1) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.33" :y="height * 0.5" width="5" height="7" rx="2.5"
+                    :class="isWindowLit(5, 2) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.64" :y="height * 0.5" width="5" height="7" rx="2.5"
+                    :class="isWindowLit(5, 3) ? 'building-window--lit' : 'building-window'" />
+                <rect :x="svgWidth * 0.70" :y="height * 0.5" width="5" height="7" rx="2.5"
+                    :class="isWindowLit(5, 4) ? 'building-window--lit' : 'building-window'" />
+
+                <!-- Flag on left tower -->
+                <template v-if="hasFlag">
+                    <line :x1="svgWidth * 0.18" :y1="height * 0.14" :x2="svgWidth * 0.18" :y2="height * 0.02"
+                        class="building-stroke" />
                     <polygon
-                        :points="`${svgWidth * 0.69},${height * 0.48} ${svgWidth * 0.77},${height * 0.38} ${svgWidth * 0.85},${height * 0.48}`"
-                        class="building-fill" />
-                    <rect :x="svgWidth * 0.73" :y="height * 0.5" width="5" height="4" rx="0.5"
-                        :class="isWindowLit(3, 1) ? 'building-window--lit' : 'building-window'" />
+                        :points="`${svgWidth * 0.18},${height * 0.02} ${svgWidth * 0.18},${height * 0.09} ${svgWidth * 0.24},${height * 0.055}`"
+                        class="building-accent-fill" />
                 </template>
-                <!-- Left palm tree (curved trunk) -->
-                <path
-                    :d="`M ${svgWidth * 0.2} ${height * 0.62} Q ${svgWidth * 0.18} ${height * 0.45} ${svgWidth * 0.21} ${height * 0.28}`"
-                    class="building-stroke" fill="none" stroke-width="2" />
-                <!-- Palm fronds (left) — overlapping arcs -->
-                <path
-                    :d="`M ${svgWidth * 0.21} ${height * 0.28} Q ${svgWidth * 0.08} ${height * 0.22} ${svgWidth * 0.06} ${height * 0.32}`"
-                    class="building-stroke" fill="none" stroke-width="1.5" />
-                <path
-                    :d="`M ${svgWidth * 0.21} ${height * 0.28} Q ${svgWidth * 0.12} ${height * 0.18} ${svgWidth * 0.14} ${height * 0.30}`"
-                    class="building-stroke" fill="none" stroke-width="1.5" />
-                <path
-                    :d="`M ${svgWidth * 0.21} ${height * 0.28} Q ${svgWidth * 0.28} ${height * 0.18} ${svgWidth * 0.32} ${height * 0.28}`"
-                    class="building-stroke" fill="none" stroke-width="1.5" />
-                <path
-                    :d="`M ${svgWidth * 0.21} ${height * 0.28} Q ${svgWidth * 0.16} ${height * 0.16} ${svgWidth * 0.20} ${height * 0.34}`"
-                    class="building-stroke" fill="none" stroke-width="1" />
-                <!-- Right palm tree (taller, slightly curved) -->
-                <path
-                    :d="`M ${svgWidth * 0.82} ${height * 0.62} Q ${svgWidth * 0.84} ${height * 0.42} ${svgWidth * 0.80} ${height * 0.22}`"
-                    class="building-stroke" fill="none" stroke-width="2" />
-                <!-- Palm fronds (right) -->
-                <path
-                    :d="`M ${svgWidth * 0.80} ${height * 0.22} Q ${svgWidth * 0.68} ${height * 0.16} ${svgWidth * 0.66} ${height * 0.26}`"
-                    class="building-stroke" fill="none" stroke-width="1.5" />
-                <path
-                    :d="`M ${svgWidth * 0.80} ${height * 0.22} Q ${svgWidth * 0.88} ${height * 0.14} ${svgWidth * 0.92} ${height * 0.24}`"
-                    class="building-stroke" fill="none" stroke-width="1.5" />
-                <path
-                    :d="`M ${svgWidth * 0.80} ${height * 0.22} Q ${svgWidth * 0.74} ${height * 0.12} ${svgWidth * 0.76} ${height * 0.26}`"
-                    class="building-stroke" fill="none" stroke-width="1" />
-                <!-- Small palm (optional) -->
-                <template v-if="hasGarden">
-                    <path
-                        :d="`M ${svgWidth * 0.28} ${height * 0.62} Q ${svgWidth * 0.27} ${height * 0.5} ${svgWidth * 0.29} ${height * 0.38}`"
-                        class="building-stroke" fill="none" stroke-width="1.5" />
-                    <path
-                        :d="`M ${svgWidth * 0.29} ${height * 0.38} Q ${svgWidth * 0.22} ${height * 0.33} ${svgWidth * 0.20} ${height * 0.40}`"
-                        class="building-stroke" fill="none" stroke-width="1" />
-                    <path
-                        :d="`M ${svgWidth * 0.29} ${height * 0.38} Q ${svgWidth * 0.34} ${height * 0.32} ${svgWidth * 0.36} ${height * 0.38}`"
-                        class="building-stroke" fill="none" stroke-width="1" />
+
+                <!-- Flag on right tower -->
+                <template v-if="hasChimney">
+                    <line :x1="svgWidth * 0.82" :y1="height * 0.14" :x2="svgWidth * 0.82" :y2="height * 0.04"
+                        class="building-stroke" />
+                    <polygon
+                        :points="`${svgWidth * 0.82},${height * 0.04} ${svgWidth * 0.82},${height * 0.10} ${svgWidth * 0.88},${height * 0.07}`"
+                        class="building-accent-fill" />
                 </template>
-                <!-- Pool -->
-                <template v-if="hasCanopy">
-                    <ellipse :cx="svgWidth * 0.35" :cy="height * 0.66" rx="6" ry="2.5" class="building-accent-fill"
-                        opacity="0.6" />
-                </template>
-                <!-- Dock (extends right from island) -->
+
+                <!-- Turret on keep (optional) -->
                 <template v-if="hasBalcony">
-                    <line :x1="svgWidth * 0.88" :y1="height - 13" :x2="svgWidth * 0.97" :y2="height - 13"
-                        class="building-stroke" stroke-width="1.5" />
-                    <line :x1="svgWidth * 0.88" :y1="height - 11" :x2="svgWidth * 0.88" :y2="height - 15"
-                        class="building-stroke" />
-                    <line :x1="svgWidth * 0.97" :y1="height - 11" :x2="svgWidth * 0.97" :y2="height - 15"
-                        class="building-stroke" />
-                </template>
-                <!-- Boat at dock -->
-                <template v-if="hasBalcony && hasFlag">
-                    <path
-                        :d="`M ${svgWidth * 0.90} ${height - 9} Q ${svgWidth * 0.94} ${height - 4} ${svgWidth * 0.98} ${height - 9}`"
-                        class="building-stroke" fill="none" />
-                    <line :x1="svgWidth * 0.94" :y1="height - 9" :x2="svgWidth * 0.94" :y2="height - 18"
-                        class="building-stroke" />
-                    <polygon
-                        :points="`${svgWidth * 0.94},${height - 18} ${svgWidth * 0.94},${height - 11} ${svgWidth * 0.98},${height - 13}`"
+                    <rect :x="svgWidth * 0.46" :y="height * 0.02" width="8" :height="height * 0.08" rx="1"
                         class="building-fill" />
+                    <polygon
+                        :points="`${svgWidth * 0.46},${height * 0.02} ${svgWidth * 0.5},${height * -0.04} ${svgWidth * 0.54},${height * 0.02}`"
+                        class="building-fill" />
+                </template>
+
+                <!-- Stone texture lines -->
+                <line :x1="svgWidth * 0.2" :y1="height * 0.5" :x2="svgWidth * 0.38" :y2="height * 0.5"
+                    class="building-stroke" stroke-opacity="0.15" />
+                <line :x1="svgWidth * 0.62" :y1="height * 0.5" :x2="svgWidth * 0.8" :y2="height * 0.5"
+                    class="building-stroke" stroke-opacity="0.15" />
+                <line :x1="svgWidth * 0.2" :y1="height * 0.65" :x2="svgWidth * 0.8" :y2="height * 0.65"
+                    class="building-stroke" stroke-opacity="0.1" />
+
+                <!-- Bridge / drawbridge (optional) -->
+                <template v-if="hasGarage">
+                    <rect :x="svgWidth * 0.44" :y="height * 0.91" :width="svgWidth * 0.12" height="3" rx="0.5"
+                        class="building-accent-fill" opacity="0.5" />
                 </template>
             </template>
 
@@ -1053,9 +1062,9 @@ const renovationLevel = computed(() => props.property.renovationLevel ?? 0)
         </svg>
 
         <!-- Renovation stars (between SVG and condition bar) -->
-        <div v-if="renovationLevel > 0" class="building-reno-stars">
+        <!-- <div v-if="renovationLevel > 0" class="building-reno-stars">
             <span v-for="s in renovationLevel" :key="`star-${s}`" class="building-reno-star">&#9733;</span>
-        </div>
+        </div> -->
 
         <!-- Condition bar -->
         <div v-if="showStatus" class="building-condition-bar">

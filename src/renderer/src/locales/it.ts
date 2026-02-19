@@ -1425,6 +1425,7 @@ export default {
     sl_bell: 'Campana',
     sl_bar: 'BAR',
     sl_seven: '7',
+    sl_seed_fruit: 'Seme',
     // Testa o Croce
     cf_title: 'Testa o Croce',
     cf_heads: 'Testa',
@@ -1510,6 +1511,7 @@ export default {
     sl_multiplier_suffix: 'moltiplicatore',
     sl_paytable_title: 'Tabella Premi',
     sl_paytable_note: 'Più linee possono vincere contemporaneamente. I moltiplicatori vengono sommati.',
+    sl_odds: 'Quote e Pagamenti',
     // Etichette Roulette
     rl_red: 'Rosso',
     rl_black: 'Nero',
@@ -1666,6 +1668,16 @@ export default {
         low: 'Rischio Basso', low_desc: 'Fino a 3× la puntata',
         medium: 'Rischio Medio', medium_desc: 'Fino a 8× la puntata',
         high: 'Rischio Alto', high_desc: 'Fino a 30× la puntata',
+      },
+      slots: {
+        how_title: 'Come Giocare',
+        reels: 'Griglia 3×3', reels_desc: 'La macchina ha una griglia 3×3 di simboli. Ogni colonna gira indipendentemente.',
+        lines: '5 Linee di Pagamento', lines_desc: 'Tre righe orizzontali più due diagonali. Ogni linea viene controllata per le combinazioni.',
+        payout_title: 'Pagamenti',
+        jackpot: 'Jackpot (3× Sette)', jackpot_desc: 'Tre 7 su qualsiasi linea paga 100× la puntata.',
+        center3: 'Tris (Centro)', center3_desc: 'Tre simboli uguali sulla riga centrale paga il moltiplicatore pieno del simbolo.',
+        row3: 'Tris (Altre)', row3_desc: 'Tre simboli uguali su qualsiasi altra linea paga il 70% del moltiplicatore base.',
+        pair: 'Coppia al Centro', pair_desc: 'Due simboli uguali sulla riga centrale paga il 20% del moltiplicatore del simbolo.',
       },
     },
   },

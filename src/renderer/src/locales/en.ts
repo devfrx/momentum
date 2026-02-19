@@ -1439,6 +1439,7 @@ export default {
     sl_bell: 'Bell',
     sl_bar: 'BAR',
     sl_seven: '7',
+    sl_seed_fruit: 'Seed',
     // Coin Flip
     cf_title: 'Coin Flip',
     cf_heads: 'Heads',
@@ -1524,6 +1525,7 @@ export default {
     sl_multiplier_suffix: 'multiplier',
     sl_paytable_title: 'Paytable',
     sl_paytable_note: 'Multiple lines can win simultaneously. Multipliers are summed.',
+    sl_odds: 'Odds & Payouts',
     // Roulette board labels
     rl_red: 'Red',
     rl_black: 'Black',
@@ -1683,6 +1685,16 @@ export default {
         low: 'Low Risk', low_desc: 'Up to 3× your bet.',
         medium: 'Medium Risk', medium_desc: 'Up to 8× your bet.',
         high: 'High Risk', high_desc: 'Up to 30× your bet.',
+      },
+      slots: {
+        how_title: 'How to Play',
+        reels: '3×3 Grid', reels_desc: 'The machine has a 3×3 grid of symbols. Each column spins independently.',
+        lines: '5 Pay Lines', lines_desc: 'Three horizontal rows plus two diagonals. Each line is checked for matches.',
+        payout_title: 'Payouts',
+        jackpot: 'Jackpot (3× Seven)', jackpot_desc: 'Three 7s on any line pays 100× your bet.',
+        center3: '3-of-a-Kind (Center)', center3_desc: 'Three matching symbols on the center row pays the symbol\'s full multiplier.',
+        row3: '3-of-a-Kind (Other)', row3_desc: 'Three matching symbols on any other line pays 70% of the base multiplier.',
+        pair: 'Pair on Center', pair_desc: 'Two matching symbols on the center row pays 20% of the symbol\'s multiplier.',
       },
     },
   },

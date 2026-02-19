@@ -95,34 +95,22 @@ const isRed = computed(() => props.card.suit === 'hearts' || props.card.suit ===
 
 /* Back */
 .card-back {
-    --_card-back-start: var(--t-blue);
-    --_card-back-end: color-mix(in srgb, var(--t-blue) 60%, black);
-    background: linear-gradient(135deg, var(--_card-back-start), var(--_card-back-end));
-    border: 2px solid var(--t-blue);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: var(--t-blue);
+    border: 2px solid var(--t-border);
 }
 
 .card-pattern {
-    --_pattern-line: color-mix(in srgb, var(--t-text) 15%, transparent);
-    --_pattern-stripe: color-mix(in srgb, var(--t-text) 4%, transparent);
     width: 60%;
     height: 70%;
-    border: 2px solid var(--_pattern-line);
+    border: 2px solid var(--t-border);
     border-radius: var(--t-radius-sm);
-    background: repeating-linear-gradient(45deg,
-            transparent,
-            transparent 4px,
-            var(--_pattern-stripe) 4px,
-            var(--_pattern-stripe) 8px);
+    background: var(--t-bg-muted);
 }
 
 /* Front */
 .card-front {
-    --_card-face-light: #fafafa;
-    --_card-face-dark: #e8e8e8;
-    background: linear-gradient(145deg, var(--_card-face-light), var(--_card-face-dark));
+    background: var(--t-bg-card);
     border: 2px solid var(--t-border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transform: rotateY(180deg);
     color: var(--t-text-inverse);
     padding: 6px;
@@ -164,11 +152,11 @@ const isRed = computed(() => props.card.suit === 'hearts' || props.card.suit ===
 
 @keyframes cardLuckyGlow {
     from {
-        box-shadow: 0 0 8px 2px color-mix(in srgb, var(--t-success) 35%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 18px 6px color-mix(in srgb, var(--t-success) 70%, transparent);
+        opacity: 0.85;
     }
 }
 </style>

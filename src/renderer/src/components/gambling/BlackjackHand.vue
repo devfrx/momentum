@@ -70,13 +70,13 @@ defineProps<{
 }
 
 .hand-score.bust {
-    background: color-mix(in srgb, var(--t-danger) 15%, transparent);
+    background: var(--t-danger-muted);
     border-color: var(--t-danger);
     color: var(--t-danger);
 }
 
 .hand-score.blackjack {
-    background: color-mix(in srgb, var(--t-success) 15%, transparent);
+    background: var(--t-success-muted);
     border-color: var(--t-success);
     color: var(--t-success);
 }

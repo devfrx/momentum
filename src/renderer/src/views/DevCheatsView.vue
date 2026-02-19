@@ -22,6 +22,7 @@ import { SECTORS, STAGES, TRAITS } from '@renderer/data/startups'
 import { gameEngine } from '@renderer/core/GameEngine'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
+import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import { LOTTERY_TICKETS } from '@renderer/data/lottery'
 import { DIVINE_ABILITIES } from '@renderer/data/lottery'
@@ -116,6 +117,13 @@ const SIZE_KEYS = [
 
 const selectedBusinessId = ref(BUSINESS_DEFS[0].id)
 
+const businessOptions = computed(() =>
+    sortedBusinessDefs.value.map((def, idx) => ({
+        label: `${t(SIZE_KEYS[idx] ?? 'business.size_stand')} — ${formatCash(def.purchasePrice)}`,
+        value: def.id
+    }))
+)
+
 function buySelectedBusiness() {
     const def = BUSINESS_DEFS.find(d => d.id === selectedBusinessId.value)
     if (!def) { addLog('Business def not found'); return }
@@ -142,6 +150,17 @@ function buyAllBusinesses() {
 // ─── Startups ──────────────────────────
 
 const startupTestNW = ref(1_000_000)
+
+const startupNWOptions = [
+    { label: '$10K (early)', value: 10000 },
+    { label: '$100K', value: 100000 },
+    { label: '$1M', value: 1000000 },
+    { label: '$10M', value: 10000000 },
+    { label: '$100M', value: 100000000 },
+    { label: '$1B', value: 1000000000 },
+    { label: '$10B', value: 10000000000 },
+    { label: '$1T', value: 1000000000000 },
+]
 
 function refreshStartupOpps() {
     startups.refreshOpportunities(gameEngine.currentTick, true)
@@ -687,11 +706,8 @@ const multiplierInfo = computed(() => {
                 </h2>
                 <div class="cheat-row">
                     <div class="input-group">
-                        <select v-model="selectedBusinessId" class="cheat-input">
-                            <option v-for="(def, idx) in sortedBusinessDefs" :key="def.id" :value="def.id">
-                                {{ t(SIZE_KEYS[idx] ?? 'business.size_stand') }} — {{ formatCash(def.purchasePrice) }}
-                            </option>
-                        </select>
+                        <Select v-model="selectedBusinessId" :options="businessOptions" optionLabel="label"
+                            optionValue="value" class="cheat-input" />
                         <UButton variant="warning" size="sm" icon="mdi:cart" @click="buySelectedBusiness">
                             Buy
                         </UButton>
@@ -712,16 +728,8 @@ const multiplierInfo = computed(() => {
                 </h2>
                 <div class="cheat-row">
                     <div class="input-group">
-                        <select v-model.number="startupTestNW" class="cheat-input">
-                            <option :value="10000">$10K (early)</option>
-                            <option :value="100000">$100K</option>
-                            <option :value="1000000">$1M</option>
-                            <option :value="10000000">$10M</option>
-                            <option :value="100000000">$100M</option>
-                            <option :value="1000000000">$1B</option>
-                            <option :value="10000000000">$10B</option>
-                            <option :value="1000000000000">$1T</option>
-                        </select>
+                        <Select v-model="startupTestNW" :options="startupNWOptions" optionLabel="label"
+                            optionValue="value" class="cheat-input" />
                         <UButton variant="warning" size="sm" icon="mdi:refresh" @click="refreshWithCustomNW">
                             {{ t('dev.gen_nw') }}
                         </UButton>
@@ -753,9 +761,9 @@ const multiplierInfo = computed(() => {
                     <div class="debug-row">
                         <span>{{ t('dev.opportunities') }} <strong>{{ startups.opportunities.length }}</strong></span>
                         <span>{{ t('dev.active_label') }} <strong class="text-sky">{{ startups.activeInvestments.length
-                        }}</strong></span>
-                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
                                 }}</strong></span>
+                        <span>{{ t('dev.pending') }} <strong class="text-emerald">{{ startups.pendingInvestments.length
+                        }}</strong></span>
                         <span>{{ t('dev.win_rate_label') }} <strong>{{ startups.winRate.toFixed(1) }}%</strong></span>
                     </div>
                 </div>
@@ -773,7 +781,7 @@ const multiplierInfo = computed(() => {
                         <span class="text-gold">${{ opp.maxInvestment.toLocaleString() }}</span>
                         <span class="text-emerald">{{ opp.baseReturnMultiplier.toFixed(1) }}x</span>
                         <span v-if="opp.dueDiligenceDone" class="text-sky">{{ (opp.baseSuccessChance * 100).toFixed(0)
-                            }}%</span>
+                        }}%</span>
                         <span v-else class="text-muted">???</span>
                         <Tag v-if="opp.isHotDeal" value="HOT" severity="danger" size="small" />
                         <span class="debug-traits">
@@ -796,9 +804,9 @@ const multiplierInfo = computed(() => {
                     <UButton variant="ghost" size="sm" @click="tickMarket100">{{ t('dev.tick_markets') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="clearAllLoans">{{ t('dev.clear_loans') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="fastForward(100)">{{ t('dev.plus_100_ticks')
-                    }}</UButton>
+                        }}</UButton>
                     <UButton variant="warning" size="sm" @click="fastForward(1000)">{{ t('dev.plus_1000_ticks')
-                    }}</UButton>
+                        }}</UButton>
                     <UButton variant="danger" size="sm" @click="fastForward(10000)">+10K ticks</UButton>
                 </div>
             </section>
@@ -930,7 +938,7 @@ const multiplierInfo = computed(() => {
                     <div class="debug-subtitle">Unlocked Divine Abilities:</div>
                     <div v-for="id in gambling.divineAbilities" :key="id" class="debug-opp">
                         <span class="debug-opp-name text-gold">{{DIVINE_ABILITIES.find(a => a.id === id)?.name || id
-                        }}</span>
+                            }}</span>
                         <span class="text-muted">{{DIVINE_ABILITIES.find(a => a.id === id)?.description || ''}}</span>
                     </div>
                 </div>
@@ -971,10 +979,10 @@ const multiplierInfo = computed(() => {
                     <UButton variant="ghost" size="sm" @click="bmClearInvestigations">{{
                         t('dev.bm_clear_investigations') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="bmClearEffects">{{ t('dev.bm_clear_effects')
-                    }}</UButton>
+                        }}</UButton>
                     <UButton variant="warning" size="sm" @click="bmMaxLoyalty">{{ t('dev.bm_max_loyalty') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="bmResetContacts">{{ t('dev.bm_reset_contacts')
-                    }}</UButton>
+                        }}</UButton>
                     <UButton variant="danger" size="sm" icon="mdi:delete" @click="bmFullReset">
                         {{ t('dev.bm_full_reset') }}
                     </UButton>
@@ -991,7 +999,7 @@ const multiplierInfo = computed(() => {
                             :class="blackmarket.activeInvestigations.length > 0 ? 'text-red' : ''">{{
                                 blackmarket.activeInvestigations.length }}</strong></span>
                     <span>{{ t('dev.bm_contacts_label') }} <strong>{{ blackmarket.unlockedContacts.length
-                    }}</strong></span>
+                            }}</strong></span>
                 </div>
             </section>
 

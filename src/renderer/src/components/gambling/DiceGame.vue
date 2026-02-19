@@ -266,7 +266,7 @@ const diceInfo = computed<InfoSection[]>(() => [
 
         <!-- Direction selector + stats -->
         <div class="direction-row">
-            <UButton variant="ghost" :active="direction === 'under'" :disabled="rolling" icon="mdi:arrow-down-bold"
+            <UButton variant="primary" :active="direction === 'under'" :disabled="rolling" icon="mdi:arrow-down-bold"
                 @click="direction = 'under'">
                 <span class="dir-label">{{ $t('gambling.dc_under', { n: target }) }}</span>
                 <span class="dir-detail">{{ waysUnder(target) }}/36 · {{ direction === 'under' ? winChance :
@@ -278,10 +278,10 @@ const diceInfo = computed<InfoSection[]>(() => [
                 <span class="payout-value">{{ multiplier }}×</span>
                 <span class="payout-sub">{{ $t('gambling.dc_win_chance', { pct: winChance }) }}</span>
                 <span class="payout-sub">{{ $t('gambling.dc_potential', { amount: formatCash(potentialPayout) })
-                    }}</span>
+                }}</span>
             </div>
 
-            <UButton variant="ghost" :active="direction === 'over'" :disabled="rolling" icon="mdi:arrow-up-bold"
+            <UButton variant="primary" :active="direction === 'over'" :disabled="rolling" icon="mdi:arrow-up-bold"
                 @click="direction = 'over'">
                 <span class="dir-label">{{ $t('gambling.dc_over', { n: target }) }}</span>
                 <span class="dir-detail">{{ waysOver(target) }}/36 · {{ direction === 'over' ? winChance :
@@ -331,7 +331,7 @@ const diceInfo = computed<InfoSection[]>(() => [
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="rolling">{{ $t('gambling.max')
-                        }}</UButton>
+                    }}</UButton>
                 </div>
             </div>
 
@@ -655,7 +655,6 @@ const diceInfo = computed<InfoSection[]>(() => [
 /* ── Controls (shared pattern) ── */
 .controls-row {
     display: flex;
-    flex-direction: column;
     gap: var(--t-space-3);
     align-items: center;
 }
@@ -795,9 +794,8 @@ const diceInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, var(--t-success-muted), color-mix(in srgb, var(--t-success) 5%, transparent));
-    border: 1px solid var(--t-success);
-    box-shadow: 0 0 24px var(--t-success-muted);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
@@ -805,7 +803,6 @@ const diceInfo = computed<InfoSection[]>(() => [
     font-size: 2rem;
     color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px var(--t-success-muted));
 }
 
 .lucky-text {
@@ -813,16 +810,15 @@ const diceInfo = computed<InfoSection[]>(() => [
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px var(--t-success-muted);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px var(--t-success-muted);
+        opacity: 0.85;
     }
 
     to {
-        box-shadow: 0 0 32px var(--t-success-muted);
+        opacity: 1;
     }
 }
 

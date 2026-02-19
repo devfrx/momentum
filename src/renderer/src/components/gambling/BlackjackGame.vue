@@ -482,7 +482,7 @@ const bjInfo = computed<InfoSection[]>(() => [
                     <UButton variant="ghost" size="xs" @click="doubleBet">x2</UButton>
                 </div>
                 <div class="bet-presets">
-                    <UButton v-for="pct in [10, 25, 50]" :key="pct"
+                    <UButton v-for="pct in [10, 25, 50]" :key="pct" variant="ghost" size="xs"
                         @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))">
                         {{ pct }}%
                     </UButton>
@@ -578,10 +578,9 @@ const bjInfo = computed<InfoSection[]>(() => [
     align-items: center;
     gap: var(--t-space-4);
     padding: var(--t-space-5) var(--t-space-4);
-    background: radial-gradient(ellipse at center, var(--t-gamble-felt-light) 0%, var(--t-gamble-felt) 70%, var(--t-gamble-felt) 100%);
+    background: var(--t-gamble-felt);
     border: 3px solid var(--t-gamble-felt-border);
     border-radius: var(--t-radius-xl, 16px);
-    box-shadow: inset 0 0 40px var(--t-overlay-light), 0 4px 20px var(--t-overlay-light);
     min-height: 320px;
     position: relative;
 }
@@ -832,9 +831,8 @@ const bjInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-2) var(--t-space-4);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, var(--t-success-muted), transparent);
-    border: 1px solid var(--t-success);
-    box-shadow: 0 0 24px var(--t-success-muted);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
@@ -842,7 +840,6 @@ const bjInfo = computed<InfoSection[]>(() => [
     font-size: 1.5rem;
     color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px var(--t-success-muted));
 }
 
 .lucky-text {
@@ -850,16 +847,15 @@ const bjInfo = computed<InfoSection[]>(() => [
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px var(--t-success-muted);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px var(--t-success-muted);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 32px var(--t-success-muted);
+        opacity: 0.85;
     }
 }
 
@@ -942,6 +938,5 @@ const bjInfo = computed<InfoSection[]>(() => [
     right: -6px;
     font-size: 1.2rem;
     color: var(--t-danger);
-    filter: drop-shadow(0 0 2px var(--t-overlay));
 }
 </style>

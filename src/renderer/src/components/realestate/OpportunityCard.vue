@@ -70,9 +70,6 @@ function handleBuy(): void {
             <div class="opp-card__identity">
                 <div class="opp-card__name-row">
                     <span class="opp-card__name">{{ opportunity.name }}</span>
-                    <span v-if="opportunity.isHotDeal" class="opp-card__hot">
-                        <AppIcon icon="mdi:fire" /> {{ t('realestate.opp.hot') }}
-                    </span>
                 </div>
                 <div class="opp-card__meta">
                     <Tag :value="opportunity.category" size="small" severity="secondary" />
@@ -82,6 +79,9 @@ function handleBuy(): void {
                 </div>
             </div>
             <!-- Price hero -->
+            <span v-if="opportunity.isHotDeal" class="opp-card__hot">
+                <AppIcon icon="mdi:fire" /> {{ t('realestate.opp.hot') }}
+            </span>
             <div class="opp-card__hero-price">
                 <span class="opp-card__hero-label">{{ t('realestate.asking_price') }}</span>
                 <span class="opp-card__hero-value">{{ formatCash(opportunity.askingPrice) }}</span>
@@ -181,7 +181,7 @@ function handleBuy(): void {
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.appreciation') }}</span>
                         <span class="d-value success">{{ formatPercent(opportunity.baseAppreciationRate * 100)
-                            }}</span>
+                        }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="d-label">{{ t('realestate.maintenance') }}</span>

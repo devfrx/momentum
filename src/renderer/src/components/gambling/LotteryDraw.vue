@@ -272,7 +272,7 @@ watch(() => props.result, () => startReveal())
                                 :icon="jackpotTier === 'cosmic' ? 'mdi:creation' : jackpotTier === 'mega' ? 'mdi:fire' : jackpotTier === 'grand' ? 'mdi:crown' : isJackpot ? 'mdi:trophy' : 'mdi:party-popper'"
                                 class="win-trophy" :class="`trophy-${jackpotTier}`" />
                             <span class="win-tier" :class="`tier-text-${jackpotTier}`">{{ activeResult.prizeTier.label
-                            }}</span>
+                                }}</span>
                             <span class="win-rarity-tag">{{ activeResult.prizeTier.rarity.toUpperCase() }}</span>
                         </div>
                         <div class="win-details">
@@ -282,7 +282,7 @@ watch(() => props.result, () => startReveal())
                                 <template v-if="activeResult.bonusMatched"> {{ $t('gambling.lt_bonus') }}</template>
                             </span>
                             <span class="win-payout" :class="`payout-${jackpotTier}`">{{ formatCash(activeResult.payout)
-                            }}</span>
+                                }}</span>
                             <span class="win-multi">{{ $t('gambling.lt_payout_multi', {
                                 n:
                                     activeResult.prizeTier.payoutMultiplier.toLocaleString()
@@ -314,89 +314,66 @@ watch(() => props.result, () => startReveal())
     background: var(--t-bg-card);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
-    transition: box-shadow 0.5s ease;
 }
 
 .jackpot-glow {
-    box-shadow: 0 0 30px color-mix(in srgb, var(--t-warning) 30%, transparent), 0 0 60px color-mix(in srgb, var(--t-warning) 10%, transparent);
+    border-color: var(--t-warning);
 }
 
 /* ── Tiered jackpot container glows ── */
 .tier-minor {
-    animation: tierMinorGlow 2s ease infinite alternate;
-    border-color: color-mix(in srgb, var(--t-purple) 40%, transparent);
+    animation: tierPulse 2s ease infinite alternate;
+    border-color: var(--t-purple);
 }
 
 .tier-major {
-    animation: tierMajorGlow 1.5s ease infinite alternate;
-    border-color: color-mix(in srgb, var(--t-warning) 50%, transparent);
+    animation: tierPulse 1.5s ease infinite alternate;
+    border-color: var(--t-warning);
 }
 
 .tier-grand {
-    animation: tierGrandGlow 1.2s ease infinite alternate;
-    border-color: color-mix(in srgb, var(--t-danger) 50%, transparent);
+    animation: tierPulse 1.2s ease infinite alternate;
+    border-color: var(--t-danger);
 }
 
 .tier-mega {
-    animation: tierMegaGlow 1s ease infinite alternate;
-    border-color: transparent;
-    border-image: linear-gradient(135deg, var(--t-danger), var(--t-warning), var(--t-purple), var(--t-blue)) 1;
+    animation: tierPulse 1s ease infinite alternate;
+    border-color: var(--t-danger);
 }
 
 .tier-cosmic {
-    animation: tierCosmicGlow 0.8s ease infinite alternate;
-    border-color: transparent;
-    border-image: linear-gradient(135deg, var(--t-pink), var(--t-purple), var(--t-cyan), var(--t-success), var(--t-warning), var(--t-danger)) 1;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-pink) 3%, transparent), color-mix(in srgb, var(--t-purple) 3%, transparent), color-mix(in srgb, var(--t-cyan) 3%, transparent));
+    animation: tierPulse 0.8s ease infinite alternate;
+    border-color: var(--t-pink);
+    background: var(--t-bg-muted);
 }
 
-@keyframes tierMinorGlow {
+@keyframes tierPulse {
     from {
-        box-shadow: 0 0 15px color-mix(in srgb, var(--t-purple) 20%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 30px color-mix(in srgb, var(--t-purple) 40%, transparent);
-    }
-}
-
-@keyframes tierMajorGlow {
-    from {
-        box-shadow: 0 0 20px color-mix(in srgb, var(--t-warning) 30%, transparent);
-    }
-
-    to {
-        box-shadow: 0 0 50px color-mix(in srgb, var(--t-warning) 50%, transparent);
-    }
-}
-
-@keyframes tierGrandGlow {
-    from {
-        box-shadow: 0 0 25px color-mix(in srgb, var(--t-danger) 30%, transparent), 0 0 50px color-mix(in srgb, var(--t-danger) 10%, transparent);
-    }
-
-    to {
-        box-shadow: 0 0 50px color-mix(in srgb, var(--t-danger) 50%, transparent), 0 0 80px color-mix(in srgb, var(--t-danger) 20%, transparent);
+        opacity: 0.85;
     }
 }
 
 @keyframes tierMegaGlow {
     from {
-        box-shadow: 0 0 30px color-mix(in srgb, var(--t-danger) 40%, transparent), 0 0 60px color-mix(in srgb, var(--t-warning) 20%, transparent), 0 0 90px color-mix(in srgb, var(--t-purple) 10%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 60px color-mix(in srgb, var(--t-danger) 60%, transparent), 0 0 100px color-mix(in srgb, var(--t-warning) 40%, transparent), 0 0 140px color-mix(in srgb, var(--t-purple) 20%, transparent);
+        opacity: 0.85;
     }
 }
 
 @keyframes tierCosmicGlow {
     from {
-        box-shadow: 0 0 40px color-mix(in srgb, var(--t-pink) 50%, transparent), 0 0 80px color-mix(in srgb, var(--t-purple) 30%, transparent), 0 0 120px color-mix(in srgb, var(--t-cyan) 20%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 80px color-mix(in srgb, var(--t-pink) 70%, transparent), 0 0 140px color-mix(in srgb, var(--t-purple) 50%, transparent), 0 0 200px color-mix(in srgb, var(--t-cyan) 30%, transparent);
+        opacity: 0.85;
     }
 }
 
@@ -453,7 +430,6 @@ watch(() => props.result, () => startReveal())
     background: var(--t-success);
     border-color: var(--t-success);
     color: var(--t-text);
-    box-shadow: 0 0 12px var(--t-success-muted);
 }
 
 .drawn-ball.lucky-forced {
@@ -467,17 +443,16 @@ watch(() => props.result, () => startReveal())
     right: -6px;
     font-size: 0.7rem;
     color: var(--t-success);
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--t-success) 60%, transparent));
     animation: cloverPop 0.5s ease;
 }
 
 @keyframes luckyBallPulse {
     from {
-        box-shadow: 0 0 8px color-mix(in srgb, var(--t-success) 30%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 18px color-mix(in srgb, var(--t-success) 60%, transparent);
+        opacity: 0.85;
     }
 }
 
@@ -511,7 +486,7 @@ watch(() => props.result, () => startReveal())
 
 .player-ball.matched {
     opacity: 1;
-    background: color-mix(in srgb, var(--t-success) 15%, transparent);
+    background: var(--t-success-muted);
     border-color: var(--t-success);
     color: var(--t-success);
 }
@@ -524,7 +499,6 @@ watch(() => props.result, () => startReveal())
     background: var(--t-warning);
     border-color: var(--t-warning);
     color: var(--t-text);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--t-warning) 40%, transparent);
 }
 
 .bonus-separator {
@@ -563,7 +537,6 @@ watch(() => props.result, () => startReveal())
 .luck-pct.luck-high {
     color: var(--t-success);
     opacity: 1;
-    text-shadow: 0 0 4px color-mix(in srgb, var(--t-success) 40%, transparent);
 }
 
 .luck-pct-icon {
@@ -606,8 +579,8 @@ watch(() => props.result, () => startReveal())
     flex-direction: column;
     gap: var(--t-space-2);
     padding: var(--t-space-4);
-    background: color-mix(in srgb, var(--rarity-color) 8%, transparent);
-    border: 1px solid color-mix(in srgb, var(--rarity-color) 50%, transparent);
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     text-align: center;
     animation: resultPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -624,46 +597,46 @@ watch(() => props.result, () => startReveal())
 
 .win-grand {
     animation: resultEpicEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), winPulseStrong 1.2s ease 0.8s infinite alternate;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-danger) 12%, transparent), color-mix(in srgb, var(--t-warning) 8%, transparent));
+    background: var(--t-bg-muted);
 }
 
 .win-mega {
     animation: resultEpicEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1), winRainbow 3s linear 1s infinite;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-danger) 15%, transparent), color-mix(in srgb, var(--t-warning) 10%, transparent), color-mix(in srgb, var(--t-purple) 8%, transparent));
+    background: var(--t-bg-muted);
 }
 
 .win-cosmic {
     animation: resultCosmicEntry 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), winCosmicPulse 2s ease 1.2s infinite alternate;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-pink) 15%, transparent), color-mix(in srgb, var(--t-purple) 12%, transparent), color-mix(in srgb, var(--t-cyan) 8%, transparent));
+    background: var(--t-bg-muted);
 }
 
 @keyframes winPulseSoft {
     from {
-        box-shadow: inset 0 0 20px color-mix(in srgb, var(--t-purple) 5%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: inset 0 0 40px color-mix(in srgb, var(--t-purple) 12%, transparent);
+        opacity: 0.85;
     }
 }
 
 @keyframes winPulseMedium {
     from {
-        box-shadow: inset 0 0 20px color-mix(in srgb, var(--t-warning) 8%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: inset 0 0 50px color-mix(in srgb, var(--t-warning) 18%, transparent);
+        opacity: 0.85;
     }
 }
 
 @keyframes winPulseStrong {
     from {
-        box-shadow: inset 0 0 30px color-mix(in srgb, var(--t-danger) 10%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: inset 0 0 60px color-mix(in srgb, var(--t-danger) 25%, transparent);
+        opacity: 0.85;
     }
 }
 
@@ -679,11 +652,11 @@ watch(() => props.result, () => startReveal())
 
 @keyframes winCosmicPulse {
     from {
-        box-shadow: inset 0 0 40px color-mix(in srgb, var(--t-pink) 15%, transparent), inset 0 0 80px color-mix(in srgb, var(--t-purple) 8%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: inset 0 0 80px color-mix(in srgb, var(--t-pink) 30%, transparent), inset 0 0 120px color-mix(in srgb, var(--t-cyan) 15%, transparent);
+        opacity: 0.85;
     }
 }
 
@@ -852,19 +825,16 @@ watch(() => props.result, () => startReveal())
 .trophy-grand {
     animation: trophyGrandEntry 1s ease;
     font-size: 2.5rem !important;
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--t-danger) 50%, transparent));
 }
 
 .trophy-mega {
     animation: trophyGrandEntry 1.2s ease;
     font-size: 2.8rem !important;
-    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--t-danger) 60%, transparent));
 }
 
 .trophy-cosmic {
     animation: trophyCosmicEntry 1.5s ease;
     font-size: 3.2rem !important;
-    filter: drop-shadow(0 0 16px color-mix(in srgb, var(--t-pink) 70%, transparent));
 }
 
 @keyframes trophySpin {
@@ -933,17 +903,13 @@ watch(() => props.result, () => startReveal())
 }
 
 /* ── Tier text effects ── */
-.tier-text-grand {
-    text-shadow: 0 0 10px color-mix(in srgb, var(--t-danger) 50%, transparent);
-}
+.tier-text-grand {}
 
 .tier-text-mega {
-    text-shadow: 0 0 15px color-mix(in srgb, var(--t-danger) 60%, transparent), 0 0 30px color-mix(in srgb, var(--t-warning) 30%, transparent);
     animation: textPulse 1s ease infinite alternate;
 }
 
 .tier-text-cosmic {
-    text-shadow: 0 0 20px color-mix(in srgb, var(--t-pink) 70%, transparent), 0 0 40px color-mix(in srgb, var(--t-purple) 40%, transparent);
     animation: textRainbow 3s linear infinite;
 }
 
@@ -982,19 +948,16 @@ watch(() => props.result, () => startReveal())
 .payout-grand {
     font-size: 2.5rem;
     animation: payoutBounce 1s ease;
-    text-shadow: 0 0 10px var(--rarity-color);
 }
 
 .payout-mega {
     font-size: 2.8rem;
     animation: payoutCountUp 1.5s ease;
-    text-shadow: 0 0 15px var(--rarity-color);
 }
 
 .payout-cosmic {
     font-size: 3.2rem;
     animation: payoutCountUp 2s ease, payoutGlow 2s ease 2s infinite alternate;
-    text-shadow: 0 0 20px color-mix(in srgb, var(--t-pink) 70%, transparent);
 }
 
 @keyframes payoutBounce {
@@ -1045,11 +1008,11 @@ watch(() => props.result, () => startReveal())
 
 @keyframes payoutGlow {
     from {
-        text-shadow: 0 0 15px color-mix(in srgb, var(--t-pink) 50%, transparent);
+        opacity: 1;
     }
 
     to {
-        text-shadow: 0 0 30px color-mix(in srgb, var(--t-pink) 90%, transparent), 0 0 60px color-mix(in srgb, var(--t-purple) 40%, transparent);
+        opacity: 0.85;
     }
 }
 
@@ -1077,7 +1040,7 @@ watch(() => props.result, () => startReveal())
     letter-spacing: 0.1em;
     padding: 2px 8px;
     border-radius: var(--t-radius-sm);
-    background: color-mix(in srgb, var(--rarity-color) 15%, transparent);
+    background: var(--t-bg-muted);
     color: var(--rarity-color);
 }
 
@@ -1167,9 +1130,8 @@ watch(() => props.result, () => startReveal())
     gap: var(--t-space-2);
     padding: var(--t-space-2) var(--t-space-4);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-success) 15%, transparent), color-mix(in srgb, var(--t-success) 5%, transparent));
-    border: 1px solid color-mix(in srgb, var(--t-success) 40%, transparent);
-    box-shadow: 0 0 20px color-mix(in srgb, var(--t-success) 25%, transparent);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-success);
     animation: drawLuckyPulse 0.8s ease infinite alternate;
 }
 
@@ -1177,7 +1139,6 @@ watch(() => props.result, () => startReveal())
     font-size: 1.4rem;
     color: var(--t-success);
     animation: drawCloverSpin 0.8s ease;
-    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--t-success) 50%, transparent));
 }
 
 .draw-lucky-text {
@@ -1185,16 +1146,15 @@ watch(() => props.result, () => startReveal())
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 6px color-mix(in srgb, var(--t-success) 30%, transparent);
 }
 
 @keyframes drawLuckyPulse {
     from {
-        box-shadow: 0 0 12px color-mix(in srgb, var(--t-success) 20%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 28px color-mix(in srgb, var(--t-success) 40%, transparent);
+        opacity: 0.85;
     }
 }
 

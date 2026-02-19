@@ -7,7 +7,7 @@
  *
  * ── Balance guidelines ──
  * ROI  = baseRent × units / price.  Targets a smooth 1× → 1.8× curve from
- *        Studio to Private Island so later properties feel better without
+ *        Studio to Private Castle so later properties feel better without
  *        dominating.  All values assume grade-B (multiplier 1.0).
  *
  * Appreciation rates are tuned for the 6 000-tick period (~10 min).
@@ -282,8 +282,8 @@ export const PROPERTY_TEMPLATES: PropertyTemplate[] = [
   },
   {
     id: 'private_island',
-    name: 'Private Island',
-    icon: 'mdi:island',
+    name: 'Private Castle',
+    icon: 'mdi:castle',
     categories: ['Luxury'],
     priceRange: [7_000_000_000, 28_000_000_000],
     baseRentRange: [33_000, 67_000],

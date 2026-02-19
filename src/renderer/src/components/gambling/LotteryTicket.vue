@@ -178,7 +178,7 @@ function confirmPlay(): void {
     width: 44px;
     height: 44px;
     border-radius: var(--t-radius-md);
-    background: color-mix(in srgb, var(--ticket-accent) 12%, transparent);
+    background: var(--t-bg-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -291,14 +291,13 @@ function confirmPlay(): void {
 .number-ball:hover:not(:disabled):not(.full) {
     border-color: var(--ticket-accent);
     color: var(--ticket-accent);
-    background: color-mix(in srgb, var(--ticket-accent) 8%, transparent);
+    background: var(--t-bg-muted);
 }
 
 .number-ball.selected {
     background: var(--ticket-accent);
     border-color: var(--ticket-accent);
     color: var(--t-text);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--ticket-accent) 40%, transparent);
 }
 
 .number-ball.full {
@@ -342,6 +341,5 @@ function confirmPlay(): void {
     background: var(--t-warning);
     border-color: var(--t-warning);
     color: var(--t-text);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--t-warning) 40%, transparent);
 }
 </style>

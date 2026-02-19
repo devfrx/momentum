@@ -322,12 +322,11 @@ const rouletteInfo = computed<InfoSection[]>(() => [
                             {{ spinning ? $t('gambling.rl_spinning') : $t('gambling.rl_spin') }}
                         </UButton>
                         <div class="action-row">
-                            <UButton variant="danger" size="sm" :disabled="spinning || bets.length === 0" @click="clearBets"
-                                icon="mdi:close">
+                            <UButton variant="danger" size="sm" :disabled="spinning || bets.length === 0"
+                                @click="clearBets" icon="mdi:close">
                                 {{ $t('gambling.rl_clear') }}
                             </UButton>
-                            <UButton variant="ghost" size="sm" v-if="showResult" @click="newRound"
-                                icon="mdi:refresh">
+                            <UButton variant="ghost" size="sm" v-if="showResult" @click="newRound" icon="mdi:refresh">
                                 {{ $t('gambling.new_round') }}
                             </UButton>
                         </div>
@@ -725,9 +724,8 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-success) 15%, transparent), color-mix(in srgb, var(--t-success) 5%, transparent));
-    border: 1px solid color-mix(in srgb, var(--t-success) 40%, transparent);
-    box-shadow: 0 0 24px color-mix(in srgb, var(--t-success) 25%, transparent);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
@@ -735,7 +733,6 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     font-size: 2rem;
     color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t-success) 50%, transparent));
 }
 
 .lucky-text {
@@ -743,16 +740,15 @@ const rouletteInfo = computed<InfoSection[]>(() => [
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--t-success) 30%, transparent);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px color-mix(in srgb, var(--t-success) 20%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 32px color-mix(in srgb, var(--t-success) 40%, transparent);
+        opacity: 0.85;
     }
 }
 

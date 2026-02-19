@@ -219,12 +219,12 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
 
         <!-- Side selector -->
         <div class="side-selector">
-            <UButton variant="ghost" :active="chosenSide === 'heads'" :disabled="flipping" icon="mdi:crown"
+            <UButton variant="tab" :active="chosenSide === 'heads'" :disabled="flipping" icon="mdi:crown"
                 @click="chosenSide = 'heads'">
                 <span>{{ $t('gambling.cf_heads') }}</span>
             </UButton>
             <span class="side-vs">{{ $t('gambling.cf_vs') }}</span>
-            <UButton variant="ghost" :active="chosenSide === 'tails'" :disabled="flipping" icon="mdi:shield"
+            <UButton variant="tab" :active="chosenSide === 'tails'" :disabled="flipping" icon="mdi:shield"
                 @click="chosenSide = 'tails'">
                 <span>{{ $t('gambling.cf_tails') }}</span>
             </UButton>
@@ -400,19 +400,16 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     justify-content: center;
     gap: 4px;
     backface-visibility: hidden;
-    border: 4px solid color-mix(in srgb, var(--t-text) 15%, transparent);
-    /* box-shadow:
-        0 4px 20px var(--t-overlay-light),
-        inset 0 2px 10px color-mix(in srgb, var(--t-text) 10%, transparent); */
+    border: 3px solid var(--t-border);
 }
 
 .coin-heads {
-    background: linear-gradient(145deg, var(--t-gold), var(--t-gold-hover));
+    background: var(--t-gold);
     color: var(--t-text-inverse);
 }
 
 .coin-tails {
-    background: linear-gradient(145deg, var(--t-info), var(--t-info));
+    background: var(--t-info);
     color: var(--t-text-inverse);
     transform: rotateX(180deg);
 }
@@ -648,9 +645,8 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, var(--t-success-muted), color-mix(in srgb, var(--t-success) 5%, transparent));
-    border: 1px solid var(--t-success);
-    box-shadow: 0 0 24px var(--t-success-muted);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
@@ -658,7 +654,6 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     font-size: 2rem;
     color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px var(--t-success-muted));
 }
 
 .lucky-text {
@@ -666,16 +661,15 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px var(--t-success-muted);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px var(--t-success-muted);
+        opacity: 0.85;
     }
 
     to {
-        box-shadow: 0 0 32px var(--t-success-muted);
+        opacity: 1;
     }
 }
 

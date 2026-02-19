@@ -516,7 +516,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                 <!-- Draw Speed Selector -->
                 <div class="speed-selector">
                     <AppIcon icon="mdi:speedometer" class="speed-icon" />
-                    <UButton variant="ghost" size="xs" v-for="sp in SPEED_OPTIONS" :key="sp"
+                    <UButton variant="tab" size="xs" v-for="sp in SPEED_OPTIONS" :key="sp"
                         :active="settings.lotteryDrawSpeed === sp" @click="settings.lotteryDrawSpeed = sp"
                         :disabled="isDrawing">
                         {{ sp }}×
@@ -526,7 +526,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
                 <!-- Multi-Draw Selector -->
                 <div class="multi-draw-selector">
                     <AppIcon icon="mdi:layers-triple" class="multi-icon" />
-                    <UButton variant="ghost" size="xs" v-for="n in MULTI_DRAW_OPTIONS" :key="n"
+                    <UButton variant="tab" size="xs" v-for="n in MULTI_DRAW_OPTIONS" :key="n"
                         :active="settings.lotteryMultiDraw === n" @click="settings.lotteryMultiDraw = n"
                         :disabled="isDrawing">
                         {{ n }}
@@ -603,10 +603,10 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
             <div class="ticket-selector">
                 <span class="selector-label">{{ $t('gambling.lt_select_ticket') }}</span>
                 <div class="ticket-tabs">
-                    <UButton variant="tab" v-for="t in LOTTERY_TICKETS" :key="t.id"
-                        :active="selectedTicketId === t.id" :style="{ '--tab-accent': t.accent }"
-                        @click="selectTicket(t.id)" :disabled="isDrawing" :icon="t.icon">
-                        <span class="tab-name">{{ t.name }}</span>
+                    <UButton variant="tab" v-for="t in LOTTERY_TICKETS" :key="t.id" :active="selectedTicketId === t.id"
+                        :style="{ '--tab-accent': t.accent }" @click="selectTicket(t.id)" :disabled="isDrawing"
+                        :icon="t.icon">
+                        <span class="tab-name">{{ t.name }} - </span>
                         <span class="tab-cost">${{ t.ticketCost }}</span>
                     </UButton>
                 </div>
@@ -835,8 +835,8 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     align-items: center;
     gap: 4px;
     padding: var(--t-space-1) var(--t-space-2);
-    background: color-mix(in srgb, var(--t-success) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--t-success) 30%, transparent);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-sm);
     font-size: 0.75rem;
     font-weight: var(--t-font-bold);
@@ -871,7 +871,7 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     gap: var(--t-space-3);
     padding: var(--t-space-2);
     border-radius: var(--t-radius-sm);
-    border-left: 3px solid var(--prize-color, var(--t-border));
+    /* border-left: 3px solid var(--prize-color, var(--t-border)); */
 }
 
 .prize-entry:nth-child(odd) {
@@ -1019,11 +1019,13 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     font-size: 1rem;
 }
 
-.positive {
+.positive,
+.success {
     color: var(--t-success);
 }
 
-.negative {
+.negative,
+.danger {
     color: var(--t-danger);
 }
 
@@ -1114,9 +1116,8 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-success) 15%, transparent), color-mix(in srgb, var(--t-success) 5%, transparent));
-    border: 1px solid color-mix(in srgb, var(--t-success) 40%, transparent);
-    box-shadow: 0 0 24px color-mix(in srgb, var(--t-success) 25%, transparent);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
@@ -1124,7 +1125,6 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     font-size: 2rem;
     color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t-success) 50%, transparent));
 }
 
 .lucky-text {
@@ -1132,16 +1132,15 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--t-success) 30%, transparent);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px color-mix(in srgb, var(--t-success) 20%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 32px color-mix(in srgb, var(--t-success) 40%, transparent);
+        opacity: 0.85;
     }
 }
 
@@ -1194,10 +1193,10 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 /* ── Dev Jackpot Simulator ── */
 .dev-jackpot-panel {
-    border: 2px dashed color-mix(in srgb, var(--t-danger) 40%, transparent);
+    border: 2px dashed var(--t-border);
     border-radius: var(--t-radius-lg);
     padding: var(--t-space-3);
-    background: color-mix(in srgb, var(--t-danger) 3%, transparent);
+    background: var(--t-bg-muted);
     display: flex;
     flex-direction: column;
     gap: var(--t-space-3);
@@ -1277,16 +1276,14 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     gap: var(--t-space-3);
     padding: var(--t-space-4) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-gold) 15%, transparent), color-mix(in srgb, var(--t-purple) 10%, transparent));
-    border: 1px solid color-mix(in srgb, var(--t-gold) 50%, transparent);
-    box-shadow: 0 0 32px color-mix(in srgb, var(--t-gold) 30%, transparent);
+    background: var(--t-gold-muted);
+    border: 1px solid var(--t-border);
     animation: divinePulse 1s ease infinite alternate;
 }
 
 .divine-ability-icon {
     font-size: 2.5rem;
     color: var(--t-gold);
-    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--t-gold) 60%, transparent));
     animation: divineIconSpin 1.2s ease;
 }
 
@@ -1308,7 +1305,6 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
     font-size: 1.1rem;
     font-weight: 800;
     color: var(--t-gold);
-    text-shadow: 0 0 8px color-mix(in srgb, var(--t-gold) 40%, transparent);
 }
 
 .divine-ability-desc {
@@ -1318,11 +1314,11 @@ function simulateJackpot(ticket: LotteryTicketDef, prizeIndex: number): void {
 
 @keyframes divinePulse {
     from {
-        box-shadow: 0 0 16px color-mix(in srgb, var(--t-gold) 20%, transparent);
+        opacity: 1;
     }
 
     to {
-        box-shadow: 0 0 40px color-mix(in srgb, var(--t-gold) 50%, transparent);
+        opacity: 0.85;
     }
 }
 

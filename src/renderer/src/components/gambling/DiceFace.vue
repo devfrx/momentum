@@ -133,27 +133,23 @@ onBeforeUnmount(() => { currentAnim?.cancel(); currentAnim = null })
 }
 
 .face {
-    --dice-face-light: #fafafa;
-    --dice-face-dark: #e0e0e0;
     position: absolute;
     width: 100px;
     height: 100px;
-    background: linear-gradient(145deg, var(--dice-face-light), var(--dice-face-dark));
+    background: var(--t-bg-card);
     border: 2px solid var(--t-border);
     border-radius: var(--t-radius-xl);
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
     padding: 12px;
-    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .pip {
     width: 16px;
     height: 16px;
     border-radius: var(--t-radius-full);
-    background: radial-gradient(circle at 35% 35%, var(--t-text-inverse), var(--t-text-inverse));
-    box-shadow: 0 1px 3px var(--t-overlay-light);
+    background: var(--t-text);
 }
 
 /* pip placement via grid */

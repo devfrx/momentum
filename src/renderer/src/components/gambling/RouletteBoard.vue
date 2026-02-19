@@ -119,7 +119,7 @@ function placeBet(type: RouletteBetType, number?: number): void {
             </div>
             <div class="outside-bet" :class="{ active: isActive('even') }" @click="placeBet('even')">{{
                 $t('gambling.rl_even')
-            }}</div>
+                }}</div>
             <div class="outside-bet color-bet red-bet" :class="{ active: isActive('red') }" @click="placeBet('red')">
                 <AppIcon icon="mdi:diamond" />
             </div>
@@ -132,7 +132,7 @@ function placeBet(type: RouletteBetType, number?: number): void {
             </div>
             <div class="outside-bet" :class="{ active: isActive('high') }" @click="placeBet('high')">{{
                 $t('gambling.rl_high')
-            }}</div>
+                }}</div>
         </div>
     </div>
 </template>
@@ -172,7 +172,8 @@ function placeBet(type: RouletteBetType, number?: number): void {
 }
 
 .board-zero.active {
-    box-shadow: inset 0 0 0 2px var(--t-accent);
+    outline: 2px solid var(--t-accent);
+    outline-offset: -2px;
 }
 
 /* ── Number grid ── */
@@ -200,7 +201,8 @@ function placeBet(type: RouletteBetType, number?: number): void {
 }
 
 .board-cell.active {
-    box-shadow: inset 0 0 0 2px var(--t-accent);
+    outline: 2px solid var(--t-accent);
+    outline-offset: -2px;
 }
 
 .cell-num {
@@ -247,7 +249,8 @@ function placeBet(type: RouletteBetType, number?: number): void {
 }
 
 .col-bet.active {
-    box-shadow: inset 0 0 0 2px var(--t-accent);
+    outline: 2px solid var(--t-accent);
+    outline-offset: -2px;
 }
 
 /* ── Dozen bets ── */
@@ -276,7 +279,8 @@ function placeBet(type: RouletteBetType, number?: number): void {
 }
 
 .dozen-bet.active {
-    box-shadow: inset 0 0 0 2px var(--t-accent);
+    outline: 2px solid var(--t-accent);
+    outline-offset: -2px;
 }
 
 /* ── Outside bets ── */
@@ -307,7 +311,8 @@ function placeBet(type: RouletteBetType, number?: number): void {
 }
 
 .outside-bet.active {
-    box-shadow: inset 0 0 0 2px var(--t-accent);
+    outline: 2px solid var(--t-accent);
+    outline-offset: -2px;
 }
 
 .color-bet {

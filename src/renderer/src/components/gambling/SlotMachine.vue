@@ -3,7 +3,10 @@ import { ref, computed, watch } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
 import SlotLever from './SlotLever.vue'
+import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
+import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
+import { useI18n } from 'vue-i18n'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
 import { D, ZERO, mul } from '@renderer/core/BigNum'
@@ -11,6 +14,7 @@ import type Decimal from 'break_infinity.js'
 import { THEME } from '@renderer/assets/theme/colors'
 
 const emit = defineEmits<{ back: [] }>()
+const { t } = useI18n()
 
 const player = usePlayerStore()
 const gambling = useGamblingStore()
@@ -26,6 +30,7 @@ interface SlotSymbol {
 }
 
 const SYMBOLS: SlotSymbol[] = [
+    { id: 'seed', icon: 'mdi:seed', label: 'Seed', color: THEME.success, weight: 30 },
     { id: 'cherry', icon: 'mdi:fruit-cherries', label: 'Cherry', color: THEME.danger, weight: 25 },
     { id: 'lemon', icon: 'mdi:fruit-citrus', label: 'Lemon', color: THEME.gold, weight: 22 },
     { id: 'orange', icon: 'mdi:food-apple', label: 'Orange', color: THEME.orange, weight: 20 },
@@ -129,6 +134,8 @@ function pickSymbol(): SlotSymbol {
     }
     return SYMBOLS[0]
 }
+
+
 
 // ─── Payline evaluation ──────────────────────────────────────
 // grid[reelIndex][rowIndex]
@@ -439,6 +446,29 @@ const stats = computed(() => gambling.getStats('slots'))
 const canSpin = computed(() => !spinning.value && player.cash.gte(D(betAmount.value)) && betAmount.value > 0)
 const showPaytable = ref(false)
 
+// ─── Info Panel ──────────────────────────────────────────────
+const slotInfo = computed<InfoSection[]>(() => [
+    {
+        title: t('gambling.info.slots.how_title'),
+        icon: 'mdi:help-circle-outline',
+        entries: [
+            { term: t('gambling.info.slots.reels'), desc: t('gambling.info.slots.reels_desc'), icon: 'mdi:slot-machine' },
+            { term: t('gambling.info.slots.lines'), desc: t('gambling.info.slots.lines_desc'), icon: 'mdi:format-line-weight' },
+
+        ]
+    },
+    {
+        title: t('gambling.info.slots.payout_title'),
+        icon: 'mdi:cash-multiple',
+        entries: [
+            { term: t('gambling.info.slots.jackpot'), desc: t('gambling.info.slots.jackpot_desc'), icon: 'mdi:numeric-7-box' },
+            { term: t('gambling.info.slots.center3'), desc: t('gambling.info.slots.center3_desc'), icon: 'mdi:arrow-right-bold' },
+            { term: t('gambling.info.slots.row3'), desc: t('gambling.info.slots.row3_desc'), icon: 'mdi:arrow-expand-horizontal' },
+            { term: t('gambling.info.slots.pair'), desc: t('gambling.info.slots.pair_desc'), icon: 'mdi:equal' },
+        ]
+    },
+])
+
 // ─── Init ────────────────────────────────────────────────────
 initReels()
 
@@ -460,6 +490,23 @@ watch(() => player.cash, (cash) => {
                 <AppIcon icon="mdi:slot-machine" class="title-icon" />
                 {{ $t('gambling.sl_title') }}
             </h2>
+            <div class="balance-chip">
+                <AppIcon icon="mdi:cash" />
+                {{ formatCash(player.cash) }}
+            </div>
+        </div>
+
+        <!-- Symbols Legend -->
+        <div class="symbols-strip">
+            <div v-for="sym in SYMBOLS" :key="sym.id" class="symbol-badge">
+                <AppIcon :icon="sym.icon" :style="{ color: sym.color }" />
+                <span class="symbol-badge__label">{{ sym.label }}</span>
+                <span class="symbol-badge__weight">{{ (sym.weight / TOTAL_WEIGHT * 100).toFixed(0) }}%</span>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar-row">
             <UButton variant="ghost" size="sm" icon="mdi:table" @click="showPaytable = !showPaytable">
                 {{ showPaytable ? $t('gambling.hide') : $t('gambling.sl_paytable') }}
             </UButton>
@@ -483,12 +530,15 @@ watch(() => player.cash, (cash) => {
         <!-- Reel area + Lever -->
         <div class="machine-body">
             <div class="reels-frame">
+                <!-- Center payline indicator -->
+                <div class="center-line"></div>
                 <div class="reels-container">
                     <div v-for="(reel, ri) in resultGrid" :key="ri" class="reel"
                         :class="{ spinning: !reelStopped[ri] && spinning }">
                         <div v-for="(sym, si) in reel" :key="si" class="reel-cell" :class="{
                             dim: spinning && !reelStopped[ri],
                             'win-cell': showResult && justWon && isWinningCell(ri, si),
+                            'center-row': si === 1,
                         }">
                             <AppIcon :icon="sym.icon" class="symbol-icon" :style="{ color: sym.color }"
                                 :class="{ 'symbol-bounce': showResult && justWon && isWinningCell(ri, si) }" />
@@ -531,7 +581,7 @@ watch(() => player.cash, (cash) => {
         </Transition>
 
         <!-- Controls -->
-        <div class="controls-area">
+        <div class="controls-row">
             <div class="bet-section">
                 <label class="bet-label">{{ $t('gambling.bet') }}</label>
                 <div class="bet-row">
@@ -552,11 +602,16 @@ watch(() => player.cash, (cash) => {
                 </div>
             </div>
 
-            <UButton variant="ghost" size="sm" :active="autoSpin" @click="toggleAutoSpin">
-                <AppIcon icon="mdi:autorenew" :class="{ 'spin-icon': autoSpin }" />
-                {{ autoSpin ? $t('gambling.sl_auto_count', { n: autoSpinCount }) : $t('gambling.sl_auto') }}
-            </UButton>
+            <div class="action-col">
+                <UButton variant="ghost" size="sm" :active="autoSpin" @click="toggleAutoSpin">
+                    <AppIcon icon="mdi:autorenew" :class="{ 'spin-icon': autoSpin }" />
+                    {{ autoSpin ? $t('gambling.sl_auto_count', { n: autoSpinCount }) : $t('gambling.sl_auto') }}
+                </UButton>
+            </div>
         </div>
+
+        <!-- Info Panel -->
+        <InfoPanel :title="$t('gambling.sl_odds')" :sections="slotInfo" />
 
         <!-- Stats -->
         <div class="slot-stats">
@@ -611,6 +666,58 @@ watch(() => player.cash, (cash) => {
 .title-icon {
     font-size: 1.1rem;
     color: var(--t-text-secondary);
+}
+
+.balance-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    color: var(--t-success);
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
+    font-size: 0.85rem;
+}
+
+/* ── Toolbar ── */
+.toolbar-row {
+    display: flex;
+    gap: var(--t-space-2);
+}
+
+/* ── Symbols Legend Strip ── */
+.symbols-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--t-space-2);
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-lg);
+}
+
+.symbol-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px var(--t-space-2);
+    background: var(--t-bg-muted);
+    border-radius: var(--t-radius-sm);
+    font-size: 0.75rem;
+}
+
+.symbol-badge__label {
+    font-weight: var(--t-font-semibold);
+    color: var(--t-text-secondary);
+}
+
+.symbol-badge__weight {
+    font-family: var(--t-font-mono);
+    font-size: 0.65rem;
+    color: var(--t-text-muted);
 }
 
 /* ── Paytable ── */
@@ -703,6 +810,18 @@ watch(() => player.cash, (cash) => {
     overflow: hidden;
 }
 
+.center-line {
+    position: absolute;
+    left: var(--t-space-3);
+    right: var(--t-space-3);
+    top: 50%;
+    height: 2px;
+    background: var(--t-text-muted);
+    opacity: 0.2;
+    z-index: 1;
+    pointer-events: none;
+}
+
 .reels-container {
     flex: 1;
     display: flex;
@@ -744,7 +863,11 @@ watch(() => player.cash, (cash) => {
 
 .reel-cell.win-cell {
     background: var(--t-success-muted);
-    box-shadow: 0 0 16px var(--t-success-muted);
+}
+
+.reel-cell.center-row {
+    border-top: 1px solid var(--t-border);
+    border-bottom: 1px solid var(--t-border);
 }
 
 .symbol-icon {
@@ -781,7 +904,7 @@ watch(() => player.cash, (cash) => {
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-success-muted);
-    border: 1px solid var(--t-success);
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-lg);
     animation: bannerPop 0.3s ease;
 }
@@ -843,7 +966,7 @@ watch(() => player.cash, (cash) => {
 }
 
 /* ── Controls ── */
-.controls-area {
+.controls-row {
     display: flex;
     gap: var(--t-space-3);
     align-items: center;
@@ -860,8 +983,15 @@ watch(() => player.cash, (cash) => {
     padding: var(--t-space-3);
 }
 
+.action-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--t-space-2);
+    min-width: 130px;
+}
+
 .bet-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: var(--t-font-bold);
@@ -881,11 +1011,11 @@ watch(() => player.cash, (cash) => {
 .bet-input {
     width: 100%;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-family: var(--t-font-mono);
     font-weight: var(--t-font-bold);
     padding: var(--t-space-2);
-    background: var(--t-bg-sunken, var(--t-bg-muted));
+    background: var(--t-bg-muted);
     border: 1px solid var(--t-border);
     border-radius: var(--t-radius-md);
     color: var(--t-text);
@@ -989,9 +1119,8 @@ watch(() => player.cash, (cash) => {
     gap: var(--t-space-3);
     padding: var(--t-space-3) var(--t-space-5);
     border-radius: var(--t-radius-lg);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--t-success) 15%, transparent), color-mix(in srgb, var(--t-success) 5%, transparent));
-    border: 1px solid color-mix(in srgb, var(--t-success) 40%, transparent);
-    box-shadow: 0 0 24px color-mix(in srgb, var(--t-success) 25%, transparent);
+    background: var(--t-success-muted);
+    border: 1px solid var(--t-border);
     animation: luckyPulse 0.8s ease infinite alternate;
 }
 
@@ -999,7 +1128,6 @@ watch(() => player.cash, (cash) => {
     font-size: 2rem;
     color: var(--t-success);
     animation: luckyCloverSpin 1s ease;
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t-success) 50%, transparent));
 }
 
 .lucky-text {
@@ -1007,16 +1135,15 @@ watch(() => player.cash, (cash) => {
     font-weight: 800;
     color: var(--t-success);
     letter-spacing: 0.05em;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--t-success) 30%, transparent);
 }
 
 @keyframes luckyPulse {
     from {
-        box-shadow: 0 0 16px color-mix(in srgb, var(--t-success) 20%, transparent);
+        opacity: 0.85;
     }
 
     to {
-        box-shadow: 0 0 32px color-mix(in srgb, var(--t-success) 40%, transparent);
+        opacity: 1;
     }
 }
 

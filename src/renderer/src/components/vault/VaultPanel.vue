@@ -6,6 +6,7 @@ import { computed, ref } from 'vue'
 import VaultItemCard from './VaultItemCard.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
+import Select from 'primevue/select'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
@@ -24,11 +25,26 @@ const searchQuery = ref('')
 const filterRarity = ref<Rarity | ''>('')
 const filterSource = ref<'' | 'storage_wars' | 'shop' | 'transfer' | 'other'>('')
 
+const rarityOptions = computed(() => [
+    { label: t('vault.all_rarities'), value: '' },
+    ...(['common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic'] as const).map(r => ({
+        label: r.charAt(0).toUpperCase() + r.slice(1),
+        value: r
+    }))
+])
+
+const sourceOptions = computed(() => [
+    { label: t('vault.all_sources'), value: '' },
+    { label: t('vault.source_storage_wars'), value: 'storage_wars' },
+    { label: t('vault.source_shop'), value: 'shop' },
+    { label: t('vault.source_transfer'), value: 'transfer' },
+])
+
 const sortOptions = [
-    { label: 'value_desc', value: 'value_desc' },
-    { label: 'value_asc', value: 'value_asc' },
-    { label: 'name', value: 'name' },
-    { label: 'rarity', value: 'rarity' }
+    { label: t('vault.sort_value_desc'), value: 'value_desc' },
+    { label: t('vault.sort_value_asc'), value: 'value_asc' },
+    { label: t('vault.sort_name'), value: 'name' },
+    { label: t('vault.sort_rarity'), value: 'rarity' }
 ] as const
 
 const sortBy = ref<string>('value_desc')
@@ -86,24 +102,13 @@ function sellAllFiltered(): void {
                 <input type="text" class="search-input" :placeholder="t('vault.search_placeholder')"
                     v-model="searchQuery" />
 
-                <select class="filter-select" v-model="filterRarity">
-                    <option value="">{{ t('vault.all_rarities') }}</option>
-                    <option v-for="r in ['common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic']"
-                        :key="r" :value="r" class="text-capitalize">{{ r }}</option>
-                </select>
+                <Select v-model="filterRarity" :options="rarityOptions" optionLabel="label" optionValue="value"
+                    :placeholder="t('vault.all_rarities')" />
 
-                <select class="filter-select" v-model="filterSource">
-                    <option value="">{{ t('vault.all_sources') }}</option>
-                    <option value="storage_wars">{{ t('vault.source_storage_wars') }}</option>
-                    <option value="shop">{{ t('vault.source_shop') }}</option>
-                    <option value="transfer">{{ t('vault.source_transfer') }}</option>
-                </select>
+                <Select v-model="filterSource" :options="sourceOptions" optionLabel="label" optionValue="value"
+                    :placeholder="t('vault.all_sources')" />
 
-                <select class="filter-select" v-model="sortBy">
-                    <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">
-                        {{ t(`vault.sort_${opt.label}`) }}
-                    </option>
-                </select>
+                <Select v-model="sortBy" :options="sortOptions" optionLabel="label" optionValue="value" />
             </div>
             <div class="filter-meta">
                 <span class="meta-label">
@@ -167,15 +172,6 @@ function sellAllFiltered(): void {
     box-shadow: var(--t-shadow-focus);
 }
 
-.filter-select {
-    flex: 1 1 130px;
-    padding: 0.45rem 0.75rem;
-    background: var(--t-bg-muted);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text);
-    font-size: var(--t-font-size-sm);
-}
 
 .filter-meta {
     display: flex;
@@ -209,9 +205,5 @@ function sellAllFiltered(): void {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--t-space-3);
-}
-
-.text-capitalize {
-    text-transform: capitalize;
 }
 </style>

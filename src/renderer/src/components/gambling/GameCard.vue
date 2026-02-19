@@ -103,6 +103,7 @@ defineEmits<{ play: [] }>()
 .game-card__head {
     display: flex;
     align-items: flex-start;
+    width: 100%;
     gap: var(--t-space-3);
 }
 
@@ -150,7 +151,7 @@ defineEmits<{ play: [] }>()
     letter-spacing: 0.05em;
     padding: 2px 8px;
     border-radius: var(--t-radius-xs);
-    background: color-mix(in srgb, var(--_accent) 12%, transparent);
+    background: var(--t-bg-muted);
     color: var(--_accent);
 }
 
@@ -178,7 +179,7 @@ defineEmits<{ play: [] }>()
 }
 
 .game-card__trait--neutral {
-    background: color-mix(in srgb, var(--t-text-muted) 10%, transparent);
+    background: var(--t-bg-muted);
     color: var(--t-text-muted);
 }
 

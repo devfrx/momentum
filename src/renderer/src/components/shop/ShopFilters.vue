@@ -6,6 +6,7 @@
 import { computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
+import Select from 'primevue/select'
 import { useI18n } from 'vue-i18n'
 import { SHOP_CATEGORIES, SHOP_CATEGORY_ICONS } from '@renderer/data/shop/items'
 import type { ShopCategory } from '@renderer/data/shop/items'
@@ -17,7 +18,13 @@ import type { SortField } from '@renderer/stores/useShopStore'
 const shop = useShopStore()
 const { t } = useI18n()
 
-const rarities = ['all', 'common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic']
+const rarityOptions = computed(() => [
+    { label: t('shop.all_rarities'), value: 'all' },
+    ...['common', 'uncommon', 'rare', 'epic', 'legendary', 'jackpot', 'mythic'].map(r => ({
+        label: t(`shop.rarity_${r}`, r.charAt(0).toUpperCase() + r.slice(1)),
+        value: r
+    }))
+])
 
 const sortOptions = computed(() => [
     { value: 'newest' as SortField, label: t('shop.sort_newest') },
@@ -56,25 +63,8 @@ const conditions = computed(() => {
     return items
 })
 
-function rarityLabel(r: string): string {
-    if (r === 'all') return t('shop.all_rarities')
-    return t(`shop.rarity_${r}`, r.charAt(0).toUpperCase() + r.slice(1))
-}
-
 function onSearchInput(e: Event): void {
     shop.setSearch((e.target as HTMLInputElement).value)
-}
-function onCategoryChange(e: Event): void {
-    shop.setCategory((e.target as HTMLSelectElement).value as ShopCategory | 'all')
-}
-function onRarityChange(e: Event): void {
-    shop.setRarity((e.target as HTMLSelectElement).value)
-}
-function onConditionChange(e: Event): void {
-    shop.setConditionFilter((e.target as HTMLSelectElement).value as ItemCondition | 'all')
-}
-function onSortChange(e: Event): void {
-    shop.setSort((e.target as HTMLSelectElement).value as SortField)
 }
 </script>
 
@@ -89,33 +79,21 @@ function onSortChange(e: Event): void {
         </div>
 
         <div class="filter-row">
-            <!-- Category Dropdown -->
-            <select class="filter-select" :value="shop.filterCategory" @change="onCategoryChange">
-                <option v-for="cat in categories" :key="cat.value" :value="cat.value">
-                    {{ cat.label }}
-                </option>
-            </select>
+            <!-- Category -->
+            <Select v-model="shop.filterCategory" :options="categories" optionLabel="label" optionValue="value"
+                :placeholder="t('shop.all_categories')" />
 
-            <!-- Rarity Dropdown -->
-            <select class="filter-select" :value="shop.filterRarity" @change="onRarityChange">
-                <option v-for="r in rarities" :key="r" :value="r">
-                    {{ rarityLabel(r) }}
-                </option>
-            </select>
+            <!-- Rarity -->
+            <Select v-model="shop.filterRarity" :options="rarityOptions" optionLabel="label" optionValue="value"
+                :placeholder="t('shop.all_rarities')" />
 
-            <!-- Condition Dropdown -->
-            <select class="filter-select" :value="shop.filterCondition" @change="onConditionChange">
-                <option v-for="c in conditions" :key="c.value" :value="c.value">
-                    {{ c.label }}
-                </option>
-            </select>
+            <!-- Condition -->
+            <Select v-model="shop.filterCondition" :options="conditions" optionLabel="label" optionValue="value"
+                :placeholder="t('shop.all_categories')" />
 
-            <!-- Sort Dropdown -->
-            <select class="filter-select" :value="shop.sortBy" @change="onSortChange">
-                <option v-for="s in sortOptions" :key="s.value" :value="s.value">
-                    {{ s.label }}
-                </option>
-            </select>
+            <!-- Sort -->
+            <Select v-model="shop.sortBy" :options="sortOptions" optionLabel="label" optionValue="value"
+                :placeholder="t('shop.sort_newest')" />
 
             <!-- Result count -->
             <span class="result-count">{{ shop.filteredListings.length }} {{ t('shop.results') }}</span>
@@ -175,25 +153,7 @@ function onSortChange(e: Event): void {
     flex-wrap: wrap;
 }
 
-.filter-select {
-    padding: 0.35rem 0.6rem;
-    background: var(--t-bg-card);
-    border: 1px solid var(--t-border);
-    border-radius: var(--t-radius-sm);
-    color: var(--t-text);
-    font-size: var(--t-font-size-xs);
-    cursor: pointer;
-    text-transform: capitalize;
-}
 
-.filter-select:focus {
-    outline: none;
-    border-color: var(--t-accent);
-}
-
-.filter-select:focus-visible {
-    box-shadow: var(--t-shadow-focus);
-}
 
 .result-count {
     margin-left: auto;

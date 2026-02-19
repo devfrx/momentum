@@ -313,7 +313,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                         </UButton>
                         <UButton variant="warning" size="xs" @click="maxBet" :disabled="autoDrop">{{
                             $t('gambling.max')
-                        }}</UButton>
+                            }}</UButton>
                     </div>
                 </div>
 
@@ -469,12 +469,12 @@ const plinkoInfo = computed<InfoSection[]>(() => [
 }
 
 .flash-win {
-    background: color-mix(in srgb, var(--t-success) 20%, transparent);
+    background: var(--t-success-muted);
     border: 2px solid var(--t-success);
 }
 
 .flash-lose {
-    background: color-mix(in srgb, var(--t-danger) 20%, transparent);
+    background: var(--t-danger-muted);
     border: 2px solid var(--t-danger);
 }
 

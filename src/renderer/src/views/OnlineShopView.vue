@@ -158,6 +158,7 @@ watch(() => shop.filteredListings.length, () => {
 
 .shop-grid {
     display: grid;
+    margin-top: var(--t-space-4);
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--t-space-3);
 }

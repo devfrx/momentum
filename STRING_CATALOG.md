@@ -810,7 +810,7 @@ No hardcoded strings (icon/title via props).
 | `"Office Tower"` | `"Commercial"` |
 | `"Luxury Hotel"` | `"Hospitality"` |
 | `"Skyscraper"` | `"Luxury"` |
-| `"Private Island"` | `"Luxury"` |
+| `"Private Castle"` | `"Luxury"` |
 
 ### `data/gambling.ts`
 

@@ -138,18 +138,16 @@ const canPull = computed(() => !props.disabled && !props.spinning)
     border-radius: var(--t-radius-full);
     background: var(--t-accent);
     border: 3px solid var(--t-bg-card);
-    box-shadow: 0 2px 8px var(--t-overlay-light);
     cursor: grab;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 2;
 }
 
 .lever-handle.dragging {
     cursor: grabbing;
-    box-shadow: 0 4px 16px var(--t-overlay-light);
 }
 
 .lever-handle.glow {
@@ -160,11 +158,11 @@ const canPull = computed(() => !props.disabled && !props.spinning)
 
     0%,
     100% {
-        box-shadow: 0 2px 8px var(--t-overlay-light);
+        opacity: 1;
     }
 
     50% {
-        box-shadow: 0 2px 12px var(--t-accent), 0 0 20px var(--t-blue-muted);
+        opacity: 0.85;
     }
 }
 
@@ -178,7 +176,7 @@ const canPull = computed(() => !props.disabled && !props.spinning)
 .grip-line {
     width: 16px;
     height: 2px;
-    background: color-mix(in srgb, var(--t-text) 50%, transparent);
+    background: var(--t-text-muted);
     border-radius: var(--t-radius-xs);
 }
 
