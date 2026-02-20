@@ -1711,6 +1711,7 @@ export default {
         choose_risk: 'Choose Risk', choose_risk_desc: 'Low risk has smaller, more consistent payouts. High risk has extreme payouts at the edges but low payouts in the middle.',
         drop_ball: 'Drop the Ball', drop_ball_desc: 'Press DROP to release a ball from the top. Watch it bounce down and land in a bucket.',
         mult_title: 'Multipliers',
+        multipliers_title: 'Multipliers',
         center: 'Center Buckets', center_desc: 'The ball lands here most often. Lower multipliers but more consistent.',
         edge: 'Edge Buckets', edge_desc: 'Rare to hit, but pays the highest multipliers.',
         luck: 'Gambling Luck', luck_desc: 'Your gambling luck skill increases all winnings.',
