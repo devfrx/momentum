@@ -28,6 +28,8 @@ export interface OfflineSummary {
   realEstateIncome: Decimal
   /** Stock dividends earned (if any) */
   dividendIncome: Decimal
+  /** Crypto staking rewards earned (if any) */
+  stakingIncome: Decimal
   /** Deposit interest accrued (added to deposit balances, not cash) */
   depositInterest: Decimal
   /** Loan interest accrued (added to debt) */
@@ -65,6 +67,7 @@ export function calculateOfflineProgress(
     business: Decimal
     realEstate: Decimal
     dividends: Decimal
+    staking: Decimal
     depositInterest: Decimal
     loanInterest: Decimal
   },
@@ -108,6 +111,13 @@ export function calculateOfflineProgress(
     cfg.maxHours
   )
 
+  const stakingIncome = offlineEarnings(
+    incomePerSecond.staking,
+    creditedSeconds,
+    cfg.efficiency,
+    cfg.maxHours
+  )
+
   // Deposit interest: full rate (not reduced by efficiency — interest always accrues)
   const depositInterest = mul(incomePerSecond.depositInterest, creditedSeconds)
 
@@ -116,7 +126,7 @@ export function calculateOfflineProgress(
 
   // Net cash earned = all income (loan interest is NOT subtracted — it only accrues
   // on debt via loan.remaining, mirroring the online tick behaviour)
-  const cashEarned = add(add(add(jobIncome, businessIncome), realEstateIncome), dividendIncome)
+  const cashEarned = add(add(add(add(jobIncome, businessIncome), realEstateIncome), dividendIncome), stakingIncome)
 
   return {
     elapsedSeconds,
@@ -127,6 +137,7 @@ export function calculateOfflineProgress(
     businessIncome,
     realEstateIncome,
     dividendIncome,
+    stakingIncome,
     depositInterest,
     loanInterestPaid,
     timeAwayFormatted: formatDuration(elapsedSeconds)

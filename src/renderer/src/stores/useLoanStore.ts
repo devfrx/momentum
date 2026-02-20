@@ -419,13 +419,8 @@ export const useLoanStore = defineStore('loans', () => {
     const loanRateMul = upgrades.getMultiplier('loan_rate').toNumber()
     effectiveRate *= loanRateMul
 
-    // Apply prestige loan_discount
-    let prestigeDiscount = 0
-    for (const upg of prestige.upgrades) {
-      if (upg.level > 0 && upg.effectType === 'loan_discount') {
-        prestigeDiscount += upg.effectValue * upg.level
-      }
-    }
+    // Apply prestige loan_discount (from upgrades, milestones, and perks)
+    const prestigeDiscount = prestige.getLoanDiscount()
     effectiveRate = Math.max(0.01, effectiveRate - prestigeDiscount)
 
     // Calculate collateral to lock

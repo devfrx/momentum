@@ -2,7 +2,7 @@ import { D } from '@renderer/core/BigNum'
 import type { UpgradeDef } from '@renderer/data/upgrades'
 
 /**
- * Gambling Skill Tree — 75 nodes
+ * Gambling Skill Tree — 65 nodes
  *
  * LEFT path:   Luck & Fortune
  * CENTER path: Strategy & Calculation
@@ -227,15 +227,15 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_casino', name: 'Casino VIP', row: 8, col: 1,
     description: 'Private rooms and unlimited credit lines.',
-    effectDescription: '+6% gambling luck', icon: 'mdi:poker-chip',
-    cost: D(50_000_000), target: 'gamblingLuck', multiplier: 0.06,
+    effectDescription: '+4% gambling luck', icon: 'mdi:poker-chip',
+    cost: D(50_000_000), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_artifact', 'g_quantum'],
   },
   {
     id: 'g_prophet', name: 'Probability Prophet', row: 8, col: 2,
     description: 'You predict outcomes with eerie accuracy.',
-    effectDescription: '+6% gambling luck', icon: 'mdi:crystal-ball',
-    cost: D(60_000_000), target: 'gamblingLuck', multiplier: 0.06,
+    effectDescription: '+4% gambling luck', icon: 'mdi:crystal-ball',
+    cost: D(60_000_000), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_quantum', 'g_hypno'],
   },
   {
@@ -264,7 +264,7 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_precog', name: 'Precognition', row: 9, col: 3,
     description: 'See outcomes moments before they happen.',
-    effectDescription: '+4% gambling luck', icon: 'mdi:third-eye',
+    effectDescription: '+4% gambling luck', icon: 'mdi:crystal-ball',
     cost: D(180_000_000), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_prophet'],
   },
@@ -317,22 +317,22 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_empire', name: 'Casino Empire', row: 11, col: 0,
     description: 'A chain of casinos across every continent.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:city-variant',
-    cost: D(1.5e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:city-variant',
+    cost: D(1.5e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_owner'],
   },
   {
     id: 'g_laplace', name: 'Laplace\'s Demon', row: 11, col: 1,
     description: 'Know the position of every atom — predict everything.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:math-integral',
-    cost: D(2e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:math-integral',
+    cost: D(2e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_chaos'],
   },
   {
     id: 'g_telekin', name: 'Telekinesis', row: 11, col: 3,
     description: 'Subtly influence where the ball lands.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:hand-wave',
-    cost: D(2e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:hand-wave',
+    cost: D(2e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_multiverse', 'g_oracle'],
   },
   {
@@ -347,15 +347,15 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_fortunes', name: 'Lord of Fortunes', row: 12, col: 1,
     description: 'Fortune itself bows before your will.',
-    effectDescription: '+7% gambling luck', icon: 'mdi:shield-crown',
-    cost: D(8e9), target: 'gamblingLuck', multiplier: 0.07,
+    effectDescription: '+5% gambling luck', icon: 'mdi:shield-crown',
+    cost: D(8e9), target: 'gamblingLuck', multiplier: 0.05,
     category: 'Gambling', prerequisites: ['g_empire', 'g_laplace'],
   },
   {
     id: 'g_rng', name: 'RNG Manipulator', row: 12, col: 2,
     description: 'Random number generators obey your thoughts.',
-    effectDescription: '+7% gambling luck', icon: 'mdi:matrix',
-    cost: D(10e9), target: 'gamblingLuck', multiplier: 0.07,
+    effectDescription: '+5% gambling luck', icon: 'mdi:matrix',
+    cost: D(10e9), target: 'gamblingLuck', multiplier: 0.05,
     category: 'Gambling', prerequisites: ['g_laplace', 'g_telekin'],
   },
   {
@@ -400,29 +400,29 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_cosmic', name: 'Cosmic Fortune', row: 14, col: 0,
     description: 'Stars align for your every gamble.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:star-four-points',
-    cost: D(100e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:star-four-points',
+    cost: D(100e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_jackpot'],
   },
   {
     id: 'g_maxwell', name: 'Maxwell\'s Demon', row: 14, col: 1,
     description: 'Sort randomness into perfect order.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:flash-outline',
-    cost: D(80e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:flash-outline',
+    cost: D(80e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_prob2'],
   },
   {
     id: 'g_godhand', name: 'God Hand', row: 14, col: 2,
     description: 'Your dice rolls are divine interventions.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:hand-extended',
-    cost: D(120e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:hand-extended',
+    cost: D(120e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_prob2', 'g_chrono'],
   },
   {
     id: 'g_timeline', name: 'Timeline Gambler', row: 14, col: 3,
     description: 'Bet on outcomes across all possible futures.',
-    effectDescription: '+5% gambling luck', icon: 'mdi:timeline-check',
-    cost: D(100e9), target: 'gamblingLuck', multiplier: 0.05,
+    effectDescription: '+4% gambling luck', icon: 'mdi:timeline-check',
+    cost: D(100e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_chrono'],
   },
   {
@@ -437,22 +437,22 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_nebula', name: 'Nebula Gambler', row: 15, col: 0,
     description: 'Gamble with the energy of dying stars.',
-    effectDescription: '+6% gambling luck', icon: 'mdi:weather-night',
-    cost: D(400e9), target: 'gamblingLuck', multiplier: 0.06,
+    effectDescription: '+4% gambling luck', icon: 'mdi:weather-night',
+    cost: D(400e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_cosmic'],
   },
   {
     id: 'g_absolute', name: 'Absolute Certainty', row: 15, col: 1,
     description: 'Eliminate uncertainty from every outcome.',
-    effectDescription: '+6% gambling luck', icon: 'mdi:check-decagram',
-    cost: D(350e9), target: 'gamblingLuck', multiplier: 0.06,
+    effectDescription: '+4% gambling luck', icon: 'mdi:check-decagram',
+    cost: D(350e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_maxwell'],
   },
   {
     id: 'g_destiny', name: 'Destiny Controller', row: 15, col: 3,
     description: 'You don\'t gamble — you choose what happens.',
-    effectDescription: '+6% gambling luck', icon: 'mdi:gamepad-variant',
-    cost: D(450e9), target: 'gamblingLuck', multiplier: 0.06,
+    effectDescription: '+4% gambling luck', icon: 'mdi:gamepad-variant',
+    cost: D(450e9), target: 'gamblingLuck', multiplier: 0.04,
     category: 'Gambling', prerequisites: ['g_godhand', 'g_timeline'],
   },
   {
@@ -467,15 +467,15 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_paradigm', name: 'Luck Paradigm', row: 16, col: 1,
     description: 'Luck is not random — it is a force you command.',
-    effectDescription: '+9% gambling luck', icon: 'mdi:diamond',
-    cost: D(2e12), target: 'gamblingLuck', multiplier: 0.09,
+    effectDescription: '+6% gambling luck', icon: 'mdi:diamond',
+    cost: D(2e12), target: 'gamblingLuck', multiplier: 0.06,
     category: 'Gambling', prerequisites: ['g_nebula', 'g_absolute'],
   },
   {
     id: 'g_omniscience', name: 'Omniscience', row: 16, col: 2,
     description: 'Know every outcome of every game that ever was.',
-    effectDescription: '+9% gambling luck', icon: 'mdi:infinity',
-    cost: D(2.5e12), target: 'gamblingLuck', multiplier: 0.09,
+    effectDescription: '+6% gambling luck', icon: 'mdi:infinity',
+    cost: D(2.5e12), target: 'gamblingLuck', multiplier: 0.06,
     category: 'Gambling', prerequisites: ['g_absolute', 'g_destiny'],
   },
   {
@@ -490,8 +490,8 @@ export const GAMBLING_SKILLS: UpgradeDef[] = [
   {
     id: 'g_god', name: 'God of Chance', row: 17, col: 1,
     description: 'Randomness itself obeys your divine will.',
-    effectDescription: '+12% gambling luck', icon: 'mdi:flare',
-    cost: D(20e12), target: 'gamblingLuck', multiplier: 0.12,
+    effectDescription: '+8% gambling luck', icon: 'mdi:flare',
+    cost: D(20e12), target: 'gamblingLuck', multiplier: 0.08,
     category: 'Gambling', prerequisites: ['g_paradigm', 'g_omniscience'],
   },
   {

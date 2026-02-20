@@ -38,10 +38,14 @@ export interface AssetConfig {
   volatility: number
   /** Min price floor (never drops below) */
   minPrice: number
-  /** Max number of historical prices to keep (for charts) */
+  /** Max number of tick-level prices to keep (recent data for charts) */
   maxHistory: number
+  /** Max number of daily close prices to keep (long-term history). Default 2000 (~5.5 game years). */
+  dailyHistoryMax?: number
   /** Annual dividend yield as a fraction (e.g. 0.035 = 3.5%). 0 = no dividends. */
   dividendYield?: number
+  /** Annual staking yield as a fraction (for crypto). 0 = no staking rewards. */
+  stakingYield?: number
 }
 
 export interface AssetState {
@@ -49,7 +53,10 @@ export interface AssetState {
   name: string
   currentPrice: number
   previousPrice: number
+  /** Tick-level price history (recent data, bounded by maxHistory) */
   priceHistory: number[]
+  /** Daily close prices (one sample per game day, long-term history) */
+  dailyHistory: number[]
   /** Change since last tick as a ratio (-0.05 = -5%) */
   changePercent: number
   /** All-time high */
@@ -89,11 +96,16 @@ export class MarketSimulator {
 
   /** Time step per tick: represents a fraction of a trading year */
   private readonly dt: number
+  /** Simulator ticks per game day (e.g. 2.4) */
+  private readonly ticksPerDay: number
+  /** Accumulator for daily history sampling */
+  private dayAccumulator: number = 0
 
   constructor(ticksPerGameDay: number = 120) {
     // dt in "annual" units: 1 game day = 1/252 of a year (trading days)
     // With larger dt, price moves are more visible and realistic
     this.dt = 1 / (252 * ticksPerGameDay)
+    this.ticksPerDay = ticksPerGameDay
     this.state = {
       condition: 'normal',
       conditionTicksRemaining: 0,
@@ -112,6 +124,7 @@ export class MarketSimulator {
       currentPrice: config.basePrice,
       previousPrice: config.basePrice,
       priceHistory: [config.basePrice],
+      dailyHistory: [],
       changePercent: 0,
       ath: config.basePrice,
       atl: config.basePrice,
@@ -183,6 +196,21 @@ export class MarketSimulator {
         assetState.priceHistory.shift()
       }
     }
+
+    // ── Daily history sampling ──────────────────────────────────
+    this.dayAccumulator += 1
+    if (this.dayAccumulator >= this.ticksPerDay) {
+      this.dayAccumulator -= this.ticksPerDay
+      for (const [id, config] of this.configs) {
+        const assetState = this.state.assets.get(id)
+        if (!assetState) continue
+        assetState.dailyHistory.push(assetState.currentPrice)
+        const maxDaily = config.dailyHistoryMax ?? 2000
+        if (assetState.dailyHistory.length > maxDaily) {
+          assetState.dailyHistory.shift()
+        }
+      }
+    }
   }
 
   /** Get current state of a specific asset */
@@ -198,6 +226,16 @@ export class MarketSimulator {
   /** Get current market condition */
   getCondition(): MarketCondition {
     return this.state.condition
+  }
+
+  /** Set market-wide sentiment modifier (added to drift for all assets) */
+  setSentimentModifier(modifier: number): void {
+    this.state.sentimentModifier = modifier
+  }
+
+  /** Get current sentiment modifier */
+  getSentimentModifier(): number {
+    return this.state.sentimentModifier
   }
 
   /** Get full state (for serialization — returns a copy to prevent external mutation) */
@@ -228,7 +266,8 @@ export class MarketSimulator {
       conditionTicksRemaining: this.state.conditionTicksRemaining,
       sentimentModifier: this.state.sentimentModifier,
       sectorModifiers: { ...this.state.sectorModifiers },
-      assets: Array.from(this.state.assets.entries())
+      assets: Array.from(this.state.assets.entries()),
+      dayAccumulator: this.dayAccumulator
     }
   }
 
@@ -239,13 +278,20 @@ export class MarketSimulator {
     sentimentModifier: number
     sectorModifiers: Partial<Record<MarketSector, number>>
     assets: [string, AssetState][]
+    dayAccumulator?: number
   }): void {
+    this.dayAccumulator = data.dayAccumulator ?? 0
+    // Ensure dailyHistory exists for each asset (backward compat with old saves)
+    const entries: [string, AssetState][] = data.assets.map(([id, state]) => [
+      id,
+      { ...state, dailyHistory: state.dailyHistory ?? [] }
+    ])
     this.state = {
       condition: data.condition,
       conditionTicksRemaining: data.conditionTicksRemaining,
       sentimentModifier: data.sentimentModifier,
       sectorModifiers: data.sectorModifiers,
-      assets: new Map(data.assets)
+      assets: new Map(entries)
     }
   }
 }

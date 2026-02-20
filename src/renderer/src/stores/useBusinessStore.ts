@@ -521,6 +521,7 @@ export const useBusinessStore = defineStore('business', () => {
     const customerAttractionMul = upgrades.getMultiplier('customer_attraction')
     const allIncomeMul = upgrades.getMultiplier('all_income')
     const prestigeGlobalMul = prestige.globalMultiplier
+    const prestigeCostRed = 1 + prestige.getTotalEffect('cost_reduction')
 
     // Event multipliers (FIX: now correctly applying business events in tick)
     const bizEventRevMul = D(events.getMultiplier('income_multiplier', 'business'))
@@ -656,7 +657,7 @@ export const useBusinessStore = defineStore('business', () => {
         biz.marketingBudget,
         ecoState.inflationIndex
       )
-      const costRedTotal = costReductionMul.toNumber() * upgCostRedMult * (1 + msBonus.cost_reduction) * bmCostReduction.toNumber()
+      const costRedTotal = costReductionMul.toNumber() * upgCostRedMult * (1 + msBonus.cost_reduction) * bmCostReduction.toNumber() * prestigeCostRed
       const afterCostRed = costRedTotal > 1 ? div(baseCosts, D(costRedTotal)) : baseCosts
       const afterEventCosts = mul(afterCostRed, bizEventCostMul)
       const costs = advCostReduction > 0 ? mul(afterEventCosts, D(1 - Math.min(0.9, advCostReduction))) : afterEventCosts

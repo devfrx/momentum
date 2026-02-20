@@ -143,7 +143,8 @@ export function useAutoSave() {
         totalInvested: h.totalInvested
       })),
       cryptoStats: {
-        totalRealizedProfit: crypto.totalRealizedProfit
+        totalRealizedProfit: crypto.totalRealizedProfit,
+        totalStakingEarned: crypto.totalStakingEarned
       },
       cryptoMarketState: crypto.getSimulator().serialize(),
 

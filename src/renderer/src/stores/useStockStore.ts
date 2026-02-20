@@ -8,6 +8,8 @@ import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
 import { MarketSimulator, type AssetConfig, type AssetState } from '@renderer/core/MarketSim'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
+import { usePrestigeStore } from './usePrestigeStore'
+import { useEventStore } from './useEventStore'
 
 export interface PortfolioPosition {
   assetId: string
@@ -17,7 +19,13 @@ export interface PortfolioPosition {
 }
 
 export const useStockStore = defineStore('stocks', () => {
-  const simulator = new MarketSimulator()
+  /**
+   * The sim is ticked every marketUpdateInterval engine ticks (default 50).
+   * A game day = 120 engine ticks → effective sim ticks per day = 120/50 = 2.4.
+   * This ensures price evolution and dividend timing stay synchronized.
+   */
+  const MARKET_TICK_INTERVAL = 50
+  const simulator = new MarketSimulator(120 / MARKET_TICK_INTERVAL)
   const configs = ref<AssetConfig[]>([])
   const portfolio = ref<PortfolioPosition[]>([])
   const assets = shallowRef<AssetState[]>([])
@@ -59,14 +67,42 @@ export const useStockStore = defineStore('stocks', () => {
   }
 
   /**
+   * Combined returns multiplier from all sources:
+   * skill tree × prestige upgrades × prestige perks × event effects.
+   */
+  function getStockReturnsMul(): Decimal {
+    const upgrades = useUpgradeStore()
+    const prestige = usePrestigeStore()
+    const events = useEventStore()
+
+    let mult = upgrades.getMultiplier('stock_returns')
+    // Prestige upgrades (stock_returns)
+    for (const upg of prestige.upgrades) {
+      if (upg.level > 0 && upg.effectType === 'stock_returns') {
+        mult = mul(mult, 1 + upg.effectValue * upg.level)
+      }
+    }
+    // Prestige perks (stock_returns)
+    for (const perk of prestige.perks) {
+      if (perk.purchased && perk.effect.type === 'stock_returns') {
+        mult = mul(mult, 1 + perk.effect.value)
+      }
+    }
+    // Event multiplier (bull_market / market_crash + global income events)
+    const evMul = events.getMultiplier('income_multiplier', 'stocks')
+    if (evMul !== 1) mult = mul(mult, evMul)
+
+    return mult
+  }
+
+  /**
    * Dividend income per second — used for offline progress calculation.
    * Sum of (shares × currentPrice × annualYield / secondsPerYear) for all held stocks.
-   * We use 30240 game-seconds per year (252 trading days × 120 ticks/day ÷ 10 ticks/s).
+   * A game day = 12 real seconds (120 engine ticks / 10 ticks/s).
    */
   const dividendIncomePerSecond = computed(() => {
     const SECONDS_PER_GAME_YEAR = 252 * 12 // 252 trading days × 12 seconds per day at 10 ticks/s
-    const upgrades = useUpgradeStore()
-    const stockReturnsMul = upgrades.getMultiplier('stock_returns')
+    const returnsMul = getStockReturnsMul()
     let total = ZERO
     for (const pos of portfolio.value) {
       const asset = assets.value.find((a) => a.id === pos.assetId)
@@ -75,16 +111,17 @@ export const useStockStore = defineStore('stocks', () => {
       const annualDividend = asset.currentPrice * pos.shares * config.dividendYield
       total = add(total, D(annualDividend / SECONDS_PER_GAME_YEAR))
     }
-    // Apply stock_returns skill-tree multiplier (matches online payDividends behaviour)
-    return mul(total, stockReturnsMul)
+    // Apply combined stock_returns multiplier (skill tree + prestige + events)
+    return mul(total, returnsMul)
   })
 
   function tick(): void {
     simulator.tick()
-    // Spread each asset with a copied priceHistory to ensure Vue detects prop changes
+    // Merge dailyHistory + priceHistory for seamless long-term charts.
+    // Creates new array refs so Vue detects prop changes.
     assets.value = simulator.getAllAssets().map(a => ({
       ...a,
-      priceHistory: a.priceHistory.slice()
+      priceHistory: [...a.dailyHistory, ...a.priceHistory]
     }))
   }
 
@@ -98,8 +135,7 @@ export const useStockStore = defineStore('stocks', () => {
     if (portfolio.value.length === 0) return
     const TICKS_PER_GAME_YEAR = 252 * 120 // 252 trading days × 120 ticks/day
     const player = usePlayerStore()
-    const upgrades = useUpgradeStore()
-    const stockReturnsMul = upgrades.getMultiplier('stock_returns')
+    const stockReturnsMul = getStockReturnsMul()
 
     let totalPayout = ZERO
     for (const pos of portfolio.value) {
@@ -112,7 +148,7 @@ export const useStockStore = defineStore('stocks', () => {
     }
 
     if (totalPayout.gt(0)) {
-      // Apply stock_returns multiplier to dividends too
+      // Apply combined stock_returns multiplier (skill tree + prestige + events)
       const adjustedPayout = mul(totalPayout, stockReturnsMul)
       player.earnCash(adjustedPayout)
       totalDividendsEarned.value = add(totalDividendsEarned.value, adjustedPayout)
@@ -160,13 +196,11 @@ export const useStockStore = defineStore('stocks', () => {
     if (!asset) return null
 
     const player = usePlayerStore()
-    const upgrades = useUpgradeStore()
     const baseRevenue = D(asset.currentPrice * shareCount)
     const costBasis = D(pos.averageBuyPrice * shareCount)
     const baseProfit = baseRevenue.sub(costBasis)
-    // Apply stock_returns skill multiplier to profit only (not gross revenue)
-    // If profit is positive, multiply it; if negative, leave unchanged
-    const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, upgrades.getMultiplier('stock_returns')) : baseProfit
+    // Apply combined stock_returns multiplier (skill tree + prestige + events) to profit
+    const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, getStockReturnsMul()) : baseProfit
     const revenue = baseRevenue.add(multipliedProfit.sub(baseProfit))
     const profit = multipliedProfit
     totalRealizedProfit.value = add(totalRealizedProfit.value, profit)
@@ -238,7 +272,11 @@ export const useStockStore = defineStore('stocks', () => {
     if (saved.stockMarketState) {
       try {
         simulator.deserialize(saved.stockMarketState as Parameters<MarketSimulator['deserialize']>[0])
-        assets.value = [...simulator.getAllAssets()]
+        // Merge dailyHistory + priceHistory for chart display
+        assets.value = simulator.getAllAssets().map(a => ({
+          ...a,
+          priceHistory: [...a.dailyHistory, ...a.priceHistory]
+        }))
       } catch (e) {
         console.warn('[StockStore] Failed to restore market state:', e)
       }

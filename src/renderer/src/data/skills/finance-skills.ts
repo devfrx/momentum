@@ -2,7 +2,7 @@ import { D } from '@renderer/core/BigNum'
 import type { UpgradeDef } from '@renderer/data/upgrades'
 
 /**
- * Finance Skill Tree — 75 nodes
+ * Finance Skill Tree — 66 nodes
  *
  * LEFT path:   Stocks & Trading
  * CENTER path: Portfolio & Wealth Management
@@ -107,22 +107,15 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_mortgage', name: 'Mortgage Mastery', row: 4, col: 2,
     description: 'Leverage property with optimal financing.',
-    effectDescription: '-3% loan rates', icon: 'mdi:home-percent',
-    cost: D(600_000), target: 'loanRate', multiplier: -0.03,
+    effectDescription: '-5% loan rates', icon: 'mdi:home-percent',
+    cost: D(600_000), target: 'loanRate', multiplier: -0.05,
     category: 'Finance', prerequisites: ['f_diversify', 'f_realestate'],
   },
   {
     id: 'f_savings', name: 'Savings Expert', row: 4, col: 3,
     description: 'Master the art of earning interest on idle cash.',
-    effectDescription: '+7% deposit APY', icon: 'mdi:piggy-bank-outline',
-    cost: D(500_000), target: 'depositRate', multiplier: 0.07,
-    category: 'Finance', prerequisites: ['f_realestate'],
-  },
-  {
-    id: 'f_propflip', name: 'Property Flipping', row: 4, col: 2,
-    description: 'Buy low, renovate, sell high, repeat.',
-    effectDescription: '+4% real estate rent', icon: 'mdi:hammer-wrench',
-    cost: D(450_000), target: 'realEstateRent', multiplier: 0.04,
+    effectDescription: '+9% deposit APY', icon: 'mdi:piggy-bank-outline',
+    cost: D(500_000), target: 'depositRate', multiplier: 0.09,
     category: 'Finance', prerequisites: ['f_realestate'],
   },
   {
@@ -151,9 +144,9 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_reit', name: 'REIT Portfolio', row: 5, col: 3,
     description: 'Passive real estate income through trusts.',
-    effectDescription: '+5% real estate rent', icon: 'mdi:office-building-marker',
-    cost: D(1_500_000), target: 'realEstateRent', multiplier: 0.05,
-    category: 'Finance', prerequisites: ['f_mortgage', 'f_propflip'],
+    effectDescription: '+7% real estate rent', icon: 'mdi:office-building-marker',
+    cost: D(1_500_000), target: 'realEstateRent', multiplier: 0.07,
+    category: 'Finance', prerequisites: ['f_mortgage', 'f_savings'],
   },
   {
     id: 'f_defiwhale', name: 'DeFi Whale', row: 5, col: 4,
@@ -181,23 +174,16 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_propdev', name: 'Property Development', row: 6, col: 2,
     description: 'Build entire residential complexes.',
-    effectDescription: '+5% real estate rent', icon: 'mdi:crane',
-    cost: D(6_000_000), target: 'realEstateRent', multiplier: 0.05,
+    effectDescription: '+7% real estate rent', icon: 'mdi:crane',
+    cost: D(6_000_000), target: 'realEstateRent', multiplier: 0.07,
     category: 'Finance', prerequisites: ['f_wealthmgr', 'f_reit'],
   },
   {
     id: 'f_compound_master', name: 'Compound Master', row: 6, col: 3,
     description: 'Unlock the full power of compound interest.',
-    effectDescription: '+7% deposit APY', icon: 'mdi:chart-timeline-variant-shimmer',
-    cost: D(5_000_000), target: 'depositRate', multiplier: 0.07,
+    effectDescription: '+9% deposit APY', icon: 'mdi:chart-timeline-variant-shimmer',
+    cost: D(5_000_000), target: 'depositRate', multiplier: 0.09,
     category: 'Finance', prerequisites: ['f_savings', 'f_reit'],
-  },
-  {
-    id: 'f_landlord', name: 'Mega Landlord', row: 6, col: 2,
-    description: 'Thousands of tenants across the region.',
-    effectDescription: '+5% real estate rent', icon: 'mdi:home-group',
-    cost: D(4_500_000), target: 'realEstateRent', multiplier: 0.05,
-    category: 'Finance', prerequisites: ['f_reit'],
   },
   {
     id: 'f_blockchain', name: 'Blockchain Architect', row: 6, col: 4,
@@ -225,9 +211,9 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_skyline', name: 'Skyline Developer', row: 7, col: 3,
     description: 'Build skyscrapers that define city skylines.',
-    effectDescription: '+5% real estate rent', icon: 'mdi:city',
-    cost: D(15_000_000), target: 'realEstateRent', multiplier: 0.05,
-    category: 'Finance', prerequisites: ['f_propdev', 'f_landlord'],
+    effectDescription: '+7% real estate rent', icon: 'mdi:city',
+    cost: D(15_000_000), target: 'realEstateRent', multiplier: 0.07,
+    category: 'Finance', prerequisites: ['f_propdev', 'f_compound_master'],
   },
   {
     id: 'f_l1chain', name: 'Layer-1 Chain', row: 7, col: 4,
@@ -285,8 +271,8 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_deposit_mogul', name: 'Deposit Mogul', row: 9, col: 2,
     description: 'Your deposits are the backbone of the banking system.',
-    effectDescription: '+9% deposit APY', icon: 'mdi:safe-square-outline',
-    cost: D(200_000_000), target: 'depositRate', multiplier: 0.09,
+    effectDescription: '+12% deposit APY', icon: 'mdi:safe-square-outline',
+    cost: D(200_000_000), target: 'depositRate', multiplier: 0.12,
     category: 'Finance', prerequisites: ['f_compound_master', 'f_conglom'],
   },
   {
@@ -308,8 +294,8 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_lobby', name: 'Financial Lobbying', row: 10, col: 1,
     description: 'Shape regulations in your favour.',
-    effectDescription: '-4% loan rates', icon: 'mdi:gavel',
-    cost: D(600_000_000), target: 'loanRate', multiplier: -0.04,
+    effectDescription: '-7% loan rates', icon: 'mdi:gavel',
+    cost: D(600_000_000), target: 'loanRate', multiplier: -0.07,
     category: 'Finance', prerequisites: ['f_pe'],
   },
   {
@@ -329,16 +315,9 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_yield_vault', name: 'Yield Vault', row: 10, col: 4,
     description: 'Automate deposit strategies across all institutions.',
-    effectDescription: '+9% deposit APY', icon: 'mdi:treasure-chest',
-    cost: D(700_000_000), target: 'depositRate', multiplier: 0.09,
+    effectDescription: '+12% deposit APY', icon: 'mdi:treasure-chest',
+    cost: D(700_000_000), target: 'depositRate', multiplier: 0.12,
     category: 'Finance', prerequisites: ['f_deposit_mogul', 'f_dao'],
-  },
-  {
-    id: 'f_metaverse', name: 'Metaverse Real Estate', row: 10, col: 3,
-    description: 'Own virtual land worth more than physical.',
-    effectDescription: '+7% real estate rent', icon: 'mdi:virtual-reality',
-    cost: D(500_000_000), target: 'realEstateRent', multiplier: 0.07,
-    category: 'Finance', prerequisites: ['f_dao'],
   },
 
   // ═══ ROW 11 ════════════════════════════════════════════════════
@@ -368,7 +347,7 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
     description: 'Quantum algorithms predict market micro-structure.',
     effectDescription: '+7% crypto returns', icon: 'mdi:atom-variant',
     cost: D(1.5e9), target: 'cryptoReturn', multiplier: 0.07,
-    category: 'Finance', prerequisites: ['f_metaverse'],
+    category: 'Finance', prerequisites: ['f_defibank'],
   },
 
   // ═══ ROW 12 — Convergence ══════════════════════════════════════
@@ -442,8 +421,8 @@ export const FINANCE_SKILLS: UpgradeDef[] = [
   {
     id: 'f_dyson', name: 'Dyson Finance Sphere', row: 14, col: 2,
     description: 'A megastructure harvesting stellar returns.',
-    effectDescription: '-5% loan rates', icon: 'mdi:sun-wireless',
-    cost: D(120e9), target: 'loanRate', multiplier: -0.05,
+    effectDescription: '-8% loan rates', icon: 'mdi:sun-wireless',
+    cost: D(120e9), target: 'loanRate', multiplier: -0.08,
     category: 'Finance', prerequisites: ['f_reserve', 'f_orbital'],
   },
   {

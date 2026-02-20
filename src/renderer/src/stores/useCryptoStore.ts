@@ -8,6 +8,8 @@ import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
 import { MarketSimulator, type AssetConfig, type AssetState } from '@renderer/core/MarketSim'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
+import { usePrestigeStore } from './usePrestigeStore'
+import { useEventStore } from './useEventStore'
 
 export interface CryptoHolding {
   assetId: string
@@ -17,10 +19,17 @@ export interface CryptoHolding {
 }
 
 export const useCryptoStore = defineStore('crypto', () => {
-  const simulator = new MarketSimulator()
+  /**
+   * Sim ticked every marketUpdateInterval engine ticks (default 50).
+   * Game day = 120 engine ticks → effective sim ticks/day = 120/50 = 2.4.
+   */
+  const MARKET_TICK_INTERVAL = 50
+  const simulator = new MarketSimulator(120 / MARKET_TICK_INTERVAL)
+  const configs = ref<AssetConfig[]>([])
   const wallet = ref<CryptoHolding[]>([])
   const assets = shallowRef<AssetState[]>([])
   const totalRealizedProfit = ref<Decimal>(ZERO)
+  const totalStakingEarned = ref<Decimal>(ZERO)
 
   const totalWalletValue = computed(() => {
     let total = ZERO
@@ -44,8 +53,9 @@ export const useCryptoStore = defineStore('crypto', () => {
     return total
   })
 
-  function initCryptos(configs: AssetConfig[]): void {
-    for (const config of configs) {
+  function initCryptos(cryptoConfigs: AssetConfig[]): void {
+    configs.value = cryptoConfigs
+    for (const config of cryptoConfigs) {
       simulator.registerAsset(config)
     }
     assets.value = simulator.getAllAssets()
@@ -53,11 +63,91 @@ export const useCryptoStore = defineStore('crypto', () => {
 
   function tick(): void {
     simulator.tick()
-    // Spread each asset with a copied priceHistory to ensure Vue detects prop changes
+    // Merge dailyHistory + priceHistory for seamless long-term charts.
+    // Creates new array refs so Vue detects prop changes.
     assets.value = simulator.getAllAssets().map(a => ({
       ...a,
-      priceHistory: a.priceHistory.slice()
+      priceHistory: [...a.dailyHistory, ...a.priceHistory]
     }))
+  }
+
+  // ─── Combined returns multiplier ──────────────────────────────
+
+  /**
+   * Combined returns multiplier from all sources:
+   * skill tree × prestige upgrades × prestige perks × event effects.
+   */
+  function getCryptoReturnsMul(): Decimal {
+    const upgrades = useUpgradeStore()
+    const prestige = usePrestigeStore()
+    const events = useEventStore()
+
+    let mult = upgrades.getMultiplier('crypto_returns')
+    // Prestige upgrades (crypto_returns)
+    for (const upg of prestige.upgrades) {
+      if (upg.level > 0 && upg.effectType === 'crypto_returns') {
+        mult = mul(mult, 1 + upg.effectValue * upg.level)
+      }
+    }
+    // Prestige perks (crypto_returns)
+    for (const perk of prestige.perks) {
+      if (perk.purchased && perk.effect.type === 'crypto_returns') {
+        mult = mul(mult, 1 + perk.effect.value)
+      }
+    }
+    // Event multiplier (crypto_boom / crypto_winter + global income events)
+    const evMul = events.getMultiplier('income_multiplier', 'crypto')
+    if (evMul !== 1) mult = mul(mult, evMul)
+
+    return mult
+  }
+
+  // ─── Staking yield ────────────────────────────────────────────
+
+  /**
+   * Staking income per second — analogous to stock dividends.
+   * Sum of (amount × currentPrice × stakingYield / secondsPerYear) for staked crypto.
+   */
+  const stakingIncomePerSecond = computed(() => {
+    const SECONDS_PER_GAME_YEAR = 252 * 12
+    const returnsMul = getCryptoReturnsMul()
+    let total = ZERO
+    for (const h of wallet.value) {
+      const asset = assets.value.find((a) => a.id === h.assetId)
+      const config = configs.value.find((c) => c.id === h.assetId)
+      if (!asset || !config || !config.stakingYield) continue
+      const annualStaking = asset.currentPrice * h.amount * config.stakingYield
+      total = add(total, D(annualStaking / SECONDS_PER_GAME_YEAR))
+    }
+    return mul(total, returnsMul)
+  })
+
+  /**
+   * Pay staking rewards to the player for all held positions.
+   * Called from game loop at a configurable interval (e.g. every 100 ticks = 10s).
+   * @param ticksSinceLastPayout Number of engine ticks since last staking payout
+   */
+  function payStakingRewards(ticksSinceLastPayout: number): void {
+    if (wallet.value.length === 0) return
+    const TICKS_PER_GAME_YEAR = 252 * 120 // 252 trading days × 120 ticks/day
+    const player = usePlayerStore()
+    const cryptoReturnsMul = getCryptoReturnsMul()
+
+    let totalPayout = ZERO
+    for (const h of wallet.value) {
+      const asset = assets.value.find((a) => a.id === h.assetId)
+      const config = configs.value.find((c) => c.id === h.assetId)
+      if (!asset || !config || !config.stakingYield || config.stakingYield <= 0) continue
+
+      const payout = D(asset.currentPrice * h.amount * config.stakingYield * ticksSinceLastPayout / TICKS_PER_GAME_YEAR)
+      totalPayout = add(totalPayout, payout)
+    }
+
+    if (totalPayout.gt(0)) {
+      const adjustedPayout = mul(totalPayout, cryptoReturnsMul)
+      player.earnCash(adjustedPayout)
+      totalStakingEarned.value = add(totalStakingEarned.value, adjustedPayout)
+    }
   }
 
   function buyCrypto(assetId: string, amount: number): Decimal | null {
@@ -102,12 +192,11 @@ export const useCryptoStore = defineStore('crypto', () => {
     if (!asset) return null
 
     const player = usePlayerStore()
-    const upgrades = useUpgradeStore()
     const baseRevenue = D(asset.currentPrice * amount)
     const costBasis = D(holding.averageBuyPrice * amount)
     const baseProfit = baseRevenue.sub(costBasis)
-    // Apply crypto_returns skill multiplier to profit only (not gross revenue)
-    const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, upgrades.getMultiplier('crypto_returns')) : baseProfit
+    // Apply combined crypto_returns multiplier (skill tree + prestige + events) to profit
+    const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, getCryptoReturnsMul()) : baseProfit
     const revenue = baseRevenue.add(multipliedProfit.sub(baseProfit))
     totalRealizedProfit.value = add(totalRealizedProfit.value, multipliedProfit)
     
@@ -131,6 +220,7 @@ export const useCryptoStore = defineStore('crypto', () => {
   function prestigeReset(): void {
     wallet.value = []
     totalRealizedProfit.value = ZERO
+    totalStakingEarned.value = ZERO
   }
 
   function getHolding(assetId: string): CryptoHolding | undefined {
@@ -168,12 +258,19 @@ export const useCryptoStore = defineStore('crypto', () => {
       if (saved.cryptoStats.totalRealizedProfit !== undefined) {
         totalRealizedProfit.value = saved.cryptoStats.totalRealizedProfit
       }
+      if ((saved.cryptoStats as Record<string, unknown>).totalStakingEarned !== undefined) {
+        totalStakingEarned.value = (saved.cryptoStats as Record<string, unknown>).totalStakingEarned as Decimal
+      }
     }
     // Restore market simulator state
     if (saved.cryptoMarketState) {
       try {
         simulator.deserialize(saved.cryptoMarketState as Parameters<MarketSimulator['deserialize']>[0])
-        assets.value = [...simulator.getAllAssets()]
+        // Merge dailyHistory + priceHistory for chart display
+        assets.value = simulator.getAllAssets().map(a => ({
+          ...a,
+          priceHistory: [...a.dailyHistory, ...a.priceHistory]
+        }))
       } catch (e) {
         console.warn('[CryptoStore] Failed to restore market state:', e)
       }
@@ -181,7 +278,9 @@ export const useCryptoStore = defineStore('crypto', () => {
   }
 
   return {
-    wallet, assets, totalRealizedProfit, totalWalletValue, unrealizedProfit,
-    initCryptos, tick, buyCrypto, sellCrypto, getHolding, prestigeReset, getSimulator, loadFromSave
+    configs, wallet, assets, totalRealizedProfit, totalStakingEarned,
+    totalWalletValue, unrealizedProfit, stakingIncomePerSecond,
+    initCryptos, tick, buyCrypto, sellCrypto, payStakingRewards,
+    getHolding, prestigeReset, getSimulator, loadFromSave
   }
 })

@@ -233,6 +233,7 @@ export function useInitGame() {
                 business: business.profitPerSecond,
                 realEstate: realEstate.rentPerSecond,
                 dividends: stocks.dividendIncomePerSecond,
+                staking: crypto.stakingIncomePerSecond,
                 depositInterest: depositStore.interestPerSecond,
                 loanInterest: loanStore.totalInterestPerSecond,
               },

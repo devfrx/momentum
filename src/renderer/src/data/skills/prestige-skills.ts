@@ -2,7 +2,7 @@ import { D } from '@renderer/core/BigNum'
 import type { UpgradeDef } from '@renderer/data/upgrades'
 
 /**
- * Prestige Skill Tree — 75 nodes
+ * Prestige Skill Tree — 65 nodes
  *
  * LEFT path:   Prestige Gain & Acceleration
  * CENTER path: Memory & Permanence

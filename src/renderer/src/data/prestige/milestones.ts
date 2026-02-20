@@ -33,7 +33,7 @@ export const PRESTIGE_MILESTONES: MilestoneDef[] = [
     condition: { type: 'total_points', value: D(100) },
     rewards: [
       { type: 'global_multiplier', value: 0.015 },
-      { type: 'starting_cash', value: 1000 },
+      { type: 'starting_cash', value: 5000 },
     ],
   },
   {
@@ -55,7 +55,7 @@ export const PRESTIGE_MILESTONES: MilestoneDef[] = [
     condition: { type: 'total_points', value: D(1000) },
     rewards: [
       { type: 'global_multiplier', value: 0.03 },
-      { type: 'starting_cash', value: 10000 },
+      { type: 'starting_cash', value: 50000 },
       { type: 'starting_xp', value: 500 },
     ],
   },
@@ -78,7 +78,7 @@ export const PRESTIGE_MILESTONES: MilestoneDef[] = [
     condition: { type: 'total_points', value: D(10000) },
     rewards: [
       { type: 'global_multiplier', value: 0.08 },
-      { type: 'starting_cash', value: 100000 },
+      { type: 'starting_cash', value: 500000 },
       { type: 'offline_bonus', value: 0.03 },
     ],
   },
@@ -100,7 +100,7 @@ export const PRESTIGE_MILESTONES: MilestoneDef[] = [
     condition: { type: 'rebirths', value: 5 },
     rewards: [
       { type: 'job_efficiency', value: 0.015 },
-      { type: 'starting_cash', value: 500 },
+      { type: 'starting_cash', value: 2500 },
     ],
   },
   {
@@ -147,7 +147,7 @@ export const PRESTIGE_MILESTONES: MilestoneDef[] = [
     rewards: [
       { type: 'global_multiplier', value: 0.08 },
       { type: 'prestige_gain', value: 0.06 },
-      { type: 'starting_cash', value: 1000000 },
+      { type: 'starting_cash', value: 5000000 },
     ],
   },
 

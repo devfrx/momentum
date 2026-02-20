@@ -54,7 +54,7 @@ export const SKILL_TREE_META = [
 ] as const
 
 /**
- * Combined upgrade definitions — 375 nodes across 5 category trees.
+ * Combined upgrade definitions — 326 nodes across 5 category trees.
  * Each category file lives in ./skills/<category>-skills.ts for scalability.
  */
 export const UPGRADES: UpgradeDef[] = [

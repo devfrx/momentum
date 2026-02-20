@@ -280,17 +280,18 @@ export function calculateNetWorth(
  * Prestige points earned on reset.
  * Formula: floor(totalEarned / threshold) ^ exponent
  * Standard incremental formula inspired by Antimatter Dimensions.
- * 
- * Balanced for slower progression:
- * - 100M cash → ~1 points
- * - 1B cash → ~4 points
- * - 10B cash → ~10 points
- * - 100B cash → ~25 points
+ *
+ * Balanced for moderate progression:
+ * - 100M cash → 1 point
+ * - 1B cash → ~3 points
+ * - 10B cash → 10 points
+ * - 100B cash → ~31 points
+ * - 1T cash → 100 points
  */
 export function prestigePointsGain(
   totalCashEarned: Decimal,
   threshold: Decimal = D(1e8),
-  exponent: number = 0.2
+  exponent: number = 0.5
 ): Decimal {
   if (totalCashEarned.lt(threshold)) return ZERO
   return floor(pow(div(totalCashEarned, threshold), exponent))

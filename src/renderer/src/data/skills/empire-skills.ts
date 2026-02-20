@@ -2,7 +2,7 @@ import { D } from '@renderer/core/BigNum'
 import type { UpgradeDef } from '@renderer/data/upgrades'
 
 /**
- * Empire Skill Tree — 75 nodes
+ * Empire Skill Tree — 65 nodes
  *
  * LEFT path:   XP & Learning
  * CENTER path: Income & Growth
@@ -428,8 +428,8 @@ export const EMPIRE_SKILLS: UpgradeDef[] = [
   {
     id: 'e_zerocost', name: 'Zero-Point Energy', row: 14, col: 4,
     description: 'Harvest energy from the quantum vacuum.',
-    effectDescription: '-5% operating costs', icon: 'mdi:lightning-bolt-circle',
-    cost: D(100e9), target: 'costReduction', multiplier: -0.05,
+    effectDescription: '-4% operating costs', icon: 'mdi:lightning-bolt-circle',
+    cost: D(100e9), target: 'costReduction', multiplier: -0.04,
     category: 'Empire', prerequisites: ['e_nanoforge'],
   },
 
@@ -458,8 +458,8 @@ export const EMPIRE_SKILLS: UpgradeDef[] = [
   {
     id: 'e_postcost', name: 'Post-Scarcity', row: 15, col: 4,
     description: 'Resources are infinite. Costs are meaningless.',
-    effectDescription: '-6% operating costs', icon: 'mdi:infinity',
-    cost: D(400e9), target: 'costReduction', multiplier: -0.06,
+    effectDescription: '-4% operating costs', icon: 'mdi:infinity',
+    cost: D(400e9), target: 'costReduction', multiplier: -0.04,
     category: 'Empire', prerequisites: ['e_zerocost'],
   },
 

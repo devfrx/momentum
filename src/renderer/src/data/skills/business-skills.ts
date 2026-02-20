@@ -2,7 +2,7 @@ import { D } from '@renderer/core/BigNum'
 import type { UpgradeDef } from '@renderer/data/upgrades'
 
 /**
- * Business Skill Tree — 75 nodes
+ * Business Skill Tree — 65 nodes
  *
  * LEFT path:   Jobs & Labour
  * CENTER path: Revenue & Operations
@@ -361,8 +361,8 @@ export const BUSINESS_SKILLS: UpgradeDef[] = [
   {
     id: 'b_monopoly', name: 'Market Monopoly', row: 12, col: 3,
     description: 'Total control over your industry.',
-    effectDescription: '-7% operating costs', icon: 'mdi:lock',
-    cost: D(1e9), target: 'costReduction', multiplier: -0.07,
+    effectDescription: '-5% operating costs', icon: 'mdi:lock',
+    cost: D(1e9), target: 'costReduction', multiplier: -0.05,
     category: 'Business', prerequisites: ['b_culture', 'b_globtrade'],
   },
 
@@ -407,8 +407,8 @@ export const BUSINESS_SKILLS: UpgradeDef[] = [
   {
     id: 'b_aiops', name: 'AI Operations', row: 14, col: 1,
     description: 'AI runs your operations with superhuman precision.',
-    effectDescription: '-5% operating costs', icon: 'mdi:robot',
-    cost: D(20e9), target: 'costReduction', multiplier: -0.05,
+    effectDescription: '-4% operating costs', icon: 'mdi:robot',
+    cost: D(20e9), target: 'costReduction', multiplier: -0.04,
     category: 'Business', prerequisites: ['b_futuretech'],
   },
   {

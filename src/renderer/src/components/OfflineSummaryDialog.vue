@@ -34,6 +34,9 @@ const incomeLines = computed(() => {
     if (s.dividendIncome.gt(ZERO)) {
         lines.push({ label: t('offline.dividends'), icon: 'mdi:chart-line', value: formatCash(s.dividendIncome), positive: true })
     }
+    if (s.stakingIncome.gt(ZERO)) {
+        lines.push({ label: t('offline.staking'), icon: 'mdi:bitcoin', value: formatCash(s.stakingIncome), positive: true })
+    }
     return lines
 })
 

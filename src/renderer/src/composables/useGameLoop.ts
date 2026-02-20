@@ -124,6 +124,10 @@ export function useGameLoop() {
       if (ctx.tick % settings.marketUpdateInterval === 0) {
         crypto.tick()
       }
+      // Pay staking rewards every 100 ticks (10 seconds) — analogous to stock dividends
+      if (ctx.tick % 100 === 0) {
+        crypto.payStakingRewards(100)
+      }
     })
 
     // ─── Real estate ─────────────────────────────────────────────
@@ -186,6 +190,37 @@ export function useGameLoop() {
       const bmIncomeBoost = D(blackmarket.getEffectMultiplier('income_boost'))
       const bmHeatPenalty = D(blackmarket.getHeatIncomePenalty())
       realEstate.globalRentMultiplier = allIncomeMul.mul(reUpgradeMul).mul(prestigeMul).mul(reEventMul).mul(bmIncomeBoost).mul(bmHeatPenalty)
+
+      // ─── Market conditions from events (Fix #4) ─────────────────
+      const stockSim = stocks.getSimulator()
+      const cryptoSim = crypto.getSimulator()
+
+      const hasBull = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'bull_market')
+      const hasCrash = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'market_crash')
+      const hasCryptoBoom = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'crypto_boom')
+      const hasCryptoWinter = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'crypto_winter')
+
+      // Stock market condition
+      if (hasCrash) stockSim.setCondition('crash', 100)
+      else if (hasBull) stockSim.setCondition('bull', 100)
+      else if (stockSim.getCondition() !== 'normal') stockSim.setCondition('normal', 0)
+
+      // Crypto market condition
+      if (hasCryptoWinter) cryptoSim.setCondition('bear', 100)
+      else if (hasCryptoBoom) cryptoSim.setCondition('bubble', 100)
+      else if (cryptoSim.getCondition() !== 'normal') cryptoSim.setCondition('normal', 0)
+
+      // ─── Economy → market sentiment (Fix #7) ────────────────────
+      const ecoState = economySim.getState()
+      let sentiment = 0
+      switch (ecoState.cyclePhase) {
+        case 'expansion':   sentiment = 0.02; break
+        case 'peak':        sentiment = 0.04; break
+        case 'contraction':  sentiment = -0.03; break
+        case 'trough':      sentiment = -0.05; break
+      }
+      stockSim.setSentimentModifier(sentiment)
+      cryptoSim.setSentimentModifier(sentiment * 1.5) // crypto more sensitive to macro
     })
 
     // ─── Achievements (every 5 seconds) ──────────────────────────
