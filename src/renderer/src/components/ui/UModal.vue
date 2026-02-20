@@ -149,6 +149,7 @@ onBeforeUnmount(() => {
 
 .u-modal--full {
     max-width: 90vw;
+    height: 90vh;
     max-height: 90vh;
 }
 
@@ -216,9 +217,16 @@ onBeforeUnmount(() => {
     padding: var(--t-space-5);
     overflow-y: auto;
     flex: 1;
+    min-height: 0;
     font-size: var(--t-font-size-sm);
     line-height: var(--t-leading-relaxed);
     color: var(--t-text-secondary);
+}
+
+.u-modal--full .u-modal-body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .u-modal-footer {

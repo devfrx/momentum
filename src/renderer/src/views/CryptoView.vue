@@ -3,14 +3,19 @@ import { ref, computed } from 'vue'
 import { useCryptoStore } from '@renderer/stores/useCryptoStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
+import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
 import AssetCard from '@renderer/components/market/AssetCard.vue'
 import MarketStats from '@renderer/components/market/MarketStats.vue'
 import MarketSettings from '@renderer/components/market/MarketSettings.vue'
+import MarketConditionBanner from '@renderer/components/market/MarketConditionBanner.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
+import CandlestickChart from '@renderer/components/charts/CandlestickChart.vue'
 import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
+import OrderBook from '@renderer/components/market/OrderBook.vue'
+import FullscreenChartModal from '@renderer/components/market/FullscreenChartModal.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
@@ -20,10 +25,12 @@ import { useI18n } from 'vue-i18n'
 const crypto = useCryptoStore()
 const player = usePlayerStore()
 const settings = useSettingsStore()
+const limitOrderStore = useLimitOrderStore()
 const { formatCash, formatPercent } = useFormat()
 const { t } = useI18n()
 
 const showCharts = ref(true)
+const chartMode = ref<'line' | 'candle'>('line')
 const pinnedAssetId = computed({
     get: () => settings.pinnedCryptoId,
     set: (v) => { settings.pinnedCryptoId = v }
@@ -60,7 +67,24 @@ const pinnedPnL = computed(() => {
     return { value: pnlValue, percent: pnlPercent, currentValue }
 })
 
-const availableCash = computed(() => player.cash.toNumber())
+const availableCash = computed(() => player.cash.toNumber() - limitOrderStore.totalReservedCash.toNumber())
+
+// ─── Fullscreen Chart Modal ─────────────────────────────────────
+const fullscreenVisible = ref(false)
+const fullscreenAssetId = ref<string | null>(null)
+
+const fullscreenAsset = computed(() =>
+    fullscreenAssetId.value ? crypto.assets.find((a) => a.id === fullscreenAssetId.value) ?? null : null
+)
+
+const fullscreenPosition = computed(() =>
+    fullscreenAssetId.value ? getHolding(fullscreenAssetId.value) : null
+)
+
+function openFullscreen(assetId: string) {
+    fullscreenAssetId.value = assetId
+    fullscreenVisible.value = true
+}
 
 function togglePin(assetId: string) {
     pinnedAssetId.value = pinnedAssetId.value === assetId ? null : assetId
@@ -135,7 +159,13 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
             </div>
             <div class="header-actions">
                 <MarketSettings />
-                <UButton variant="ghost" size="sm" :icon="showCharts ? 'mdi:eye-off' : 'mdi:eye'" @click="showCharts = !showCharts">
+                <UButton variant="ghost" size="sm"
+                    :icon="chartMode === 'candle' ? 'mdi:chart-areaspline' : 'mdi:chart-box'"
+                    @click="chartMode = chartMode === 'line' ? 'candle' : 'line'">
+                    {{ chartMode === 'candle' ? $t('charts.line') : $t('charts.candle') }}
+                </UButton>
+                <UButton variant="ghost" size="sm" :icon="showCharts ? 'mdi:eye-off' : 'mdi:eye'"
+                    @click="showCharts = !showCharts">
                     {{ showCharts ? $t('crypto.hide_charts') : $t('crypto.show_charts') }}
                 </UButton>
             </div>
@@ -143,6 +173,9 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
 
         <!-- Event Impact -->
         <EventImpactBanner route-name="crypto" />
+
+        <!-- Market Condition Indicator -->
+        <MarketConditionBanner :analysis="crypto.marketAnalysis" type="crypto" />
 
         <!-- Volatility Warning -->
         <div class="alert-box alert-box-warning">
@@ -167,13 +200,21 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
                         {{ formatPercent(Math.abs(pinnedAsset.changePercent * 100)) }}
                     </div>
                 </div>
-                <UButton variant="text" size="xs" @click="pinnedAssetId = null" :title="$t('crypto.unpin')" icon="mdi:close">
-                </UButton>
+                <div class="pinned-header-actions">
+                    <UButton variant="ghost" size="xs" icon="mdi:fullscreen" :title="$t('market.fullscreen_chart')"
+                        @click="openFullscreen(pinnedAsset?.id ?? '')" />
+                    <UButton variant="text" size="xs" @click="pinnedAssetId = null" :title="$t('crypto.unpin')"
+                        icon="mdi:close" />
+                </div>
             </div>
 
             <div class="pinned-body">
                 <div class="pinned-chart">
-                    <PriceChart :data="pinnedAsset.priceHistory"
+                    <CandlestickChart v-if="chartMode === 'candle' && pinnedAsset.candlestickHistory?.length > 1"
+                        :data="pinnedAsset.candlestickHistory" :asset-id="pinnedAsset.id"
+                        :color="pinnedAsset.changePercent >= 0 ? 'purple' : 'red'" :height="560"
+                        :buy-price="pinnedPosition?.averageBuyPrice ?? null" :label="pinnedAsset.name" />
+                    <PriceChart v-else :data="pinnedAsset.priceHistory"
                         :color="pinnedAsset.changePercent >= 0 ? 'purple' : 'red'" :height="560"
                         :buy-price="pinnedPosition?.averageBuyPrice ?? null" />
                 </div>
@@ -207,12 +248,20 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
         <div class="card-grid">
             <AssetCard v-for="asset in unpinnedAssets" :key="asset.id" :asset="asset" :position="getHolding(asset.id)"
                 :show-chart="showCharts" :available-cash="availableCash" :pinned="pinnedAssetId === asset.id"
-                type="crypto" @buy="handleBuy" @sell="handleSell" @pin="togglePin" />
+                type="crypto" :chart-mode="chartMode" @buy="handleBuy" @sell="handleSell" @pin="togglePin"
+                @fullscreen="openFullscreen" />
         </div>
+
+        <!-- Order Book -->
+        <OrderBook market-type="crypto" />
 
         <!-- Info Panel -->
         <InfoPanel :title="$t('crypto.info_title')" :description="$t('crypto.info_desc')"
             :sections="cryptoInfoSections" />
+
+        <!-- Fullscreen Chart Modal -->
+        <FullscreenChartModal v-model="fullscreenVisible" :asset="fullscreenAsset" :position="fullscreenPosition"
+            :available-cash="availableCash" type="crypto" @buy="handleBuy" @sell="handleSell" />
     </div>
 </template>
 
@@ -237,6 +286,12 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--t-space-4);
+}
+
+.pinned-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
 }
 
 .pinned-title {

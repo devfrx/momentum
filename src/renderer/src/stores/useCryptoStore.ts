@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 import { shallowRef, ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
-import { MarketSimulator, type AssetConfig, type AssetState } from '@renderer/core/MarketSim'
+import { MarketSimulator, type AssetConfig, type AssetState, type MarketAnalysis, type MarketCondition } from '@renderer/core/MarketSim'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
@@ -30,6 +30,19 @@ export const useCryptoStore = defineStore('crypto', () => {
   const assets = shallowRef<AssetState[]>([])
   const totalRealizedProfit = ref<Decimal>(ZERO)
   const totalStakingEarned = ref<Decimal>(ZERO)
+
+  /** Reactive market analysis — updated every tick */
+  const marketAnalysis = shallowRef<MarketAnalysis>({
+    trend: 'neutral',
+    phase: 'normal',
+    shortTermMomentum: 0,
+    mediumTermMomentum: 0,
+    avgDistanceFromAth: 0,
+    volatilityIndex: 0,
+    fearGreedIndex: 50,
+    activeCondition: 'normal',
+    conditionTicksRemaining: 0
+  })
 
   const totalWalletValue = computed(() => {
     let total = ZERO
@@ -67,8 +80,18 @@ export const useCryptoStore = defineStore('crypto', () => {
     // Creates new array refs so Vue detects prop changes.
     assets.value = simulator.getAllAssets().map(a => ({
       ...a,
-      priceHistory: [...a.dailyHistory, ...a.priceHistory]
+      priceHistory: [...a.dailyHistory, ...a.priceHistory],
+      candlestickHistory: a.candlestickHistory.slice()
     }))
+    // Update market analysis
+    marketAnalysis.value = simulator.analyzeMarket()
+  }
+
+  /**
+   * Set market condition on the simulator (used by event system wiring).
+   */
+  function setMarketCondition(condition: MarketCondition, durationTicks: number): void {
+    simulator.setCondition(condition, durationTicks)
   }
 
   // ─── Combined returns multiplier ──────────────────────────────
@@ -232,7 +255,7 @@ export const useCryptoStore = defineStore('crypto', () => {
   /** Restore crypto state from saved data */
   function loadFromSave(saved: {
     cryptoWallet?: Array<{ assetId: string; amount: number; averageBuyPrice: number; totalInvested: Decimal }>
-    cryptoStats?: { totalRealizedProfit?: Decimal }
+    cryptoStats?: { totalRealizedProfit?: Decimal; totalStakingEarned?: Decimal }
     cryptoMarketState?: unknown
   }): void {
     // Restore wallet holdings
@@ -258,18 +281,19 @@ export const useCryptoStore = defineStore('crypto', () => {
       if (saved.cryptoStats.totalRealizedProfit !== undefined) {
         totalRealizedProfit.value = saved.cryptoStats.totalRealizedProfit
       }
-      if ((saved.cryptoStats as Record<string, unknown>).totalStakingEarned !== undefined) {
-        totalStakingEarned.value = (saved.cryptoStats as Record<string, unknown>).totalStakingEarned as Decimal
+      if (saved.cryptoStats.totalStakingEarned !== undefined) {
+        totalStakingEarned.value = saved.cryptoStats.totalStakingEarned
       }
     }
     // Restore market simulator state
     if (saved.cryptoMarketState) {
       try {
         simulator.deserialize(saved.cryptoMarketState as Parameters<MarketSimulator['deserialize']>[0])
-        // Merge dailyHistory + priceHistory for chart display
+        // Merge dailyHistory + priceHistory for chart display (clone candlestickHistory for reactivity)
         assets.value = simulator.getAllAssets().map(a => ({
           ...a,
-          priceHistory: [...a.dailyHistory, ...a.priceHistory]
+          priceHistory: [...a.dailyHistory, ...a.priceHistory],
+          candlestickHistory: a.candlestickHistory.slice()
         }))
       } catch (e) {
         console.warn('[CryptoStore] Failed to restore market state:', e)
@@ -280,7 +304,8 @@ export const useCryptoStore = defineStore('crypto', () => {
   return {
     configs, wallet, assets, totalRealizedProfit, totalStakingEarned,
     totalWalletValue, unrealizedProfit, stakingIncomePerSecond,
+    marketAnalysis,
     initCryptos, tick, buyCrypto, sellCrypto, payStakingRewards,
-    getHolding, prestigeReset, getSimulator, loadFromSave
+    getHolding, prestigeReset, getSimulator, setMarketCondition, loadFromSave
   }
 })

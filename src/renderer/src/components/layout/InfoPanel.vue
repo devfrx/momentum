@@ -113,6 +113,27 @@ const open = ref(false)
 /* ── Body ── */
 .info-body {
     padding: var(--t-space-3) var(--t-space-4) var(--t-space-4);
+    max-height: 50vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--t-border) transparent;
+}
+
+.info-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.info-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.info-body::-webkit-scrollbar-thumb {
+    background: var(--t-border);
+    border-radius: var(--t-radius-full);
+}
+
+.info-body::-webkit-scrollbar-thumb:hover {
+    background: var(--t-border-hover);
 }
 
 /* ── Description ── */

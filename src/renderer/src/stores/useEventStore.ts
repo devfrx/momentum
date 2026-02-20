@@ -5,6 +5,21 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { EventSystem, type GameEventDef, type ActiveEvent, type EventEffectType } from '@renderer/core/EventSystem'
 import { EVENTS } from '@renderer/data/events'
+import type { MarketCondition } from '@renderer/core/MarketSim'
+
+/**
+ * Maps event IDs to MarketSimulator conditions.
+ * When these events fire, setCondition() is called on the appropriate simulator.
+ */
+const EVENT_TO_STOCK_CONDITION: Record<string, MarketCondition> = {
+  bull_market: 'bull',
+  market_crash: 'crash',
+}
+
+const EVENT_TO_CRYPTO_CONDITION: Record<string, MarketCondition> = {
+  crypto_boom: 'bubble',
+  crypto_winter: 'bear',
+}
 
 export const useEventStore = defineStore('events', () => {
   const eventSystem = new EventSystem(100) // evaluate every 100 ticks (10s)
@@ -25,16 +40,69 @@ export const useEventStore = defineStore('events', () => {
     eventSystem.setOnEventStart((event) => {
       recentEvents.value.push(event)
       if (recentEvents.value.length > 5) recentEvents.value.shift()
+
+      // Wire market events to MarketSimulator conditions
+      _applyMarketCondition(event)
+
       syncState()
     })
 
-    eventSystem.setOnEventEnd(() => {
+    eventSystem.setOnEventEnd((event) => {
+      // When a market-impacting event ends, clear the condition
+      // (MarketSimulator auto-clears via timer, but this is defensive)
+      _clearMarketCondition(event)
+
       syncState()
     })
 
     eventSystem.setOnChoiceRequired(() => {
       syncState()
     })
+  }
+
+  /**
+   * Apply market condition to the relevant simulator when an event fires.
+   * Uses lazy imports to avoid circular dependency issues.
+   */
+  function _applyMarketCondition(event: GameEventDef): void {
+    const stockCondition = EVENT_TO_STOCK_CONDITION[event.id]
+    if (stockCondition) {
+      // Convert duration from event ticks to sim ticks: event uses engine ticks (10/sec),
+      // stock sim ticks = engineTicks / MARKET_TICK_INTERVAL (50)
+      const simTicks = Math.ceil(event.durationTicks / 50)
+      try {
+        const { useStockStore } = require('./useStockStore')
+        const stocks = useStockStore()
+        stocks.setMarketCondition(stockCondition, simTicks)
+      } catch { /* store not ready yet */ }
+    }
+
+    const cryptoCondition = EVENT_TO_CRYPTO_CONDITION[event.id]
+    if (cryptoCondition) {
+      const simTicks = Math.ceil(event.durationTicks / 50)
+      try {
+        const { useCryptoStore } = require('./useCryptoStore')
+        const crypto = useCryptoStore()
+        crypto.setMarketCondition(cryptoCondition, simTicks)
+      } catch { /* store not ready yet */ }
+    }
+  }
+
+  function _clearMarketCondition(event: GameEventDef): void {
+    if (EVENT_TO_STOCK_CONDITION[event.id]) {
+      try {
+        const { useStockStore } = require('./useStockStore')
+        const stocks = useStockStore()
+        stocks.setMarketCondition('normal', 0)
+      } catch { /* store not ready yet */ }
+    }
+    if (EVENT_TO_CRYPTO_CONDITION[event.id]) {
+      try {
+        const { useCryptoStore } = require('./useCryptoStore')
+        const crypto = useCryptoStore()
+        crypto.setMarketCondition('normal', 0)
+      } catch { /* store not ready yet */ }
+    }
   }
 
   function tick(): void {

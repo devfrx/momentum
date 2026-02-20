@@ -9,6 +9,7 @@ import { UTooltip, UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import MiniChart from '@renderer/components/charts/MiniChart.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
+import CandlestickChart from '@renderer/components/charts/CandlestickChart.vue'
 import TradePanel from './TradePanel.vue'
 import PositionInfo from './PositionInfo.vue'
 
@@ -18,6 +19,7 @@ export interface AssetData {
     currentPrice: number
     previousPrice: number
     priceHistory: number[]
+    candlestickHistory?: Array<{ open: number; high: number; low: number; close: number; timestamp: number }>
     changePercent: number
     ath: number
     atl: number
@@ -40,12 +42,15 @@ const props = defineProps<{
     availableCash: number
     /** Whether this asset is currently pinned */
     pinned?: boolean
+    /** Chart display mode */
+    chartMode?: 'line' | 'candle'
 }>()
 
 const emit = defineEmits<{
     (e: 'buy', assetId: string, amount: number): void
     (e: 'sell', assetId: string, amount: number): void
     (e: 'pin', assetId: string): void
+    (e: 'fullscreen', assetId: string): void
 }>()
 
 const { formatCash, formatPercent } = useFormat()
@@ -120,15 +125,23 @@ function handleSell(amount: number) {
         <MiniChart v-if="showChart && asset.priceHistory?.length > 1 && !expanded" :data="asset.priceHistory"
             :color="accentColor" :height="60" :buy-price="position?.averageBuyPrice ?? null" />
 
-        <!-- Expand to full chart -->
-        <UButton variant="primary" v-if="showChart && asset.priceHistory?.length > 1" @click="expanded = !expanded"
-            :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'">
-            {{ expanded ? $t('market.collapse_chart') : $t('market.expand_chart') }}
-        </UButton>
+        <!-- Expand / Fullscreen chart buttons -->
+        <div class="chart-actions" v-if="showChart && asset.priceHistory?.length > 1">
+            <UButton variant="primary" @click="expanded = !expanded"
+                :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'">
+                {{ expanded ? $t('market.collapse_chart') : $t('market.expand_chart') }}
+            </UButton>
+            <UTooltip :text="$t('market.fullscreen_chart')" placement="top">
+                <UButton variant="ghost" size="sm" icon="mdi:fullscreen" @click="emit('fullscreen', asset.id)" />
+            </UTooltip>
+        </div>
 
         <!-- Expanded Interactive Chart -->
-        <PriceChart v-if="expanded && asset.priceHistory?.length > 1" :data="asset.priceHistory" :color="accentColor"
-            :height="220" :buy-price="position?.averageBuyPrice ?? null" class="chart" />
+        <CandlestickChart v-if="expanded && chartMode === 'candle' && (asset.candlestickHistory?.length ?? 0) > 1"
+            :data="asset.candlestickHistory!" :asset-id="asset.id" :color="accentColor" :height="220"
+            :buy-price="position?.averageBuyPrice ?? null" :label="asset.name" class="chart" />
+        <PriceChart v-else-if="expanded && asset.priceHistory?.length > 1" :data="asset.priceHistory"
+            :color="accentColor" :height="220" :buy-price="position?.averageBuyPrice ?? null" class="chart" />
 
         <!-- Position Info -->
         <PositionInfo v-if="position && positionPnL" :position="position" :current-price="asset.currentPrice"
@@ -169,6 +182,12 @@ function handleSell(amount: number) {
 
 .chart {
     margin-bottom: var(--t-space-3);
+}
+
+.chart-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
 }
 
 .crypto-symbol {

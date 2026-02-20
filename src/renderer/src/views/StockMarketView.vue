@@ -3,14 +3,19 @@ import { ref, computed } from 'vue'
 import { useStockStore } from '@renderer/stores/useStockStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
+import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
 import AssetCard from '@renderer/components/market/AssetCard.vue'
 import MarketStats from '@renderer/components/market/MarketStats.vue'
 import MarketSettings from '@renderer/components/market/MarketSettings.vue'
+import MarketConditionBanner from '@renderer/components/market/MarketConditionBanner.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
+import CandlestickChart from '@renderer/components/charts/CandlestickChart.vue'
 import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
+import OrderBook from '@renderer/components/market/OrderBook.vue'
+import FullscreenChartModal from '@renderer/components/market/FullscreenChartModal.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
@@ -20,10 +25,12 @@ import { useI18n } from 'vue-i18n'
 const stocks = useStockStore()
 const player = usePlayerStore()
 const settings = useSettingsStore()
+const limitOrderStore = useLimitOrderStore()
 const { formatCash, formatPercent } = useFormat()
 const { t } = useI18n()
 
 const showCharts = ref(true)
+const chartMode = ref<'line' | 'candle'>('line')
 const pinnedAssetId = computed({
     get: () => settings.pinnedStockId,
     set: (v) => { settings.pinnedStockId = v }
@@ -58,7 +65,24 @@ const pinnedPnL = computed(() => {
     return { value: pnlValue, percent: pnlPercent, currentValue }
 })
 
-const availableCash = computed(() => player.cash.toNumber())
+const availableCash = computed(() => player.cash.toNumber() - limitOrderStore.totalReservedCash.toNumber())
+
+// ─── Fullscreen Chart Modal ─────────────────────────────────────
+const fullscreenVisible = ref(false)
+const fullscreenAssetId = ref<string | null>(null)
+
+const fullscreenAsset = computed(() =>
+    fullscreenAssetId.value ? stocks.assets.find((a) => a.id === fullscreenAssetId.value) ?? null : null
+)
+
+const fullscreenPosition = computed(() =>
+    fullscreenAssetId.value ? getPosition(fullscreenAssetId.value) ?? null : null
+)
+
+function openFullscreen(assetId: string) {
+    fullscreenAssetId.value = assetId
+    fullscreenVisible.value = true
+}
 
 function togglePin(assetId: string) {
     pinnedAssetId.value = pinnedAssetId.value === assetId ? null : assetId
@@ -146,6 +170,11 @@ const stockInfoSections = computed<InfoSection[]>(() => [
             </div>
             <div class="header-actions">
                 <MarketSettings />
+                <UButton variant="ghost" size="sm"
+                    :icon="chartMode === 'candle' ? 'mdi:chart-areaspline' : 'mdi:chart-box'"
+                    @click="chartMode = chartMode === 'line' ? 'candle' : 'line'">
+                    {{ chartMode === 'candle' ? $t('charts.line') : $t('charts.candle') }}
+                </UButton>
                 <UButton variant="ghost" size="sm" :icon="showCharts ? 'mdi:eye-off' : 'mdi:eye'"
                     @click="showCharts = !showCharts">
                     {{ showCharts ? $t('stocks.hide_charts') : $t('stocks.show_charts') }}
@@ -155,6 +184,9 @@ const stockInfoSections = computed<InfoSection[]>(() => [
 
         <!-- Event Impact -->
         <EventImpactBanner route-name="stocks" />
+
+        <!-- Market Condition Indicator -->
+        <MarketConditionBanner :analysis="stocks.marketAnalysis" type="stock" />
 
         <!-- Stats Bar -->
         <MarketStats :portfolio-value="stocks.totalPortfolioValue" :unrealized-profit="stocks.unrealizedProfit"
@@ -174,14 +206,21 @@ const stockInfoSections = computed<InfoSection[]>(() => [
                         {{ formatPercent(Math.abs(pinnedAsset.changePercent * 100)) }}
                     </div>
                 </div>
-                <UButton variant="text" size="xs" @click="pinnedAssetId = null" :title="$t('stocks.unpin')"
-                    icon="mdi:close">
-                </UButton>
+                <div class="pinned-header-actions">
+                    <UButton variant="ghost" size="xs" icon="mdi:fullscreen" :title="$t('market.fullscreen_chart')"
+                        @click="openFullscreen(pinnedAsset?.id ?? '')" />
+                    <UButton variant="text" size="xs" @click="pinnedAssetId = null" :title="$t('stocks.unpin')"
+                        icon="mdi:close" />
+                </div>
             </div>
 
             <div class="pinned-body">
                 <div class="pinned-chart">
-                    <PriceChart :data="pinnedAsset.priceHistory"
+                    <CandlestickChart v-if="chartMode === 'candle' && pinnedAsset.candlestickHistory?.length > 1"
+                        :data="pinnedAsset.candlestickHistory" :asset-id="pinnedAsset.id"
+                        :color="pinnedAsset.changePercent >= 0 ? 'emerald' : 'red'" :height="560"
+                        :buy-price="pinnedPosition?.averageBuyPrice ?? null" :label="pinnedAsset.name" />
+                    <PriceChart v-else :data="pinnedAsset.priceHistory"
                         :color="pinnedAsset.changePercent >= 0 ? 'emerald' : 'red'" :height="560"
                         :buy-price="pinnedPosition?.averageBuyPrice ?? null" />
                 </div>
@@ -215,13 +254,20 @@ const stockInfoSections = computed<InfoSection[]>(() => [
         <div class="card-grid">
             <AssetCard v-for="asset in unpinnedAssets" :key="asset.id" :asset="asset"
                 :position="getPosition(asset.id) ?? null" :show-chart="showCharts" :available-cash="availableCash"
-                :pinned="pinnedAssetId === asset.id" type="stock" @buy="handleBuy" @sell="handleSell"
-                @pin="togglePin" />
+                :pinned="pinnedAssetId === asset.id" type="stock" :chart-mode="chartMode" @buy="handleBuy"
+                @sell="handleSell" @pin="togglePin" @fullscreen="openFullscreen" />
         </div>
+
+        <!-- Order Book -->
+        <OrderBook market-type="stock" />
 
         <!-- Info Panel -->
         <InfoPanel :title="$t('stocks.info_title')" :description="$t('stocks.info_desc')"
             :sections="stockInfoSections" />
+
+        <!-- Fullscreen Chart Modal -->
+        <FullscreenChartModal v-model="fullscreenVisible" :asset="fullscreenAsset" :position="fullscreenPosition"
+            :available-cash="availableCash" type="stock" @buy="handleBuy" @sell="handleSell" />
     </div>
 </template>
 
@@ -246,6 +292,12 @@ const stockInfoSections = computed<InfoSection[]>(() => [
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--t-space-4);
+}
+
+.pinned-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
 }
 
 .pinned-title {

@@ -24,6 +24,8 @@ import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
+import { useLimitOrderStore, initLimitOrderNotify } from '@renderer/stores/useLimitOrderStore'
+import { useNotify } from '@renderer/composables/useNotify'
 
 
 // Data imports
@@ -40,6 +42,11 @@ import { UPGRADES } from '@renderer/data/upgrades'
 export function useGameLoop() {
   const tickCount = ref(0)
   const totalPlayTime = ref(0)
+
+  // Initialize limit order notification bridge NOW (sync setup context — inject() works).
+  // Cannot be inside startLoop() because it runs after `await` in onMounted where
+  // Vue's currentInstance is null, causing inject() / useToast() to crash.
+  initLimitOrderNotify(useNotify())
 
   function startLoop(): void {
     if (gameEngine.running) return
@@ -61,6 +68,7 @@ export function useGameLoop() {
     const storage = useStorageStore()
     const blackmarket = useBlackMarketStore()
     const shop = useShopStore()
+    const limitOrderStore = useLimitOrderStore()
 
     // ─── Initialize game data from static definitions ───────────
     if (stocks.assets.length === 0) {
@@ -127,6 +135,14 @@ export function useGameLoop() {
       // Pay staking rewards every 100 ticks (10 seconds) — analogous to stock dividends
       if (ctx.tick % 100 === 0) {
         crypto.payStakingRewards(100)
+      }
+    })
+
+    // ─── Limit orders (check every market tick) ──────────────────
+    gameEngine.subscribe('limitOrders', (ctx: TickContext) => {
+      const settings = useSettingsStore()
+      if (ctx.tick % settings.marketUpdateInterval === 0) {
+        limitOrderStore.tick(ctx.tick)
       }
     })
 

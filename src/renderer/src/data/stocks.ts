@@ -48,7 +48,7 @@ export const STOCKS: AssetConfig[] = [
     ticker: 'MEDVX',
     sector: 'healthcare',
     basePrice: 200,
-    drift: 0.05,
+    drift: 0.07,
     volatility: 0.28,
     minPrice: 1,
     maxHistory: 2000,

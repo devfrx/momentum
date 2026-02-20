@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch, nextTick, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Chart, registerables } from 'chart.js'
+import { Chart, registerables, type UpdateMode } from 'chart.js'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import { smartDecimals } from '@renderer/composables/useFormat'
 import { UButton } from '@renderer/components/ui'
@@ -18,16 +18,22 @@ const props = withDefaults(defineProps<{
     height?: number
     /** Average buy price line */
     buyPrice?: number | null
+    /** When true, canvas wrapper fills parent height via flex instead of fixed px */
+    fill?: boolean
 }>(), {
     label: 'Price',
     color: 'gold',
     height: 340,
-    buyPrice: null
+    buyPrice: null,
+    fill: false
 })
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
 let isDestroyed = false
+
+/** Tracks whether the user has manually zoomed/panned (via wheel/pinch/drag) */
+const isUserZoomed = ref(false)
 
 const zoomOptions = [
     { label: '1m', points: 20 },
@@ -140,6 +146,48 @@ function destroyChart() {
     if (chartInstance) {
         chartInstance.destroy()
         chartInstance = null
+    }
+}
+
+// ─── Legend-safe update helpers ──────────────────────────────────
+/**
+ * Sync meta.hidden → dataset.hidden before calling chart.update().
+ * Guarantees legend toggle state survives every update code-path.
+ */
+function safeChartUpdate(chart: Chart, mode = 'none') {
+    for (let i = 0; i < chart.data.datasets.length; i++) {
+        const meta = chart.getDatasetMeta(i)
+        if (typeof meta.hidden === 'boolean') {
+            ; (chart.data.datasets[i] as any).hidden = meta.hidden
+        }
+    }
+    chart.update(mode as UpdateMode)
+}
+
+/**
+ * Rebuild chart while preserving legend visibility state.
+ */
+function rebuildChart() {
+    const hiddenByLabel = new Map<string, boolean>()
+    if (chartInstance) {
+        for (let i = 0; i < chartInstance.data.datasets.length; i++) {
+            const meta = chartInstance.getDatasetMeta(i)
+            if (typeof meta.hidden === 'boolean') {
+                hiddenByLabel.set(String(chartInstance.data.datasets[i].label), meta.hidden)
+            }
+        }
+    }
+    createChart()
+    if (chartInstance && hiddenByLabel.size > 0) {
+        for (let i = 0; i < chartInstance.data.datasets.length; i++) {
+            const label = String(chartInstance.data.datasets[i].label)
+            if (hiddenByLabel.has(label)) {
+                const h = hiddenByLabel.get(label)!
+                    ; (chartInstance.data.datasets[i] as any).hidden = h
+                chartInstance.getDatasetMeta(i).hidden = h
+            }
+        }
+        safeChartUpdate(chartInstance)
     }
 }
 
@@ -256,11 +304,18 @@ function createChart() {
                     }
                 },
                 zoom: {
-                    pan: { enabled: true, mode: 'x' as const },
+                    pan: {
+                        enabled: true,
+                        mode: 'x' as const,
+                        // onPan fires IMMEDIATELY — no 250ms debounce
+                        onPan: () => { isUserZoomed.value = true }
+                    },
                     zoom: {
                         wheel: { enabled: true, speed: 0.05 },
                         pinch: { enabled: true },
-                        mode: 'x' as const
+                        mode: 'x' as const,
+                        // onZoom fires IMMEDIATELY — no 250ms debounce
+                        onZoom: () => { isUserZoomed.value = true }
                     }
                 }
             },
@@ -308,7 +363,13 @@ function createChart() {
 
 function updateChart() {
     if (isDestroyed) return
-    if (!chartInstance) { createChart(); return }
+    if (!chartInstance) { rebuildChart(); return }
+
+    // When user has zoomed/panned: skip chart update entirely.
+    // The chartjs-plugin-zoom owns scale.options.min/max — touching them
+    // destroys the zoom state. Stats (price, change%, high, low) still
+    // update via computed props in the template.
+    if (isUserZoomed.value) return
 
     const colors = getColors()
     const chartData = visibleData.value
@@ -342,14 +403,46 @@ function updateChart() {
             ; (chartInstance.options.scales.y as any).max = maxPrice + yPadding
     }
 
-    chartInstance.update('none')
+    safeChartUpdate(chartInstance)
 }
 
 function resetZoom() {
+    isUserZoomed.value = false
     chartInstance?.resetZoom()
 }
 
-watch([() => props.data, () => props.color, () => props.buyPrice, selectedRange], updateChart, { deep: true })
+// Range change: full rebuild (resets zoom)
+watch(selectedRange, () => {
+    isUserZoomed.value = false
+    if (!isDestroyed) rebuildChart()
+})
+
+// Config changes (color, buyPrice): rebuild but preserve zoom via imperative API
+watch([() => props.color, () => props.buyPrice], () => {
+    if (isDestroyed) return
+    // Save zoom state from the CURRENT chart before destroying it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ci = chartInstance as any
+    let savedX: { min: number; max: number } | null = null
+    const wasZoomed = isUserZoomed.value
+    if (wasZoomed && ci) {
+        try { savedX = ci.getZoomedScaleBounds?.()?.x ?? null } catch { /* ignore */ }
+    }
+    rebuildChart()
+    // Restore zoom on the NEW chart via official zoomScale API
+    if (wasZoomed && savedX && chartInstance) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ; (chartInstance as any).zoomScale?.('x', savedX, 'none')
+        isUserZoomed.value = true
+    } else {
+        isUserZoomed.value = false
+    }
+})
+
+// Data change: in-place update (skips when zoomed)
+watch(() => props.data, () => {
+    if (!isDestroyed) updateChart()
+})
 
 onMounted(() => {
     isDestroyed = false
@@ -370,7 +463,7 @@ function formatPrice(v: number): string {
 </script>
 
 <template>
-    <div class="chart-container">
+    <div class="chart-container" :class="{ 'is-fill': fill }">
         <!-- Toolbar -->
         <div class="chart-toolbar">
             <div class="toolbar-row toolbar-row--top">
@@ -412,7 +505,8 @@ function formatPrice(v: number): string {
         </div>
 
         <!-- Canvas -->
-        <div class="chart-canvas-wrap" :style="{ height: height + 'px' }">
+        <div class="chart-canvas-wrap" :class="{ 'canvas-fill': fill }"
+            :style="fill ? undefined : { height: height + 'px' }">
             <canvas ref="canvasRef"></canvas>
         </div>
     </div>
@@ -544,5 +638,15 @@ function formatPrice(v: number): string {
     position: relative;
     padding: 0.5rem 0.5rem 0.25rem;
     box-sizing: border-box;
+}
+
+.canvas-fill {
+    flex: 1;
+    min-height: 200px;
+}
+
+.chart-container.is-fill {
+    flex: 1;
+    min-height: 0;
 }
 </style>

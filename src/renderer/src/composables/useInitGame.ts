@@ -24,6 +24,7 @@ import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
+import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import { hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -73,6 +74,7 @@ export function useInitGame() {
       const blackmarketStore = useBlackMarketStore()
       const vaultStore = useVaultStore()
       const shopStore = useShopStore()
+      const limitOrderStore = useLimitOrderStore()
 
       // Initialize static data first (always refresh from source to pick up rebalances)
       // Note: businesses are no longer initialized from static defs — they are created by player action
@@ -206,6 +208,11 @@ export function useInitGame() {
         // Restore shop state
         if (save.shop) {
           shopStore.loadFromSave(save.shop as Record<string, unknown>)
+        }
+
+        // Restore limit orders state
+        if (save.limitOrders) {
+          limitOrderStore.loadFromSave(save.limitOrders as Record<string, unknown>)
         }
 
         // Restore event system state

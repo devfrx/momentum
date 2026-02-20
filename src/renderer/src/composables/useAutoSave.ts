@@ -24,6 +24,7 @@ import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
+import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { economySim } from '@renderer/core/EconomySim'
 import { dehydrateDecimals } from '@renderer/core/BigNum'
@@ -91,6 +92,7 @@ export function useAutoSave() {
     const blackmarketStore = useBlackMarketStore()
     const vaultStore = useVaultStore()
     const shopStore = useShopStore()
+    const limitOrderStore = useLimitOrderStore()
 
     return dehydrateDecimals({
       version: 3,
@@ -280,6 +282,9 @@ export function useAutoSave() {
 
       // Shop state
       shop: shopStore.exportState(),
+
+      // Limit Orders state
+      limitOrders: limitOrderStore.exportState(),
 
       // Settings
       settings: {

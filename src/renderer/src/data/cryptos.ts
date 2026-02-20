@@ -39,7 +39,7 @@ export const CRYPTOS: AssetConfig[] = [
     ticker: 'DOGE',
     sector: 'meme',
     basePrice: 0.08,
-    drift: 0.42,       // log-drift ≈ +10% (σ²/2 = 0.32)
+    drift: 0.35,       // log-drift ≈ +3% (σ²/2 = 0.32)
     volatility: 0.80,
     minPrice: 0.0001,
     maxHistory: 2000,
@@ -63,7 +63,7 @@ export const CRYPTOS: AssetConfig[] = [
     ticker: 'PEPE',
     sector: 'meme',
     basePrice: 0.001,
-    drift: 0.50,       // log-drift ≈ +9.5% (σ²/2 = 0.405)
+    drift: 0.42,       // log-drift ≈ +1.5% (σ²/2 = 0.405)
     volatility: 0.90,
     minPrice: 0.000001,
     maxHistory: 2000,
@@ -99,7 +99,7 @@ export const CRYPTOS: AssetConfig[] = [
     ticker: 'SHIB',
     sector: 'meme',
     basePrice: 0.00001,
-    drift: 0.55,       // log-drift ≈ +9.9% (σ²/2 = 0.451)
+    drift: 0.46,       // log-drift ≈ +0.9% (σ²/2 = 0.451)
     volatility: 0.95,
     minPrice: 0.0000001,
     maxHistory: 2000,

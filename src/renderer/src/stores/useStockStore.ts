@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 import { shallowRef, ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
-import { MarketSimulator, type AssetConfig, type AssetState } from '@renderer/core/MarketSim'
+import { MarketSimulator, type AssetConfig, type AssetState, type MarketAnalysis, type MarketCondition } from '@renderer/core/MarketSim'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
@@ -31,6 +31,19 @@ export const useStockStore = defineStore('stocks', () => {
   const assets = shallowRef<AssetState[]>([])
   const totalRealizedProfit = ref<Decimal>(ZERO)
   const totalDividendsEarned = ref<Decimal>(ZERO)
+
+  /** Reactive market analysis — updated every tick */
+  const marketAnalysis = shallowRef<MarketAnalysis>({
+    trend: 'neutral',
+    phase: 'normal',
+    shortTermMomentum: 0,
+    mediumTermMomentum: 0,
+    avgDistanceFromAth: 0,
+    volatilityIndex: 0,
+    fearGreedIndex: 50,
+    activeCondition: 'normal',
+    conditionTicksRemaining: 0
+  })
 
   // ─── Computed ─────────────────────────────────────────────────
 
@@ -121,8 +134,19 @@ export const useStockStore = defineStore('stocks', () => {
     // Creates new array refs so Vue detects prop changes.
     assets.value = simulator.getAllAssets().map(a => ({
       ...a,
-      priceHistory: [...a.dailyHistory, ...a.priceHistory]
+      priceHistory: [...a.dailyHistory, ...a.priceHistory],
+      candlestickHistory: a.candlestickHistory.slice()
     }))
+    // Update market analysis
+    marketAnalysis.value = simulator.analyzeMarket()
+  }
+
+  /**
+   * Set market condition on the simulator (used by event system wiring).
+   * Maps event ids to MarketCondition + duration.
+   */
+  function setMarketCondition(condition: MarketCondition, durationTicks: number): void {
+    simulator.setCondition(condition, durationTicks)
   }
 
   /**
@@ -183,6 +207,9 @@ export const useStockStore = defineStore('stocks', () => {
         totalInvested: cost
       })
     }
+
+    // XP for buying stocks
+    player.addXp(D(5))
 
     return cost
   }
@@ -272,10 +299,11 @@ export const useStockStore = defineStore('stocks', () => {
     if (saved.stockMarketState) {
       try {
         simulator.deserialize(saved.stockMarketState as Parameters<MarketSimulator['deserialize']>[0])
-        // Merge dailyHistory + priceHistory for chart display
+        // Merge dailyHistory + priceHistory for chart display (clone candlestickHistory for reactivity)
         assets.value = simulator.getAllAssets().map(a => ({
           ...a,
-          priceHistory: [...a.dailyHistory, ...a.priceHistory]
+          priceHistory: [...a.dailyHistory, ...a.priceHistory],
+          candlestickHistory: a.candlestickHistory.slice()
         }))
       } catch (e) {
         console.warn('[StockStore] Failed to restore market state:', e)
@@ -292,6 +320,7 @@ export const useStockStore = defineStore('stocks', () => {
     unrealizedProfit,
     totalPortfolioValue,
     dividendIncomePerSecond,
+    marketAnalysis,
     initStocks,
     tick,
     payDividends,
@@ -300,6 +329,7 @@ export const useStockStore = defineStore('stocks', () => {
     getPosition,
     prestigeReset,
     getSimulator,
+    setMarketCondition,
     loadFromSave
   }
 })
