@@ -28,7 +28,7 @@ export type ButtonVariant =
     | 'tab'
     | 'icon'
 
-export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 const props = withDefaults(
     defineProps<{
@@ -89,7 +89,9 @@ const classes = computed(() => {
         {
             'btn-xs': props.size === 'xs',
             'btn-sm': props.size === 'sm',
+            'btn-md': props.size === 'md',
             'btn-lg': props.size === 'lg',
+            'btn-xl': props.size === 'xl',
             'btn-icon': isIconOnly.value,
             'btn-block': props.block,
             'btn-loading': props.loading,

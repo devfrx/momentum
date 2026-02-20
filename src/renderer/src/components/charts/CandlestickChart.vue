@@ -247,7 +247,7 @@ function safeChartUpdate(chart: Chart, mode = 'none') {
     const meta = chart.getDatasetMeta(i)
     if (typeof meta.hidden === 'boolean') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(chart.data.datasets[i] as any).hidden = meta.hidden
+      ; (chart.data.datasets[i] as any).hidden = meta.hidden
     }
   }
   chart.update(mode as UpdateMode)
@@ -274,8 +274,8 @@ function rebuildChart() {
       const label = String(chartInstance.data.datasets[i].label)
       if (hiddenByLabel.has(label)) {
         const h = hiddenByLabel.get(label)!
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(chartInstance.data.datasets[i] as any).hidden = h
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ; (chartInstance.data.datasets[i] as any).hidden = h
         chartInstance.getDatasetMeta(i).hidden = h
       }
     }
@@ -643,8 +643,8 @@ function updateChartData() {
   const startIdx = rangeCount > 0 && rangeCount < allCandles.length
     ? allCandles.length - rangeCount : 0
   if (chartInstance.options.scales?.x) {
-    ;(chartInstance.options.scales.x as any).min = chartData[startIdx].x
-    ;(chartInstance.options.scales.x as any).max = chartData[chartData.length - 1].x + DAY_MS * 0.5
+    ; (chartInstance.options.scales.x as any).min = chartData[startIdx].x
+      ; (chartInstance.options.scales.x as any).max = chartData[chartData.length - 1].x + DAY_MS * 0.5
   }
 
   safeChartUpdate(chartInstance)
@@ -674,7 +674,7 @@ watch(
     // Restore zoom on the NEW chart instance via the official zoomScale API
     if (wasZoomed && savedX && chartInstance) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(chartInstance as any).zoomScale?.('x', savedX, 'none')
+      ; (chartInstance as any).zoomScale?.('x', savedX, 'none')
       isUserZoomed.value = true
       autoScaleY(chartInstance)
     } else {
@@ -713,12 +713,7 @@ defineExpose({ resetZoom })
           <UTooltip v-for="(opt, idx) in zoomOptions" :key="opt.label"
             :text="opt.candles > 0 ? $t('charts.tip_range', { n: opt.candles }) : $t('charts.tip_range_all')"
             placement="bottom">
-            <UButton
-              variant="text"
-              size="xs"
-              :active="selectedRange === idx"
-              @click="selectedRange = idx"
-            >
+            <UButton variant="text" size="xs" :active="selectedRange === idx" @click="selectedRange = idx">
               {{ opt.label }}
             </UButton>
           </UTooltip>
@@ -767,7 +762,8 @@ defineExpose({ resetZoom })
     </div>
 
     <!-- Canvas -->
-    <div v-else class="chart-canvas-wrap" :class="{ 'canvas-fill': fill }" :style="fill ? undefined : { height: height + 'px' }">
+    <div v-else class="chart-canvas-wrap" :class="{ 'canvas-fill': fill }"
+      :style="fill ? undefined : { height: height + 'px' }">
       <canvas ref="canvasRef"></canvas>
     </div>
   </div>

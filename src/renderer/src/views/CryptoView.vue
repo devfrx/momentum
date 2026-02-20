@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCryptoStore } from '@renderer/stores/useCryptoStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
@@ -15,13 +16,13 @@ import CandlestickChart from '@renderer/components/charts/CandlestickChart.vue'
 import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import OrderBook from '@renderer/components/market/OrderBook.vue'
-import FullscreenChartModal from '@renderer/components/market/FullscreenChartModal.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useI18n } from 'vue-i18n'
 
+const router = useRouter()
 const crypto = useCryptoStore()
 const player = usePlayerStore()
 const settings = useSettingsStore()
@@ -69,21 +70,8 @@ const pinnedPnL = computed(() => {
 
 const availableCash = computed(() => player.cash.toNumber() - limitOrderStore.totalReservedCash.toNumber())
 
-// ─── Fullscreen Chart Modal ─────────────────────────────────────
-const fullscreenVisible = ref(false)
-const fullscreenAssetId = ref<string | null>(null)
-
-const fullscreenAsset = computed(() =>
-    fullscreenAssetId.value ? crypto.assets.find((a) => a.id === fullscreenAssetId.value) ?? null : null
-)
-
-const fullscreenPosition = computed(() =>
-    fullscreenAssetId.value ? getHolding(fullscreenAssetId.value) : null
-)
-
 function openFullscreen(assetId: string) {
-    fullscreenAssetId.value = assetId
-    fullscreenVisible.value = true
+    router.push({ name: 'crypto-detail', params: { assetId } })
 }
 
 function togglePin(assetId: string) {
@@ -259,9 +247,6 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
         <InfoPanel :title="$t('crypto.info_title')" :description="$t('crypto.info_desc')"
             :sections="cryptoInfoSections" />
 
-        <!-- Fullscreen Chart Modal -->
-        <FullscreenChartModal v-model="fullscreenVisible" :asset="fullscreenAsset" :position="fullscreenPosition"
-            :available-cash="availableCash" type="crypto" @buy="handleBuy" @sell="handleSell" />
     </div>
 </template>
 

@@ -25,10 +25,22 @@ const router = createRouter({
       meta: { titleKey: 'nav.stocks', icon: 'mdi:chart-line' }
     },
     {
+      path: '/stocks/:assetId',
+      name: 'stock-detail',
+      component: () => import('@renderer/views/AssetDetailView.vue'),
+      meta: { titleKey: 'nav.stocks', icon: 'mdi:chart-line', assetType: 'stock' }
+    },
+    {
       path: '/crypto',
       name: 'crypto',
       component: () => import('@renderer/views/CryptoView.vue'),
       meta: { titleKey: 'nav.crypto', icon: 'mdi:bitcoin' }
+    },
+    {
+      path: '/crypto/:assetId',
+      name: 'crypto-detail',
+      component: () => import('@renderer/views/AssetDetailView.vue'),
+      meta: { titleKey: 'nav.crypto', icon: 'mdi:bitcoin', assetType: 'crypto' }
     },
     {
       path: '/realestate',
@@ -123,7 +135,9 @@ export type RouteName =
   | 'dashboard'
   | 'business'
   | 'stocks'
+  | 'stock-detail'
   | 'crypto'
+  | 'crypto-detail'
   | 'realestate'
   | 'investments'
   | 'loans'

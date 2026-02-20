@@ -61,6 +61,11 @@
   font-size: var(--t-font-size-base);
 }
 
+.btn-xl {
+  padding: var(--t-space-4) var(--t-space-8);
+  font-size: var(--t-font-size-xl);
+}
+
 /* -- Primary CTA (solid) -- */
 .btn-primary {
   background: var(--t-cta);

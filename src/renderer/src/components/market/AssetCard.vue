@@ -87,6 +87,9 @@ function handleSell(amount: number) {
         <!-- Header -->
         <template #header>
             <div class="item-card-title">
+                <UTooltip :text="$t('market.fullscreen_chart')" placement="top">
+                    <UButton variant="icon" size="xl" icon="mdi:fullscreen" @click="emit('fullscreen', asset.id)" />
+                </UTooltip>
                 <div :class="symbolClass">{{ asset.id }}</div>
                 <h3 class="item-card-name">{{ asset.name }}</h3>
             </div>
@@ -131,9 +134,6 @@ function handleSell(amount: number) {
                 :icon="expanded ? 'mdi:chevron-up' : 'mdi:chart-areaspline'">
                 {{ expanded ? $t('market.collapse_chart') : $t('market.expand_chart') }}
             </UButton>
-            <UTooltip :text="$t('market.fullscreen_chart')" placement="top">
-                <UButton variant="ghost" size="sm" icon="mdi:fullscreen" @click="emit('fullscreen', asset.id)" />
-            </UTooltip>
         </div>
 
         <!-- Expanded Interactive Chart -->

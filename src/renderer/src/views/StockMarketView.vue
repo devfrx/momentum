@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useStockStore } from '@renderer/stores/useStockStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
@@ -15,13 +16,13 @@ import CandlestickChart from '@renderer/components/charts/CandlestickChart.vue'
 import PositionInfo from '@renderer/components/market/PositionInfo.vue'
 import TradePanel from '@renderer/components/market/TradePanel.vue'
 import OrderBook from '@renderer/components/market/OrderBook.vue'
-import FullscreenChartModal from '@renderer/components/market/FullscreenChartModal.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { EventImpactBanner } from '@renderer/components/events'
 import { useI18n } from 'vue-i18n'
 
+const router = useRouter()
 const stocks = useStockStore()
 const player = usePlayerStore()
 const settings = useSettingsStore()
@@ -67,21 +68,8 @@ const pinnedPnL = computed(() => {
 
 const availableCash = computed(() => player.cash.toNumber() - limitOrderStore.totalReservedCash.toNumber())
 
-// ─── Fullscreen Chart Modal ─────────────────────────────────────
-const fullscreenVisible = ref(false)
-const fullscreenAssetId = ref<string | null>(null)
-
-const fullscreenAsset = computed(() =>
-    fullscreenAssetId.value ? stocks.assets.find((a) => a.id === fullscreenAssetId.value) ?? null : null
-)
-
-const fullscreenPosition = computed(() =>
-    fullscreenAssetId.value ? getPosition(fullscreenAssetId.value) ?? null : null
-)
-
 function openFullscreen(assetId: string) {
-    fullscreenAssetId.value = assetId
-    fullscreenVisible.value = true
+    router.push({ name: 'stock-detail', params: { assetId } })
 }
 
 function togglePin(assetId: string) {
@@ -207,9 +195,9 @@ const stockInfoSections = computed<InfoSection[]>(() => [
                     </div>
                 </div>
                 <div class="pinned-header-actions">
-                    <UButton variant="ghost" size="xs" icon="mdi:fullscreen" :title="$t('market.fullscreen_chart')"
+                    <UButton variant="icon" size="xl" icon="mdi:fullscreen" :title="$t('market.fullscreen_chart')"
                         @click="openFullscreen(pinnedAsset?.id ?? '')" />
-                    <UButton variant="text" size="xs" @click="pinnedAssetId = null" :title="$t('stocks.unpin')"
+                    <UButton variant="icon" size="xl" @click="pinnedAssetId = null" :title="$t('stocks.unpin')"
                         icon="mdi:close" />
                 </div>
             </div>
@@ -265,9 +253,6 @@ const stockInfoSections = computed<InfoSection[]>(() => [
         <InfoPanel :title="$t('stocks.info_title')" :description="$t('stocks.info_desc')"
             :sections="stockInfoSections" />
 
-        <!-- Fullscreen Chart Modal -->
-        <FullscreenChartModal v-model="fullscreenVisible" :asset="fullscreenAsset" :position="fullscreenPosition"
-            :available-cash="availableCash" type="stock" @buy="handleBuy" @sell="handleSell" />
     </div>
 </template>
 
