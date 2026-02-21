@@ -652,6 +652,11 @@ export const useShopStore = defineStore('shop', () => {
 
     if (!item) return false
 
+    // Validate buyNowPrice > startingPrice (if provided)
+    if (buyNowPrice && buyNowPrice.lte(startingPrice)) {
+      buyNowPrice = null
+    }
+
     // Pay listing fee
     const listingFee = calculateListingFee(startingPrice)
     if (player.cash.lt(listingFee)) return false
@@ -681,7 +686,11 @@ export const useShopStore = defineStore('shop', () => {
   function tickAuctions(currentTick: number): void {
     for (let i = activeAuctions.value.length - 1; i >= 0; i--) {
       const auction = activeAuctions.value[i]
-      if (auction.status !== 'active') continue
+      if (auction.status !== 'active') {
+        // Stale non-active auction stuck in the list (e.g. buy-now sold) — finalize it
+        finalizeAuction(i)
+        continue
+      }
 
       // Process bids periodically
       if (currentTick - auction.lastBidTick >= AUCTION_NPC_BID_INTERVAL) {
@@ -689,8 +698,11 @@ export const useShopStore = defineStore('shop', () => {
         activeAuctions.value[i].lastBidTick = currentTick
       }
 
-      // Check if auction ended
-      if (currentTick >= auction.endsAtTick) {
+      // Re-read after bid processing (processAuctionBids may set status='sold' via buy-now)
+      const updated = activeAuctions.value[i]
+
+      // Check if auction ended or was completed via buy-now
+      if (updated.status !== 'active' || currentTick >= updated.endsAtTick) {
         finalizeAuction(i)
       }
     }
@@ -698,27 +710,33 @@ export const useShopStore = defineStore('shop', () => {
 
   /**
    * Finalize an auction — pay the player or return the item.
+   * Safe to call on auctions already marked 'sold' by buy-now logic.
    */
   function finalizeAuction(auctionIdx: number): void {
     const auction = activeAuctions.value[auctionIdx]
     const player = usePlayerStore()
 
-    if (auction.currentBid.gt(ZERO) && auction.currentBidder) {
-      // Item sold!
-      const successFee = calculateSuccessFee(auction.currentBid)
-      const proceeds = sub(auction.currentBid, successFee)
-      player.earnCash(proceeds)
+    // Only process rewards/returns for auctions still marked 'active'
+    // or 'sold' by buy-now (which hasn't paid the player yet).
+    const alreadyFinalized = auction.status === 'expired' || auction.status === 'cancelled'
+    if (!alreadyFinalized) {
+      if (auction.currentBid.gt(ZERO) && auction.currentBidder) {
+        // Item sold!
+        const successFee = calculateSuccessFee(auction.currentBid)
+        const proceeds = sub(auction.currentBid, successFee)
+        player.earnCash(proceeds)
 
-      totalAuctionRevenue.value = add(totalAuctionRevenue.value, proceeds)
-      totalAuctionsCompleted.value++
-      player.addXp(D(3))
+        totalAuctionRevenue.value = add(totalAuctionRevenue.value, proceeds)
+        totalAuctionsCompleted.value++
+        player.addXp(D(3))
 
-      auction.status = 'sold'
-    } else {
-      // No bids — return item to vault
-      const vault = useVaultStore()
-      vault.addItem(auction.item, 'shop')
-      auction.status = 'expired'
+        auction.status = 'sold'
+      } else {
+        // No bids — return item to vault
+        const vault = useVaultStore()
+        vault.addItem(auction.item, 'shop')
+        auction.status = 'expired'
+      }
     }
 
     // Move to history

@@ -2732,6 +2732,13 @@ export default {
     auction_optional: 'Optional',
     auction_listing_fee: 'Listing Fee',
     auction_confirm: 'List for Auction',
+    auction_live: 'LIVE',
+    auction_heat_hot: 'Hot',
+    auction_heat_warm: 'Active',
+    auction_heat_cool: 'Quiet',
+    auction_buy_now_label: 'Buy Now',
+    auction_source_vault: 'Vault',
+    auction_source_storage: 'Storage',
   },
 
   // ─── Vault ────────────────────────────────────────────────────

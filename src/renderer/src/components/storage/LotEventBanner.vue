@@ -115,8 +115,8 @@ function parseRevealInfo(resultKey: string): { name: string; budget: string } | 
     align-items: center;
     gap: var(--t-space-2);
     padding: var(--t-space-2) var(--t-space-3);
-    border-radius: var(--t-radius-sm);
-    border-left: 3px solid transparent;
+    /* border-radius: var(--t-radius-sm); */
+    /* border-left: 3px solid transparent; */
     transition: all var(--t-transition-normal);
     font-size: var(--t-font-size-sm);
 }

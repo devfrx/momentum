@@ -98,11 +98,11 @@ export function generateAuctionBidders(
 ): NpcAuctionBidder[] {
   const rarityIdx = RARITY_ORDER[item.rarity] ?? 0
 
-  // Number of bidders: 1-3 for common, up to 4-6 for mythic
-  const baseBidders = 1 + Math.floor(rarityIdx * 0.7)
+  // Number of bidders: 2-3 for common, up to 5-7 for mythic
+  const baseBidders = 2 + Math.floor(rarityIdx * 0.8)
   const demandBonus = demandMult > 1.3 ? 1 : 0
   const luckBidders = luckBonus > 0.5 ? 1 : 0
-  const totalBidders = Math.min(6, baseBidders + demandBonus + luckBidders)
+  const totalBidders = Math.min(7, baseBidders + demandBonus + luckBidders)
 
   // Shuffle and pick from pool
   const shuffled = [...NPC_BIDDER_NAMES].sort(() => Math.random() - 0.5)
@@ -148,7 +148,9 @@ export function calculateSuccessFee(salePrice: Decimal): Decimal {
 export function getItemFairValue(item: StorageItem): Decimal {
   const condition: ItemCondition = item.condition ?? 'good'
   const condMult = CONDITION_MULTIPLIERS[condition] ?? 1.0
-  return mul(item.baseValue, D(condMult))
+  // Use appraised value when available (more accurate market signal)
+  const base = item.appraisedValue ?? item.baseValue
+  return mul(base, D(condMult))
 }
 
 /**
@@ -161,13 +163,6 @@ export function processAuctionBids(auction: ResaleAuction): ResaleAuction {
 
   const fairValue = getItemFairValue(auction.item)
   let { currentBid, currentBidder } = auction
-
-  // Minimum bid floor: at least 1 (prevents zero-bid deadlock)
-  const bidBase = currentBid.gt(ZERO)
-    ? currentBid
-    : auction.startingPrice.gt(ZERO)
-      ? auction.startingPrice
-      : D(1)
 
   // Phase 1 — each active bidder independently decides whether to bid
   const proposals: { bidder: NpcAuctionBidder; bid: Decimal }[] = []
@@ -184,9 +179,24 @@ export function processAuctionBids(auction: ResaleAuction): ResaleAuction {
     // Decide to bid based on aggression
     if (Math.random() > bidder.aggression * 0.7) return bidder
 
-    // Calculate bid amount: increment by 2-8% over the incoming bid
-    const increment = 0.02 + Math.random() * 0.06 * (1 + bidder.aggression)
-    let newBid = mul(bidBase, D(1 + increment))
+    // Jump bid: when the price is far below the NPC's ceiling, make a
+    // larger opening move instead of tiny increments from a low base.
+    const budgetUsed = maxBid.gt(ZERO) ? currentBid.div(maxBid).toNumber() : 1
+    let newBid: Decimal
+
+    if (budgetUsed < 0.35) {
+      // Price well below ceiling → jump to 35-55% of their max
+      const jumpFrac = 0.35 + Math.random() * 0.20
+      newBid = mul(maxBid, D(jumpFrac))
+    } else if (budgetUsed < 0.60) {
+      // Mid-range → moderate increments (5-15%)
+      const increment = 0.05 + Math.random() * 0.10 * (1 + bidder.aggression)
+      newBid = mul(currentBid, D(1 + increment))
+    } else {
+      // Close to ceiling → careful small increments (2-8%)
+      const increment = 0.02 + Math.random() * 0.06 * (1 + bidder.aggression)
+      newBid = mul(currentBid, D(1 + increment))
+    }
 
     // Don't exceed their max
     if (newBid.gt(maxBid)) newBid = maxBid
@@ -244,7 +254,7 @@ export function createResaleAuction(
     source,
     startingPrice,
     buyNowPrice,
-    currentBid: ZERO,
+    currentBid: startingPrice,
     currentBidder: null,
     bidders: generateAuctionBidders(item, demandMultiplier, luckBonus),
     startedAtTick: currentTick,

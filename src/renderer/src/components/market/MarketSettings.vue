@@ -28,7 +28,7 @@ const intervalOptions = [
                 <span>{{ $t('market.tick_speed') }}</span>
             </div>
             <div class="interval-buttons">
-                <UButton variant="ghost" size="xs" v-for="opt in intervalOptions" :key="opt.value"
+                <UButton variant="icon" size="xs" v-for="opt in intervalOptions" :key="opt.value"
                     :active="settings.marketUpdateInterval === opt.value"
                     @click="settings.marketUpdateInterval = opt.value" :title="$t(opt.descKey)">
                     {{ opt.label }}

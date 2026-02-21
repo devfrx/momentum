@@ -2702,6 +2702,13 @@ export default {
     auction_optional: 'Opzionale',
     auction_listing_fee: 'Commissione di Inserzione',
     auction_confirm: "Metti all'Asta",
+    auction_live: 'LIVE',
+    auction_heat_hot: 'Caldo',
+    auction_heat_warm: 'Attivo',
+    auction_heat_cool: 'Calmo',
+    auction_buy_now_label: 'Compralo Subito',
+    auction_source_vault: 'Cassaforte',
+    auction_source_storage: 'Magazzino',
   },
 
   // ─── Cassaforte ───────────────────────────────────────────────

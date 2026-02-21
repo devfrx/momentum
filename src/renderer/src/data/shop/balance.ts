@@ -144,7 +144,7 @@ export const AUCTION_MAX_ACTIVE = 3
 export const AUCTION_NPC_BID_INTERVAL = 30 // ~3 seconds
 
 /** Base NPC ceiling as fraction of fair value. */
-export const AUCTION_NPC_BASE_CEILING = 0.65
+export const AUCTION_NPC_BASE_CEILING = 0.72
 
 /** Additional ceiling per rarity tier. */
 export const AUCTION_NPC_RARITY_CEILING_MULT = 0.08
