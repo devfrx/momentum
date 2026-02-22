@@ -15,6 +15,8 @@ import { add, sub, ZERO } from '@renderer/core/BigNum'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton, UTooltip } from '@renderer/components/ui'
 import MultiplierBreakdownPanel from '@renderer/components/MultiplierBreakdownPanel.vue'
+import blackLogo from '@renderer/assets/black_logo.png'
+import whiteLogo from '@renderer/assets/white_logo.png'
 
 const route = useRoute()
 const player = usePlayerStore()
@@ -87,8 +89,8 @@ function handleClose(): void {
 
         <!-- Brand -->
         <div class="brand">
-            <AppIcon icon="mdi:chart-timeline-variant-shimmer" class="brand-icon" />
-            <span class="brand-text">{{ $t('header.brand') }}</span>
+            <img :src="settings.theme === 'dark' ? whiteLogo : blackLogo" alt="FINANX" class="brand-logo" />
+            <span class="brand-text">FINANX</span>
         </div>
 
         <!-- Hero Cash -->
@@ -121,7 +123,7 @@ function handleClose(): void {
             <div v-if="routeMultiplier" class="hud-chip" :class="{ 'has-bonus': routeMultiplier.hasBonus }">
                 <AppIcon :icon="routeMultiplier.icon" class="hud-route-icon" />
                 <span class="hud-chip-value" :class="{ accent: routeMultiplier.hasBonus }">{{ routeMultiplier.formatted
-                }}</span>
+                    }}</span>
             </div>
 
             <UTooltip :text="$t('header.view_multipliers')" placement="bottom">
@@ -199,15 +201,16 @@ function handleClose(): void {
     padding-right: var(--t-space-3);
 }
 
-.brand-icon {
-    font-size: 1rem;
-    color: var(--t-text-muted);
+.brand-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
 }
 
 .brand-text {
     font-size: var(--t-font-size-sm);
     font-weight: var(--t-font-bold);
-    letter-spacing: -0.03em;
+    letter-spacing: 0.08em;
     color: var(--t-text);
 }
 

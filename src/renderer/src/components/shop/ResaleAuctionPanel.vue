@@ -547,10 +547,10 @@ const HISTORY_STATUS_ICONS: Record<string, string> = {
     height: 6px;
     border-radius: 50%;
     background: var(--t-danger);
-    animation: live-blink 1.5s ease-in-out infinite;
+    /* animation: live-blink 1.5s ease-in-out infinite; */
 }
 
-@keyframes live-blink {
+/* @keyframes live-blink {
 
     0%,
     100% {
@@ -560,7 +560,7 @@ const HISTORY_STATUS_ICONS: Record<string, string> = {
     50% {
         opacity: 0.3;
     }
-}
+} */
 
 .heat-badge {
     display: inline-flex;

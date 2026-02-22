@@ -98,6 +98,26 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
 }
 
+/**
+ * Track last-picked asset per ability type to avoid consecutive repeats.
+ * Module-scoped (not persisted) — resets on page reload, which is fine.
+ */
+const _lastPicked: Record<string, string> = {}
+
+/**
+ * Pick a random asset from the array, avoiding the one previously picked
+ * for the given `key`. Guarantees variety when there are ≥ 2 assets.
+ */
+function pickRandomAsset<T extends { id: string }>(assets: T[], key: string): T {
+  if (assets.length <= 1) return assets[0]
+  const lastId = _lastPicked[key]
+  const candidates = lastId ? assets.filter(a => a.id !== lastId) : assets
+  const pool = candidates.length > 0 ? candidates : assets
+  const picked = pool[randomInt(0, pool.length - 1)]
+  _lastPicked[key] = picked.id
+  return picked
+}
+
 // ─── Store ──────────────────────────────────────────────────────
 
 export const useBlackMarketStore = defineStore('blackmarket', () => {
@@ -685,8 +705,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           addLogEntry('warning', 'mdi:chart-line-variant', 'blackmarket.log_tip_no_assets', { market: 'Stock' }, 'contact')
           return { type: 'tip', failed: true, reason: 'no_assets' }
         }
-        const idx = randomInt(0, allAssets.length - 1)
-        const asset = allAssets[idx]
+        const asset = pickRandomAsset(allAssets, 'broker_stock_tip')
         const config = STOCKS.find(s => s.id === asset.id)
         const accuracy = Math.min(1, BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS)
         const recentChange = asset.changePercent
@@ -715,8 +734,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           addLogEntry('warning', 'mdi:currency-btc', 'blackmarket.log_tip_no_assets', { market: 'Crypto' }, 'contact')
           return { type: 'tip', failed: true, reason: 'no_assets' }
         }
-        const idx = randomInt(0, allCrypto.length - 1)
-        const asset = allCrypto[idx]
+        const asset = pickRandomAsset(allCrypto, 'broker_crypto_tip')
         const config = CRYPTOS.find(c => c.id === asset.id)
         const accuracy = Math.min(1, BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS)
         const recentChange = asset.changePercent
@@ -748,8 +766,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             addLogEntry('warning', 'mdi:trending-up', 'blackmarket.log_insider_no_assets', {}, 'contact')
             return { type: 'insider', failed: true, reason: 'no_assets' }
           }
-          const idx = randomInt(0, allAssets.length - 1)
-          const asset = allAssets[idx]
+          const asset = pickRandomAsset(allAssets, 'broker_insider_stock')
           const targetAsset = sim.getAsset(asset.id)
           const boostPct = Math.round((0.15 + Math.random() * 0.10) * 100)
           if (targetAsset) {
@@ -776,8 +793,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             addLogEntry('warning', 'mdi:trending-up', 'blackmarket.log_insider_no_assets', {}, 'contact')
             return { type: 'insider', failed: true, reason: 'no_assets' }
           }
-          const idx = randomInt(0, allCrypto.length - 1)
-          const asset = allCrypto[idx]
+          const asset = pickRandomAsset(allCrypto, 'broker_insider_crypto')
           const targetAsset = sim.getAsset(asset.id)
           const boostPct = Math.round((0.15 + Math.random() * 0.10) * 100)
           if (targetAsset) {
@@ -1031,8 +1047,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           addLogEntry('warning', 'mdi:alert-decagram', 'blackmarket.log_hack_no_assets', { market: 'Stock' }, 'contact')
           return { type: 'hack', failed: true, reason: 'no_assets' }
         }
-        const idx = randomInt(0, allAssets.length - 1)
-        const asset = allAssets[idx]
+        const asset = pickRandomAsset(allAssets, 'hacker_stock')
         const targetAsset = sim.getAsset(asset.id)
         // Biased 75% up / 25% down — hacking should reward the player
         const direction = Math.random() > 0.25 ? 1 : -1
@@ -1063,8 +1078,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           addLogEntry('warning', 'mdi:alert-decagram', 'blackmarket.log_hack_no_assets', { market: 'Crypto' }, 'contact')
           return { type: 'hack', failed: true, reason: 'no_assets' }
         }
-        const idx = randomInt(0, allCrypto.length - 1)
-        const asset = allCrypto[idx]
+        const asset = pickRandomAsset(allCrypto, 'hacker_crypto')
         const targetAsset = sim.getAsset(asset.id)
         // Biased 75% up / 25% down — hacking should reward the player
         const direction = Math.random() > 0.25 ? 1 : -1
