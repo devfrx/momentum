@@ -66,6 +66,8 @@ const xpProgress = computed(() => {
     return Math.min(100, player.xp.div(player.xpToNextLevel).mul(100).toNumber())
 })
 
+const isInDebt = computed(() => player.cash.lt(0))
+
 function toggleTheme(): void {
     settings.theme = settings.theme === 'dark' ? 'light' : 'dark'
 }
@@ -94,9 +96,12 @@ function handleClose(): void {
         </div>
 
         <!-- Hero Cash -->
-        <UTooltip :text="formatCashFull(player.cash)" placement="bottom">
-            <div class="hero-stat">
-                <span class="hero-value">{{ formatCash(player.cash) }}</span>
+        <UTooltip
+            :text="isInDebt ? $t('header.in_debt') + ': ' + formatCashFull(player.cash) : formatCashFull(player.cash)"
+            placement="bottom">
+            <div class="hero-stat" :class="{ 'hero-stat--debt': isInDebt }">
+                <AppIcon v-if="isInDebt" icon="mdi:alert-circle" class="debt-icon" />
+                <span class="hero-value" :class="{ 'hero-value--debt': isInDebt }">{{ formatCash(player.cash) }}</span>
                 <span class="hero-profit" :class="{ negative: totalIncomePerSecond.lt(0) }">
                     <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
                     {{ formatCash(totalIncomePerSecond) }}{{ $t('common.per_second') }}
@@ -123,7 +128,7 @@ function handleClose(): void {
             <div v-if="routeMultiplier" class="hud-chip" :class="{ 'has-bonus': routeMultiplier.hasBonus }">
                 <AppIcon :icon="routeMultiplier.icon" class="hud-route-icon" />
                 <span class="hud-chip-value" :class="{ accent: routeMultiplier.hasBonus }">{{ routeMultiplier.formatted
-                    }}</span>
+                }}</span>
             </div>
 
             <UTooltip :text="$t('header.view_multipliers')" placement="bottom">
@@ -237,6 +242,33 @@ function handleClose(): void {
     font-weight: var(--t-font-bold);
     color: var(--t-text);
     letter-spacing: -0.02em;
+}
+
+.hero-value--debt {
+    color: var(--t-danger);
+}
+
+.hero-stat--debt {
+    border-color: var(--t-danger);
+    background: color-mix(in srgb, var(--t-danger) 8%, var(--t-bg-muted));
+    animation: debt-pulse 2s ease-in-out infinite;
+}
+
+@keyframes debt-pulse {
+
+    0%,
+    100% {
+        border-color: var(--t-danger);
+    }
+
+    50% {
+        border-color: color-mix(in srgb, var(--t-danger) 40%, transparent);
+    }
+}
+
+.debt-icon {
+    color: var(--t-danger);
+    font-size: 0.85rem;
 }
 
 .hero-profit {

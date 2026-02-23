@@ -10,6 +10,25 @@ import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
 import { useUpgradeStore } from './useUpgradeStore'
 
+/**
+ * Transaction metadata — attach to earnCash/spendCash/forcePay to
+ * automatically record a banking transaction for that cash operation.
+ */
+export interface TxMeta {
+  /** i18n key for the transaction description */
+  key: string
+  /** TransactionCategory string (cast in the recorder) */
+  cat: string
+  /** Optional i18n params */
+  params?: Record<string, string | number>
+}
+
+/** Callback signature for the transaction recorder (registered by useInitGame) */
+type TxRecordFn = (amount: Decimal, balance: Decimal, meta: TxMeta) => void
+
+/** Module-level recorder — set once at init, survives HMR */
+let _txRecordFn: TxRecordFn | null = null
+
 export const usePlayerStore = defineStore('player', () => {
   // ─── State ────────────────────────────────────────────────────
   const cash = ref<Decimal>(D(50))
@@ -41,18 +60,46 @@ export const usePlayerStore = defineStore('player', () => {
 
   // ─── Actions ──────────────────────────────────────────────────
 
-  /** Add cash (from income, job wages, etc.) */
-  function earnCash(amount: Decimal): void {
-    cash.value = add(cash.value, amount)
-    totalCashEarned.value = add(totalCashEarned.value, amount)
+  /**
+   * Register the transaction recorder callback.
+   * Called once from useInitGame after both player and banking stores exist.
+   */
+  function registerTxRecorder(fn: TxRecordFn): void {
+    _txRecordFn = fn
   }
 
-  /** Spend cash (purchases). Returns false if not enough. */
-  function spendCash(amount: Decimal): boolean {
+  /**
+   * Add cash (from income, job wages, etc.).
+   * Pass optional `meta` to auto-record a banking transaction.
+   */
+  function earnCash(amount: Decimal, meta?: TxMeta): void {
+    cash.value = add(cash.value, amount)
+    totalCashEarned.value = add(totalCashEarned.value, amount)
+    if (meta && _txRecordFn) _txRecordFn(amount, cash.value, meta)
+  }
+
+  /**
+   * Spend cash (purchases). Returns false if not enough.
+   * Pass optional `meta` to auto-record a banking transaction.
+   */
+  function spendCash(amount: Decimal, meta?: TxMeta): boolean {
     if (!gte(cash.value, amount)) return false
     cash.value = sub(cash.value, amount)
     totalCashSpent.value = add(totalCashSpent.value, amount)
+    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cash.value, meta)
     return true
+  }
+
+  /**
+   * Force-deduct cash even if balance goes negative.
+   * Used for mandatory payments the player cannot dodge
+   * (fines, operating losses, penalties, etc.).
+   * Pass optional `meta` to auto-record a banking transaction.
+   */
+  function forcePay(amount: Decimal, meta?: TxMeta): void {
+    cash.value = sub(cash.value, amount)
+    totalCashSpent.value = add(totalCashSpent.value, amount)
+    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cash.value, meta)
   }
 
   /** Add XP and handle level-up (applies xp_gain multiplier from skill tree) */
@@ -118,10 +165,12 @@ export const usePlayerStore = defineStore('player', () => {
     netWorthLocal,
     canAfford,
     // Actions
+    registerTxRecorder,
     earnCash,
     spendCash,
+    forcePay,
     addXp,
     prestigeReset,
-    loadFromSave,
+    loadFromSave
   }
 })

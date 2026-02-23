@@ -48,6 +48,7 @@ import {
   INVESTIGATION_FINE_MULT,
   MAX_ACTIVE_EFFECTS,
   MAX_INVESTIGATIONS,
+  INVESTIGATION_COOLDOWN_TICKS,
   FENCE_DAILY_LIMIT,
   FENCE_SELL_MULTIPLIER,
   FENCE_FORGE_MIN_BONUS,
@@ -81,7 +82,7 @@ import {
   scalePercentageCost,
   rollContactRisk,
   getBetrayalChance,
-  getScamChance,
+  getScamChance
 } from '@renderer/data/blackmarket'
 
 // ─── Helpers ────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ const _lastPicked: Record<string, string> = {}
 function pickRandomAsset<T extends { id: string }>(assets: T[], key: string): T {
   if (assets.length <= 1) return assets[0]
   const lastId = _lastPicked[key]
-  const candidates = lastId ? assets.filter(a => a.id !== lastId) : assets
+  const candidates = lastId ? assets.filter((a) => a.id !== lastId) : assets
   const pool = candidates.length > 0 ? candidates : assets
   const picked = pool[randomInt(0, pool.length - 1)]
   _lastPicked[key] = picked.id
@@ -143,6 +144,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
   // ── Investigations ─────────────────────────────────────────
   const investigations = ref<Investigation[]>([])
+  const lastInvestigationSpawnTick = ref(0)
 
   // ── Activity Log ───────────────────────────────────────────
   const activityLog = ref<ActivityLogEntry[]>([])
@@ -160,7 +162,9 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
   // ─── Computed ──────────────────────────────────────────────
 
-  const currentTier = computed((): ReputationTier => calculateTier(totalDealsCompleted.value, reputationPoints.value))
+  const currentTier = computed(
+    (): ReputationTier => calculateTier(totalDealsCompleted.value, reputationPoints.value)
+  )
 
   const tierProgress = computed(() => {
     const progress = getTierProgress(totalDealsCompleted.value, reputationPoints.value)
@@ -170,7 +174,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     return {
       progress,
       progressPercent: Math.round(progress * 100),
-      dealsToNext,
+      dealsToNext
     }
   })
 
@@ -179,14 +183,14 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
   const currentHeatLevel = computed(() => getHeatLevel(heat.value))
 
   const unlockedContacts = computed(() => {
-    return CONTACTS.filter(c => currentTier.value >= c.unlockTier)
+    return CONTACTS.filter((c) => currentTier.value >= c.unlockTier)
   })
 
-  const activeInvestigations = computed(() =>
-    investigations.value.filter(i => !i.resolved)
-  )
+  const activeInvestigations = computed(() => investigations.value.filter((i) => !i.resolved))
 
-  const netProfit = computed(() => sub(totalCashEarned.value, add(totalCashSpent.value, totalFinesPaid.value)))
+  const netProfit = computed(() =>
+    sub(totalCashEarned.value, add(totalCashSpent.value, totalFinesPaid.value))
+  )
 
   /** Time until next deal rotation in seconds */
   const timeToNextRotation = computed(() => {
@@ -203,7 +207,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     titleParams: Record<string, string | number>,
     source: ActivityLogEntry['source'],
     detailKey?: string,
-    detailParams?: Record<string, string | number>,
+    detailParams?: Record<string, string | number>
   ): void {
     activityLog.value.unshift({
       id: uid(),
@@ -214,7 +218,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       titleParams,
       detailKey,
       detailParams,
-      source,
+      source
     })
     if (activityLog.value.length > MAX_LOG_ENTRIES) {
       activityLog.value = activityLog.value.slice(0, MAX_LOG_ENTRIES)
@@ -223,13 +227,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
   function initContacts(): void {
     if (contactStates.value.length > 0) return
-    contactStates.value = CONTACTS.map(c => ({
+    contactStates.value = CONTACTS.map((c) => ({
       contactId: c.id,
       loyalty: 0,
       totalInteractions: 0,
       abilityCooldowns: {},
       dailyUses: 0,
-      lastDailyResetTick: 0,
+      lastDailyResetTick: 0
     }))
   }
 
@@ -241,7 +245,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     const player = usePlayerStore()
     const wealth = player.cash
 
-    const eligible = DEAL_DEFS.filter(d => {
+    const eligible = DEAL_DEFS.filter((d) => {
       // Check tier
       if (d.minTier > tier) return false
       // Check category unlock
@@ -258,7 +262,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     const count = clamp(
       MIN_DEALS_AVAILABLE + Math.floor(tier * 0.8),
       MIN_DEALS_AVAILABLE,
-      Math.min(MAX_DEALS_AVAILABLE, eligible.length),
+      Math.min(MAX_DEALS_AVAILABLE, eligible.length)
     )
 
     const selected = new Set<string>()
@@ -288,21 +292,23 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           const riskVariance = randomInt(-10, 10)
           const adjustedRisk = clamp(
             def.baseRisk + riskVariance - riskReduction + heatRiskIncrease,
-            1, 95,
+            1,
+            95
           )
 
           // Scale cash-based effects by wealth (ROI model)
-          const scaledEffects = def.successEffects.map(e => ({
+          const scaledEffects = def.successEffects.map((e) => ({
             ...e,
-            value: scaleDealEffect(e.type, e.value, wealth, scaledBaseCost, def.roiRatio),
+            value: scaleDealEffect(e.type, e.value, wealth, scaledBaseCost, def.roiRatio)
           }))
-          const scaledConsequences = def.failConsequences.map(c => ({
+          const scaledConsequences = def.failConsequences.map((c) => ({
             ...c,
-            value: scaleDealConsequence(c.type, c.value, wealth, scaledBaseCost),
+            value: scaleDealConsequence(c.type, c.value, wealth, scaledBaseCost)
           }))
 
           // Deal expires at next rotation
-          const expiresAt = currentTick + randomInt(DEAL_ROTATION_MIN_TICKS, DEAL_ROTATION_MAX_TICKS)
+          const expiresAt =
+            currentTick + randomInt(DEAL_ROTATION_MIN_TICKS, DEAL_ROTATION_MAX_TICKS)
 
           deals.push({
             id: uid(),
@@ -319,7 +325,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             repReward: def.repReward,
             availableAtTick: currentTick,
             expiresAtTick: expiresAt,
-            status: 'available',
+            status: 'available'
           })
           break
         }
@@ -328,13 +334,14 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
     availableDeals.value = deals
     lastDealRotationTick.value = currentTick
-    nextRotationTick.value = currentTick + randomInt(DEAL_ROTATION_MIN_TICKS, DEAL_ROTATION_MAX_TICKS)
+    nextRotationTick.value =
+      currentTick + randomInt(DEAL_ROTATION_MIN_TICKS, DEAL_ROTATION_MAX_TICKS)
   }
 
   // ─── Accept Deal ──────────────────────────────────────────
 
   function acceptDeal(dealId: string): { success: boolean; message: string } {
-    const deal = availableDeals.value.find(d => d.id === dealId)
+    const deal = availableDeals.value.find((d) => d.id === dealId)
     if (!deal || deal.status !== 'available') {
       return { success: false, message: 'deal_not_available' }
     }
@@ -347,7 +354,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     }
 
     // Pay for the deal
-    player.spendCash(deal.cost)
+    player.spendCash(deal.cost, { key: 'banking.tx_bm_deal', cat: 'blackmarket' })
     totalCashSpent.value = add(totalCashSpent.value, deal.cost)
 
     // Roll for success
@@ -378,9 +385,17 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         dealCooldowns.value[def.id] = lastTickProcessed.value + def.cooldownTicks
       }
 
-      addLogEntry('success', deal.icon, 'blackmarket.log_deal_success', {
-        deal: deal.nameKey, cost: deal.cost.toNumber(), risk: deal.risk,
-      }, 'deal')
+      addLogEntry(
+        'success',
+        deal.icon,
+        'blackmarket.log_deal_success',
+        {
+          deal: deal.nameKey,
+          cost: deal.cost.toNumber(),
+          risk: deal.risk
+        },
+        'deal'
+      )
 
       return { success: true, message: 'deal_success' }
     } else {
@@ -407,9 +422,17 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       // Partial XP even on failure
       player.addXp(D(Math.ceil(deal.xpReward * 0.3)))
 
-      addLogEntry('danger', 'mdi:alert-octagon', 'blackmarket.log_deal_failed', {
-        deal: deal.nameKey, cost: deal.cost.toNumber(), risk: deal.risk,
-      }, 'deal')
+      addLogEntry(
+        'danger',
+        'mdi:alert-octagon',
+        'blackmarket.log_deal_failed',
+        {
+          deal: deal.nameKey,
+          cost: deal.cost.toNumber(),
+          risk: deal.risk
+        },
+        'deal'
+      )
 
       return { success: false, message: 'deal_failed' }
     }
@@ -422,7 +445,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     value: number,
     durationTicks: number,
     sourceId: string,
-    target?: string,
+    target?: string
   ): void {
     const player = usePlayerStore()
 
@@ -430,7 +453,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (durationTicks === 0) {
       switch (type) {
         case 'cash_grant':
-          player.earnCash(D(value))
+          player.earnCash(D(value), { key: 'banking.tx_bm_deal_reward', cat: 'blackmarket' })
           totalCashEarned.value = add(totalCashEarned.value, D(value))
           return
         case 'heat_reduction':
@@ -452,7 +475,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       value,
       ticksRemaining: durationTicks,
       totalDuration: durationTicks,
-      target,
+      target
     })
   }
 
@@ -462,15 +485,25 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     switch (type) {
       case 'cash_loss': {
         const loss = D(value)
-        if (gte(player.cash, loss)) {
-          player.spendCash(loss)
-        }
-        addLogEntry('danger', 'mdi:cash-minus', 'blackmarket.log_cash_loss', { amount: formatCashStandalone(loss) }, 'deal')
+        player.forcePay(loss, { key: 'banking.tx_bm_deal_loss', cat: 'blackmarket' })
+        addLogEntry(
+          'danger',
+          'mdi:cash-minus',
+          'blackmarket.log_cash_loss',
+          { amount: formatCashStandalone(loss) },
+          'deal'
+        )
         break
       }
       case 'heat_spike':
         addHeat(value)
-        addLogEntry('warning', 'mdi:fire', 'blackmarket.log_heat_spike', { amount: Math.round(value) }, 'deal')
+        addLogEntry(
+          'warning',
+          'mdi:fire',
+          'blackmarket.log_heat_spike',
+          { amount: Math.round(value) },
+          'deal'
+        )
         break
       case 'income_penalty':
         if (activeEffects.value.length < MAX_ACTIVE_EFFECTS) {
@@ -478,9 +511,9 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             id: uid(),
             sourceId: 'consequence',
             type: 'income_boost',
-            value,  // value < 1 = penalty
+            value, // value < 1 = penalty
             ticksRemaining: durationTicks || 1200,
-            totalDuration: durationTicks || 1200,
+            totalDuration: durationTicks || 1200
           })
         }
         break
@@ -493,7 +526,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             value,
             ticksRemaining: durationTicks || 600,
             totalDuration: durationTicks || 600,
-            target: 'all',
+            target: 'all'
           })
         }
         break
@@ -517,6 +550,9 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
   function triggerInvestigation(severity: number): void {
     if (activeInvestigations.value.length >= MAX_INVESTIGATIONS) return
+    // Enforce cooldown between investigation spawns
+    if (lastTickProcessed.value - lastInvestigationSpawnTick.value < INVESTIGATION_COOLDOWN_TICKS)
+      return
     const player = usePlayerStore()
 
     const duration = randomInt(INVESTIGATION_MIN_TICKS, INVESTIGATION_MAX_TICKS)
@@ -531,17 +567,24 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       fineAmount: fineBase,
       catchChance: 0.3 + severity * 0.1,
       resolved: false,
-      caught: false,
+      caught: false
     })
 
     totalInvestigations.value++
-    addLogEntry('danger', 'mdi:shield-alert', 'blackmarket.log_investigation_started', {
-      severity,
-    }, 'investigation')
+    lastInvestigationSpawnTick.value = lastTickProcessed.value
+    addLogEntry(
+      'danger',
+      'mdi:shield-alert',
+      'blackmarket.log_investigation_started',
+      {
+        severity
+      },
+      'investigation'
+    )
   }
 
   function resolveInvestigation(investigationId: string): void {
-    const inv = investigations.value.find(i => i.id === investigationId)
+    const inv = investigations.value.find((i) => i.id === investigationId)
     if (!inv || inv.resolved) return
 
     inv.resolved = true
@@ -551,50 +594,65 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (caught) {
       const player = usePlayerStore()
       const fine = inv.fineAmount
-      if (gte(player.cash, fine)) {
-        player.spendCash(fine)
-      } else {
-        // Take all remaining cash if can't pay full fine
-        player.spendCash(player.cash)
-      }
+      player.forcePay(fine, { key: 'banking.tx_bm_fine', cat: 'blackmarket' })
       totalFinesPaid.value = add(totalFinesPaid.value, fine)
-      // Heat spike on getting caught
-      addHeat(inv.severity * 5)
-      addLogEntry('danger', 'mdi:gavel', 'blackmarket.log_investigation_caught', {
-        fine: formatCashStandalone(fine), severity: inv.severity,
-      }, 'investigation')
+      // Heat spike on getting caught (capped to avoid snowball)
+      addHeat(inv.severity * 2)
+      addLogEntry(
+        'danger',
+        'mdi:gavel',
+        'blackmarket.log_investigation_caught',
+        {
+          fine: formatCashStandalone(fine),
+          severity: inv.severity
+        },
+        'investigation'
+      )
     } else {
       // Dodged it — small heat reduction
       heat.value = clamp(heat.value - 5, 0, MAX_HEAT)
-      addLogEntry('success', 'mdi:shield-check', 'blackmarket.log_investigation_dodged', {
-        severity: inv.severity,
-      }, 'investigation')
+      addLogEntry(
+        'success',
+        'mdi:shield-check',
+        'blackmarket.log_investigation_dodged',
+        {
+          severity: inv.severity
+        },
+        'investigation'
+      )
     }
   }
 
   // ─── NPC Contact Actions ──────────────────────────────────
 
   function getContactState(contactId: ContactId): ContactState | undefined {
-    return contactStates.value.find(c => c.contactId === contactId)
+    return contactStates.value.find((c) => c.contactId === contactId)
   }
 
-  function useContactAbility(contactId: ContactId, abilityId: string): { success: boolean; message: string; result?: unknown } {
+  function useContactAbility(
+    contactId: ContactId,
+    abilityId: string
+  ): { success: boolean; message: string; result?: unknown } {
     const def = getContactDef(contactId)
     if (!def) return { success: false, message: 'contact_not_found' }
     if (currentTier.value < def.unlockTier) return { success: false, message: 'contact_locked' }
 
-    const ability = def.abilities.find(a => a.id === abilityId)
+    const ability = def.abilities.find((a) => a.id === abilityId)
     if (!ability) return { success: false, message: 'ability_not_found' }
 
     const state = getContactState(contactId)
     if (!state) return { success: false, message: 'contact_state_error' }
 
     // Check loyalty requirement
-    if (state.loyalty < ability.minLoyalty) return { success: false, message: 'insufficient_loyalty' }
+    if (state.loyalty < ability.minLoyalty)
+      return { success: false, message: 'insufficient_loyalty' }
     // Check tier
     if (currentTier.value < ability.minTier) return { success: false, message: 'tier_too_low' }
     // Check cooldown
-    if (state.abilityCooldowns[abilityId] && lastTickProcessed.value < state.abilityCooldowns[abilityId]) {
+    if (
+      state.abilityCooldowns[abilityId] &&
+      lastTickProcessed.value < state.abilityCooldowns[abilityId]
+    ) {
       return { success: false, message: 'on_cooldown' }
     }
 
@@ -602,7 +660,10 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (abilityId === 'fixer_dismiss_investigation' && activeInvestigations.value.length === 0) {
       return { success: false, message: 'no_investigations' }
     }
-    if ((abilityId === 'broker_stock_tip' || abilityId === 'broker_insider_trade') && useStockStore().assets.length === 0) {
+    if (
+      (abilityId === 'broker_stock_tip' || abilityId === 'broker_insider_trade') &&
+      useStockStore().assets.length === 0
+    ) {
       return { success: false, message: 'no_assets' }
     }
     if (abilityId === 'broker_crypto_tip' && useCryptoStore().assets.length === 0) {
@@ -614,7 +675,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (abilityId === 'hacker_manipulate_crypto' && useCryptoStore().assets.length === 0) {
       return { success: false, message: 'no_assets' }
     }
-    if ((abilityId === 'fence_sell_premium' || abilityId === 'fence_bulk_deal' || abilityId === 'fence_forge') && useStorageStore().inventory.length === 0 && useVaultStore().items.length === 0) {
+    if (
+      (abilityId === 'fence_sell_premium' ||
+        abilityId === 'fence_bulk_deal' ||
+        abilityId === 'fence_forge') &&
+      useStorageStore().inventory.length === 0 &&
+      useVaultStore().items.length === 0
+    ) {
       return { success: false, message: 'no_items' }
     }
     if (abilityId === 'fence_sell_premium' && state.dailyUses >= FENCE_DAILY_LIMIT) {
@@ -626,7 +693,11 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       const sysState = sys.getState()
       const negEvents = sysState.activeEvents.filter((e: { eventId: string }) => {
         const evDef = sys.getDefinition(e.eventId)
-        return evDef?.category === 'economy' || evDef?.category === 'disaster' || evDef?.category === 'market'
+        return (
+          evDef?.category === 'economy' ||
+          evDef?.category === 'disaster' ||
+          evDef?.category === 'market'
+        )
       })
       if (negEvents.length === 0) {
         return { success: false, message: 'no_events' }
@@ -634,14 +705,22 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     }
 
     const player = usePlayerStore()
-    const scaledCost = ability.cost > 0
-      ? D(scaleContactCost(ability.cost, player.cash.toNumber(), ability.impactTier ?? 'minor', ability.costWeight ?? 0.5))
-      : ZERO
+    const scaledCost =
+      ability.cost > 0
+        ? D(
+            scaleContactCost(
+              ability.cost,
+              player.cash.toNumber(),
+              ability.impactTier ?? 'minor',
+              ability.costWeight ?? 0.5
+            )
+          )
+        : ZERO
 
     // Check and pay cost
     if (scaledCost.gt(ZERO)) {
       if (!gte(player.cash, scaledCost)) return { success: false, message: 'insufficient_cash' }
-      player.spendCash(scaledCost)
+      player.spendCash(scaledCost, { key: 'banking.tx_bm_hire', cat: 'blackmarket' })
       totalCashSpent.value = add(totalCashSpent.value, scaledCost)
     }
 
@@ -656,10 +735,23 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       state.loyalty = Math.max(0, state.loyalty - 15)
       state.totalInteractions++
       state.abilityCooldowns[abilityId] = lastTickProcessed.value + ability.cooldownTicks * 2
-      addLogEntry('danger', 'mdi:account-alert', 'blackmarket.log_betrayal', {
-        contact: def.nameKey, ability: ability.id, heatGain,
-      }, 'contact', 'blackmarket.log_betrayal_detail')
-      return { success: false, message: 'betrayed', result: { type: 'betrayal', contact: def.nameKey, heatGain } }
+      addLogEntry(
+        'danger',
+        'mdi:account-alert',
+        'blackmarket.log_betrayal',
+        {
+          contact: def.nameKey,
+          ability: ability.id,
+          heatGain
+        },
+        'contact',
+        'blackmarket.log_betrayal_detail'
+      )
+      return {
+        success: false,
+        message: 'betrayed',
+        result: { type: 'betrayal', contact: def.nameKey, heatGain }
+      }
     }
 
     if (riskOutcome === 'scam') {
@@ -667,10 +759,23 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       state.loyalty = Math.max(0, state.loyalty - 10)
       state.totalInteractions++
       state.abilityCooldowns[abilityId] = lastTickProcessed.value + ability.cooldownTicks
-      addLogEntry('warning', 'mdi:account-cancel', 'blackmarket.log_scam', {
-        contact: def.nameKey, ability: ability.id, cost: formatCashStandalone(scaledCost),
-      }, 'contact', 'blackmarket.log_scam_detail')
-      return { success: false, message: 'scammed', result: { type: 'scam', contact: def.nameKey, cost: scaledCost.toNumber() } }
+      addLogEntry(
+        'warning',
+        'mdi:account-cancel',
+        'blackmarket.log_scam',
+        {
+          contact: def.nameKey,
+          ability: ability.id,
+          cost: formatCashStandalone(scaledCost)
+        },
+        'contact',
+        'blackmarket.log_scam_detail'
+      )
+      return {
+        success: false,
+        message: 'scammed',
+        result: { type: 'scam', contact: def.nameKey, cost: scaledCost.toNumber() }
+      }
     }
 
     // ── Execute ability (no risk triggered) ──
@@ -693,7 +798,12 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     return { success: true, message: 'ability_used', result }
   }
 
-  function executeAbility(_contactId: ContactId, abilityId: string, state: ContactState, paidCost: Decimal): unknown {
+  function executeAbility(
+    _contactId: ContactId,
+    abilityId: string,
+    state: ContactState,
+    paidCost: Decimal
+  ): unknown {
     const player = usePlayerStore()
 
     switch (abilityId) {
@@ -702,28 +812,54 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const stocks = useStockStore()
         const allAssets = stocks.assets
         if (!allAssets.length) {
-          addLogEntry('warning', 'mdi:chart-line-variant', 'blackmarket.log_tip_no_assets', { market: 'Stock' }, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:chart-line-variant',
+            'blackmarket.log_tip_no_assets',
+            { market: 'Stock' },
+            'contact'
+          )
           return { type: 'tip', failed: true, reason: 'no_assets' }
         }
         const asset = pickRandomAsset(allAssets, 'broker_stock_tip')
-        const config = STOCKS.find(s => s.id === asset.id)
-        const accuracy = Math.min(1, BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS)
+        const config = STOCKS.find((s) => s.id === asset.id)
+        const accuracy = Math.min(
+          1,
+          BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS
+        )
         const recentChange = asset.changePercent
         const actualLikelihood = (config?.drift ?? 0) + recentChange
         const realDirection = actualLikelihood >= 0 ? 'up' : 'down'
         const isAccurate = Math.random() < accuracy
-        const predictedDirection = isAccurate ? realDirection : (Math.random() > 0.5 ? 'up' : 'down')
+        const predictedDirection = isAccurate ? realDirection : Math.random() > 0.5 ? 'up' : 'down'
         const arrow = predictedDirection === 'up' ? '▲' : '▼'
         const conf = Math.round(accuracy * 100)
-        addLogEntry('info', 'mdi:chart-line-variant', 'blackmarket.log_stock_tip', {
-          asset: asset.name, ticker: config?.ticker ?? asset.id, arrow, confidence: conf,
-        }, 'contact', 'blackmarket.log_stock_tip_detail', {
-          price: formatCashStandalone(asset.currentPrice), direction: predictedDirection,
-        })
+        addLogEntry(
+          'info',
+          'mdi:chart-line-variant',
+          'blackmarket.log_stock_tip',
+          {
+            asset: asset.name,
+            ticker: config?.ticker ?? asset.id,
+            arrow,
+            confidence: conf
+          },
+          'contact',
+          'blackmarket.log_stock_tip_detail',
+          {
+            price: formatCashStandalone(asset.currentPrice),
+            direction: predictedDirection
+          }
+        )
         return {
-          type: 'tip', assetType: 'stock', assetId: asset.id, assetName: asset.name,
-          ticker: config?.ticker ?? asset.id, currentPrice: asset.currentPrice,
-          direction: predictedDirection, confidence: conf,
+          type: 'tip',
+          assetType: 'stock',
+          assetId: asset.id,
+          assetName: asset.name,
+          ticker: config?.ticker ?? asset.id,
+          currentPrice: asset.currentPrice,
+          direction: predictedDirection,
+          confidence: conf
         }
       }
 
@@ -731,28 +867,54 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const crypto = useCryptoStore()
         const allCrypto = crypto.assets
         if (!allCrypto.length) {
-          addLogEntry('warning', 'mdi:currency-btc', 'blackmarket.log_tip_no_assets', { market: 'Crypto' }, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:currency-btc',
+            'blackmarket.log_tip_no_assets',
+            { market: 'Crypto' },
+            'contact'
+          )
           return { type: 'tip', failed: true, reason: 'no_assets' }
         }
         const asset = pickRandomAsset(allCrypto, 'broker_crypto_tip')
-        const config = CRYPTOS.find(c => c.id === asset.id)
-        const accuracy = Math.min(1, BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS)
+        const config = CRYPTOS.find((c) => c.id === asset.id)
+        const accuracy = Math.min(
+          1,
+          BROKER_BASE_ACCURACY + (state.loyalty / 10) * BROKER_LOYALTY_ACCURACY_BONUS
+        )
         const recentChange = asset.changePercent
         const actualLikelihood = (config?.drift ?? 0) + recentChange
         const realDirection = actualLikelihood >= 0 ? 'up' : 'down'
         const isAccurate = Math.random() < accuracy
-        const predictedDirection = isAccurate ? realDirection : (Math.random() > 0.5 ? 'up' : 'down')
+        const predictedDirection = isAccurate ? realDirection : Math.random() > 0.5 ? 'up' : 'down'
         const arrow = predictedDirection === 'up' ? '▲' : '▼'
         const conf = Math.round(accuracy * 100)
-        addLogEntry('info', 'mdi:currency-btc', 'blackmarket.log_crypto_tip', {
-          asset: asset.name, ticker: config?.ticker ?? asset.id, arrow, confidence: conf,
-        }, 'contact', 'blackmarket.log_crypto_tip_detail', {
-          price: formatCashStandalone(asset.currentPrice), direction: predictedDirection,
-        })
+        addLogEntry(
+          'info',
+          'mdi:currency-btc',
+          'blackmarket.log_crypto_tip',
+          {
+            asset: asset.name,
+            ticker: config?.ticker ?? asset.id,
+            arrow,
+            confidence: conf
+          },
+          'contact',
+          'blackmarket.log_crypto_tip_detail',
+          {
+            price: formatCashStandalone(asset.currentPrice),
+            direction: predictedDirection
+          }
+        )
         return {
-          type: 'tip', assetType: 'crypto', assetId: asset.id, assetName: asset.name,
-          ticker: config?.ticker ?? asset.id, currentPrice: asset.currentPrice,
-          direction: predictedDirection, confidence: conf,
+          type: 'tip',
+          assetType: 'crypto',
+          assetId: asset.id,
+          assetName: asset.name,
+          ticker: config?.ticker ?? asset.id,
+          currentPrice: asset.currentPrice,
+          direction: predictedDirection,
+          confidence: conf
         }
       }
 
@@ -763,54 +925,96 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           const sim = stocks.getSimulator()
           const allAssets = stocks.assets
           if (!allAssets.length) {
-            addLogEntry('warning', 'mdi:trending-up', 'blackmarket.log_insider_no_assets', {}, 'contact')
+            addLogEntry(
+              'warning',
+              'mdi:trending-up',
+              'blackmarket.log_insider_no_assets',
+              {},
+              'contact'
+            )
             return { type: 'insider', failed: true, reason: 'no_assets' }
           }
           const asset = pickRandomAsset(allAssets, 'broker_insider_stock')
           const targetAsset = sim.getAsset(asset.id)
-          const boostPct = Math.round((0.15 + Math.random() * 0.10) * 100)
+          const boostPct = Math.round((0.15 + Math.random() * 0.1) * 100)
           if (targetAsset) {
             targetAsset.currentPrice *= 1 + boostPct / 100
           }
           addHeat(5)
-          const ticker = STOCKS.find(s => s.id === asset.id)?.ticker ?? asset.id
-          addLogEntry('success', 'mdi:trending-up', 'blackmarket.log_insider_trade', {
-            asset: asset.name, ticker, pct: boostPct, market: 'Stock',
-          }, 'contact', 'blackmarket.log_insider_trade_detail', {
-            priceBefore: formatCashStandalone(asset.currentPrice / (1 + boostPct / 100)),
-            priceAfter: formatCashStandalone(asset.currentPrice),
-          })
+          const ticker = STOCKS.find((s) => s.id === asset.id)?.ticker ?? asset.id
+          addLogEntry(
+            'success',
+            'mdi:trending-up',
+            'blackmarket.log_insider_trade',
+            {
+              asset: asset.name,
+              ticker,
+              pct: boostPct,
+              market: 'Stock'
+            },
+            'contact',
+            'blackmarket.log_insider_trade_detail',
+            {
+              priceBefore: formatCashStandalone(asset.currentPrice / (1 + boostPct / 100)),
+              priceAfter: formatCashStandalone(asset.currentPrice)
+            }
+          )
           return {
-            type: 'insider', applied: true, assetType: 'stock',
-            assetId: asset.id, assetName: asset.name, ticker,
-            priceChange: `+${boostPct}%`,
+            type: 'insider',
+            applied: true,
+            assetType: 'stock',
+            assetId: asset.id,
+            assetName: asset.name,
+            ticker,
+            priceChange: `+${boostPct}%`
           }
         } else {
           const crypto = useCryptoStore()
           const sim = crypto.getSimulator()
           const allCrypto = crypto.assets
           if (!allCrypto.length) {
-            addLogEntry('warning', 'mdi:trending-up', 'blackmarket.log_insider_no_assets', {}, 'contact')
+            addLogEntry(
+              'warning',
+              'mdi:trending-up',
+              'blackmarket.log_insider_no_assets',
+              {},
+              'contact'
+            )
             return { type: 'insider', failed: true, reason: 'no_assets' }
           }
           const asset = pickRandomAsset(allCrypto, 'broker_insider_crypto')
           const targetAsset = sim.getAsset(asset.id)
-          const boostPct = Math.round((0.15 + Math.random() * 0.10) * 100)
+          const boostPct = Math.round((0.15 + Math.random() * 0.1) * 100)
           if (targetAsset) {
             targetAsset.currentPrice *= 1 + boostPct / 100
           }
           addHeat(5)
-          const ticker = CRYPTOS.find(c => c.id === asset.id)?.ticker ?? asset.id
-          addLogEntry('success', 'mdi:trending-up', 'blackmarket.log_insider_trade', {
-            asset: asset.name, ticker, pct: boostPct, market: 'Crypto',
-          }, 'contact', 'blackmarket.log_insider_trade_detail', {
-            priceBefore: formatCashStandalone(asset.currentPrice / (1 + boostPct / 100)),
-            priceAfter: formatCashStandalone(asset.currentPrice),
-          })
+          const ticker = CRYPTOS.find((c) => c.id === asset.id)?.ticker ?? asset.id
+          addLogEntry(
+            'success',
+            'mdi:trending-up',
+            'blackmarket.log_insider_trade',
+            {
+              asset: asset.name,
+              ticker,
+              pct: boostPct,
+              market: 'Crypto'
+            },
+            'contact',
+            'blackmarket.log_insider_trade_detail',
+            {
+              priceBefore: formatCashStandalone(asset.currentPrice / (1 + boostPct / 100)),
+              priceAfter: formatCashStandalone(asset.currentPrice)
+            }
+          )
           return {
-            type: 'insider', applied: true, assetType: 'crypto',
-            assetId: asset.id, assetName: asset.name, ticker,
-            priceChange: `+${boostPct}%`,
+            type: 'insider',
+            applied: true,
+            assetType: 'crypto',
+            assetId: asset.id,
+            assetName: asset.name,
+            ticker,
+            priceChange: `+${boostPct}%`
           }
         }
       }
@@ -818,7 +1022,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       // ─── Fence abilities ──────────────────────────────
       case 'fence_sell_premium': {
         if (state.dailyUses >= FENCE_DAILY_LIMIT) {
-          addLogEntry('warning', 'mdi:store-alert', 'blackmarket.log_fence_daily_limit', {}, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:store-alert',
+            'blackmarket.log_fence_daily_limit',
+            {},
+            'contact'
+          )
           return { type: 'fence', sold: false, reason: 'daily_limit' }
         }
         const storage = useStorageStore()
@@ -826,62 +1036,104 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const storageInv = storage.inventory
         const vaultInv = vault.items
         if (storageInv.length === 0 && vaultInv.length === 0) {
-          addLogEntry('warning', 'mdi:package-variant-remove', 'blackmarket.log_fence_no_items', {}, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:package-variant-remove',
+            'blackmarket.log_fence_no_items',
+            {},
+            'contact'
+          )
           return { type: 'fence', sold: false, reason: 'no_items' }
         }
-        const premiumMul = FENCE_SELL_MULTIPLIER + (state.loyalty / 200)
+        const premiumMul = FENCE_SELL_MULTIPLIER + state.loyalty / 200
         // Find best item across both warehouses
         let bestVal = ZERO
         let bestSource: 'storage' | 'vault' = 'storage'
         let bestIdx = 0
         for (let i = 0; i < storageInv.length; i++) {
           const val = storageInv[i].appraisedValue ?? storageInv[i].baseValue
-          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'storage' }
+          if (val.gt(bestVal)) {
+            bestVal = val
+            bestIdx = i
+            bestSource = 'storage'
+          }
         }
         for (let i = 0; i < vaultInv.length; i++) {
           const val = vaultInv[i].appraisedValue ?? vaultInv[i].baseValue
-          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'vault' }
+          if (val.gt(bestVal)) {
+            bestVal = val
+            bestIdx = i
+            bestSource = 'vault'
+          }
         }
         let item: { name: string; appraisedValue?: unknown; baseValue?: unknown; value?: unknown }
         if (bestSource === 'storage') {
           item = storageInv[bestIdx]
           const rawVal = (item as any).appraisedValue ?? (item as any).baseValue
           const finalVal = mul(rawVal, D(premiumMul))
-          player.earnCash(finalVal)
+          player.earnCash(finalVal, { key: 'banking.tx_bm_sell', cat: 'blackmarket' })
           totalCashEarned.value = add(totalCashEarned.value, finalVal)
           storage.totalItemsSold++
           storage.totalSaleRevenue = add(storage.totalSaleRevenue, finalVal)
           const itemName = resolveItemName(item as any, i18n.global.t)
           const premPct = Math.round((premiumMul - 1) * 100)
           storageInv.splice(bestIdx, 1)
-          addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
-            item: itemName, premium: premPct,
-          }, 'contact', 'blackmarket.log_fence_sold_detail', {
-            value: formatCashStandalone(finalVal), remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
-          })
+          addLogEntry(
+            'success',
+            'mdi:cash-plus',
+            'blackmarket.log_fence_sold',
+            {
+              item: itemName,
+              premium: premPct
+            },
+            'contact',
+            'blackmarket.log_fence_sold_detail',
+            {
+              value: formatCashStandalone(finalVal),
+              remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1
+            }
+          )
           return {
-            type: 'fence', sold: true, itemName, value: finalVal.toNumber(),
-            premiumPercent: premPct, dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+            type: 'fence',
+            sold: true,
+            itemName,
+            value: finalVal.toNumber(),
+            premiumPercent: premPct,
+            dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1
           }
         } else {
           item = vaultInv[bestIdx]
           const rawVal = (item as any).appraisedValue ?? (item as any).baseValue
           const finalVal = mul(rawVal, D(premiumMul))
-          player.earnCash(finalVal)
+          player.earnCash(finalVal, { key: 'banking.tx_bm_sell', cat: 'blackmarket' })
           totalCashEarned.value = add(totalCashEarned.value, finalVal)
           vault.totalItemsSold++
           vault.totalSaleRevenue = add(vault.totalSaleRevenue, finalVal)
           const itemName = resolveItemName(item as any, i18n.global.t)
           const premPct = Math.round((premiumMul - 1) * 100)
           vault.removeItem(vaultInv[bestIdx].id)
-          addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_sold', {
-            item: itemName, premium: premPct,
-          }, 'contact', 'blackmarket.log_fence_sold_detail', {
-            value: formatCashStandalone(finalVal), remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
-          })
+          addLogEntry(
+            'success',
+            'mdi:cash-plus',
+            'blackmarket.log_fence_sold',
+            {
+              item: itemName,
+              premium: premPct
+            },
+            'contact',
+            'blackmarket.log_fence_sold_detail',
+            {
+              value: formatCashStandalone(finalVal),
+              remaining: FENCE_DAILY_LIMIT - state.dailyUses - 1
+            }
+          )
           return {
-            type: 'fence', sold: true, itemName, value: finalVal.toNumber(),
-            premiumPercent: premPct, dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1,
+            type: 'fence',
+            sold: true,
+            itemName,
+            value: finalVal.toNumber(),
+            premiumPercent: premPct,
+            dailyRemaining: FENCE_DAILY_LIMIT - state.dailyUses - 1
           }
         }
       }
@@ -892,10 +1144,16 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const storageInv = storage.inventory
         const vaultInv = vault.items
         if (storageInv.length === 0 && vaultInv.length === 0) {
-          addLogEntry('warning', 'mdi:package-variant-remove', 'blackmarket.log_fence_no_items', {}, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:package-variant-remove',
+            'blackmarket.log_fence_no_items',
+            {},
+            'contact'
+          )
           return { type: 'fence_bulk', sold: false, reason: 'no_items' }
         }
-        const premiumMul = FENCE_SELL_MULTIPLIER + (state.loyalty / 200)
+        const premiumMul = FENCE_SELL_MULTIPLIER + state.loyalty / 200
         let totalSold = ZERO
         let count = 0
         // Sell all storage items
@@ -903,7 +1161,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           const item = storageInv[0]
           const rawVal = item.appraisedValue ?? item.baseValue
           const finalVal = mul(rawVal, D(premiumMul))
-          player.earnCash(finalVal)
+          player.earnCash(finalVal, { key: 'banking.tx_bm_sell', cat: 'blackmarket' })
           totalCashEarned.value = add(totalCashEarned.value, finalVal)
           storage.totalItemsSold++
           storage.totalSaleRevenue = add(storage.totalSaleRevenue, finalVal)
@@ -912,13 +1170,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           storageInv.splice(0, 1)
         }
         // Sell all vault items
-        const vaultIds = vaultInv.map(i => i.id)
+        const vaultIds = vaultInv.map((i) => i.id)
         for (const id of vaultIds) {
-          const item = vault.items.find(i => i.id === id)
+          const item = vault.items.find((i) => i.id === id)
           if (!item) continue
           const rawVal = item.appraisedValue ?? item.baseValue
           const finalVal = mul(rawVal, D(premiumMul))
-          player.earnCash(finalVal)
+          player.earnCash(finalVal, { key: 'banking.tx_bm_sell', cat: 'blackmarket' })
           totalCashEarned.value = add(totalCashEarned.value, finalVal)
           vault.totalItemsSold++
           vault.totalSaleRevenue = add(vault.totalSaleRevenue, finalVal)
@@ -927,14 +1185,26 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           vault.removeItem(id)
         }
         const premPct = Math.round((premiumMul - 1) * 100)
-        addLogEntry('success', 'mdi:cash-plus', 'blackmarket.log_fence_bulk', {
-          count, premium: premPct,
-        }, 'contact', 'blackmarket.log_fence_bulk_detail', {
-          total: formatCashStandalone(totalSold),
-        })
+        addLogEntry(
+          'success',
+          'mdi:cash-plus',
+          'blackmarket.log_fence_bulk',
+          {
+            count,
+            premium: premPct
+          },
+          'contact',
+          'blackmarket.log_fence_bulk_detail',
+          {
+            total: formatCashStandalone(totalSold)
+          }
+        )
         return {
-          type: 'fence_bulk', sold: true, itemCount: count,
-          totalValue: totalSold.toNumber(), premiumPercent: premPct,
+          type: 'fence_bulk',
+          sold: true,
+          itemCount: count,
+          totalValue: totalSold.toNumber(),
+          premiumPercent: premPct
         }
       }
 
@@ -945,7 +1215,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const storageInv = storage.inventory
         const vaultInv = vault.items
         if (storageInv.length === 0 && vaultInv.length === 0) {
-          addLogEntry('warning', 'mdi:package-variant-remove', 'blackmarket.log_fence_no_items', {}, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:package-variant-remove',
+            'blackmarket.log_fence_no_items',
+            {},
+            'contact'
+          )
           return { type: 'fence_forge', forged: false, reason: 'no_items' }
         }
         let bestVal = ZERO
@@ -953,27 +1229,42 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         let bestIdx = 0
         for (let i = 0; i < storageInv.length; i++) {
           const val = storageInv[i].appraisedValue ?? storageInv[i].baseValue
-          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'storage' }
+          if (val.gt(bestVal)) {
+            bestVal = val
+            bestIdx = i
+            bestSource = 'storage'
+          }
         }
         for (let i = 0; i < vaultInv.length; i++) {
           const val = vaultInv[i].appraisedValue ?? vaultInv[i].baseValue
-          if (val.gt(bestVal)) { bestVal = val; bestIdx = i; bestSource = 'vault' }
+          if (val.gt(bestVal)) {
+            bestVal = val
+            bestIdx = i
+            bestSource = 'vault'
+          }
         }
         // Dynamic cost: fraction of item value
         const forgeCost = bestVal.mul(FENCE_FORGE_COST_FRACTION).round().max(D(1))
         if (!gte(player.cash, forgeCost)) {
-          addLogEntry('warning', 'mdi:cash-remove', 'blackmarket.log_fence_forge_no_cash', {
-            cost: formatCashStandalone(forgeCost),
-          }, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:cash-remove',
+            'blackmarket.log_fence_forge_no_cash',
+            {
+              cost: formatCashStandalone(forgeCost)
+            },
+            'contact'
+          )
           return { type: 'fence_forge', forged: false, reason: 'insufficient_cash' }
         }
-        player.spendCash(forgeCost)
+        player.spendCash(forgeCost, { key: 'banking.tx_bm_forge', cat: 'blackmarket' })
         totalCashSpent.value = add(totalCashSpent.value, forgeCost)
 
         // Loyalty-scaled bonus: higher loyalty → closer to max bonus
         const loyaltyFactor = state.loyalty / 100
         const bonusRange = FENCE_FORGE_MAX_BONUS - FENCE_FORGE_MIN_BONUS
-        const bonus = FENCE_FORGE_MIN_BONUS + (loyaltyFactor * 0.5 + Math.random() * 0.5) * bonusRange
+        const bonus =
+          FENCE_FORGE_MIN_BONUS + (loyaltyFactor * 0.5 + Math.random() * 0.5) * bonusRange
         const boostMul = 1 + bonus
 
         const item = bestSource === 'storage' ? storageInv[bestIdx] : vaultInv[bestIdx]
@@ -987,44 +1278,88 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
         const itemName = resolveItemName(item as any, i18n.global.t)
         const boostPct = Math.round(bonus * 100)
-        addLogEntry('success', 'mdi:file-certificate', 'blackmarket.log_fence_forged', {
-          item: itemName, boost: boostPct,
-        }, 'contact', 'blackmarket.log_fence_forged_detail', {
-          oldValue: formatCashStandalone(oldVal), newValue: formatCashStandalone(newVal),
-          cost: formatCashStandalone(forgeCost),
-        })
+        addLogEntry(
+          'success',
+          'mdi:file-certificate',
+          'blackmarket.log_fence_forged',
+          {
+            item: itemName,
+            boost: boostPct
+          },
+          'contact',
+          'blackmarket.log_fence_forged_detail',
+          {
+            oldValue: formatCashStandalone(oldVal),
+            newValue: formatCashStandalone(newVal),
+            cost: formatCashStandalone(forgeCost)
+          }
+        )
         return {
-          type: 'fence_forge', forged: true, itemName, boostPercent: boostPct,
-          oldValue: oldVal.toNumber(), newValue: newVal.toNumber(),
+          type: 'fence_forge',
+          forged: true,
+          itemName,
+          boostPercent: boostPct,
+          oldValue: oldVal.toNumber(),
+          newValue: newVal.toNumber()
         }
       }
 
       case 'fence_network': {
-        applyDealEffect('income_boost', FENCE_NETWORK_SELL_BOOST, FENCE_NETWORK_DURATION_TICKS, 'fence_network')
+        applyDealEffect(
+          'income_boost',
+          FENCE_NETWORK_SELL_BOOST,
+          FENCE_NETWORK_DURATION_TICKS,
+          'fence_network'
+        )
         addHeat(3)
         const boostPct = Math.round((FENCE_NETWORK_SELL_BOOST - 1) * 100)
-        addLogEntry('info', 'mdi:web', 'blackmarket.log_fence_network', {
-          boost: boostPct, duration: Math.round(FENCE_NETWORK_DURATION_TICKS / 10),
-        }, 'contact', 'blackmarket.log_fence_network_detail', {})
+        addLogEntry(
+          'info',
+          'mdi:web',
+          'blackmarket.log_fence_network',
+          {
+            boost: boostPct,
+            duration: Math.round(FENCE_NETWORK_DURATION_TICKS / 10)
+          },
+          'contact',
+          'blackmarket.log_fence_network_detail',
+          {}
+        )
         return { type: 'fence_network', applied: true, boostPercent: boostPct }
       }
 
       // ─── Smuggler abilities ───────────────────────────
       case 'smuggler_contraband': {
-        const abilityDef = getContactDef('smuggler')?.abilities.find(a => a.id === 'smuggler_contraband')
+        const abilityDef = getContactDef('smuggler')?.abilities.find(
+          (a) => a.id === 'smuggler_contraband'
+        )
         const roiRatio = abilityDef?.roiRatio ?? 2.0
-        const valueRoll = SMUGGLER_VALUE_MIN + Math.random() * (SMUGGLER_VALUE_MAX - SMUGGLER_VALUE_MIN)
+        const valueRoll =
+          SMUGGLER_VALUE_MIN + Math.random() * (SMUGGLER_VALUE_MAX - SMUGGLER_VALUE_MIN)
         // Use the cost that was actually paid (paidCost) instead of recalculating
         // after cash was deducted, to avoid systematic reward undercount.
-        const sCost = paidCost.gt(ZERO) ? paidCost.toNumber() : scaleContactCost(abilityDef?.cost ?? 2000, player.cash.toNumber(), abilityDef?.impactTier ?? 'standard', abilityDef?.costWeight ?? 0.4)
+        const sCost = paidCost.gt(ZERO)
+          ? paidCost.toNumber()
+          : scaleContactCost(
+              abilityDef?.cost ?? 2000,
+              player.cash.toNumber(),
+              abilityDef?.impactTier ?? 'standard',
+              abilityDef?.costWeight ?? 0.4
+            )
         const scaledValue = scaleContactReward(sCost, roiRatio * valueRoll)
         const cashGrant = D(scaledValue)
-        player.earnCash(cashGrant)
+        player.earnCash(cashGrant, { key: 'banking.tx_bm_contraband', cat: 'blackmarket' })
         totalCashEarned.value = add(totalCashEarned.value, cashGrant)
         addHeat(3)
-        addLogEntry('success', 'mdi:package-variant-closed-check', 'blackmarket.log_contraband', {
-          value: formatCashStandalone(cashGrant),
-        }, 'contact')
+        addLogEntry(
+          'success',
+          'mdi:package-variant-closed-check',
+          'blackmarket.log_contraband',
+          {
+            value: formatCashStandalone(cashGrant)
+          },
+          'contact'
+        )
         return { type: 'contraband', value: cashGrant.toNumber() }
       }
 
@@ -1032,9 +1367,17 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         applyDealEffect('cost_reduction', 1.33, 3600, 'smuggler_supply')
         applyDealEffect('business_boost', 1.3, 3600, 'smuggler_supply')
         addHeat(5)
-        addLogEntry('info', 'mdi:truck-fast', 'blackmarket.log_supply_run', {
-          duration: 360,
-        }, 'contact', 'blackmarket.log_supply_run_detail', {})
+        addLogEntry(
+          'info',
+          'mdi:truck-fast',
+          'blackmarket.log_supply_run',
+          {
+            duration: 360
+          },
+          'contact',
+          'blackmarket.log_supply_run_detail',
+          {}
+        )
         return { type: 'supply_run', applied: true, durationSecs: 360 }
       }
 
@@ -1044,7 +1387,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const sim = stocks.getSimulator()
         const allAssets = stocks.assets
         if (!allAssets.length) {
-          addLogEntry('warning', 'mdi:alert-decagram', 'blackmarket.log_hack_no_assets', { market: 'Stock' }, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:alert-decagram',
+            'blackmarket.log_hack_no_assets',
+            { market: 'Stock' },
+            'contact'
+          )
           return { type: 'hack', failed: true, reason: 'no_assets' }
         }
         const asset = pickRandomAsset(allAssets, 'hacker_stock')
@@ -1053,20 +1402,36 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const direction = Math.random() > 0.25 ? 1 : -1
         const changePct = Math.round(HACKER_MANIPULATION_RANGE * (0.5 + Math.random() * 0.5) * 100)
         if (targetAsset) {
-          targetAsset.currentPrice *= (1 + (changePct / 100) * direction)
+          targetAsset.currentPrice *= 1 + (changePct / 100) * direction
           targetAsset.currentPrice = Math.max(1, targetAsset.currentPrice)
         }
         addHeat(4)
-        const ticker = STOCKS.find(s => s.id === asset.id)?.ticker ?? asset.id
+        const ticker = STOCKS.find((s) => s.id === asset.id)?.ticker ?? asset.id
         const arrow = direction > 0 ? '▲' : '▼'
-        addLogEntry('success', 'mdi:code-braces', 'blackmarket.log_hack_stock', {
-          asset: asset.name, ticker, arrow, pct: changePct,
-        }, 'contact', 'blackmarket.log_hack_stock_detail', {
-          price: formatCashStandalone(asset.currentPrice),
-        })
+        addLogEntry(
+          'success',
+          'mdi:code-braces',
+          'blackmarket.log_hack_stock',
+          {
+            asset: asset.name,
+            ticker,
+            arrow,
+            pct: changePct
+          },
+          'contact',
+          'blackmarket.log_hack_stock_detail',
+          {
+            price: formatCashStandalone(asset.currentPrice)
+          }
+        )
         return {
-          type: 'hack', target: 'stock', assetId: asset.id, assetName: asset.name,
-          ticker, direction: direction > 0 ? 'up' : 'down', magnitude: changePct,
+          type: 'hack',
+          target: 'stock',
+          assetId: asset.id,
+          assetName: asset.name,
+          ticker,
+          direction: direction > 0 ? 'up' : 'down',
+          magnitude: changePct
         }
       }
 
@@ -1075,7 +1440,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const sim = crypto.getSimulator()
         const allCrypto = crypto.assets
         if (!allCrypto.length) {
-          addLogEntry('warning', 'mdi:alert-decagram', 'blackmarket.log_hack_no_assets', { market: 'Crypto' }, 'contact')
+          addLogEntry(
+            'warning',
+            'mdi:alert-decagram',
+            'blackmarket.log_hack_no_assets',
+            { market: 'Crypto' },
+            'contact'
+          )
           return { type: 'hack', failed: true, reason: 'no_assets' }
         }
         const asset = pickRandomAsset(allCrypto, 'hacker_crypto')
@@ -1084,20 +1455,36 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const direction = Math.random() > 0.25 ? 1 : -1
         const changePct = Math.round(HACKER_MANIPULATION_RANGE * (0.5 + Math.random() * 0.5) * 100)
         if (targetAsset) {
-          targetAsset.currentPrice *= (1 + (changePct / 100) * direction)
+          targetAsset.currentPrice *= 1 + (changePct / 100) * direction
           targetAsset.currentPrice = Math.max(0.0001, targetAsset.currentPrice)
         }
         addHeat(4)
-        const ticker = CRYPTOS.find(c => c.id === asset.id)?.ticker ?? asset.id
+        const ticker = CRYPTOS.find((c) => c.id === asset.id)?.ticker ?? asset.id
         const arrow = direction > 0 ? '▲' : '▼'
-        addLogEntry('success', 'mdi:code-braces', 'blackmarket.log_hack_crypto', {
-          asset: asset.name, ticker, arrow, pct: changePct,
-        }, 'contact', 'blackmarket.log_hack_crypto_detail', {
-          price: formatCashStandalone(asset.currentPrice),
-        })
+        addLogEntry(
+          'success',
+          'mdi:code-braces',
+          'blackmarket.log_hack_crypto',
+          {
+            asset: asset.name,
+            ticker,
+            arrow,
+            pct: changePct
+          },
+          'contact',
+          'blackmarket.log_hack_crypto_detail',
+          {
+            price: formatCashStandalone(asset.currentPrice)
+          }
+        )
         return {
-          type: 'hack', target: 'crypto', assetId: asset.id, assetName: asset.name,
-          ticker, direction: direction > 0 ? 'up' : 'down', magnitude: changePct,
+          type: 'hack',
+          target: 'crypto',
+          assetId: asset.id,
+          assetName: asset.name,
+          ticker,
+          direction: direction > 0 ? 'up' : 'down',
+          magnitude: changePct
         }
       }
 
@@ -1105,9 +1492,17 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         applyDealEffect('business_boost', 2.0, 1800, 'hacker_ddos')
         applyDealEffect('income_boost', 1.5, 1800, 'hacker_ddos')
         addHeat(15)
-        addLogEntry('danger', 'mdi:web-cancel', 'blackmarket.log_ddos', {
-          duration: 180,
-        }, 'contact', 'blackmarket.log_ddos_detail', {})
+        addLogEntry(
+          'danger',
+          'mdi:web-cancel',
+          'blackmarket.log_ddos',
+          {
+            duration: 180
+          },
+          'contact',
+          'blackmarket.log_ddos_detail',
+          {}
+        )
         return { type: 'ddos', applied: true, durationSecs: 180 }
       }
 
@@ -1118,34 +1513,63 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const sysState = system.getState()
         const negativeEvents = sysState.activeEvents.filter((e: { eventId: string }) => {
           const def = system.getDefinition(e.eventId)
-          return def?.category === 'economy' || def?.category === 'disaster' || def?.category === 'market'
+          return (
+            def?.category === 'economy' ||
+            def?.category === 'disaster' ||
+            def?.category === 'market'
+          )
         })
         if (negativeEvents.length > 0) {
           const target = negativeEvents[0]
           // Percentage-based cost: scales with player wealth like the rest of the system
           const eventDuration = target.ticksRemaining
           const severityFactor = Math.max(1, Math.ceil(eventDuration / 600)) // higher for longer events
-          const cost = D(scalePercentageCost(player.cash, 'standard', Math.min(1, severityFactor * 0.15)))
+          const cost = D(
+            scalePercentageCost(player.cash, 'standard', Math.min(1, severityFactor * 0.15))
+          )
           if (gte(player.cash, cost)) {
-            player.spendCash(cost)
+            player.spendCash(cost, { key: 'banking.tx_bm_bribe', cat: 'blackmarket' })
             totalCashSpent.value = add(totalCashSpent.value, cost)
             sysState.activeEvents = sysState.activeEvents.filter(
               (e: { eventId: string }) => e.eventId !== target.eventId
             )
             system.setState(sysState)
-            const storeIdx = eventStore.activeEvents.findIndex(e => e.eventId === target.eventId)
+            const storeIdx = eventStore.activeEvents.findIndex((e) => e.eventId === target.eventId)
             if (storeIdx >= 0) eventStore.activeEvents.splice(storeIdx, 1)
             const eventDef = system.getDefinition(target.eventId)
             const evName = eventDef?.name ?? target.eventId
-            addLogEntry('success', 'mdi:shield-check', 'blackmarket.log_event_fixed', {
-              event: evName, cost: formatCashStandalone(cost),
-            }, 'contact')
-            return { type: 'fixed', eventId: target.eventId, eventName: evName, cost: cost.toNumber() }
+            addLogEntry(
+              'success',
+              'mdi:shield-check',
+              'blackmarket.log_event_fixed',
+              {
+                event: evName,
+                cost: formatCashStandalone(cost)
+              },
+              'contact'
+            )
+            return {
+              type: 'fixed',
+              eventId: target.eventId,
+              eventName: evName,
+              cost: cost.toNumber()
+            }
           }
-          addLogEntry('warning', 'mdi:cash-remove', 'blackmarket.log_fixer_no_cash', {
-            cost: formatCashStandalone(cost),
-          }, 'contact')
-          return { type: 'fixed', failed: true, reason: 'insufficient_cash', costNeeded: cost.toNumber() }
+          addLogEntry(
+            'warning',
+            'mdi:cash-remove',
+            'blackmarket.log_fixer_no_cash',
+            {
+              cost: formatCashStandalone(cost)
+            },
+            'contact'
+          )
+          return {
+            type: 'fixed',
+            failed: true,
+            reason: 'insufficient_cash',
+            costNeeded: cost.toNumber()
+          }
         }
         addLogEntry('info', 'mdi:check-circle', 'blackmarket.log_fixer_no_events', {}, 'contact')
         return { type: 'fixed', failed: true, reason: 'no_events' }
@@ -1157,9 +1581,17 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         const removed = Math.round(before - heat.value)
         // Side effect: burning favors costs loyalty
         state.loyalty = Math.max(0, state.loyalty - 8)
-        addLogEntry('success', 'mdi:thermometer-minus', 'blackmarket.log_heat_cleared', {
-          removed, heat: Math.round(heat.value),
-        }, 'contact', 'blackmarket.log_heat_cleared_detail')
+        addLogEntry(
+          'success',
+          'mdi:thermometer-minus',
+          'blackmarket.log_heat_cleared',
+          {
+            removed,
+            heat: Math.round(heat.value)
+          },
+          'contact',
+          'blackmarket.log_heat_cleared_detail'
+        )
         return { type: 'heat_cleared', removed, newHeat: Math.round(heat.value) }
       }
 
@@ -1170,7 +1602,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           // Cost = 60% of the fine — always cheaper than getting caught
           const cost = mul(inv.fineAmount, D(0.6))
           if (gte(player.cash, cost)) {
-            player.spendCash(cost)
+            player.spendCash(cost, { key: 'banking.tx_bm_bribe', cat: 'blackmarket' })
             totalCashSpent.value = add(totalCashSpent.value, cost)
             inv.resolved = true
             inv.caught = false
@@ -1178,17 +1610,37 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             const heatGain = 5 + inv.severity * 3
             addHeat(heatGain)
             state.loyalty = Math.max(0, state.loyalty - 12)
-            addLogEntry('success', 'mdi:shield-off', 'blackmarket.log_investigation_dismissed', {
-              cost: formatCashStandalone(cost),
-            }, 'contact', 'blackmarket.log_dismiss_side_effects', {
-              heatGain, loyaltyCost: 12,
-            })
+            addLogEntry(
+              'success',
+              'mdi:shield-off',
+              'blackmarket.log_investigation_dismissed',
+              {
+                cost: formatCashStandalone(cost)
+              },
+              'contact',
+              'blackmarket.log_dismiss_side_effects',
+              {
+                heatGain,
+                loyaltyCost: 12
+              }
+            )
             return { type: 'dismissed', investigationId: inv.id, cost: cost.toNumber(), heatGain }
           }
-          addLogEntry('warning', 'mdi:cash-remove', 'blackmarket.log_dismiss_no_cash', {
-            cost: formatCashStandalone(cost),
-          }, 'contact')
-          return { type: 'dismissed', failed: true, reason: 'insufficient_cash', costNeeded: cost.toNumber() }
+          addLogEntry(
+            'warning',
+            'mdi:cash-remove',
+            'blackmarket.log_dismiss_no_cash',
+            {
+              cost: formatCashStandalone(cost)
+            },
+            'contact'
+          )
+          return {
+            type: 'dismissed',
+            failed: true,
+            reason: 'insufficient_cash',
+            costNeeded: cost.toNumber()
+          }
         }
         addLogEntry('info', 'mdi:shield-check', 'blackmarket.log_dismiss_no_inv', {}, 'contact')
         return { type: 'dismissed', failed: true, reason: 'no_investigations' }
@@ -1245,7 +1697,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
 
     // ─── Expire deals ─────────────────────────────────
     availableDeals.value = availableDeals.value.filter(
-      d => d.status === 'available' && currentTick < d.expiresAtTick,
+      (d) => d.status === 'available' && currentTick < d.expiresAtTick
     )
 
     // ─── Tick active effects ──────────────────────────
@@ -1257,7 +1709,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       }
     }
     if (expired.length > 0) {
-      activeEffects.value = activeEffects.value.filter(e => !expired.includes(e.id))
+      activeEffects.value = activeEffects.value.filter((e) => !expired.includes(e.id))
     }
 
     // ─── Tick investigations ──────────────────────────
@@ -1271,11 +1723,11 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       }
     }
     // Clean old resolved investigations (keep last 10)
-    const resolved = investigations.value.filter(i => i.resolved)
+    const resolved = investigations.value.filter((i) => i.resolved)
     if (resolved.length > 10) {
       const toRemove = resolved.slice(0, resolved.length - 10)
       investigations.value = investigations.value.filter(
-        i => !toRemove.some(r => r.id === i.id),
+        (i) => !toRemove.some((r) => r.id === i.id)
       )
     }
 
@@ -1284,8 +1736,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       heat.value = clamp(heat.value - HEAT_DECAY_PER_TICK, 0, MAX_HEAT)
     }
 
-    // ─── Investigation chance from heat (every 100 ticks) ──
-    if (currentTick % 100 === 0) {
+    // ─── Investigation chance from heat (every 600 ticks ≈ 1 min) ──
+    if (currentTick % 600 === 0) {
       const investigationChance = getHeatPenalty(heat.value, 'investigation_chance')
       if (investigationChance > 0 && Math.random() < investigationChance) {
         const severity = Math.min(5, Math.ceil(heat.value / 20))
@@ -1327,6 +1779,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     lastDealRotationTick.value = 0
     nextRotationTick.value = 0
     lastTickProcessed.value = 0
+    lastInvestigationSpawnTick.value = 0
   }
 
   function fullReset(): void {
@@ -1348,6 +1801,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     totalFinesPaid.value = ZERO
     activityLog.value = []
     lastTickProcessed.value = 0
+    lastInvestigationSpawnTick.value = 0
     initContacts()
   }
 
@@ -1363,16 +1817,16 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       lastDealRotationTick: lastDealRotationTick.value,
       nextRotationTick: nextRotationTick.value,
       contactStates: contactStates.value,
-      activeEffects: activeEffects.value.map(e => ({
+      activeEffects: activeEffects.value.map((e) => ({
         id: e.id,
         sourceId: e.sourceId,
         type: e.type,
         value: e.value,
         ticksRemaining: e.ticksRemaining,
         totalDuration: e.totalDuration,
-        target: e.target,
+        target: e.target
       })),
-      investigations: investigations.value.map(i => ({
+      investigations: investigations.value.map((i) => ({
         id: i.id,
         nameKey: i.nameKey,
         severity: i.severity,
@@ -1381,7 +1835,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
         fineAmount: i.fineAmount,
         catchChance: i.catchChance,
         resolved: i.resolved,
-        caught: i.caught,
+        caught: i.caught
       })),
       totalCashSpent: totalCashSpent.value,
       totalCashEarned: totalCashEarned.value,
@@ -1389,29 +1843,40 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       totalInvestigations: totalInvestigations.value,
       totalFinesPaid: totalFinesPaid.value,
       lastTickProcessed: lastTickProcessed.value,
+      lastInvestigationSpawnTick: lastInvestigationSpawnTick.value,
       activityLog: activityLog.value,
-      availableDeals: availableDeals.value,
+      availableDeals: availableDeals.value
     }
   }
 
   function loadFromSave(data: Record<string, unknown>): void {
     if (!data) return
-    if (data.totalDealsCompleted !== undefined) totalDealsCompleted.value = data.totalDealsCompleted as number
-    if (data.totalDealsFailed !== undefined) totalDealsFailed.value = data.totalDealsFailed as number
-    if (data.reputationPoints !== undefined) reputationPoints.value = data.reputationPoints as number
+    if (data.totalDealsCompleted !== undefined)
+      totalDealsCompleted.value = data.totalDealsCompleted as number
+    if (data.totalDealsFailed !== undefined)
+      totalDealsFailed.value = data.totalDealsFailed as number
+    if (data.reputationPoints !== undefined)
+      reputationPoints.value = data.reputationPoints as number
     if (data.heat !== undefined) heat.value = data.heat as number
     if (data.dealCooldowns) dealCooldowns.value = data.dealCooldowns as Record<string, number>
-    if (data.lastDealRotationTick !== undefined) lastDealRotationTick.value = data.lastDealRotationTick as number
-    if (data.nextRotationTick !== undefined) nextRotationTick.value = data.nextRotationTick as number
+    if (data.lastDealRotationTick !== undefined)
+      lastDealRotationTick.value = data.lastDealRotationTick as number
+    if (data.nextRotationTick !== undefined)
+      nextRotationTick.value = data.nextRotationTick as number
     if (data.contactStates) contactStates.value = data.contactStates as ContactState[]
     if (data.activeEffects) activeEffects.value = data.activeEffects as ActiveBlackMarketEffect[]
     if (data.investigations) investigations.value = data.investigations as Investigation[]
     if (data.totalCashSpent !== undefined) totalCashSpent.value = data.totalCashSpent as Decimal
     if (data.totalCashEarned !== undefined) totalCashEarned.value = data.totalCashEarned as Decimal
-    if (data.totalHeatAccumulated !== undefined) totalHeatAccumulated.value = data.totalHeatAccumulated as number
-    if (data.totalInvestigations !== undefined) totalInvestigations.value = data.totalInvestigations as number
+    if (data.totalHeatAccumulated !== undefined)
+      totalHeatAccumulated.value = data.totalHeatAccumulated as number
+    if (data.totalInvestigations !== undefined)
+      totalInvestigations.value = data.totalInvestigations as number
     if (data.totalFinesPaid !== undefined) totalFinesPaid.value = data.totalFinesPaid as Decimal
-    if (data.lastTickProcessed !== undefined) lastTickProcessed.value = data.lastTickProcessed as number
+    if (data.lastTickProcessed !== undefined)
+      lastTickProcessed.value = data.lastTickProcessed as number
+    if (data.lastInvestigationSpawnTick !== undefined)
+      lastInvestigationSpawnTick.value = data.lastInvestigationSpawnTick as number
     if (data.activityLog) activityLog.value = data.activityLog as ActivityLogEntry[]
     if (data.availableDeals) availableDeals.value = data.availableDeals as BlackMarketDeal[]
 
@@ -1462,6 +1927,6 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     prestigeReset,
     fullReset,
     exportState,
-    loadFromSave,
+    loadFromSave
   }
 })

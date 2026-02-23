@@ -6,6 +6,7 @@
  */
 import { ref } from 'vue'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
+import type { TransactionCategory } from '@renderer/stores/useBankingStore'
 import { useJobStore } from '@renderer/stores/useJobStore'
 import { useBusinessStore } from '@renderer/stores/useBusinessStore'
 import { useStockStore } from '@renderer/stores/useStockStore'
@@ -25,6 +26,7 @@ import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
+import { useBankingStore } from '@renderer/stores/useBankingStore'
 import { hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -75,6 +77,19 @@ export function useInitGame() {
       const vaultStore = useVaultStore()
       const shopStore = useShopStore()
       const limitOrderStore = useLimitOrderStore()
+      const bankingStore = useBankingStore()
+
+      // Register the transaction recorder so every earnCash/spendCash/forcePay
+      // with meta automatically records into the banking store
+      player.registerTxRecorder((amount, balance, meta) => {
+        bankingStore.recordTransaction(
+          meta.key,
+          amount,
+          meta.cat as TransactionCategory,
+          balance,
+          meta.params
+        )
+      })
 
       // Initialize static data first (always refresh from source to pick up rebalances)
       // Note: businesses are no longer initialized from static defs — they are created by player action
@@ -215,6 +230,14 @@ export function useInitGame() {
           limitOrderStore.loadFromSave(save.limitOrders as Record<string, unknown>)
         }
 
+        // Restore banking state
+        if (save.banking) {
+          bankingStore.loadFromSave(save.banking as Record<string, unknown>)
+        }
+
+        // Initialize card if not yet created
+        bankingStore.initCard()
+
         // Restore event system state
         if (save.eventState) {
           events.loadFromSave(save.eventState)
@@ -242,7 +265,7 @@ export function useInitGame() {
                 dividends: stocks.dividendIncomePerSecond,
                 staking: crypto.stakingIncomePerSecond,
                 depositInterest: depositStore.interestPerSecond,
-                loanInterest: loanStore.totalInterestPerSecond,
+                loanInterest: loanStore.totalInterestPerSecond
               },
               {
                 efficiency: offlineEff,
@@ -252,7 +275,8 @@ export function useInitGame() {
 
             if (summary) {
               // Check if anything meaningful happened offline
-              const hasAnything = summary.cashEarned.gt(0) ||
+              const hasAnything =
+                summary.cashEarned.gt(0) ||
                 summary.depositInterest.gt(0) ||
                 summary.loanInterestPaid.gt(0)
 
@@ -300,7 +324,9 @@ export function useInitGame() {
               if (hasAnything) {
                 offlineSummary.value = summary
               }
-              console.log(`[Init] Offline earnings: ${summary.cashEarned.toString()} (${summary.timeAwayFormatted} away)`)
+              console.log(
+                `[Init] Offline earnings: ${summary.cashEarned.toString()} (${summary.timeAwayFormatted} away)`
+              )
               console.log(`[Init] Offline deposits interest: ${summary.depositInterest.toString()}`)
               console.log(`[Init] Offline loan interest: ${summary.loanInterestPaid.toString()}`)
             }
@@ -312,11 +338,16 @@ export function useInitGame() {
         console.log('[Init] Game state restored successfully')
       } else {
         console.log('[Init] No save found, starting fresh game')
+        // Initialize banking card on fresh start
+        bankingStore.initCard()
       }
 
       // Compute net worth immediately so business unlock filters work on first render
       {
-        const portfolioValue = add(stocks.totalPortfolioValue ?? ZERO, crypto.totalWalletValue ?? ZERO)
+        const portfolioValue = add(
+          stocks.totalPortfolioValue ?? ZERO,
+          crypto.totalWalletValue ?? ZERO
+        )
         const propertyValue = realEstate.totalPropertyValue ?? ZERO
         const startupValue = startups.totalInvested ?? ZERO
         const depositValue = depositStore.totalLockedBalance ?? ZERO

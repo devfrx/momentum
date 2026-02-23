@@ -195,7 +195,7 @@ function doPrestige(): void {
     // Apply starting bonuses
     const startingCash = prestige.getStartingCash()
     if (startingCash.gt(0)) {
-        player.earnCash(startingCash)
+        player.earnCash(startingCash, { key: 'banking.tx_prestige_bonus', cat: 'prestige' })
     }
 
     const startingXp = prestige.getStartingXp()

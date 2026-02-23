@@ -1,3 +1,6 @@
 export { default as CashDisplay } from './CashDisplay.vue'
 export { default as StatCard } from './StatCard.vue'
 export { default as MultiplierStats } from './MultiplierStats.vue'
+export { default as BankCard } from './BankCard.vue'
+export { default as TransactionList } from './TransactionList.vue'
+export { default as AccountSummary } from './AccountSummary.vue'

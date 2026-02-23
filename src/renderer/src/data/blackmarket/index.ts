@@ -24,11 +24,17 @@ export type {
   ActiveBlackMarketEffect,
   Investigation,
   ActivityLogEntry,
-  ActivityLogSeverity,
+  ActivityLogSeverity
 } from './types'
 
 // Reputation
-export { REPUTATION_TIERS, getReputationTier, calculateTier, getTierProgress, effectiveDealScore } from './reputation'
+export {
+  REPUTATION_TIERS,
+  getReputationTier,
+  calculateTier,
+  getTierProgress,
+  effectiveDealScore
+} from './reputation'
 
 // Heat
 export { HEAT_THRESHOLDS, getHeatLevel, getHeatPenalty } from './heat'
@@ -55,6 +61,7 @@ export {
   INVESTIGATION_FINE_MULT,
   MAX_ACTIVE_EFFECTS,
   MAX_INVESTIGATIONS,
+  INVESTIGATION_COOLDOWN_TICKS,
   FENCE_DAILY_LIMIT,
   FENCE_SELL_MULTIPLIER,
   FENCE_FORGE_MIN_BONUS,
@@ -69,7 +76,7 @@ export {
   BROKER_BASE_ACCURACY,
   BROKER_LOYALTY_ACCURACY_BONUS,
   SMUGGLER_VALUE_MIN,
-  SMUGGLER_VALUE_MAX,
+  SMUGGLER_VALUE_MAX
 } from './balance'
 
 // Scaling utilities
@@ -86,5 +93,5 @@ export {
   getBetrayalChance,
   getScamChance,
   BETRAYAL_BASE_CHANCE,
-  SCAM_BASE_CHANCE,
+  SCAM_BASE_CHANCE
 } from './scaling'

@@ -10,7 +10,7 @@ export const HEAT_THRESHOLDS: HeatThresholdDef[] = [
     nameKey: 'blackmarket.heat_0',
     icon: 'mdi:shield-check',
     color: '#4caf50',
-    penalties: [],
+    penalties: []
   },
   {
     level: 1,
@@ -18,9 +18,7 @@ export const HEAT_THRESHOLDS: HeatThresholdDef[] = [
     nameKey: 'blackmarket.heat_1',
     icon: 'mdi:alert-circle-outline',
     color: '#8bc34a',
-    penalties: [
-      { type: 'deal_cost_increase', value: 0.05 },
-    ],
+    penalties: [{ type: 'deal_cost_increase', value: 0.05 }]
   },
   {
     level: 2,
@@ -30,8 +28,8 @@ export const HEAT_THRESHOLDS: HeatThresholdDef[] = [
     color: '#ff9800',
     penalties: [
       { type: 'deal_cost_increase', value: 0.15 },
-      { type: 'risk_increase', value: 5 },
-    ],
+      { type: 'risk_increase', value: 5 }
+    ]
   },
   {
     level: 3,
@@ -42,8 +40,8 @@ export const HEAT_THRESHOLDS: HeatThresholdDef[] = [
     penalties: [
       { type: 'deal_cost_increase', value: 0.25 },
       { type: 'risk_increase', value: 10 },
-      { type: 'investigation_chance', value: 0.03 },
-    ],
+      { type: 'investigation_chance', value: 0.015 }
+    ]
   },
   {
     level: 4,
@@ -52,11 +50,11 @@ export const HEAT_THRESHOLDS: HeatThresholdDef[] = [
     icon: 'mdi:fire-alert',
     color: '#d32f2f',
     penalties: [
-      { type: 'income_penalty', value: 0.90 },
-      { type: 'deal_cost_increase', value: 0.40 },
+      { type: 'income_penalty', value: 0.9 },
+      { type: 'deal_cost_increase', value: 0.4 },
       { type: 'risk_increase', value: 20 },
-      { type: 'investigation_chance', value: 0.08 },
-    ],
+      { type: 'investigation_chance', value: 0.04 }
+    ]
   },
   {
     level: 5,
@@ -66,11 +64,11 @@ export const HEAT_THRESHOLDS: HeatThresholdDef[] = [
     color: '#b71c1c',
     penalties: [
       { type: 'income_penalty', value: 0.75 },
-      { type: 'deal_cost_increase', value: 0.60 },
+      { type: 'deal_cost_increase', value: 0.6 },
       { type: 'risk_increase', value: 35 },
-      { type: 'investigation_chance', value: 0.15 },
-    ],
-  },
+      { type: 'investigation_chance', value: 0.08 }
+    ]
+  }
 ]
 
 /** Get current heat level from heat value */
@@ -84,6 +82,6 @@ export function getHeatLevel(heat: number): HeatThresholdDef {
 /** Get aggregate heat penalty value for a given type */
 export function getHeatPenalty(heat: number, type: string): number {
   const level = getHeatLevel(heat)
-  const penalty = level.penalties.find(p => p.type === type)
+  const penalty = level.penalties.find((p) => p.type === type)
   return penalty?.value ?? 0
 }

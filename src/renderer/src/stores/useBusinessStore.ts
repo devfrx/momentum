@@ -39,13 +39,13 @@ import {
   synergyCategoryMultiplier,
   getGeoTier,
   MEGA_CORP_REQUIREMENTS,
-  marketDominanceMultiplier,
+  marketDominanceMultiplier
 } from '@renderer/data/businesses'
 import type {
   BusinessDef,
   BusinessCategory,
   AdvisorType,
-  AdvisorState,
+  AdvisorState
 } from '@renderer/data/businesses'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
@@ -175,12 +175,12 @@ export const useBusinessStore = defineStore('business', () => {
   const totalBusinessCount = computed(() => businesses.value.length)
   const totalLevels = computed(() => businesses.value.reduce((sum, b) => sum + b.level, 0))
   const totalBranches = computed(() => businesses.value.reduce((sum, b) => sum + b.branches, 0))
-  const corporationCount = computed(() => businesses.value.filter(b => b.isCorporation).length)
+  const corporationCount = computed(() => businesses.value.filter((b) => b.isCorporation).length)
 
   // ─── Helpers ──────────────────────────────────────────────────
 
   function getDef(defId: string): BusinessDef | undefined {
-    return BUSINESS_DEFS.find(d => d.id === defId)
+    return BUSINESS_DEFS.find((d) => d.id === defId)
   }
 
   function getLevelCost(biz: OwnedBusiness): Decimal {
@@ -215,7 +215,7 @@ export const useBusinessStore = defineStore('business', () => {
     // Also factor in upgrade-provided employee capacity
     let upgEmpCap = 0
     for (const state of biz.upgrades) {
-      const upgDef = BUSINESS_UPGRADES.find(u => u.id === state.upgradeId)
+      const upgDef = BUSINESS_UPGRADES.find((u) => u.id === state.upgradeId)
       if (upgDef?.effectType === 'employee_capacity') {
         upgEmpCap += getUpgradeBonus(state.upgradeId, state.level)
       }
@@ -228,21 +228,21 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function getUpgradeCost(biz: OwnedBusiness, upgradeId: string): Decimal {
-    const upgDef = BUSINESS_UPGRADES.find(u => u.id === upgradeId)
+    const upgDef = BUSINESS_UPGRADES.find((u) => u.id === upgradeId)
     if (!upgDef) return D(1e18)
-    const state = biz.upgrades.find(u => u.upgradeId === upgradeId)
+    const state = biz.upgrades.find((u) => u.upgradeId === upgradeId)
     const level = state?.level ?? 0
     return mul(upgDef.baseCost, pow(D(upgDef.costGrowth), level))
   }
 
   function getUpgradeBonus(upgradeId: string, level: number): number {
-    const upgDef = BUSINESS_UPGRADES.find(u => u.id === upgradeId)
+    const upgDef = BUSINESS_UPGRADES.find((u) => u.id === upgradeId)
     if (!upgDef || level <= 0) return 0
     return upgDef.baseBonus * Math.log2(level + 1)
   }
 
   function getApplicableUpgrades(biz: OwnedBusiness) {
-    return BUSINESS_UPGRADES.filter(u => {
+    return BUSINESS_UPGRADES.filter((u) => {
       if (biz.level < u.unlockAtBusinessLevel) return false
       if (u.categories && !u.categories.includes(biz.category)) return false
       return true
@@ -259,9 +259,9 @@ export const useBusinessStore = defineStore('business', () => {
 
   /** Real manager cost: uses operations advisor cost formula */
   function getManagerCost(biz: OwnedBusiness): Decimal {
-    const opsDef = ADVISOR_DEFS.find(a => a.type === 'operations')
+    const opsDef = ADVISOR_DEFS.find((a) => a.type === 'operations')
     if (!opsDef) return mul(biz.purchasePrice, 0.15)
-    const state = biz.advisors.find(a => a.type === 'operations')
+    const state = biz.advisors.find((a) => a.type === 'operations')
     const level = state?.level ?? 0
     return advisorCost(biz.purchasePrice, opsDef, level)
   }
@@ -269,7 +269,7 @@ export const useBusinessStore = defineStore('business', () => {
   // ─── Actions ──────────────────────────────────────────────────
 
   function buyBusiness(defId: string, customName?: string, customIcon?: string): boolean {
-    const def = BUSINESS_DEFS.find(d => d.id === defId)
+    const def = BUSINESS_DEFS.find((d) => d.id === defId)
     if (!def) return false
 
     const player = usePlayerStore()
@@ -325,7 +325,7 @@ export const useBusinessStore = defineStore('business', () => {
       marketingFactor: 1,
       hasManager: false,
       managerCost: mul(def.purchasePrice, 0.5),
-      pendingProfit: ZERO,
+      pendingProfit: ZERO
     })
 
     player.addXp(D(50))
@@ -333,7 +333,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function levelUp(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
     const cost = getLevelCost(biz)
     const player = usePlayerStore()
@@ -353,7 +353,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function openBranch(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
     const cost = getBranchCost(biz)
     const player = usePlayerStore()
@@ -364,7 +364,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function trainStaff(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
     const cost = getTrainingCost(biz)
     const player = usePlayerStore()
@@ -375,16 +375,16 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function purchaseUpgrade(businessId: string, upgradeId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
-    const upgDef = BUSINESS_UPGRADES.find(u => u.id === upgradeId)
+    const upgDef = BUSINESS_UPGRADES.find((u) => u.id === upgradeId)
     if (!upgDef) return false
     if (biz.level < upgDef.unlockAtBusinessLevel) return false
     if (upgDef.categories && !upgDef.categories.includes(biz.category)) return false
     const cost = getUpgradeCost(biz, upgradeId)
     const player = usePlayerStore()
     if (!player.spendCash(cost)) return false
-    let state = biz.upgrades.find(u => u.upgradeId === upgradeId)
+    let state = biz.upgrades.find((u) => u.upgradeId === upgradeId)
     if (state) {
       state.level++
     } else {
@@ -395,11 +395,11 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function hireAdvisor(businessId: string, advisorType: AdvisorType): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
-    const advDef = ADVISOR_DEFS.find(a => a.type === advisorType)
+    const advDef = ADVISOR_DEFS.find((a) => a.type === advisorType)
     if (!advDef) return false
-    let state = biz.advisors.find(a => a.type === advisorType)
+    let state = biz.advisors.find((a) => a.type === advisorType)
     const currentLevel = state?.level ?? 0
     const cost = advisorCost(biz.purchasePrice, advDef, currentLevel)
     const player = usePlayerStore()
@@ -421,12 +421,12 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function setPolicy(businessId: string, policyId: string, value: number): void {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (biz) biz.policies[policyId] = Math.max(0, Math.min(100, value))
   }
 
   function becomeCorporation(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz || !canBecomeCorporation(biz)) return false
     biz.isCorporation = true
     biz.reputation = Math.min(100, biz.reputation + 20)
@@ -436,11 +436,13 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function sellBusiness(businessId: string): Decimal {
-    const idx = businesses.value.findIndex(b => b.id === businessId)
+    const idx = businesses.value.findIndex((b) => b.id === businessId)
     if (idx === -1) return ZERO
     const biz = businesses.value[idx]
     const valuation = Formulas.businessValuation(
-      biz.avgProfitPerTick, biz.purchasePrice, biz.sectorMultiplier
+      biz.avgProfitPerTick,
+      biz.purchasePrice,
+      biz.sectorMultiplier
     )
     const player = usePlayerStore()
     // Collect pending profit before selling (BUG-02 fix)
@@ -451,7 +453,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function hireEmployee(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
     const maxEmp = getMaxEmployees(biz)
     if (biz.employees >= maxEmp) return false
@@ -460,24 +462,24 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function fireEmployee(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz || biz.employees <= 1) return false
     biz.employees--
     return true
   }
 
   function setPrice(businessId: string, price: number): void {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (biz && price > 0) biz.pricePerUnit = price
   }
 
   function setMarketingBudget(businessId: string, budget: number): void {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (biz && budget >= 0) biz.marketingBudget = budget
   }
 
   function upgradeQuality(businessId: string): boolean {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
     const player = usePlayerStore()
     if (!player.spendCash(biz.qualityUpgradeCost)) return false
@@ -487,7 +489,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function renameBusiness(businessId: string, newName: string): void {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (biz) biz.customName = newName.trim() || undefined
   }
 
@@ -496,7 +498,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function collectProfit(businessId: string): Decimal {
-    const biz = businesses.value.find(b => b.id === businessId)
+    const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz || biz.pendingProfit.lte(ZERO)) return ZERO
     const player = usePlayerStore()
     const amount = biz.pendingProfit
@@ -566,15 +568,26 @@ export const useBusinessStore = defineStore('business', () => {
       let upgQualMult = 1
       for (const state of biz.upgrades) {
         const bonus = getUpgradeBonus(state.upgradeId, state.level)
-        const upgDef = BUSINESS_UPGRADES.find(u => u.id === state.upgradeId)
+        const upgDef = BUSINESS_UPGRADES.find((u) => u.id === state.upgradeId)
         if (!upgDef) continue
         switch (upgDef.effectType) {
-          case 'revenue_mult': upgRevMult += bonus; break
-          case 'cost_reduction': upgCostRedMult += bonus; break
-          case 'customer_mult': upgCustMult += bonus; break
-          case 'output_mult': upgOutputMult += bonus; break
-          case 'quality_mult': upgQualMult += bonus; break
-          default: break
+          case 'revenue_mult':
+            upgRevMult += bonus
+            break
+          case 'cost_reduction':
+            upgCostRedMult += bonus
+            break
+          case 'customer_mult':
+            upgCustMult += bonus
+            break
+          case 'output_mult':
+            upgOutputMult += bonus
+            break
+          case 'quality_mult':
+            upgQualMult += bonus
+            break
+          default:
+            break
         }
       }
 
@@ -584,14 +597,22 @@ export const useBusinessStore = defineStore('business', () => {
       let advOutputBoost = 0
       let hasCFO = false
       for (const adv of biz.advisors) {
-        const advDef = ADVISOR_DEFS.find(a => a.type === adv.type)
+        const advDef = ADVISOR_DEFS.find((a) => a.type === adv.type)
         if (!advDef || adv.level <= 0) continue
         const eff = advisorEffect(advDef, adv.level)
         switch (adv.type) {
-          case 'operations': advCostReduction += eff; break
-          case 'marketing': advMarketingEff += eff; break
-          case 'hr': advOutputBoost += eff; break
-          case 'cfo': hasCFO = true; break
+          case 'operations':
+            advCostReduction += eff
+            break
+          case 'marketing':
+            advMarketingEff += eff
+            break
+          case 'hr':
+            advOutputBoost += eff
+            break
+          case 'cfo':
+            hasCFO = true
+            break
         }
       }
 
@@ -621,29 +642,48 @@ export const useBusinessStore = defineStore('business', () => {
       const repFactor = Math.max(0.01, biz.reputation / 50) // rep=50 → ×1
       // Level = brand recognition → more customers; branches = new locations → larger market
       const levelCustMult = Math.pow(biz.level, 0.7)
-      const branchCustMult = 1 + biz.branches * 0.30
+      const branchCustMult = 1 + biz.branches * 0.3
       const customers = Math.floor(
-        baseCustomers
-        * customerAttractionMul.toNumber()
-        * upgCustMult
-        * policyEffects.customerMult
-        * (1 + msBonus.customer_attraction)
-        * repFactor
-        * levelCustMult
-        * branchCustMult
+        baseCustomers *
+          customerAttractionMul.toNumber() *
+          upgCustMult *
+          policyEffects.customerMult *
+          (1 + msBonus.customer_attraction) *
+          repFactor *
+          levelCustMult *
+          branchCustMult
       )
 
       // ── Production capacity ──
-      const effectiveOutput = biz.outputPerEmployee * levelMult * trainingMult * upgOutputMult * (1 + advOutputBoost) * policyEffects.outputMult
+      const effectiveOutput =
+        biz.outputPerEmployee *
+        levelMult *
+        trainingMult *
+        upgOutputMult *
+        (1 + advOutputBoost) *
+        policyEffects.outputMult
       const maxOutput = Math.floor(biz.employees * effectiveOutput * (1 + biz.branches * 0.3))
       const unitsSold = Math.min(customers, maxOutput)
 
       // ── Revenue ──
       const baseRevenue = D(unitsSold * biz.pricePerUnit)
-      const revMultTotal = D(geoMult * synergyMult * corpMult * upgRevMult * policyEffects.revenueMult * (1 + msBonus.revenue_mult))
+      const revMultTotal = D(
+        geoMult *
+          synergyMult *
+          corpMult *
+          upgRevMult *
+          policyEffects.revenueMult *
+          (1 + msBonus.revenue_mult)
+      )
       const revenue = mul(
-        mul(mul(mul(mul(baseRevenue, bizRevenueMul), allIncomeMul), prestigeGlobalMul), revMultTotal),
-        mul(mul(bizEventRevMul, generalEventIncomeMul), mul(mul(bmBusinessBoost, bmIncomeBoost), bmHeatPenalty))
+        mul(
+          mul(mul(mul(baseRevenue, bizRevenueMul), allIncomeMul), prestigeGlobalMul),
+          revMultTotal
+        ),
+        mul(
+          mul(bizEventRevMul, generalEventIncomeMul),
+          mul(mul(bmBusinessBoost, bmIncomeBoost), bmHeatPenalty)
+        )
       )
 
       // ── Costs ──
@@ -657,17 +697,27 @@ export const useBusinessStore = defineStore('business', () => {
         biz.marketingBudget,
         ecoState.inflationIndex
       )
-      const costRedTotal = costReductionMul.toNumber() * upgCostRedMult * (1 + msBonus.cost_reduction) * bmCostReduction.toNumber() * prestigeCostRed
+      const costRedTotal =
+        costReductionMul.toNumber() *
+        upgCostRedMult *
+        (1 + msBonus.cost_reduction) *
+        bmCostReduction.toNumber() *
+        prestigeCostRed
       const afterCostRed = costRedTotal > 1 ? div(baseCosts, D(costRedTotal)) : baseCosts
       const afterEventCosts = mul(afterCostRed, bizEventCostMul)
-      const costs = advCostReduction > 0 ? mul(afterEventCosts, D(1 - Math.min(0.9, advCostReduction))) : afterEventCosts
+      const costs =
+        advCostReduction > 0
+          ? mul(afterEventCosts, D(1 - Math.min(0.9, advCostReduction)))
+          : afterEventCosts
 
       // ── Profit ──
       const profit = sub(revenue, costs)
 
       // ── Update live stats ──
-      const priceFactor = biz.optimalPrice > 0 && biz.pricePerUnit > 0
-        ? Math.pow(biz.optimalPrice / biz.pricePerUnit, biz.elasticity) : 1.0
+      const priceFactor =
+        biz.optimalPrice > 0 && biz.pricePerUnit > 0
+          ? Math.pow(biz.optimalPrice / biz.pricePerUnit, biz.elasticity)
+          : 1.0
       biz.currentCustomers = customers
       biz.maxCapacity = maxOutput
       biz.unitsSold = unitsSold
@@ -697,7 +747,7 @@ export const useBusinessStore = defineStore('business', () => {
 
       // ── HR auto-train (every 100 ticks) ──
       // Guard: skip if cost would exceed 1% of player cash (prevents silent drain)
-      const hrAdvisor = biz.advisors.find(a => a.type === 'hr')
+      const hrAdvisor = biz.advisors.find((a) => a.type === 'hr')
       if (hrAdvisor && hrAdvisor.level > 0 && biz.ticksOwned % 100 === 0) {
         const tCost = getTrainingCost(biz)
         const p = usePlayerStore()
@@ -715,8 +765,7 @@ export const useBusinessStore = defineStore('business', () => {
           player.addXp(D(0.05))
         } else if (profit.lt(ZERO)) {
           const loss = profit.abs()
-          if (gte(player.cash, loss)) player.spendCash(loss)
-          else player.spendCash(player.cash)
+          player.forcePay(loss)
         }
       } else {
         if (profit.gt(ZERO)) {
@@ -728,8 +777,7 @@ export const useBusinessStore = defineStore('business', () => {
           } else {
             const remaining = sub(loss, biz.pendingProfit)
             biz.pendingProfit = ZERO
-            if (gte(player.cash, remaining)) player.spendCash(remaining)
-            else player.spendCash(player.cash)
+            player.forcePay(remaining)
           }
         }
       }
@@ -755,17 +803,22 @@ export const useBusinessStore = defineStore('business', () => {
 
     const migrated = arr.map((biz: Record<string, unknown>) => ({
       ...biz,
-      defId: (biz.defId as string) ?? (biz.id as string)?.replace(/_\d+$/, '') ?? (biz.id as string),
+      defId:
+        (biz.defId as string) ?? (biz.id as string)?.replace(/_\d+$/, '') ?? (biz.id as string),
       level: (biz.level as number) ?? 1,
       branches: (biz.branches as number) ?? 0,
       trainingLevel: (biz.trainingLevel as number) ?? 0,
-      policies: (biz.policies as Record<string, number>) ?? Object.fromEntries(POLICIES.map(p => [p.id, p.defaultValue])),
+      policies:
+        (biz.policies as Record<string, number>) ??
+        Object.fromEntries(POLICIES.map((p) => [p.id, p.defaultValue])),
       upgrades: (biz.upgrades as BusinessUpgradeState[]) ?? [],
       advisors: (biz.advisors as AdvisorState[]) ?? [],
       reputation: (biz.reputation as number) ?? 50,
       isCorporation: (biz.isCorporation as boolean) ?? false,
       hasManager: (biz.hasManager as boolean) ?? false,
-      managerCost: biz.managerCost ? D(biz.managerCost as string | number) : mul(D(biz.purchasePrice as string | number || 100), 0.5),
+      managerCost: biz.managerCost
+        ? D(biz.managerCost as string | number)
+        : mul(D((biz.purchasePrice as string | number) || 100), 0.5),
       pendingProfit: biz.pendingProfit ? D(biz.pendingProfit as string | number) : ZERO,
       totalRevenue: biz.totalRevenue ? D(biz.totalRevenue as string | number) : ZERO,
       totalCosts: biz.totalCosts ? D(biz.totalCosts as string | number) : ZERO,
@@ -775,7 +828,9 @@ export const useBusinessStore = defineStore('business', () => {
       costsPerTick: biz.costsPerTick ? D(biz.costsPerTick as string | number) : ZERO,
       profitPerTick: biz.profitPerTick ? D(biz.profitPerTick as string | number) : ZERO,
       purchasePrice: biz.purchasePrice ? D(biz.purchasePrice as string | number) : ZERO,
-      qualityUpgradeCost: biz.qualityUpgradeCost ? D(biz.qualityUpgradeCost as string | number) : D(100),
+      qualityUpgradeCost: biz.qualityUpgradeCost
+        ? D(biz.qualityUpgradeCost as string | number)
+        : D(100)
     })) as OwnedBusiness[]
 
     businesses.value = migrated
@@ -823,6 +878,6 @@ export const useBusinessStore = defineStore('business', () => {
     collectProfit,
     tick,
     prestigeReset,
-    loadFromSave,
+    loadFromSave
   }
 })

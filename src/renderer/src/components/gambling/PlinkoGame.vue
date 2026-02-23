@@ -110,7 +110,7 @@ const maxMultiplier = computed(() =>
 // ─── Drop logic ─────────────────────────────────────────────
 function drop(): void {
     if (!canDrop.value) return
-    if (!player.spendCash(betDecimal.value)) return
+    if (!player.spendCash(betDecimal.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
 
     dropping.value = true
     showResultFlash.value = false
@@ -129,12 +129,12 @@ function onBallLanded(bucketIndex: number, multiplier: number, _ballId: number):
     const isWin = multiplier >= 1
 
     if (isWin) {
-        player.earnCash(payoutAmount)
+        player.earnCash(payoutAmount, { key: 'banking.tx_gambling_win', cat: 'gambling' })
         gambling.recordWin('plinko', betDecimal.value, payoutAmount)
     } else {
         // Partial return: the payout is less than the bet
         if (multiplier > 0) {
-            player.earnCash(payoutAmount)
+            player.earnCash(payoutAmount, { key: 'banking.tx_gambling_win', cat: 'gambling' })
         }
         gambling.recordLoss('plinko', betDecimal.value)
     }
@@ -313,7 +313,7 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                         </UButton>
                         <UButton variant="warning" size="xs" @click="maxBet" :disabled="autoDrop">{{
                             $t('gambling.max')
-                            }}</UButton>
+                        }}</UButton>
                     </div>
                 </div>
 

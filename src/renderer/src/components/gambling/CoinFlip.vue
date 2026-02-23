@@ -44,7 +44,7 @@ const stats = computed(() => gambling.getStats('coinflip'))
 // ─── Flip logic ──────────────────────────────────────────────
 function flip(): void {
     if (!canFlip.value) return
-    if (!player.spendCash(betDecimal.value)) return
+    if (!player.spendCash(betDecimal.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
 
     flipping.value = true
     showResult.value = false
@@ -110,7 +110,7 @@ function playFlip(outcome: Side, isFinal: boolean, onLand?: () => void): void {
                     const isWin = outcome === chosenSide.value
                     if (isWin) {
                         const winPayout = mul(betDecimal.value, 2)
-                        player.earnCash(winPayout)
+                        player.earnCash(winPayout, { key: 'banking.tx_gambling_win', cat: 'gambling' })
                         gambling.recordWin('coinflip', betDecimal.value, winPayout)
                         payout.value = winPayout
                         won.value = true
@@ -202,7 +202,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                 <div v-if="showResult" class="result-badge" :class="won ? 'badge-win' : 'badge-lose'">
                     <AppIcon :icon="won ? 'mdi:trophy' : 'mdi:emoticon-sad'" class="badge-icon" />
                     <span class="badge-side">{{ result === 'heads' ? $t('gambling.cf_heads') : $t('gambling.cf_tails')
-                    }}</span>
+                        }}</span>
                     <span v-if="won" class="badge-payout">{{ formatCash(payout) }}</span>
                     <span v-else class="badge-text">{{ $t('gambling.cf_you_lose') }}</span>
                 </div>
@@ -248,7 +248,7 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="flipping">{{ $t('gambling.max')
-                    }}</UButton>
+                        }}</UButton>
                 </div>
             </div>
 

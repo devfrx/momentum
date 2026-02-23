@@ -5,7 +5,13 @@ import { defineStore } from 'pinia'
 import { shallowRef, ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
-import { MarketSimulator, type AssetConfig, type AssetState, type MarketAnalysis, type MarketCondition } from '@renderer/core/MarketSim'
+import {
+  MarketSimulator,
+  type AssetConfig,
+  type AssetState,
+  type MarketAnalysis,
+  type MarketCondition
+} from '@renderer/core/MarketSim'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
@@ -132,7 +138,7 @@ export const useStockStore = defineStore('stocks', () => {
     simulator.tick()
     // Merge dailyHistory + priceHistory for seamless long-term charts.
     // Creates new array refs so Vue detects prop changes.
-    assets.value = simulator.getAllAssets().map(a => ({
+    assets.value = simulator.getAllAssets().map((a) => ({
       ...a,
       priceHistory: [...a.dailyHistory, ...a.priceHistory],
       candlestickHistory: a.candlestickHistory.slice()
@@ -167,14 +173,17 @@ export const useStockStore = defineStore('stocks', () => {
       const config = configs.value.find((c) => c.id === pos.assetId)
       if (!asset || !config || !config.dividendYield || config.dividendYield <= 0) continue
 
-      const payout = D(asset.currentPrice * pos.shares * config.dividendYield * ticksSinceLastPayout / TICKS_PER_GAME_YEAR)
+      const payout = D(
+        (asset.currentPrice * pos.shares * config.dividendYield * ticksSinceLastPayout) /
+          TICKS_PER_GAME_YEAR
+      )
       totalPayout = add(totalPayout, payout)
     }
 
     if (totalPayout.gt(0)) {
       // Apply combined stock_returns multiplier (skill tree + prestige + events)
       const adjustedPayout = mul(totalPayout, stockReturnsMul)
-      player.earnCash(adjustedPayout)
+      player.earnCash(adjustedPayout, { key: 'banking.tx_stock_dividend', cat: 'investment' })
       totalDividendsEarned.value = add(totalDividendsEarned.value, adjustedPayout)
     }
   }
@@ -186,11 +195,18 @@ export const useStockStore = defineStore('stocks', () => {
 
     const player = usePlayerStore()
     const cost = D(asset.currentPrice * shareCount)
-    
+
     // Check and spend cash
     if (!gte(player.cash, cost)) return null
-    if (!player.spendCash(cost)) return null
-    
+    if (
+      !player.spendCash(cost, {
+        key: 'banking.tx_stock_buy',
+        cat: 'investment',
+        params: { name: asset.name, qty: shareCount }
+      })
+    )
+      return null
+
     const existing = portfolio.value.find((p) => p.assetId === assetId)
 
     if (existing) {
@@ -231,9 +247,13 @@ export const useStockStore = defineStore('stocks', () => {
     const revenue = baseRevenue.add(multipliedProfit.sub(baseProfit))
     const profit = multipliedProfit
     totalRealizedProfit.value = add(totalRealizedProfit.value, profit)
-    
+
     // Add revenue to player cash
-    player.earnCash(revenue)
+    player.earnCash(revenue, {
+      key: 'banking.tx_stock_sell',
+      cat: 'investment',
+      params: { name: asset.name, qty: shareCount }
+    })
 
     pos.shares -= shareCount
     pos.totalInvested = sub(pos.totalInvested, costBasis)
@@ -264,7 +284,12 @@ export const useStockStore = defineStore('stocks', () => {
 
   /** Restore stock state from saved data */
   function loadFromSave(saved: {
-    stockPortfolio?: Array<{ assetId: string; shares: number; averageBuyPrice: number; totalInvested: Decimal }>
+    stockPortfolio?: Array<{
+      assetId: string
+      shares: number
+      averageBuyPrice: number
+      totalInvested: Decimal
+    }>
     stockStats?: { totalRealizedProfit?: Decimal; totalDividendsEarned?: Decimal }
     stockMarketState?: unknown
   }): void {
@@ -298,9 +323,11 @@ export const useStockStore = defineStore('stocks', () => {
     // Restore market simulator state
     if (saved.stockMarketState) {
       try {
-        simulator.deserialize(saved.stockMarketState as Parameters<MarketSimulator['deserialize']>[0])
+        simulator.deserialize(
+          saved.stockMarketState as Parameters<MarketSimulator['deserialize']>[0]
+        )
         // Merge dailyHistory + priceHistory for chart display (clone candlestickHistory for reactivity)
-        assets.value = simulator.getAllAssets().map(a => ({
+        assets.value = simulator.getAllAssets().map((a) => ({
           ...a,
           priceHistory: [...a.dailyHistory, ...a.priceHistory],
           candlestickHistory: a.candlestickHistory.slice()

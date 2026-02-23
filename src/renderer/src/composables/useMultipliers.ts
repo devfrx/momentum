@@ -14,6 +14,7 @@ import { usePrestigeStore } from '@renderer/stores/usePrestigeStore'
 import { useEventStore } from '@renderer/stores/useEventStore'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useBankingStore } from '@renderer/stores/useBankingStore'
 import { useFormat } from './useFormat'
 import type { EventEffectType } from '@renderer/core/EventSystem'
 
@@ -58,7 +59,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['global_multiplier'],
     eventEffect: { type: 'income_multiplier' },
     achievementTarget: 'all_income',
-    eraAffected: true,
+    eraAffected: true
   },
   {
     id: 'business_revenue',
@@ -68,7 +69,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['business_revenue'],
     eventEffect: { type: 'income_multiplier', target: 'business' },
     achievementTarget: 'business_revenue',
-    eraAffected: true,
+    eraAffected: true
   },
   {
     id: 'cost_reduction',
@@ -78,7 +79,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['cost_reduction'],
     eventEffect: { type: 'cost_multiplier' },
     achievementTarget: 'cost_reduction',
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'customer_attraction',
@@ -88,7 +89,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: [],
     eventEffect: null,
     achievementTarget: null,
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'job_efficiency',
@@ -98,7 +99,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['job_efficiency'],
     eventEffect: null,
     achievementTarget: 'job_efficiency',
-    eraAffected: true,
+    eraAffected: true
   },
   {
     id: 'real_estate_rent',
@@ -108,7 +109,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['real_estate_income'],
     eventEffect: { type: 'income_multiplier', target: 'realestate' },
     achievementTarget: 'real_estate_rent',
-    eraAffected: true,
+    eraAffected: true
   },
   {
     id: 'stock_returns',
@@ -118,7 +119,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['stock_returns'],
     eventEffect: { type: 'income_multiplier', target: 'stocks' },
     achievementTarget: 'stock_returns',
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'crypto_returns',
@@ -128,7 +129,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['crypto_returns'],
     eventEffect: { type: 'income_multiplier', target: 'crypto' },
     achievementTarget: 'crypto_returns',
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'gambling_luck',
@@ -138,7 +139,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: [],
     eventEffect: null,
     achievementTarget: 'gambling_luck',
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'offline_efficiency',
@@ -148,7 +149,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['offline_bonus'],
     eventEffect: null,
     achievementTarget: null,
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'xp_gain',
@@ -158,7 +159,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['xp_gain'],
     eventEffect: null,
     achievementTarget: 'xp_gain',
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'prestige_gain',
@@ -168,7 +169,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['prestige_gain'],
     eventEffect: null,
     achievementTarget: null,
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'startup_success',
@@ -178,7 +179,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: [],
     eventEffect: null,
     achievementTarget: null,
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'loan_rate',
@@ -188,7 +189,7 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['loan_discount'],
     eventEffect: { type: 'loan_rate_modifier' },
     achievementTarget: null,
-    eraAffected: false,
+    eraAffected: false
   },
   {
     id: 'deposit_rate',
@@ -198,15 +199,15 @@ export const MULTIPLIER_CATEGORIES: MultiplierCategory[] = [
     prestigeEffects: ['deposit_bonus'],
     eventEffect: { type: 'deposit_rate_modifier' },
     achievementTarget: null,
-    eraAffected: false,
-  },
+    eraAffected: false
+  }
 ]
 
 const IMPORTANT_CATEGORIES = new Set([
   'all_income',
   'business_revenue',
   'gambling_luck',
-  'offline_efficiency',
+  'offline_efficiency'
 ])
 
 export function useMultipliers() {
@@ -231,7 +232,7 @@ export function useMultipliers() {
             sourceParam: node.name,
             icon: node.icon || 'mdi:puzzle',
             value: formatMultiplier(effect.add(1)),
-            raw: effect.add(1),
+            raw: effect.add(1)
           })
         }
       }
@@ -246,7 +247,7 @@ export function useMultipliers() {
               sourceParam: upg.name,
               icon: upg.icon || 'mdi:crown',
               value: formatMultiplier(D(val)),
-              raw: D(val),
+              raw: D(val)
             })
           }
         }
@@ -260,7 +261,7 @@ export function useMultipliers() {
                   sourceParam: ms.name,
                   icon: ms.icon || 'mdi:flag',
                   value: formatMultiplier(D(val)),
-                  raw: D(val),
+                  raw: D(val)
                 })
               }
             }
@@ -274,7 +275,7 @@ export function useMultipliers() {
               sourceParam: perk.name,
               icon: perk.icon || 'mdi:lightning-bolt',
               value: formatMultiplier(D(val)),
-              raw: D(val),
+              raw: D(val)
             })
           }
         }
@@ -289,7 +290,7 @@ export function useMultipliers() {
             sourceParam: prestige.currentEra.name,
             icon: prestige.currentEra.icon || 'mdi:shield-crown',
             value: formatMultiplier(D(1 + eraBonus)),
-            raw: D(1 + eraBonus),
+            raw: D(1 + eraBonus)
           })
         }
         const basePM = D(1).add(mul(prestige.points, 0.1))
@@ -298,7 +299,7 @@ export function useMultipliers() {
             sourceKey: 'multipliers.source_prestige_points',
             icon: 'mdi:diamond-stone',
             value: formatMultiplier(basePM),
-            raw: basePM,
+            raw: basePM
           })
         }
       }
@@ -314,7 +315,7 @@ export function useMultipliers() {
             sourceKey: 'multipliers.source_event',
             icon: 'mdi:lightning-bolt-circle',
             value: formatMultiplier(D(evMul)),
-            raw: D(evMul),
+            raw: D(evMul)
           })
         }
       }
@@ -332,7 +333,7 @@ export function useMultipliers() {
               sourceParam: ach.name,
               icon: ach.icon || 'mdi:medal',
               value: formatMultiplier(D(ach.reward.value)),
-              raw: D(ach.reward.value),
+              raw: D(ach.reward.value)
             })
           }
         }
@@ -346,7 +347,20 @@ export function useMultipliers() {
             sourceParam: ability.name,
             icon: ability.icon || 'mdi:shimmer',
             value: formatMultiplier(D(ability.effect.value)),
-            raw: D(ability.effect.value),
+            raw: D(ability.effect.value)
+          })
+        }
+      }
+
+      // 7. FINANX Card Tier bonus (applied to all_income)
+      if (cat.id === 'all_income') {
+        const banking = useBankingStore()
+        if (banking.tierBonus > 1) {
+          sources.push({
+            sourceKey: 'multipliers.source_card_tier',
+            icon: banking.tierConfig.icon,
+            value: formatMultiplier(D(banking.tierBonus)),
+            raw: D(banking.tierBonus)
           })
         }
       }
@@ -359,11 +373,9 @@ export function useMultipliers() {
         sources,
         total,
         totalFormatted: formatMultiplier(total),
-        hasBonus: total.gt(1),
+        hasBonus: total.gt(1)
       }
-    }).filter(
-      (b) => b.hasBonus || b.sources.length > 0 || IMPORTANT_CATEGORIES.has(b.category.id)
-    )
+    }).filter((b) => b.hasBonus || b.sources.length > 0 || IMPORTANT_CATEGORIES.has(b.category.id))
   })
 
   /** Only categories that have an active bonus */

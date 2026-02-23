@@ -592,6 +592,39 @@ export interface ShopSave {
 
 // ─── Root Save Schema ───────────────────────────────────────────────
 
+// ─── Banking / Card ─────────────────────────────────────────────────
+export interface BankingCardSave {
+  number: string
+  expiry: string
+  cvv: string
+  iban: string
+  seed: number
+}
+
+export interface BankingTransactionSave {
+  id: string
+  timestamp: number
+  descriptionKey: string
+  descriptionParams?: Record<string, string | number>
+  amount: SD
+  category: string
+  balanceAfter: SD
+}
+
+export interface BankingSave {
+  card: BankingCardSave
+  holderName: string
+  transactions: BankingTransactionSave[]
+  totalIncome: SD
+  totalExpenses: SD
+  cardTier: string
+  highestTierUnlocked: string
+  selectedStyleId: string
+  lifetimeTransactions: number
+}
+
+// ─── Root Save Schema ───────────────────────────────────────────────
+
 export interface GameSave {
   /** Schema version for migrations */
   version: number
@@ -646,6 +679,9 @@ export interface GameSave {
 
   /** Shop state */
   shop?: ShopSave
+
+  /** Banking / card state */
+  banking?: BankingSave
 
   settings: SettingsSave
 }
@@ -769,7 +805,13 @@ export function createDefaultSave(): GameSave {
     loans: {
       loans: [],
       creditScore: 50,
-      creditScoreFactors: { paymentHistory: 10, creditUtilization: 30, creditAge: 0, creditMix: 0, newCredit: 10 },
+      creditScoreFactors: {
+        paymentHistory: 10,
+        creditUtilization: 30,
+        creditAge: 0,
+        creditMix: 0,
+        newCredit: 10
+      },
       loanHistory: [],
       totalTicksWithCredit: 0,
       recentApplications: [],
@@ -806,7 +848,7 @@ export function createDefaultSave(): GameSave {
       totalFinesPaid: ZERO_SD,
       lastTickProcessed: 0,
       activityLog: [],
-      availableDeals: [],
+      availableDeals: []
     },
 
     vault: {
@@ -817,7 +859,7 @@ export function createDefaultSave(): GameSave {
       totalItemsSold: 0,
       totalSaleRevenue: ZERO_SD,
       totalCashDeposited: ZERO_SD,
-      totalCashWithdrawn: ZERO_SD,
+      totalCashWithdrawn: ZERO_SD
     },
 
     shop: {
@@ -840,7 +882,7 @@ export function createDefaultSave(): GameSave {
       restorationSlotCount: 1,
       restorationSlots: [null],
       activeAuctions: [],
-      auctionHistory: [],
+      auctionHistory: []
     },
 
     settings: {

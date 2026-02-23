@@ -36,7 +36,7 @@ import {
   OPPORTUNITY_REFRESH_TICKS,
   MIN_OPPORTUNITIES,
   MAX_OPPORTUNITIES,
-  PROPERTY_TEMPLATES,
+  PROPERTY_TEMPLATES
 } from '@renderer/data/realestate'
 import type { TickContext } from '@renderer/core/GameEngine'
 import { usePlayerStore } from './usePlayerStore'
@@ -206,7 +206,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       p.baseRent,
       p.renovationLevel,
       0.15, // upgradeBonus per renovation level
-      1.0,  // locationMultiplier = 1.0 (already in baseRent)
+      1.0 // locationMultiplier = 1.0 (already in baseRent)
     )
 
     // Apply all modifiers
@@ -280,20 +280,19 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
   /** Hot deals */
   const hotDeals = computed<PropertyOpportunity[]>(() =>
-    opportunities.value.filter((o) => o.isHotDeal),
+    opportunities.value.filter((o) => o.isHotDeal)
   )
 
   /** All available opportunities (no expiration — managed via scans & refreshes) */
-  const availableOpportunities = computed<PropertyOpportunity[]>(() =>
-    [...opportunities.value],
-  )
+  const availableOpportunities = computed<PropertyOpportunity[]>(() => [...opportunities.value])
 
   // ─── Actions ───────────────────────────────────────────────────
 
   /** Generate initial opportunities if we have none */
   function ensureOpportunities(netWorth: number, currentTime: number): void {
     if (opportunities.value.length < MIN_OPPORTUNITIES) {
-      const count = MIN_OPPORTUNITIES + Math.floor(Math.random() * (MAX_OPPORTUNITIES - MIN_OPPORTUNITIES + 1))
+      const count =
+        MIN_OPPORTUNITIES + Math.floor(Math.random() * (MAX_OPPORTUNITIES - MIN_OPPORTUNITIES + 1))
       const newOpps = generateOpportunityBatch(netWorth, currentTime, count)
       opportunities.value.push(...newOpps)
     }
@@ -326,7 +325,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     if (player.cash.lt(cost)) return []
 
     // Pay
-    player.spendCash(cost)
+    player.spendCash(cost, { key: 'banking.tx_re_scout', cat: 'real_estate' })
 
     // Remove old scouted opportunities (replaced by fresh scout)
     opportunities.value = opportunities.value.filter((o) => !o.isScanned)
@@ -369,7 +368,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const cost = D(opp.scoutCosts[targetPhase])
     if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost)
+    player.spendCash(cost, { key: 'banking.tx_re_scout', cat: 'real_estate' })
     opp.scoutPhase = targetPhase
     return true
   }
@@ -390,7 +389,11 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
     if (player.cash.lt(price)) return null
 
-    player.spendCash(price)
+    player.spendCash(price, {
+      key: 'banking.tx_re_buy',
+      cat: 'real_estate',
+      params: { name: opp.name }
+    })
 
     // Find template to get maxImprovements
     const template = PROPERTY_TEMPLATES.find((t) => t.id === opp.templateId)
@@ -424,7 +427,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       occupancy: 0.7 + Math.random() * 0.25, // 70-95% initial occupancy
       occupancyRecalcIn: OCCUPANCY_RECALC_TICKS,
       totalRentCollected: ZERO,
-      totalMaintenancePaid: ZERO,
+      totalMaintenancePaid: ZERO
     }
 
     properties.value.push(property)
@@ -444,7 +447,11 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const conditionFactor = 0.5 + (prop.condition / 100) * 0.5
     const salePrice = D(Math.round(prop.currentValue.toNumber() * conditionFactor))
 
-    player.earnCash(salePrice)
+    player.earnCash(salePrice, {
+      key: 'banking.tx_re_sell',
+      cat: 'real_estate',
+      params: { name: prop.name }
+    })
     const profit = sub(salePrice, prop.purchasePrice)
     totalSaleProfit.value = add(totalSaleProfit.value, profit)
     totalPropertiesSold.value++
@@ -461,10 +468,16 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
     const baseCost = prop.currentValue.toNumber() * 0.15
     if (baseCost <= 0) return false // Prevent free renovation on zero-value properties
-    const cost = D(Math.round(baseCost * Math.pow(prop.renovationCostMultiplier, prop.renovationLevel)))
+    const cost = D(
+      Math.round(baseCost * Math.pow(prop.renovationCostMultiplier, prop.renovationLevel))
+    )
     if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost)
+    player.spendCash(cost, {
+      key: 'banking.tx_re_renovate',
+      cat: 'real_estate',
+      params: { name: prop.name }
+    })
     prop.renovationLevel++
     prop.condition = Math.min(100, prop.condition + 15)
     return true
@@ -481,7 +494,11 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const cost = D(Math.round(prop.baseMaintenance.toNumber() * repairAmount * 5 * prop.units))
     if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost)
+    player.spendCash(cost, {
+      key: 'banking.tx_re_repair',
+      cat: 'real_estate',
+      params: { name: prop.name }
+    })
     prop.condition = 100
     return true
   }
@@ -505,10 +522,17 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const cost = D(Math.round(prop.currentValue.toNumber() * imp.costFraction))
     if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost)
+    player.spendCash(cost, {
+      key: 'banking.tx_re_improve',
+      cat: 'real_estate',
+      params: { name: prop.name }
+    })
     prop.improvements.push(improvementId)
     // Improvement adds to property value
-    prop.currentValue = add(prop.currentValue, D(Math.round(prop.currentValue.toNumber() * imp.valueFraction)))
+    prop.currentValue = add(
+      prop.currentValue,
+      D(Math.round(prop.currentValue.toNumber() * imp.valueFraction))
+    )
     totalImprovementsInstalled.value++
     return true
   }
@@ -573,11 +597,9 @@ export const useRealEstateStore = defineStore('realEstate', () => {
         prop.totalRentCollected = add(prop.totalRentCollected, grossRent)
         totalRentEarned.value = add(totalRentEarned.value, grossRent)
       } else if (netRent.lt(0)) {
-        // Property is operating at a loss — deduct from cash
+        // Property is operating at a loss — deduct from cash (can go negative)
         const loss = netRent.abs()
-        if (player.cash.gte(loss)) {
-          player.spendCash(loss)
-        }
+        player.forcePay(loss)
         // Still track the gross rent earned (even if net is negative)
         prop.totalRentCollected = add(prop.totalRentCollected, grossRent)
         totalRentEarned.value = add(totalRentEarned.value, grossRent)
@@ -596,7 +618,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
         // Category portfolio bonus adds to appreciation
         const catBonus = getCategoryRentBonus(prop.category)
-        effectiveAppreciation *= (1 + catBonus)
+        effectiveAppreciation *= 1 + catBonus
 
         // Trait appreciation mods (multiplicative)
         for (const tid of prop.traits) {
@@ -622,7 +644,10 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
     // ── Opportunity refresh (no expiration — only periodic refresh & min-fill) ──
     const ticksSinceRefresh = ctx.tick - lastRefreshTick.value
-    if (ticksSinceRefresh >= OPPORTUNITY_REFRESH_TICKS || opportunities.value.length < MIN_OPPORTUNITIES) {
+    if (
+      ticksSinceRefresh >= OPPORTUNITY_REFRESH_TICKS ||
+      opportunities.value.length < MIN_OPPORTUNITIES
+    ) {
       const netWorth = player.netWorth.toNumber()
       refreshOpportunities(netWorth, now)
       lastRefreshTick.value = ctx.tick
@@ -683,12 +708,12 @@ export const useRealEstateStore = defineStore('realEstate', () => {
         baseRent: p.baseRent,
         baseMaintenance: p.baseMaintenance,
         totalRentCollected: p.totalRentCollected,
-        totalMaintenancePaid: p.totalMaintenancePaid,
+        totalMaintenancePaid: p.totalMaintenancePaid
       })),
       opportunities: opportunities.value.map((o) => ({
         ...o,
         // Traits stored as full objects in opportunity
-        traits: o.traits,
+        traits: o.traits
       })),
       lastRefreshTick: lastRefreshTick.value,
       scoutCooldownExpiry: scoutCooldownExpiry.value,
@@ -697,7 +722,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       totalRentEarned: totalRentEarned.value,
       totalMaintenancePaid: totalMaintenancePaid.value,
       totalSaleProfit: totalSaleProfit.value,
-      totalImprovementsInstalled: totalImprovementsInstalled.value,
+      totalImprovementsInstalled: totalImprovementsInstalled.value
     }
   }
 
@@ -730,12 +755,16 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     }
 
     // Statistics
-    if (state.totalPropertiesBought !== undefined) totalPropertiesBought.value = state.totalPropertiesBought
-    if (state.totalPropertiesSold !== undefined) totalPropertiesSold.value = state.totalPropertiesSold
+    if (state.totalPropertiesBought !== undefined)
+      totalPropertiesBought.value = state.totalPropertiesBought
+    if (state.totalPropertiesSold !== undefined)
+      totalPropertiesSold.value = state.totalPropertiesSold
     if (state.totalRentEarned !== undefined) totalRentEarned.value = D(state.totalRentEarned)
-    if (state.totalMaintenancePaid !== undefined) totalMaintenancePaid.value = D(state.totalMaintenancePaid)
+    if (state.totalMaintenancePaid !== undefined)
+      totalMaintenancePaid.value = D(state.totalMaintenancePaid)
     if (state.totalSaleProfit !== undefined) totalSaleProfit.value = D(state.totalSaleProfit)
-    if (state.totalImprovementsInstalled !== undefined) totalImprovementsInstalled.value = state.totalImprovementsInstalled
+    if (state.totalImprovementsInstalled !== undefined)
+      totalImprovementsInstalled.value = state.totalImprovementsInstalled
   }
 
   /** Migrate a saved property, backfilling new fields with defaults */
@@ -747,7 +776,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       name: saved.name ?? 'Property',
       icon: saved.icon ?? 'mdi:home',
       category: saved.category ?? 'Residential',
-      locationGrade: saved.locationGrade ?? saved.districtId ? 'B' : 'B',
+      locationGrade: (saved.locationGrade ?? saved.districtId) ? 'B' : 'B',
       purchasePrice: D(saved.purchasePrice ?? 0),
       currentValue: D(saved.currentValue ?? saved.purchasePrice ?? 0),
       baseRent: D(saved.baseRent ?? 0),
@@ -773,7 +802,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       occupancy: saved.occupancy ?? 0.85,
       occupancyRecalcIn: saved.occupancyRecalcIn ?? OCCUPANCY_RECALC_TICKS,
       totalRentCollected: D(saved.totalRentCollected ?? 0),
-      totalMaintenancePaid: D(saved.totalMaintenancePaid ?? 0),
+      totalMaintenancePaid: D(saved.totalMaintenancePaid ?? 0)
     }
   }
 
@@ -789,14 +818,27 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       traits: Array.isArray(saved.traits)
         ? saved.traits.map((t: string | PropertyTrait) => {
             if (typeof t === 'string') {
-              return getTrait(t) ?? { id: t, nameKey: '', descriptionKey: '', icon: '', isPositive: false, rentMod: 0, appreciationMod: 1, occupancyMod: 0, wearMod: 1, maintenanceMod: 1 }
+              return (
+                getTrait(t) ?? {
+                  id: t,
+                  nameKey: '',
+                  descriptionKey: '',
+                  icon: '',
+                  isPositive: false,
+                  rentMod: 0,
+                  appreciationMod: 1,
+                  occupancyMod: 0,
+                  wearMod: 1,
+                  maintenanceMod: 1
+                }
+              )
             }
             return t
           })
         : [],
       isScanned: saved.isScanned ?? false,
       scoutPhase: saved.scoutPhase ?? 'none',
-      scoutCosts: saved.scoutCosts ?? { none: 0, drive_by: 0, inspection: 0, appraisal: 0 },
+      scoutCosts: saved.scoutCosts ?? { none: 0, drive_by: 0, inspection: 0, appraisal: 0 }
     }
   }
 
@@ -884,6 +926,6 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     exportState,
     loadFromSave,
     prestigeReset,
-    fullReset,
+    fullReset
   }
 })

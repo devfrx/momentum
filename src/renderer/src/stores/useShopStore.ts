@@ -31,7 +31,7 @@ import {
   refreshShopPartial,
   SHOP_CATEGORIES,
   type ShopListing,
-  type ShopCategory,
+  type ShopCategory
 } from '@renderer/data/shop/items'
 import type { StorageItem, ItemCondition } from '@renderer/data/storage/items'
 import { resolveItemName } from '@renderer/data/storage/items'
@@ -46,13 +46,9 @@ import {
   AUCTION_NPC_BID_INTERVAL,
   AUCTION_MAX_ACTIVE,
   RESTORATION_SLOT_BASE,
-  RESTORATION_SLOT_MAX,
+  RESTORATION_SLOT_MAX
 } from '@renderer/data/shop/balance'
-import {
-  initDemandState,
-  tickDemand,
-  type CategoryDemand,
-} from '@renderer/data/shop/demand'
+import { initDemandState, tickDemand, type CategoryDemand } from '@renderer/data/shop/demand'
 import {
   CONDITION_ORDER,
   calculateRestorationCost,
@@ -60,21 +56,27 @@ import {
   getStepsBetween,
   getSlotUpgradeCost,
   getRestoredValue,
-  type RestorationSlot,
+  type RestorationSlot
 } from '@renderer/data/shop/restoration'
 import {
   createResaleAuction,
   processAuctionBids,
   calculateListingFee,
   calculateSuccessFee,
-  type ResaleAuction,
+  type ResaleAuction
 } from '@renderer/data/shop/auction'
 
 import { RARITY_ORDER, migrateRarity } from '@renderer/data/rarity'
 
 // ─── Types ──────────────────────────────────────────────────────
 
-export type SortField = 'price_asc' | 'price_desc' | 'rarity_asc' | 'rarity_desc' | 'newest' | 'name'
+export type SortField =
+  | 'price_asc'
+  | 'price_desc'
+  | 'rarity_asc'
+  | 'rarity_desc'
+  | 'newest'
+  | 'name'
 
 export type SellSource = 'vault' | 'storage_wars' | 'shop'
 
@@ -144,25 +146,26 @@ export const useShopStore = defineStore('shop', () => {
     // Text search
     if (searchQuery.value.trim()) {
       const q = searchQuery.value.toLowerCase().trim()
-      result = result.filter(l =>
-        resolveItemName(l.item, i18n.global.t).toLowerCase().includes(q) ||
-        l.item.category.toLowerCase().includes(q),
+      result = result.filter(
+        (l) =>
+          resolveItemName(l.item, i18n.global.t).toLowerCase().includes(q) ||
+          l.item.category.toLowerCase().includes(q)
       )
     }
 
     // Category filter
     if (filterCategory.value !== 'all') {
-      result = result.filter(l => l.item.category === filterCategory.value)
+      result = result.filter((l) => l.item.category === filterCategory.value)
     }
 
     // Rarity filter
     if (filterRarity.value !== 'all') {
-      result = result.filter(l => l.item.rarity === filterRarity.value)
+      result = result.filter((l) => l.item.rarity === filterRarity.value)
     }
 
     // Condition filter
     if (filterCondition.value !== 'all') {
-      result = result.filter(l => (l.item.condition ?? 'good') === filterCondition.value)
+      result = result.filter((l) => (l.item.condition ?? 'good') === filterCondition.value)
     }
 
     // Sort
@@ -174,16 +177,24 @@ export const useShopStore = defineStore('shop', () => {
         result.sort((a, b) => b.price.cmp(a.price))
         break
       case 'rarity_asc':
-        result.sort((a, b) => (RARITY_ORDER[a.item.rarity] ?? 0) - (RARITY_ORDER[b.item.rarity] ?? 0))
+        result.sort(
+          (a, b) => (RARITY_ORDER[a.item.rarity] ?? 0) - (RARITY_ORDER[b.item.rarity] ?? 0)
+        )
         break
       case 'rarity_desc':
-        result.sort((a, b) => (RARITY_ORDER[b.item.rarity] ?? 0) - (RARITY_ORDER[a.item.rarity] ?? 0))
+        result.sort(
+          (a, b) => (RARITY_ORDER[b.item.rarity] ?? 0) - (RARITY_ORDER[a.item.rarity] ?? 0)
+        )
         break
       case 'newest':
         result.sort((a, b) => b.listedAtTick - a.listedAtTick)
         break
       case 'name':
-        result.sort((a, b) => resolveItemName(a.item, i18n.global.t).localeCompare(resolveItemName(b.item, i18n.global.t)))
+        result.sort((a, b) =>
+          resolveItemName(a.item, i18n.global.t).localeCompare(
+            resolveItemName(b.item, i18n.global.t)
+          )
+        )
         break
     }
 
@@ -193,55 +204,42 @@ export const useShopStore = defineStore('shop', () => {
   const listingCount = computed(() => listings.value.length)
   const filteredCount = computed(() => filteredListings.value.length)
 
-  const flashSaleCount = computed(() =>
-    listings.value.filter(l => l.flashSale).length,
-  )
+  const flashSaleCount = computed(() => listings.value.filter((l) => l.flashSale).length)
 
-  const uniqueListingCount = computed(() =>
-    listings.value.filter(l => l.unique).length,
-  )
+  const uniqueListingCount = computed(() => listings.value.filter((l) => l.unique).length)
 
-  const shopNetProfit = computed((): Decimal =>
-    sub(
-      add(totalCashFromSales.value, totalAuctionRevenue.value),
-      add(totalCashSpentOnPurchases.value, totalRestorationCashSpent.value),
-    ),
+  const shopNetProfit = computed(
+    (): Decimal =>
+      sub(
+        add(totalCashFromSales.value, totalAuctionRevenue.value),
+        add(totalCashSpentOnPurchases.value, totalRestorationCashSpent.value)
+      )
   )
 
   /** Trending categories (demand ≥ 1.4). */
-  const trendingCategories = computed(() =>
-    demands.value.filter(d => d.current >= 1.4),
-  )
+  const trendingCategories = computed(() => demands.value.filter((d) => d.current >= 1.4))
 
   /** Active restoration count. */
-  const activeRestorations = computed(() =>
-    restorationSlots.value.filter(s => s !== null).length,
-  )
+  const activeRestorations = computed(() => restorationSlots.value.filter((s) => s !== null).length)
 
   /** Free restoration slots. */
-  const freeRestorationSlots = computed(() =>
-    restorationSlots.value.filter(s => s === null).length,
+  const freeRestorationSlots = computed(
+    () => restorationSlots.value.filter((s) => s === null).length
   )
 
   /** Can upgrade restoration slots. */
-  const canUpgradeSlots = computed(() =>
-    restorationSlotCount.value < RESTORATION_SLOT_MAX,
-  )
+  const canUpgradeSlots = computed(() => restorationSlotCount.value < RESTORATION_SLOT_MAX)
 
   /** Next restoration slot upgrade cost. */
-  const nextSlotUpgradeCost = computed(() =>
-    getSlotUpgradeCost(restorationSlotCount.value),
-  )
+  const nextSlotUpgradeCost = computed(() => getSlotUpgradeCost(restorationSlotCount.value))
 
   /** Active auction count. */
-  const activeAuctionCount = computed(() =>
-    activeAuctions.value.filter(a => a.status === 'active').length,
+  const activeAuctionCount = computed(
+    () => activeAuctions.value.filter((a) => a.status === 'active').length
   )
 
   /** Can list more auctions. */
-  const canListAuction = computed(() =>
-    activeAuctionCount.value < AUCTION_MAX_ACTIVE,
-  )
+  const canListAuction = computed(() => activeAuctionCount.value < AUCTION_MAX_ACTIVE)
 
   // ══════════════════════════════════════════════════════════════
   // ── DEMAND HELPERS ─────────────────────────────────────────
@@ -249,7 +247,7 @@ export const useShopStore = defineStore('shop', () => {
 
   /** Get the current demand multiplier for a category. */
   function getDemandMultiplier(category: string): number {
-    const d = demands.value.find(d => d.category === category)
+    const d = demands.value.find((d) => d.category === category)
     return d?.current ?? 1.0
   }
 
@@ -262,8 +260,8 @@ export const useShopStore = defineStore('shop', () => {
     if (listings.value.length === 0) {
       const luckBonus = getLuckBonus()
       listings.value = generateShopBatch(SHOP_LISTING_COUNT, luckBonus, tick)
-      listings.value = listings.value.filter(l =>
-        !l.unique || !purchasedUniqueIds.value.has(l.item.name),
+      listings.value = listings.value.filter(
+        (l) => !l.unique || !purchasedUniqueIds.value.has(l.item.name)
       )
       lastRefreshTick.value = tick
       lastFullRestockTick.value = tick
@@ -292,10 +290,13 @@ export const useShopStore = defineStore('shop', () => {
     if (currentTick - lastRefreshTick.value >= SHOP_REFRESH_TICKS) {
       const luckBonus = getLuckBonus()
       listings.value = refreshShopPartial(
-        listings.value, SHOP_REFRESH_FRACTION, luckBonus, currentTick,
+        listings.value,
+        SHOP_REFRESH_FRACTION,
+        luckBonus,
+        currentTick
       )
-      listings.value = listings.value.filter(l =>
-        !l.unique || !purchasedUniqueIds.value.has(l.item.name),
+      listings.value = listings.value.filter(
+        (l) => !l.unique || !purchasedUniqueIds.value.has(l.item.name)
       )
       lastRefreshTick.value = currentTick
     }
@@ -304,8 +305,8 @@ export const useShopStore = defineStore('shop', () => {
     if (currentTick - lastFullRestockTick.value >= SHOP_FULL_RESTOCK_TICKS) {
       const luckBonus = getLuckBonus()
       listings.value = generateShopBatch(SHOP_LISTING_COUNT, luckBonus, currentTick)
-      listings.value = listings.value.filter(l =>
-        !l.unique || !purchasedUniqueIds.value.has(l.item.name),
+      listings.value = listings.value.filter(
+        (l) => !l.unique || !purchasedUniqueIds.value.has(l.item.name)
       )
       lastFullRestockTick.value = currentTick
     }
@@ -328,7 +329,7 @@ export const useShopStore = defineStore('shop', () => {
   // ══════════════════════════════════════════════════════════════
 
   function buyItem(listingId: string, destination: 'vault' | 'storage'): boolean {
-    const idx = listings.value.findIndex(l => l.id === listingId)
+    const idx = listings.value.findIndex((l) => l.id === listingId)
     if (idx === -1) return false
 
     const listing = listings.value[idx]
@@ -341,7 +342,7 @@ export const useShopStore = defineStore('shop', () => {
       if (vault.isFull) return false
     }
 
-    player.spendCash(listing.price)
+    player.spendCash(listing.price, { key: 'banking.tx_shop_buy', cat: 'shop' })
     totalItemsBought.value++
     totalCashSpentOnPurchases.value = add(totalCashSpentOnPurchases.value, listing.price)
 
@@ -358,7 +359,7 @@ export const useShopStore = defineStore('shop', () => {
       storage.inventory.push({
         ...listing.item,
         auctionId: 'shop_purchase',
-        acquiredAtTick: listing.listedAtTick || Date.now(),
+        acquiredAtTick: listing.listedAtTick || Date.now()
       })
     }
 
@@ -371,24 +372,21 @@ export const useShopStore = defineStore('shop', () => {
   // ── SELL (with demand multiplier) ──────────────────────────
   // ══════════════════════════════════════════════════════════════
 
-  function sellToShop(
-    itemId: string,
-    source: SellSource,
-  ): Decimal | null {
+  function sellToShop(itemId: string, source: SellSource): Decimal | null {
     const player = usePlayerStore()
     const upgrades = useUpgradeStore()
     let item: any = null
-    let removeItem: () => void = () => { }
+    let removeItem: () => void = () => {}
 
     if (source === 'vault') {
       const vault = useVaultStore()
-      const idx = vault.items.findIndex(i => i.id === itemId)
+      const idx = vault.items.findIndex((i) => i.id === itemId)
       if (idx === -1) return null
       item = vault.items[idx]
       removeItem = () => vault.items.splice(idx, 1)
     } else if (source === 'storage_wars') {
       const storage = useStorageStore()
-      const idx = storage.inventory.findIndex(i => i.id === itemId)
+      const idx = storage.inventory.findIndex((i) => i.id === itemId)
       if (idx === -1) return null
       item = storage.inventory[idx]
       removeItem = () => storage.inventory.splice(idx, 1)
@@ -402,7 +400,7 @@ export const useShopStore = defineStore('shop', () => {
     const sellMul = upgrades.getMultiplier('all_income')
     const finalValue = mul(mul(afterFraction, D(demandMult)), sellMul).max(D(1))
 
-    player.earnCash(finalValue)
+    player.earnCash(finalValue, { key: 'banking.tx_shop_sell', cat: 'shop' })
     totalItemsSoldToShop.value++
     totalCashFromSales.value = add(totalCashFromSales.value, finalValue)
 
@@ -424,15 +422,19 @@ export const useShopStore = defineStore('shop', () => {
       const vault = useVaultStore()
       while (vault.items.length > 0) {
         const result = sellToShop(vault.items[0].id, 'vault')
-        if (result) { total = add(total, result); count++ }
-        else break
+        if (result) {
+          total = add(total, result)
+          count++
+        } else break
       }
     } else if (source === 'storage_wars') {
       const storage = useStorageStore()
       while (storage.inventory.length > 0) {
         const result = sellToShop(storage.inventory[0].id, 'storage_wars')
-        if (result) { total = add(total, result); count++ }
-        else break
+        if (result) {
+          total = add(total, result)
+          count++
+        } else break
       }
     }
 
@@ -462,25 +464,25 @@ export const useShopStore = defineStore('shop', () => {
   function startRestoration(
     itemId: string,
     source: 'vault' | 'storage',
-    targetCondition: ItemCondition,
+    targetCondition: ItemCondition
   ): boolean {
     // Find a free slot
-    const slotIdx = restorationSlots.value.findIndex(s => s === null)
+    const slotIdx = restorationSlots.value.findIndex((s) => s === null)
     if (slotIdx === -1) return false
 
     const player = usePlayerStore()
     let item: any = null
-    let removeItem: () => void = () => { }
+    let removeItem: () => void = () => {}
 
     if (source === 'vault') {
       const vault = useVaultStore()
-      const idx = vault.items.findIndex(i => i.id === itemId)
+      const idx = vault.items.findIndex((i) => i.id === itemId)
       if (idx === -1) return false
       item = vault.items[idx]
       removeItem = () => vault.items.splice(idx, 1)
     } else {
       const storage = useStorageStore()
-      const idx = storage.inventory.findIndex(i => i.id === itemId)
+      const idx = storage.inventory.findIndex((i) => i.id === itemId)
       if (idx === -1) return false
       item = storage.inventory[idx]
       removeItem = () => storage.inventory.splice(idx, 1)
@@ -500,7 +502,7 @@ export const useShopStore = defineStore('shop', () => {
     const ticksPerStep = getTicksPerStep(item)
 
     // Pay upfront
-    player.spendCash(cost)
+    player.spendCash(cost, { key: 'banking.tx_shop_restore', cat: 'shop' })
     totalRestorationCashSpent.value = add(totalRestorationCashSpent.value, cost)
 
     // Remove item from source
@@ -519,7 +521,7 @@ export const useShopStore = defineStore('shop', () => {
       ticksPerStep,
       totalCost: cost,
       paidCost: cost,
-      completed: false,
+      completed: false
     }
 
     return true
@@ -564,7 +566,7 @@ export const useShopStore = defineStore('shop', () => {
     const restoredItem: StorageItem = {
       ...slot.item,
       condition: slot.targetCondition as StorageItem['condition'],
-      appraisedValue: getRestoredValue(slot.item, slot.targetCondition),
+      appraisedValue: getRestoredValue(slot.item, slot.targetCondition)
     }
 
     // Return to vault (always goes to vault after restoration)
@@ -594,7 +596,7 @@ export const useShopStore = defineStore('shop', () => {
     const partialItem: StorageItem = {
       ...slot.item,
       condition: currentCond as StorageItem['condition'],
-      appraisedValue: getRestoredValue(slot.item, currentCond),
+      appraisedValue: getRestoredValue(slot.item, currentCond)
     }
 
     vault.addItem(partialItem, 'shop')
@@ -610,7 +612,7 @@ export const useShopStore = defineStore('shop', () => {
     const cost = nextSlotUpgradeCost.value
     if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost)
+    player.spendCash(cost, { key: 'banking.tx_shop_upgrade', cat: 'shop' })
     restorationSlotCount.value++
     restorationSlots.value.push(null)
     return true
@@ -627,24 +629,24 @@ export const useShopStore = defineStore('shop', () => {
     itemId: string,
     source: 'vault' | 'storage',
     startingPrice: Decimal,
-    buyNowPrice: Decimal | null,
+    buyNowPrice: Decimal | null
   ): boolean {
     const currentTick = _lastGameTick.value
     if (!canListAuction.value) return false
 
     const player = usePlayerStore()
     let item: any = null
-    let removeItem: () => void = () => { }
+    let removeItem: () => void = () => {}
 
     if (source === 'vault') {
       const vault = useVaultStore()
-      const idx = vault.items.findIndex(i => i.id === itemId)
+      const idx = vault.items.findIndex((i) => i.id === itemId)
       if (idx === -1) return false
       item = vault.items[idx]
       removeItem = () => vault.items.splice(idx, 1)
     } else {
       const storage = useStorageStore()
-      const idx = storage.inventory.findIndex(i => i.id === itemId)
+      const idx = storage.inventory.findIndex((i) => i.id === itemId)
       if (idx === -1) return false
       item = storage.inventory[idx]
       removeItem = () => storage.inventory.splice(idx, 1)
@@ -660,7 +662,7 @@ export const useShopStore = defineStore('shop', () => {
     // Pay listing fee
     const listingFee = calculateListingFee(startingPrice)
     if (player.cash.lt(listingFee)) return false
-    player.spendCash(listingFee)
+    player.spendCash(listingFee, { key: 'banking.tx_shop_auction_list', cat: 'shop' })
 
     const demandMult = getDemandMultiplier(item.category)
     const luckBonus = getLuckBonus()
@@ -672,7 +674,7 @@ export const useShopStore = defineStore('shop', () => {
       buyNowPrice,
       currentTick,
       demandMult,
-      luckBonus,
+      luckBonus
     )
 
     removeItem()
@@ -724,7 +726,7 @@ export const useShopStore = defineStore('shop', () => {
         // Item sold!
         const successFee = calculateSuccessFee(auction.currentBid)
         const proceeds = sub(auction.currentBid, successFee)
-        player.earnCash(proceeds)
+        player.earnCash(proceeds, { key: 'banking.tx_shop_auction_sold', cat: 'shop' })
 
         totalAuctionRevenue.value = add(totalAuctionRevenue.value, proceeds)
         totalAuctionsCompleted.value++
@@ -750,7 +752,7 @@ export const useShopStore = defineStore('shop', () => {
    * No refund on listing fee.
    */
   function cancelAuction(auctionId: string): boolean {
-    const idx = activeAuctions.value.findIndex(a => a.id === auctionId)
+    const idx = activeAuctions.value.findIndex((a) => a.id === auctionId)
     if (idx === -1) return false
 
     const auction = activeAuctions.value[idx]
@@ -843,7 +845,7 @@ export const useShopStore = defineStore('shop', () => {
 
   function exportState(): Record<string, unknown> {
     return {
-      listings: listings.value.map(l => ({
+      listings: listings.value.map((l) => ({
         id: l.id,
         item: {
           id: l.item.id,
@@ -856,7 +858,7 @@ export const useShopStore = defineStore('shop', () => {
           appraised: l.item.appraised,
           appraisedValue: l.item.appraisedValue,
           weight: l.item.weight,
-          condition: l.item.condition,
+          condition: l.item.condition
         },
         price: l.price,
         basePrice: l.basePrice,
@@ -864,7 +866,7 @@ export const useShopStore = defineStore('shop', () => {
         discount: l.discount,
         unique: l.unique,
         listedAtTick: l.listedAtTick,
-        views: l.views,
+        views: l.views
       })),
       purchasedUniqueIds: [...purchasedUniqueIds.value],
       lastRefreshTick: lastRefreshTick.value,
@@ -887,7 +889,7 @@ export const useShopStore = defineStore('shop', () => {
       restorationSlots: restorationSlots.value,
       // Auction state
       activeAuctions: activeAuctions.value,
-      auctionHistory: auctionHistory.value,
+      auctionHistory: auctionHistory.value
     }
   }
 
@@ -903,20 +905,25 @@ export const useShopStore = defineStore('shop', () => {
     if (data.lastRefreshTick !== undefined) lastRefreshTick.value = data.lastRefreshTick
     if (data.lastFullRestockTick !== undefined) lastFullRestockTick.value = data.lastFullRestockTick
     if (data.totalItemsBought !== undefined) totalItemsBought.value = data.totalItemsBought
-    if (data.totalCashSpentOnPurchases !== undefined) totalCashSpentOnPurchases.value = data.totalCashSpentOnPurchases
-    if (data.totalItemsSoldToShop !== undefined) totalItemsSoldToShop.value = data.totalItemsSoldToShop
+    if (data.totalCashSpentOnPurchases !== undefined)
+      totalCashSpentOnPurchases.value = data.totalCashSpentOnPurchases
+    if (data.totalItemsSoldToShop !== undefined)
+      totalItemsSoldToShop.value = data.totalItemsSoldToShop
     if (data.totalCashFromSales !== undefined) totalCashFromSales.value = data.totalCashFromSales
     if (data.uniqueItemsBought !== undefined) uniqueItemsBought.value = data.uniqueItemsBought
     if (data.bestDeal !== undefined) bestDeal.value = data.bestDeal
     if (data.totalItemsRestored !== undefined) totalItemsRestored.value = data.totalItemsRestored
-    if (data.totalRestorationCashSpent !== undefined) totalRestorationCashSpent.value = data.totalRestorationCashSpent
+    if (data.totalRestorationCashSpent !== undefined)
+      totalRestorationCashSpent.value = data.totalRestorationCashSpent
     if (data.totalAuctionRevenue !== undefined) totalAuctionRevenue.value = data.totalAuctionRevenue
-    if (data.totalAuctionsCompleted !== undefined) totalAuctionsCompleted.value = data.totalAuctionsCompleted
+    if (data.totalAuctionsCompleted !== undefined)
+      totalAuctionsCompleted.value = data.totalAuctionsCompleted
     // Demand
     if (data.demands) demands.value = data.demands
     if (data.lastDemandTick !== undefined) lastDemandTick.value = data.lastDemandTick
     // Restoration
-    if (data.restorationSlotCount !== undefined) restorationSlotCount.value = data.restorationSlotCount
+    if (data.restorationSlotCount !== undefined)
+      restorationSlotCount.value = data.restorationSlotCount
     if (data.restorationSlots) {
       restorationSlots.value = data.restorationSlots
       // Migrate legacy rarity names in restoration slots
@@ -1002,6 +1009,6 @@ export const useShopStore = defineStore('shop', () => {
     prestigeReset,
     fullReset,
     exportState,
-    loadFromSave,
+    loadFromSave
   }
 })

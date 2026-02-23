@@ -95,7 +95,7 @@ const potentialPayout = computed(() => {
 // ─── Roll logic ──────────────────────────────────────────────
 function roll(): void {
     if (!canRoll.value) return
-    if (!player.spendCash(betDecimal.value)) return
+    if (!player.spendCash(betDecimal.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
 
     rolling.value = true
     showResult.value = false
@@ -155,7 +155,7 @@ function playRoll(r1: number, r2: number, isFinal: boolean, onLand?: () => void)
             const isWin = direction.value === 'over' ? sum > target.value : sum < target.value
             if (isWin) {
                 const pay = mul(betDecimal.value, multiplier.value)
-                player.earnCash(pay)
+                player.earnCash(pay, { key: 'banking.tx_gambling_win', cat: 'gambling' })
                 gambling.recordWin('dice', betDecimal.value, pay)
                 lastPayout.value = pay
                 won.value = true
@@ -278,7 +278,7 @@ const diceInfo = computed<InfoSection[]>(() => [
                 <span class="payout-value">{{ multiplier }}×</span>
                 <span class="payout-sub">{{ $t('gambling.dc_win_chance', { pct: winChance }) }}</span>
                 <span class="payout-sub">{{ $t('gambling.dc_potential', { amount: formatCash(potentialPayout) })
-                }}</span>
+                    }}</span>
             </div>
 
             <UButton variant="primary" :active="direction === 'over'" :disabled="rolling" icon="mdi:arrow-up-bold"
@@ -331,7 +331,7 @@ const diceInfo = computed<InfoSection[]>(() => [
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="rolling">{{ $t('gambling.max')
-                    }}</UButton>
+                        }}</UButton>
                 </div>
             </div>
 

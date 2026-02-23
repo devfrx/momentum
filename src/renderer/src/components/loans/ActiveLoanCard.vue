@@ -23,6 +23,37 @@ const { formatCash, formatTime } = useFormat()
 
 const loanDef = computed(() => LOANS.find(l => l.id === props.loan.loanDefId))
 
+/** Payment period in ticks — must match the formula in useLoanStore.tick() */
+const paymentPeriodTicks = computed(() => {
+    const def = loanDef.value
+    if (!def) return 0
+    return def.termTicks > 0
+        ? Math.max(600, Math.floor(def.termTicks / 10))
+        : 600 // REVOLVING_PAYMENT_PERIOD_TICKS
+})
+
+/** How many seconds until the next payment is due */
+const nextPaymentIn = computed(() => {
+    if (paymentPeriodTicks.value <= 0) return null
+    const remaining = Math.max(0, paymentPeriodTicks.value - props.loan.ticksSinceLastPayment)
+    return formatTime(remaining / 10)
+})
+
+/** Whether the player is currently late on a payment */
+const isLate = computed(() => {
+    return paymentPeriodTicks.value > 0 && props.loan.ticksSinceLastPayment > paymentPeriodTicks.value
+})
+
+/** Grace period remaining (before it counts as missed). Null if not late. */
+const graceRemaining = computed(() => {
+    if (!isLate.value) return null
+    const def = loanDef.value
+    const graceTicks = def?.gracePeriodTicks ?? 300
+    const ticksOverdue = props.loan.ticksSinceLastPayment - paymentPeriodTicks.value
+    const remaining = Math.max(0, graceTicks - ticksOverdue)
+    return formatTime(remaining / 10)
+})
+
 const progress = computed(() => {
     if (props.loan.termTicks === 0) return 0 // Revolving has no progress
     return Math.min(100, (props.loan.ticksActive / props.loan.termTicks) * 100)
@@ -86,8 +117,21 @@ const hasEarlyPenalty = computed(() => {
                 <span class="balance-value">{{ formatCash(loan.principal) }}</span>
             </div>
             <div class="balance-row">
-                <span class="balance-label">{{ $t('loans.interest_paid') }}</span>
+                <span class="balance-label">{{ $t('loans.interest_accrued') }}</span>
                 <span class="balance-value text-warning">{{ formatCash(loan.totalInterestPaid) }}</span>
+            </div>
+        </div>
+
+        <div class="payment-schedule">
+            <div class="balance-row">
+                <span class="balance-label">{{ $t('loans.next_payment') }}</span>
+                <span class="balance-value" :class="isLate ? 'text-danger' : 'text-success'">{{ isLate ?
+                    $t('loans.overdue') :
+                    nextPaymentIn }}</span>
+            </div>
+            <div v-if="isLate && graceRemaining" class="balance-row">
+                <span class="balance-label">{{ $t('loans.grace_remaining') }}</span>
+                <span class="balance-value text-warning">{{ graceRemaining }}</span>
             </div>
         </div>
 
@@ -111,12 +155,12 @@ const hasEarlyPenalty = computed(() => {
             <div class="loan-stat-mini">
                 <span class="stat-label">{{ $t('loans.late_stat') }}</span>
                 <span class="stat-value" :class="{ 'text-danger': loan.latePayments > 0 }">{{ loan.latePayments
-                }}</span>
+                    }}</span>
             </div>
             <div class="loan-stat-mini">
                 <span class="stat-label">{{ $t('loans.missed_stat') }}</span>
                 <span class="stat-value" :class="{ 'text-danger': loan.missedPayments > 0 }">{{ loan.missedPayments
-                }}</span>
+                    }}</span>
             </div>
         </div>
 
@@ -207,6 +251,12 @@ const hasEarlyPenalty = computed(() => {
     font-size: var(--t-font-size-sm);
     font-weight: var(--t-font-semibold);
     font-family: var(--t-font-mono);
+}
+
+.payment-schedule {
+    padding: var(--t-space-3);
+    background: var(--t-bg-muted);
+    border-radius: var(--t-radius-md);
 }
 
 .collateral-info,

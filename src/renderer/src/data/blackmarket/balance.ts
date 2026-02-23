@@ -8,8 +8,8 @@
 // ─── Timing (in ticks, 10 ticks/sec) ───────────────────────────
 
 /** How often the deal pool rotates (ticks). Range of [MIN, MAX] for randomized rotation. */
-export const DEAL_ROTATION_MIN_TICKS = 9_000   // 15 minutes
-export const DEAL_ROTATION_MAX_TICKS = 36_000  // 60 minutes
+export const DEAL_ROTATION_MIN_TICKS = 9_000 // 15 minutes
+export const DEAL_ROTATION_MAX_TICKS = 36_000 // 60 minutes
 
 /** How many deals are available at once */
 export const MIN_DEALS_AVAILABLE = 3
@@ -19,11 +19,11 @@ export const MAX_DEALS_AVAILABLE = 8
 export const HEAT_DECAY_PER_TICK = 0.002
 
 /** NPC daily cycle length in ticks (resets daily use counters) */
-export const NPC_DAILY_CYCLE_TICKS = 36_000  // 1 hour real time = 1 "day"
+export const NPC_DAILY_CYCLE_TICKS = 36_000 // 1 hour real time = 1 "day"
 
 /** Investigation base duration range (ticks) */
-export const INVESTIGATION_MIN_TICKS = 3_000  // 5 min
-export const INVESTIGATION_MAX_TICKS = 9_000  // 15 min
+export const INVESTIGATION_MIN_TICKS = 3_000 // 5 min
+export const INVESTIGATION_MAX_TICKS = 9_000 // 15 min
 
 // ─── Economy ────────────────────────────────────────────────────
 
@@ -43,7 +43,10 @@ export const INVESTIGATION_FINE_MULT = 0.05
 export const MAX_ACTIVE_EFFECTS = 10
 
 /** Maximum concurrent investigations */
-export const MAX_INVESTIGATIONS = 3
+export const MAX_INVESTIGATIONS = 2
+
+/** Minimum ticks between two consecutive investigation spawns (cooldown) */
+export const INVESTIGATION_COOLDOWN_TICKS = 3000 // 5 minutes
 
 /** Fence: max daily sell operations */
 export const FENCE_DAILY_LIMIT = 3
@@ -55,25 +58,25 @@ export const FENCE_SELL_MULTIPLIER = 1.2
 export const FENCE_FORGE_MIN_BONUS = 0.25
 
 /** Fence forge: max value boost (fraction, e.g. 0.60 = +60%) */
-export const FENCE_FORGE_MAX_BONUS = 0.60
+export const FENCE_FORGE_MAX_BONUS = 0.6
 
 /** Fence forge: heat added per forge */
 export const FENCE_FORGE_HEAT = 5
 
 /** Fence forge: cost as fraction of item's current value */
-export const FENCE_FORGE_COST_FRACTION = 0.10
+export const FENCE_FORGE_COST_FRACTION = 0.1
 
 /** Fence network: sell multiplier applied to ALL sell channels */
 export const FENCE_NETWORK_SELL_BOOST = 1.35
 
 /** Fence network: duration in ticks */
-export const FENCE_NETWORK_DURATION_TICKS = 3000  // 5 min
+export const FENCE_NETWORK_DURATION_TICKS = 3000 // 5 min
 
 /** Hacker: stock/crypto manipulation range (±%) */
-export const HACKER_MANIPULATION_RANGE = 0.50
+export const HACKER_MANIPULATION_RANGE = 0.5
 
 /** Hacker: manipulation duration (ticks) */
-export const HACKER_MANIPULATION_TICKS = 600  // 1 minute
+export const HACKER_MANIPULATION_TICKS = 600 // 1 minute
 
 /** Fixer: cost multiplier per active negative event severity */
 export const FIXER_COST_PER_SEVERITY = 500

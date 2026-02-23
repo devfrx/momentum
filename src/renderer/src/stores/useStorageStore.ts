@@ -20,7 +20,7 @@ import {
   type StorageAuction,
   type StorageItem,
   type AuctionBidder,
-  type AppraiserDef,
+  type AppraiserDef
 } from '@renderer/data/storage'
 import {
   createBiddingTactics,
@@ -30,24 +30,22 @@ import {
   calcSniperBidAmount,
   canUseTactic,
   SNIPER_RESPONSE_FRACTION,
-  type BiddingTactics,
+  type BiddingTactics
 } from '@renderer/data/storage/biddingTactics'
 import {
   getRevealEvents,
   getBidEvents,
   getWinEvents,
   type ActiveLotEvent,
-  type LotEventEffect,
+  type LotEventEffect
 } from '@renderer/data/storage/lotEvents'
-import {
-  getLotTierDef,
-} from '@renderer/data/storage/auctionTiers'
+import { getLotTierDef } from '@renderer/data/storage/auctionTiers'
 import { generateItem } from '@renderer/data/storage/itemGen'
 import { migrateItemRarities } from '@renderer/data/rarity'
 import {
   type StorageLocation,
   getUnlockedLocations,
-  findLocationInPool,
+  findLocationInPool
 } from '@renderer/data/storage/locations'
 import { generateLocationPool } from '@renderer/data/storage/locationGen'
 import { applySellTax } from '@renderer/data/storage/items'
@@ -58,7 +56,7 @@ import {
   INVENTORY_SOFT_CAP,
   STORAGE_FEE_PER_ITEM,
   LOCATION_RESHUFFLE_TICKS,
-  NPC_AGGRESSION_MULT,
+  NPC_AGGRESSION_MULT
 } from '@renderer/data/storage/balance'
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -109,7 +107,7 @@ function freshSessionPnL(): SessionPnL {
     saleRevenue: ZERO,
     auctionsEntered: 0,
     auctionsWon: 0,
-    itemsSold: 0,
+    itemsSold: 0
   }
 }
 
@@ -173,29 +171,37 @@ export const useStorageStore = defineStore('storage', () => {
   const netProfit = computed(() =>
     sub(
       totalSaleRevenue.value,
-      add(add(totalSpentOnAuctions.value, totalSpentOnAppraisals.value),
-        add(totalSpentOnEntryFees.value, totalSpentOnStorageFees.value)),
-    ),
+      add(
+        add(totalSpentOnAuctions.value, totalSpentOnAppraisals.value),
+        add(totalSpentOnEntryFees.value, totalSpentOnStorageFees.value)
+      )
+    )
   )
 
   /** Session net P&L (revenue − all costs). */
-  const sessionNet = computed((): Decimal =>
-    sub(
-      session.value.saleRevenue,
-      add(add(session.value.entryFees, session.value.bidSpend),
-        add(session.value.appraisalSpend, session.value.storageFees)),
-    ),
+  const sessionNet = computed(
+    (): Decimal =>
+      sub(
+        session.value.saleRevenue,
+        add(
+          add(session.value.entryFees, session.value.bidSpend),
+          add(session.value.appraisalSpend, session.value.storageFees)
+        )
+      )
   )
 
   /** Session total costs. */
-  const sessionTotalCost = computed((): Decimal =>
-    add(add(session.value.entryFees, session.value.bidSpend),
-      add(session.value.appraisalSpend, session.value.storageFees)),
+  const sessionTotalCost = computed(
+    (): Decimal =>
+      add(
+        add(session.value.entryFees, session.value.bidSpend),
+        add(session.value.appraisalSpend, session.value.storageFees)
+      )
   )
 
   const unlockedAppraisers = computed((): AppraiserDef[] => {
     const player = usePlayerStore()
-    return APPRAISER_DEFS.filter(a => player.level >= a.unlockLevel)
+    return APPRAISER_DEFS.filter((a) => player.level >= a.unlockLevel)
   })
 
   /** Current sell tax rate as a display string. */
@@ -217,7 +223,10 @@ export const useStorageStore = defineStore('storage', () => {
 
   function tick(currentTick: number): void {
     // Refresh auctions periodically
-    if (currentTick - lastRefreshTick.value >= AUCTION_CONFIG.refreshTicks || availableAuctions.value.length === 0) {
+    if (
+      currentTick - lastRefreshTick.value >= AUCTION_CONFIG.refreshTicks ||
+      availableAuctions.value.length === 0
+    ) {
       refreshAuctions(currentTick)
       lastRefreshTick.value = currentTick
     }
@@ -238,7 +247,7 @@ export const useStorageStore = defineStore('storage', () => {
     // Expire old available auctions
     const expireThreshold = AUCTION_CONFIG.refreshTicks * 3
     availableAuctions.value = availableAuctions.value.filter(
-      a => a.status === 'available' && (currentTick - a.availableAtTick) < expireThreshold
+      (a) => a.status === 'available' && currentTick - a.availableAtTick < expireThreshold
     )
 
     // Storage fees for over-capacity inventory (charged each refresh)
@@ -274,7 +283,7 @@ export const useStorageStore = defineStore('storage', () => {
     )
 
     // Keep existing available ones that haven't expired
-    const existing = availableAuctions.value.filter(a => a.status === 'available')
+    const existing = availableAuctions.value.filter((a) => a.status === 'available')
     const needed = Math.max(0, targetCount - existing.length)
 
     for (let i = 0; i < needed; i++) {
@@ -288,7 +297,7 @@ export const useStorageStore = defineStore('storage', () => {
   // ── Start Auction ──────────────────────────────────────────
 
   function startAuction(auctionId: string): boolean {
-    const auction = availableAuctions.value.find(a => a.id === auctionId)
+    const auction = availableAuctions.value.find((a) => a.id === auctionId)
     if (!auction || auction.status !== 'available') return false
 
     const player = usePlayerStore()
@@ -299,7 +308,7 @@ export const useStorageStore = defineStore('storage', () => {
     if (player.cash.lt(location.entryFee)) return false
 
     // Pay entry fee
-    player.spendCash(location.entryFee)
+    player.spendCash(location.entryFee, { key: 'banking.tx_storage_auction', cat: 'storage' })
     totalSpentOnEntryFees.value = add(totalSpentOnEntryFees.value, location.entryFee)
     session.value.entryFees = add(session.value.entryFees, location.entryFee)
     session.value.auctionsEntered++
@@ -316,7 +325,7 @@ export const useStorageStore = defineStore('storage', () => {
     applyRevealEvents(auction)
 
     // Remove from available
-    availableAuctions.value = availableAuctions.value.filter(a => a.id !== auctionId)
+    availableAuctions.value = availableAuctions.value.filter((a) => a.id !== auctionId)
 
     return true
   }
@@ -377,7 +386,7 @@ export const useStorageStore = defineStore('storage', () => {
         bidder,
         auction.currentBid,
         auction.bidIncrement,
-        auction.roundsElapsed,
+        auction.roundsElapsed
       )
 
       if (npcBid === null) {
@@ -484,7 +493,11 @@ export const useStorageStore = defineStore('storage', () => {
 
   /** Effect types that modify items and must be deferred to win-time */
   const ITEM_EFFECT_TYPES = new Set<string>([
-    'extra_item', 'item_upgrade', 'item_damage', 'hidden_treasure', 'rarity_boost',
+    'extra_item',
+    'item_upgrade',
+    'item_damage',
+    'hidden_treasure',
+    'rarity_boost'
   ])
 
   /**
@@ -500,7 +513,7 @@ export const useStorageStore = defineStore('storage', () => {
         applyLotEffect(auction, fx)
       }
       // Only mark fully applied if no item-level effects need deferred processing
-      const hasDeferredEffects = ev.def.effects.some(fx => ITEM_EFFECT_TYPES.has(fx.type))
+      const hasDeferredEffects = ev.def.effects.some((fx) => ITEM_EFFECT_TYPES.has(fx.type))
       if (!hasDeferredEffects) ev.applied = true
     }
   }
@@ -515,7 +528,7 @@ export const useStorageStore = defineStore('storage', () => {
       for (const fx of ev.def.effects) {
         applyLotEffect(auction, fx)
       }
-      const hasDeferredEffects = ev.def.effects.some(fx => ITEM_EFFECT_TYPES.has(fx.type))
+      const hasDeferredEffects = ev.def.effects.some((fx) => ITEM_EFFECT_TYPES.has(fx.type))
       if (!hasDeferredEffects) ev.applied = true
     }
   }
@@ -526,7 +539,7 @@ export const useStorageStore = defineStore('storage', () => {
    */
   function applyWinEvents(auction: StorageAuction): void {
     // Process ALL unapplied events: dedicated on_win + deferred item effects from reveal/bid
-    const pendingEvs = auction.lotEvents.filter(e => !e.applied)
+    const pendingEvs = auction.lotEvents.filter((e) => !e.applied)
     const player = usePlayerStore()
     const condOrder = CONDITION_TIERS
 
@@ -544,7 +557,7 @@ export const useStorageStore = defineStore('storage', () => {
             if (loc) {
               const bonusItem = generateItem(
                 'certified', // base rarity for bonus items
-                loc.valueMultiplier,
+                loc.valueMultiplier
               )
               auction.items.push(bonusItem)
             }
@@ -553,21 +566,24 @@ export const useStorageStore = defineStore('storage', () => {
           case 'hidden_treasure': {
             // Generate a rare/epic+ hidden item — the "treasure" feeling
             const rarityRoll = Math.random()
-            const treasureRarity = rarityRoll < 0.05 ? 'prestige'
-              : rarityRoll < 0.15 ? 'licensed'
-              : rarityRoll < 0.35 ? 'authenticated'
-              : 'graded'
+            const treasureRarity =
+              rarityRoll < 0.05
+                ? 'prestige'
+                : rarityRoll < 0.15
+                  ? 'licensed'
+                  : rarityRoll < 0.35
+                    ? 'authenticated'
+                    : 'graded'
             const loc = getLocation(auction.locationId)
-            const bonusTreasure = generateItem(
-              treasureRarity,
-              loc?.valueMultiplier ?? 1.0,
-            )
+            const bonusTreasure = generateItem(treasureRarity, loc?.valueMultiplier ?? 1.0)
             auction.items.push(bonusTreasure)
             break
           }
           case 'item_upgrade': {
             // Upgrade ONE random item's condition by fx.value steps
-            const upgradeable = auction.items.filter(i => i.condition && i.condition !== 'pristine')
+            const upgradeable = auction.items.filter(
+              (i) => i.condition && i.condition !== 'pristine'
+            )
             if (upgradeable.length > 0) {
               const item = upgradeable[Math.floor(Math.random() * upgradeable.length)]
               const curIdx = condOrder.indexOf(item.condition ?? 'good')
@@ -578,7 +594,7 @@ export const useStorageStore = defineStore('storage', () => {
           }
           case 'item_damage': {
             // Damage up to fx.value distinct items, each by 1 condition step
-            const damageable = auction.items.filter(i => i.condition && i.condition !== 'damaged')
+            const damageable = auction.items.filter((i) => i.condition && i.condition !== 'damaged')
             const toDamage = Math.min(fx.value, damageable.length)
             // Shuffle to pick distinct items
             const shuffled = [...damageable].sort(() => Math.random() - 0.5)
@@ -596,8 +612,16 @@ export const useStorageStore = defineStore('storage', () => {
           }
           case 'rarity_boost': {
             // Chance to upgrade the rarity of one random item
-            const rarityOrder = ['unverified', 'certified', 'graded', 'authenticated', 'licensed', 'exclusive', 'prestige']
-            const boostable = auction.items.filter(i => {
+            const rarityOrder = [
+              'unverified',
+              'certified',
+              'graded',
+              'authenticated',
+              'licensed',
+              'exclusive',
+              'prestige'
+            ]
+            const boostable = auction.items.filter((i) => {
               const idx = rarityOrder.indexOf(i.rarity)
               return idx >= 0 && idx < rarityOrder.length - 1
             })
@@ -630,7 +654,7 @@ export const useStorageStore = defineStore('storage', () => {
       case 'npc_dropout': {
         // Force weakest N NPCs to drop out
         const active = auction.bidders
-          .filter(b => !b.droppedOut)
+          .filter((b) => !b.droppedOut)
           .sort((a, b) => a.maxBid.cmp(b.maxBid))
         const toDrop = Math.min(fx.value, active.length)
         for (let i = 0; i < toDrop; i++) {
@@ -657,7 +681,7 @@ export const useStorageStore = defineStore('storage', () => {
         const loc = getLocation(auction.locationId)
         if (loc) {
           const refundAmount = loc.entryFee.mul(0.6)
-          player.earnCash(refundAmount)
+          player.earnCash(refundAmount, { key: 'banking.tx_storage_refund', cat: 'storage' })
         }
         break
       }
@@ -675,7 +699,7 @@ export const useStorageStore = defineStore('storage', () => {
           currentBid: D(0),
           droppedOut: false,
           avatar: 'mdi:account-alert',
-          bidCount: 0,
+          bidCount: 0
         }
         auction.bidders.push(newBidder)
         break
@@ -684,11 +708,11 @@ export const useStorageStore = defineStore('storage', () => {
         // Mark the event result key with the strongest bidder's budget
         // (the UI reads this from the event's resultKeys)
         const strongest = auction.bidders
-          .filter(b => !b.droppedOut)
+          .filter((b) => !b.droppedOut)
           .sort((a, b) => b.maxBid.cmp(a.maxBid))[0]
         if (strongest) {
           // Store revealed info in the event's resultKeys for UI
-          const ev = auction.lotEvents.find(e => e.def.effects.includes(fx))
+          const ev = auction.lotEvents.find((e) => e.def.effects.includes(fx))
           if (ev) {
             ev.resultKeys.push(`${strongest.name}:${strongest.maxBid.toString()}`)
           }
@@ -711,11 +735,28 @@ export const useStorageStore = defineStore('storage', () => {
     if (!activeAuction.value) return
     const auction = activeAuction.value
     const player = usePlayerStore()
-    const currentTick = auction.availableAtTick + auction.roundsElapsed * AUCTION_CONFIG.ticksPerRound
+    const currentTick =
+      auction.availableAtTick + auction.roundsElapsed * AUCTION_CONFIG.ticksPerRound
 
     if (auction.currentBidder === 'player') {
-      // Player won!
-      player.spendCash(auction.currentBid)
+      // Player won — but must still afford it at close time
+      const cost = auction.currentBid
+      if (!player.spendCash(cost, { key: 'banking.tx_storage_buy_unit', cat: 'storage' })) {
+        // Can't afford anymore — lose the auction
+        auction.status = 'lost'
+        totalAuctionsLost.value++
+        auctionHistory.value.unshift({
+          auctionId: auction.id,
+          locationId: auction.locationId,
+          won: false,
+          pricePaid: ZERO,
+          itemsValue: ZERO,
+          itemCount: 0,
+          tick: currentTick
+        })
+        activeAuction.value = null
+        return
+      }
       auction.status = 'won'
       totalAuctionsWon.value++
       totalSpentOnAuctions.value = add(totalSpentOnAuctions.value, auction.currentBid)
@@ -730,7 +771,7 @@ export const useStorageStore = defineStore('storage', () => {
         inventory.value.push({
           ...item,
           auctionId: auction.id,
-          acquiredAtTick: currentTick,
+          acquiredAtTick: currentTick
         })
       }
 
@@ -748,7 +789,7 @@ export const useStorageStore = defineStore('storage', () => {
         pricePaid: auction.currentBid,
         itemsValue: totalVal,
         itemCount: auction.items.length,
-        tick: currentTick,
+        tick: currentTick
       })
     } else {
       // Player lost (or didn't bid)
@@ -762,7 +803,7 @@ export const useStorageStore = defineStore('storage', () => {
         pricePaid: ZERO,
         itemsValue: ZERO,
         itemCount: 0,
-        tick: currentTick,
+        tick: currentTick
       })
     }
 
@@ -798,17 +839,13 @@ export const useStorageStore = defineStore('storage', () => {
     tactics.intimidateUsesLeft--
     tactics.lastTacticRound = auction.roundsElapsed
 
-    const result = resolveIntimidate(
-      auction.bidders,
-      auction.currentBid,
-      auction.bidIncrement,
-    )
+    const result = resolveIntimidate(auction.bidders, auction.currentBid, auction.bidIncrement)
 
     // Apply counter-bids: highest counter-bidder wins
     if (result.counterBids.length > 0) {
       const best = result.counterBids.reduce(
-        (top, cb) => cb.amount.gt(top.amount) ? cb : top,
-        result.counterBids[0],
+        (top, cb) => (cb.amount.gt(top.amount) ? cb : top),
+        result.counterBids[0]
       )
       if (best.amount.gt(auction.currentBid)) {
         auction.currentBid = best.amount
@@ -826,7 +863,7 @@ export const useStorageStore = defineStore('storage', () => {
     const entry: BiddingTactics['tacticLog'][number] = {
       tactic: 'intimidate',
       round: auction.roundsElapsed,
-      reactions: result.reactions,
+      reactions: result.reactions
     }
     tactics.tacticLog.push(entry)
     return entry
@@ -846,17 +883,13 @@ export const useStorageStore = defineStore('storage', () => {
     tactics.bluffUsesLeft--
     tactics.lastTacticRound = auction.roundsElapsed
 
-    const result = resolveBluff(
-      auction.bidders,
-      auction.currentBid,
-      auction.bidIncrement,
-    )
+    const result = resolveBluff(auction.bidders, auction.currentBid, auction.bidIncrement)
 
     // Apply caller bids: highest caller wins
     if (result.callerBids.length > 0) {
       const best = result.callerBids.reduce(
-        (top, cb) => cb.amount.gt(top.amount) ? cb : top,
-        result.callerBids[0],
+        (top, cb) => (cb.amount.gt(top.amount) ? cb : top),
+        result.callerBids[0]
       )
       if (best.amount.gt(auction.currentBid)) {
         auction.currentBid = best.amount
@@ -874,7 +907,7 @@ export const useStorageStore = defineStore('storage', () => {
     const entry: BiddingTactics['tacticLog'][number] = {
       tactic: 'bluff',
       round: auction.roundsElapsed,
-      reactions: result.reactions,
+      reactions: result.reactions
     }
     tactics.tacticLog.push(entry)
     return entry
@@ -913,13 +946,16 @@ export const useStorageStore = defineStore('storage', () => {
           bidderId: b.id,
           bidderName: b.name,
           outcome: 'sniped',
-          i18nKey: 'sniper_caught_off_guard',
+          i18nKey: 'sniper_caught_off_guard'
         })
         continue
       }
       // Those who react, normal bidding logic
       const npcBid = calculateBidderBehavior(
-        b, auction.currentBid, auction.bidIncrement, auction.roundsElapsed,
+        b,
+        auction.currentBid,
+        auction.bidIncrement,
+        auction.roundsElapsed
       )
       if (npcBid === null) {
         b.droppedOut = true
@@ -927,7 +963,7 @@ export const useStorageStore = defineStore('storage', () => {
           bidderId: b.id,
           bidderName: b.name,
           outcome: 'dropped',
-          i18nKey: 'sniper_dropped',
+          i18nKey: 'sniper_dropped'
         })
       } else if (npcBid.gt(auction.currentBid)) {
         auction.currentBid = npcBid
@@ -938,14 +974,14 @@ export const useStorageStore = defineStore('storage', () => {
           bidderId: b.id,
           bidderName: b.name,
           outcome: 'counter_bid',
-          i18nKey: 'sniper_countered',
+          i18nKey: 'sniper_countered'
         })
       } else {
         reactions.push({
           bidderId: b.id,
           bidderName: b.name,
           outcome: 'sniped',
-          i18nKey: 'sniper_caught_off_guard',
+          i18nKey: 'sniper_caught_off_guard'
         })
       }
     }
@@ -953,7 +989,7 @@ export const useStorageStore = defineStore('storage', () => {
     tactics.tacticLog.push({
       tactic: 'sniper',
       round: auction.roundsElapsed,
-      reactions,
+      reactions
     })
 
     // After sniper bid, reset going phase to going_once
@@ -974,17 +1010,17 @@ export const useStorageStore = defineStore('storage', () => {
   // ── Appraise Item ──────────────────────────────────────────
 
   function appraiseItem(itemId: string, appraiserId: string): boolean {
-    const item = inventory.value.find(i => i.id === itemId)
+    const item = inventory.value.find((i) => i.id === itemId)
     if (!item || item.appraised) return false
 
-    const appraiser = APPRAISER_DEFS.find(a => a.id === appraiserId)
+    const appraiser = APPRAISER_DEFS.find((a) => a.id === appraiserId)
     if (!appraiser) return false
 
     const player = usePlayerStore()
     if (player.cash.lt(appraiser.costPerItem)) return false
 
     // Pay appraisal fee
-    player.spendCash(appraiser.costPerItem)
+    player.spendCash(appraiser.costPerItem, { key: 'banking.tx_storage_appraise', cat: 'storage' })
     totalSpentOnAppraisals.value = add(totalSpentOnAppraisals.value, appraiser.costPerItem)
     session.value.appraisalSpend = add(session.value.appraisalSpend, appraiser.costPerItem)
 
@@ -1012,7 +1048,7 @@ export const useStorageStore = defineStore('storage', () => {
   // ── Appraise All Items ─────────────────────────────────────
 
   function appraiseAll(appraiserId: string): number {
-    const unappraised = inventory.value.filter(i => !i.appraised)
+    const unappraised = inventory.value.filter((i) => !i.appraised)
     let count = 0
     for (const item of unappraised) {
       if (appraiseItem(item.id, appraiserId)) count++
@@ -1024,7 +1060,7 @@ export const useStorageStore = defineStore('storage', () => {
   // ── Sell Item ──────────────────────────────────────────────
 
   function sellItem(itemId: string): Decimal | null {
-    const idx = inventory.value.findIndex(i => i.id === itemId)
+    const idx = inventory.value.findIndex((i) => i.id === itemId)
     if (idx === -1) return null
 
     const item = inventory.value[idx]
@@ -1038,7 +1074,7 @@ export const useStorageStore = defineStore('storage', () => {
     const sellMul = getSellMultiplier()
     const finalValue = mul(afterTax, sellMul)
 
-    player.earnCash(finalValue)
+    player.earnCash(finalValue, { key: 'banking.tx_storage_sell', cat: 'storage' })
     totalItemsSold.value++
     totalSaleRevenue.value = add(totalSaleRevenue.value, finalValue)
     session.value.saleRevenue = add(session.value.saleRevenue, finalValue)
@@ -1132,10 +1168,14 @@ export const useStorageStore = defineStore('storage', () => {
     if (data.locationPool) locationPool.value = data.locationPool
     if (data.totalAuctionsWon !== undefined) totalAuctionsWon.value = data.totalAuctionsWon
     if (data.totalAuctionsLost !== undefined) totalAuctionsLost.value = data.totalAuctionsLost
-    if (data.totalSpentOnAuctions !== undefined) totalSpentOnAuctions.value = data.totalSpentOnAuctions
-    if (data.totalSpentOnAppraisals !== undefined) totalSpentOnAppraisals.value = data.totalSpentOnAppraisals
-    if (data.totalSpentOnEntryFees !== undefined) totalSpentOnEntryFees.value = data.totalSpentOnEntryFees
-    if (data.totalSpentOnStorageFees !== undefined) totalSpentOnStorageFees.value = data.totalSpentOnStorageFees
+    if (data.totalSpentOnAuctions !== undefined)
+      totalSpentOnAuctions.value = data.totalSpentOnAuctions
+    if (data.totalSpentOnAppraisals !== undefined)
+      totalSpentOnAppraisals.value = data.totalSpentOnAppraisals
+    if (data.totalSpentOnEntryFees !== undefined)
+      totalSpentOnEntryFees.value = data.totalSpentOnEntryFees
+    if (data.totalSpentOnStorageFees !== undefined)
+      totalSpentOnStorageFees.value = data.totalSpentOnStorageFees
     if (data.totalItemsSold !== undefined) totalItemsSold.value = data.totalItemsSold
     if (data.totalSaleRevenue !== undefined) totalSaleRevenue.value = data.totalSaleRevenue
     if (data.totalProfit !== undefined) totalProfit.value = data.totalProfit
@@ -1143,13 +1183,14 @@ export const useStorageStore = defineStore('storage', () => {
     if (data.biggestFlip !== undefined) biggestFlip.value = data.biggestFlip
     if (data.auctionHistory !== undefined) auctionHistory.value = data.auctionHistory
     if (data.lastRefreshTick !== undefined) lastRefreshTick.value = data.lastRefreshTick
-    if (data.lastLocationReshuffle !== undefined) lastLocationReshuffle.value = data.lastLocationReshuffle
+    if (data.lastLocationReshuffle !== undefined)
+      lastLocationReshuffle.value = data.lastLocationReshuffle
     // Session is intentionally NOT loaded — it resets each page load
   }
 
   function exportState(): Record<string, unknown> {
     return {
-      inventory: inventory.value.map(i => ({
+      inventory: inventory.value.map((i) => ({
         id: i.id,
         name: i.name,
         icon: i.icon,
@@ -1162,7 +1203,7 @@ export const useStorageStore = defineStore('storage', () => {
         weight: i.weight,
         condition: i.condition,
         auctionId: i.auctionId,
-        acquiredAtTick: i.acquiredAtTick,
+        acquiredAtTick: i.acquiredAtTick
       })),
       locationPool: locationPool.value,
       totalAuctionsWon: totalAuctionsWon.value,
@@ -1178,7 +1219,7 @@ export const useStorageStore = defineStore('storage', () => {
       biggestFlip: biggestFlip.value,
       auctionHistory: auctionHistory.value,
       lastRefreshTick: lastRefreshTick.value,
-      lastLocationReshuffle: lastLocationReshuffle.value,
+      lastLocationReshuffle: lastLocationReshuffle.value
     }
   }
 
@@ -1236,6 +1277,6 @@ export const useStorageStore = defineStore('storage', () => {
     prestigeReset,
     fullReset,
     loadFromSave,
-    exportState,
+    exportState
   }
 })

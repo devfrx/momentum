@@ -25,6 +25,7 @@ import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
+import { useBankingStore } from '@renderer/stores/useBankingStore'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { economySim } from '@renderer/core/EconomySim'
 import { dehydrateDecimals } from '@renderer/core/BigNum'
@@ -93,13 +94,14 @@ export function useAutoSave() {
     const vaultStore = useVaultStore()
     const shopStore = useShopStore()
     const limitOrderStore = useLimitOrderStore()
+    const bankingStore = useBankingStore()
 
     return dehydrateDecimals({
       version: 3,
       savedAt: Date.now(),
       totalTicks: gameEngine.currentTick,
       totalPlayTime: gameEngine.elapsedTime,
-      
+
       // Player state (use prestige store as authoritative source for prestige fields)
       player: {
         cash: player.cash,
@@ -110,12 +112,12 @@ export function useAutoSave() {
         level: player.level,
         xp: player.xp,
         xpToNextLevel: player.xpToNextLevel,
-        netWorth: player.netWorth,
+        netWorth: player.netWorth
       },
 
       // Jobs state
       jobs: {
-        unlockedJobs: jobs.unlockedJobs,
+        unlockedJobs: jobs.unlockedJobs
       },
 
       // Economy simulator state
@@ -125,7 +127,7 @@ export function useAutoSave() {
       businesses: business.businesses,
 
       // Stocks portfolio state
-      stockPortfolio: stocks.portfolio.map(p => ({
+      stockPortfolio: stocks.portfolio.map((p) => ({
         assetId: p.assetId,
         shares: p.shares,
         averageBuyPrice: p.averageBuyPrice,
@@ -138,7 +140,7 @@ export function useAutoSave() {
       stockMarketState: stocks.getSimulator().serialize(),
 
       // Crypto wallet state
-      cryptoWallet: crypto.wallet.map(h => ({
+      cryptoWallet: crypto.wallet.map((h) => ({
         assetId: h.assetId,
         amount: h.amount,
         averageBuyPrice: h.averageBuyPrice,
@@ -161,16 +163,16 @@ export function useAutoSave() {
         points: prestige.points,
         totalPointsEarned: prestige.totalPointsEarned,
         rebirthCount: prestige.rebirthCount,
-        upgrades: prestige.upgrades.map(u => ({
+        upgrades: prestige.upgrades.map((u) => ({
           id: u.id,
           level: u.level
         })),
-        milestones: prestige.milestones.map(m => ({
+        milestones: prestige.milestones.map((m) => ({
           id: m.id,
           unlocked: m.unlocked,
           unlockedAtTick: m.unlockedAtTick
         })),
-        perks: prestige.perks.map(p => ({
+        perks: prestige.perks.map((p) => ({
           id: p.id,
           purchased: p.purchased,
           purchasedAtTick: p.purchasedAtTick
@@ -178,7 +180,7 @@ export function useAutoSave() {
       },
 
       // Upgrade tree state
-      upgrades: upgrades.nodes.map(u => ({
+      upgrades: upgrades.nodes.map((u) => ({
         id: u.id,
         level: u.level,
         maxLevel: u.maxLevel,
@@ -186,7 +188,7 @@ export function useAutoSave() {
       })),
 
       // Achievement state
-      achievements: achievements.achievements.map(a => ({
+      achievements: achievements.achievements.map((a) => ({
         id: a.id,
         unlocked: a.unlocked,
         unlockedAtTick: a.unlockedAtTick
@@ -207,7 +209,7 @@ export function useAutoSave() {
 
       // Loans state
       loans: {
-        loans: loanStore.loans.map(l => ({
+        loans: loanStore.loans.map((l) => ({
           id: l.id,
           loanDefId: l.loanDefId,
           principal: l.principal,
@@ -243,7 +245,7 @@ export function useAutoSave() {
 
       // Deposits state
       deposits: {
-        deposits: depositStore.deposits.map(d => ({
+        deposits: depositStore.deposits.map((d) => ({
           id: d.id,
           depositDefId: d.depositDefId,
           principal: d.principal,
@@ -286,6 +288,9 @@ export function useAutoSave() {
       // Limit Orders state
       limitOrders: limitOrderStore.exportState(),
 
+      // Banking state
+      banking: bankingStore.exportState(),
+
       // Settings
       settings: {
         locale: settings.locale,
@@ -327,12 +332,15 @@ export function useAutoSave() {
     }, settings.autoSaveInterval * 1000)
 
     // Re-setup interval when settings change
-    watch(() => settings.autoSaveInterval, (newInterval) => {
-      if (intervalId) clearInterval(intervalId)
-      intervalId = setInterval(() => {
-        save()
-      }, newInterval * 1000)
-    })
+    watch(
+      () => settings.autoSaveInterval,
+      (newInterval) => {
+        if (intervalId) clearInterval(intervalId)
+        intervalId = setInterval(() => {
+          save()
+        }, newInterval * 1000)
+      }
+    )
   }
 
   function stopAutoSave(): void {

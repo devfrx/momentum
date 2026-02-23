@@ -34,7 +34,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 3,
     completionXp: 50,
     creditImpactOnTime: 2,
-    creditImpactDefault: -15,
+    creditImpactDefault: -15
   },
 
   {
@@ -61,7 +61,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 2,
     completionXp: 150,
     creditImpactOnTime: 3,
-    creditImpactDefault: -20,
+    creditImpactDefault: -20
   },
 
   {
@@ -81,14 +81,14 @@ export const LOANS: LoanDef[] = [
     collateralType: 'none',
     collateralRatio: 0,
     earlyRepaymentPenalty: 0.02,
-    latePaymentPenalty: 0.10,
+    latePaymentPenalty: 0.1,
     gracePeriodTicks: 200,
     riskLevel: 'medium',
     canRefinance: true,
     maxActive: 1,
     completionXp: 500,
     creditImpactOnTime: 5,
-    creditImpactDefault: -25,
+    creditImpactDefault: -25
   },
 
   // ═══ BUSINESS LOANS ═══════════════════════════════════════════
@@ -117,7 +117,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 3,
     completionXp: 200,
     creditImpactOnTime: 4,
-    creditImpactDefault: -18,
+    creditImpactDefault: -18
   },
 
   {
@@ -144,7 +144,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 2,
     completionXp: 750,
     creditImpactOnTime: 6,
-    creditImpactDefault: -22,
+    creditImpactDefault: -22
   },
 
   {
@@ -171,7 +171,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 1,
     completionXp: 2000,
     creditImpactOnTime: 8,
-    creditImpactDefault: -30,
+    creditImpactDefault: -30
   },
 
   // ═══ MORTGAGE LOANS ═══════════════════════════════════════════
@@ -200,7 +200,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 2,
     completionXp: 1000,
     creditImpactOnTime: 7,
-    creditImpactDefault: -35,
+    creditImpactDefault: -35
   },
 
   {
@@ -227,7 +227,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 3,
     completionXp: 3000,
     creditImpactOnTime: 10,
-    creditImpactDefault: -40,
+    creditImpactDefault: -40
   },
 
   {
@@ -254,7 +254,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 2,
     completionXp: 7500,
     creditImpactOnTime: 12,
-    creditImpactDefault: -50,
+    creditImpactDefault: -50
   },
 
   // ═══ INVESTMENT LOANS ═══════════════════════════════════════════
@@ -283,7 +283,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 1,
     completionXp: 500,
     creditImpactOnTime: 3,
-    creditImpactDefault: -25,
+    creditImpactDefault: -25
   },
 
   {
@@ -310,7 +310,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 1,
     completionXp: 1500,
     creditImpactOnTime: 6,
-    creditImpactDefault: -28,
+    creditImpactDefault: -28
   },
 
   // ═══ PREDATORY LOANS (HIGH RISK) ═══════════════════════════════
@@ -323,7 +323,7 @@ export const LOANS: LoanDef[] = [
     icon: 'mdi:cash-fast',
     minAmount: D(100),
     maxAmount: D(10_000),
-    baseAnnualRate: 0.50, // 50% annual = crazy high
+    baseAnnualRate: 0.5, // 50% annual = crazy high
     rateScalesWithCredit: false,
     termTicks: 6_000, // ~10 minutes - very short term
     minNetWorth: D(0),
@@ -339,18 +339,18 @@ export const LOANS: LoanDef[] = [
     maxActive: 1,
     completionXp: 25,
     creditImpactOnTime: 1,
-    creditImpactDefault: -10,
+    creditImpactDefault: -10
   },
 
   {
     id: 'loan_shark',
     name: 'Underground Loan',
-    description: 'No questions asked. Just don\'t miss a payment... or else.',
+    description: "No questions asked. Just don't miss a payment... or else.",
     category: 'predatory',
     icon: 'mdi:skull',
     minAmount: D(1_000),
     maxAmount: D(100_000),
-    baseAnnualRate: 0.80, // 80% annual - loan shark territory
+    baseAnnualRate: 0.8, // 80% annual - loan shark territory
     rateScalesWithCredit: false,
     termTicks: 18_000, // ~30 minutes
     minNetWorth: D(0),
@@ -359,14 +359,14 @@ export const LOANS: LoanDef[] = [
     collateralType: 'none',
     collateralRatio: 0,
     earlyRepaymentPenalty: 0,
-    latePaymentPenalty: 0.50, // Ouch
-    gracePeriodTicks: 0, // No grace
+    latePaymentPenalty: 0.5, // Ouch
+    gracePeriodTicks: 600, // 1 minute grace
     riskLevel: 'extreme',
     canRefinance: false,
     maxActive: 1,
     completionXp: 100,
     creditImpactOnTime: 0, // Off the books
-    creditImpactDefault: 0, // But there are... other consequences
+    creditImpactDefault: 0 // But there are... other consequences
   },
 
   // ═══ SPECIAL LOANS ═══════════════════════════════════════════════
@@ -395,7 +395,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 1,
     completionXp: 400,
     creditImpactOnTime: 5,
-    creditImpactDefault: -15,
+    creditImpactDefault: -15
   },
 
   {
@@ -422,7 +422,7 @@ export const LOANS: LoanDef[] = [
     maxActive: 1,
     completionXp: 2500,
     creditImpactOnTime: 8,
-    creditImpactDefault: -20,
+    creditImpactDefault: -20
   },
 
   {
@@ -433,7 +433,7 @@ export const LOANS: LoanDef[] = [
     icon: 'mdi:rocket-launch',
     minAmount: D(500_000),
     maxAmount: D(20_000_000),
-    baseAnnualRate: 0.10,
+    baseAnnualRate: 0.1,
     rateScalesWithCredit: true,
     termTicks: 540_000, // ~15 hours
     minNetWorth: D(2_000_000),
@@ -442,13 +442,13 @@ export const LOANS: LoanDef[] = [
     collateralType: 'mixed',
     collateralRatio: 0.75,
     earlyRepaymentPenalty: 0.02,
-    latePaymentPenalty: 0.10,
+    latePaymentPenalty: 0.1,
     gracePeriodTicks: 300,
     riskLevel: 'high',
     canRefinance: true,
     maxActive: 1,
     completionXp: 5000,
     creditImpactOnTime: 10,
-    creditImpactDefault: -35,
-  },
+    creditImpactDefault: -35
+  }
 ]

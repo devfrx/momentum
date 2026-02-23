@@ -238,7 +238,7 @@ function evaluateGrid(grid: SlotSymbol[][]): WinLine[] {
 async function spin(): Promise<void> {
     const bet = D(betAmount.value)
     if (bet.lte(ZERO) || player.cash.lt(bet) || spinning.value) return
-    if (!player.spendCash(bet)) return
+    if (!player.spendCash(bet, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
 
     spinning.value = true
     showResult.value = false
@@ -317,7 +317,7 @@ async function spin(): Promise<void> {
         }
         winningCells.value = cells
 
-        player.earnCash(payout)
+        player.earnCash(payout, { key: 'banking.tx_gambling_win', cat: 'gambling' })
         gambling.recordWin('slots', bet, payout)
 
         const bestLine = winLines.reduce((best, w) => w.multiplier > best.multiplier ? w : best)
@@ -528,7 +528,7 @@ watch(() => player.cash, (cash) => {
                         <span class="win-desc">{{ winResult.description }}</span>
                         <span class="win-amount">{{ formatCash(winResult.payout) }}</span>
                         <span class="win-multi">x{{ winResult.multiplier }} {{ $t('gambling.sl_multiplier_suffix')
-                        }}</span>
+                            }}</span>
                     </div>
                 </div>
                 <div v-else class="lose-banner">
@@ -564,7 +564,7 @@ watch(() => player.cash, (cash) => {
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="spinning">{{ $t('gambling.max')
-                    }}</UButton>
+                        }}</UButton>
                 </div>
             </div>
 

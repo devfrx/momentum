@@ -5,7 +5,13 @@ import { defineStore } from 'pinia'
 import { shallowRef, ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
-import { MarketSimulator, type AssetConfig, type AssetState, type MarketAnalysis, type MarketCondition } from '@renderer/core/MarketSim'
+import {
+  MarketSimulator,
+  type AssetConfig,
+  type AssetState,
+  type MarketAnalysis,
+  type MarketCondition
+} from '@renderer/core/MarketSim'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
@@ -78,7 +84,7 @@ export const useCryptoStore = defineStore('crypto', () => {
     simulator.tick()
     // Merge dailyHistory + priceHistory for seamless long-term charts.
     // Creates new array refs so Vue detects prop changes.
-    assets.value = simulator.getAllAssets().map(a => ({
+    assets.value = simulator.getAllAssets().map((a) => ({
       ...a,
       priceHistory: [...a.dailyHistory, ...a.priceHistory],
       candlestickHistory: a.candlestickHistory.slice()
@@ -162,13 +168,16 @@ export const useCryptoStore = defineStore('crypto', () => {
       const config = configs.value.find((c) => c.id === h.assetId)
       if (!asset || !config || !config.stakingYield || config.stakingYield <= 0) continue
 
-      const payout = D(asset.currentPrice * h.amount * config.stakingYield * ticksSinceLastPayout / TICKS_PER_GAME_YEAR)
+      const payout = D(
+        (asset.currentPrice * h.amount * config.stakingYield * ticksSinceLastPayout) /
+          TICKS_PER_GAME_YEAR
+      )
       totalPayout = add(totalPayout, payout)
     }
 
     if (totalPayout.gt(0)) {
       const adjustedPayout = mul(totalPayout, cryptoReturnsMul)
-      player.earnCash(adjustedPayout)
+      player.earnCash(adjustedPayout, { key: 'banking.tx_crypto_staking', cat: 'investment' })
       totalStakingEarned.value = add(totalStakingEarned.value, adjustedPayout)
     }
   }
@@ -179,11 +188,18 @@ export const useCryptoStore = defineStore('crypto', () => {
 
     const player = usePlayerStore()
     const cost = D(asset.currentPrice * amount)
-    
+
     // Check and spend cash
     if (!gte(player.cash, cost)) return null
-    if (!player.spendCash(cost)) return null
-    
+    if (
+      !player.spendCash(cost, {
+        key: 'banking.tx_crypto_buy',
+        cat: 'investment',
+        params: { name: asset.name }
+      })
+    )
+      return null
+
     const existing = wallet.value.find((h) => h.assetId === assetId)
 
     if (existing) {
@@ -222,9 +238,13 @@ export const useCryptoStore = defineStore('crypto', () => {
     const multipliedProfit = baseProfit.gt(0) ? mul(baseProfit, getCryptoReturnsMul()) : baseProfit
     const revenue = baseRevenue.add(multipliedProfit.sub(baseProfit))
     totalRealizedProfit.value = add(totalRealizedProfit.value, multipliedProfit)
-    
+
     // Add revenue to player cash
-    player.earnCash(revenue)
+    player.earnCash(revenue, {
+      key: 'banking.tx_crypto_sell',
+      cat: 'investment',
+      params: { name: asset.name }
+    })
 
     holding.amount -= amount
     holding.totalInvested = sub(holding.totalInvested, costBasis)
@@ -250,11 +270,18 @@ export const useCryptoStore = defineStore('crypto', () => {
     return wallet.value.find((h) => h.assetId === assetId)
   }
 
-  function getSimulator(): MarketSimulator { return simulator }
+  function getSimulator(): MarketSimulator {
+    return simulator
+  }
 
   /** Restore crypto state from saved data */
   function loadFromSave(saved: {
-    cryptoWallet?: Array<{ assetId: string; amount: number; averageBuyPrice: number; totalInvested: Decimal }>
+    cryptoWallet?: Array<{
+      assetId: string
+      amount: number
+      averageBuyPrice: number
+      totalInvested: Decimal
+    }>
     cryptoStats?: { totalRealizedProfit?: Decimal; totalStakingEarned?: Decimal }
     cryptoMarketState?: unknown
   }): void {
@@ -288,9 +315,11 @@ export const useCryptoStore = defineStore('crypto', () => {
     // Restore market simulator state
     if (saved.cryptoMarketState) {
       try {
-        simulator.deserialize(saved.cryptoMarketState as Parameters<MarketSimulator['deserialize']>[0])
+        simulator.deserialize(
+          saved.cryptoMarketState as Parameters<MarketSimulator['deserialize']>[0]
+        )
         // Merge dailyHistory + priceHistory for chart display (clone candlestickHistory for reactivity)
-        assets.value = simulator.getAllAssets().map(a => ({
+        assets.value = simulator.getAllAssets().map((a) => ({
           ...a,
           priceHistory: [...a.dailyHistory, ...a.priceHistory],
           candlestickHistory: a.candlestickHistory.slice()
@@ -302,10 +331,24 @@ export const useCryptoStore = defineStore('crypto', () => {
   }
 
   return {
-    configs, wallet, assets, totalRealizedProfit, totalStakingEarned,
-    totalWalletValue, unrealizedProfit, stakingIncomePerSecond,
+    configs,
+    wallet,
+    assets,
+    totalRealizedProfit,
+    totalStakingEarned,
+    totalWalletValue,
+    unrealizedProfit,
+    stakingIncomePerSecond,
     marketAnalysis,
-    initCryptos, tick, buyCrypto, sellCrypto, payStakingRewards,
-    getHolding, prestigeReset, getSimulator, setMarketCondition, loadFromSave
+    initCryptos,
+    tick,
+    buyCrypto,
+    sellCrypto,
+    payStakingRewards,
+    getHolding,
+    prestigeReset,
+    getSimulator,
+    setMarketCondition,
+    loadFromSave
   }
 })

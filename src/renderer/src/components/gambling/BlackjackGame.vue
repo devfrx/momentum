@@ -159,7 +159,7 @@ const canDouble = computed(() =>
 function deal(): void {
     const bet = D(betAmount.value)
     if (bet.lte(ZERO) || player.cash.lt(bet)) return
-    if (!player.spendCash(bet)) return
+    if (!player.spendCash(bet, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
 
     currentBet.value = bet
     doubled.value = false
@@ -209,7 +209,7 @@ function stand(): void {
 
 function doubleDown(): void {
     if (!canDouble.value) return
-    if (!player.spendCash(currentBet.value)) return
+    if (!player.spendCash(currentBet.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
     currentBet.value = add(currentBet.value, currentBet.value)
     doubled.value = true
     playerCards.push(drawCardWithLuck())
@@ -270,21 +270,21 @@ function settleRound(result: Outcome): void {
         case 'blackjack': {
             // 3:2 payout — bet back + 1.5× bet
             const pay = mul(currentBet.value, 2.5)
-            player.earnCash(pay)
+            player.earnCash(pay, { key: 'banking.tx_gambling_win', cat: 'gambling' })
             gambling.recordWin('blackjack', currentBet.value, pay)
             lastPayout.value = pay
             break
         }
         case 'win': {
             const pay = mul(currentBet.value, 2)
-            player.earnCash(pay)
+            player.earnCash(pay, { key: 'banking.tx_gambling_win', cat: 'gambling' })
             gambling.recordWin('blackjack', currentBet.value, pay)
             lastPayout.value = pay
             break
         }
         case 'push': {
             // Return bet
-            player.earnCash(currentBet.value)
+            player.earnCash(currentBet.value, { key: 'banking.tx_gambling_win', cat: 'gambling' })
             // Push is neither win nor loss — record as win with 0 net
             gambling.recordWin('blackjack', currentBet.value, currentBet.value)
             lastPayout.value = null

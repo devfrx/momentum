@@ -77,7 +77,7 @@ function spin(): void {
     if (!canSpin.value) return
 
     const totalCost = totalBetCost.value
-    if (!player.spendCash(totalCost)) return
+    if (!player.spendCash(totalCost, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
 
     spinning.value = true
     showResult.value = false
@@ -154,7 +154,7 @@ function evaluateResult(num: number): void {
     }
 
     if (totalPayout.gt(ZERO)) {
-        player.earnCash(totalPayout)
+        player.earnCash(totalPayout, { key: 'banking.tx_gambling_win', cat: 'gambling' })
         gambling.recordWin('roulette', totalBetCost.value, totalPayout)
         lastPayout.value = totalPayout
     } else {

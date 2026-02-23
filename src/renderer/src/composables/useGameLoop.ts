@@ -3,7 +3,7 @@
  */
 import { onMounted, onUnmounted, ref } from 'vue'
 import { gameEngine, type TickContext } from '@renderer/core/GameEngine'
-import { D, ZERO, add } from '@renderer/core/BigNum'
+import { D, ZERO, add, sub, mul } from '@renderer/core/BigNum'
 import { Formulas } from '@renderer/core'
 import { economySim } from '@renderer/core/EconomySim'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
@@ -25,8 +25,8 @@ import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useLimitOrderStore, initLimitOrderNotify } from '@renderer/stores/useLimitOrderStore'
+import { useBankingStore } from '@renderer/stores/useBankingStore'
 import { useNotify } from '@renderer/composables/useNotify'
-
 
 // Data imports
 import { STOCKS } from '@renderer/data/stocks'
@@ -69,6 +69,7 @@ export function useGameLoop() {
     const blackmarket = useBlackMarketStore()
     const shop = useShopStore()
     const limitOrderStore = useLimitOrderStore()
+    const bankingStore = useBankingStore()
 
     // ─── Initialize game data from static definitions ───────────
     if (stocks.assets.length === 0) {
@@ -107,6 +108,18 @@ export function useGameLoop() {
     // ─── Loan interest accrual ───────────────────────────────────
     gameEngine.subscribe('loans', () => {
       loans.tick(10) // 10 ticks/s - uses new loan store for comprehensive loan management
+    })
+
+    // ─── Debt interest (negative cash penalty) ───────────────────
+    // When cash < 0, apply 0.5% interest per 100 ticks (≈ 10 sec)
+    // to discourage staying in debt without making it instantly fatal.
+    gameEngine.subscribe('debtInterest', (ctx: TickContext) => {
+      if (ctx.tick % 100 !== 0) return
+      if (player.cash.lt(0)) {
+        const debtAmount = player.cash.abs()
+        const interest = mul(debtAmount, 0.005) // 0.5% per 10 sec
+        player.forcePay(interest)
+      }
     })
 
     // ─── Deposit interest accrual ────────────────────────────────
@@ -181,7 +194,10 @@ export function useGameLoop() {
       // Only recalculate every 10 ticks (1/s) for perf
       if (ctx.tick % 10 !== 0) return
 
-      const portfolioValue = add(stocks.totalPortfolioValue ?? ZERO, crypto.totalWalletValue ?? ZERO)
+      const portfolioValue = add(
+        stocks.totalPortfolioValue ?? ZERO,
+        crypto.totalWalletValue ?? ZERO
+      )
       const propertyValue = realEstate.totalPropertyValue ?? ZERO
       const startupValue = startups.totalInvested ?? ZERO
       const depositValue = deposits.totalLockedBalance ?? ZERO
@@ -205,16 +221,31 @@ export function useGameLoop() {
       const prestigeMul = prestige.globalMultiplier
       const bmIncomeBoost = D(blackmarket.getEffectMultiplier('income_boost'))
       const bmHeatPenalty = D(blackmarket.getHeatIncomePenalty())
-      realEstate.globalRentMultiplier = allIncomeMul.mul(reUpgradeMul).mul(prestigeMul).mul(reEventMul).mul(bmIncomeBoost).mul(bmHeatPenalty)
+      const cardTierMul = D(bankingStore.tierBonus)
+      realEstate.globalRentMultiplier = allIncomeMul
+        .mul(reUpgradeMul)
+        .mul(prestigeMul)
+        .mul(reEventMul)
+        .mul(bmIncomeBoost)
+        .mul(bmHeatPenalty)
+        .mul(cardTierMul)
 
       // ─── Market conditions from events (Fix #4) ─────────────────
       const stockSim = stocks.getSimulator()
       const cryptoSim = crypto.getSimulator()
 
-      const hasBull = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'bull_market')
-      const hasCrash = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'market_crash')
-      const hasCryptoBoom = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'crypto_boom')
-      const hasCryptoWinter = events.activeEvents.some((e: { eventId: string }) => e.eventId === 'crypto_winter')
+      const hasBull = events.activeEvents.some(
+        (e: { eventId: string }) => e.eventId === 'bull_market'
+      )
+      const hasCrash = events.activeEvents.some(
+        (e: { eventId: string }) => e.eventId === 'market_crash'
+      )
+      const hasCryptoBoom = events.activeEvents.some(
+        (e: { eventId: string }) => e.eventId === 'crypto_boom'
+      )
+      const hasCryptoWinter = events.activeEvents.some(
+        (e: { eventId: string }) => e.eventId === 'crypto_winter'
+      )
 
       // Stock market condition
       if (hasCrash) stockSim.setCondition('crash', 100)
@@ -230,10 +261,18 @@ export function useGameLoop() {
       const ecoState = economySim.getState()
       let sentiment = 0
       switch (ecoState.cyclePhase) {
-        case 'expansion':   sentiment = 0.02; break
-        case 'peak':        sentiment = 0.04; break
-        case 'contraction':  sentiment = -0.03; break
-        case 'trough':      sentiment = -0.05; break
+        case 'expansion':
+          sentiment = 0.02
+          break
+        case 'peak':
+          sentiment = 0.04
+          break
+        case 'contraction':
+          sentiment = -0.03
+          break
+        case 'trough':
+          sentiment = -0.05
+          break
       }
       stockSim.setSentimentModifier(sentiment)
       cryptoSim.setSentimentModifier(sentiment * 1.5) // crypto more sensitive to macro
@@ -278,7 +317,7 @@ export function useGameLoop() {
             met = realEstate.properties.length >= (condition.value as number)
             break
           case 'upgrades': {
-            const purchasedCount = upgrades.nodes.filter(n => n.purchased).length
+            const purchasedCount = upgrades.nodes.filter((n) => n.purchased).length
             met = purchasedCount >= (condition.value as number)
             break
           }
@@ -296,7 +335,11 @@ export function useGameLoop() {
           if (reward) {
             switch (reward.type) {
               case 'cash':
-                player.earnCash(D(reward.value))
+                player.earnCash(D(reward.value), {
+                  key: 'banking.tx_achievement_reward',
+                  cat: 'achievement',
+                  params: { name: ach.name }
+                })
                 break
               case 'multiplier':
                 // Multiplier rewards are passive — stored in achievement and
@@ -316,6 +359,47 @@ export function useGameLoop() {
     gameEngine.subscribe('prestige-milestones', (ctx: TickContext) => {
       if (ctx.tick % 50 !== 0) return
       prestige.checkMilestones(ctx.tick, player.totalCashEarned)
+    })
+
+    // ─── Banking: transaction recording & card tier ──────────────
+    gameEngine.subscribe('banking', (ctx: TickContext) => {
+      // Every 100 ticks (10 seconds): record aggregated income/expenses
+      if (ctx.tick % 100 !== 0) return
+
+      const bal = player.cash
+
+      // Job income (aggregated over 10s)
+      const jobIncome = mul(jobs.jobIncomePerSecond, 10)
+      if (jobIncome.gt(0)) {
+        bankingStore.recordPeriodicIncome('banking.tx_job_income', jobIncome, 'salary', bal)
+      }
+
+      // Business profit (aggregated over 10s)
+      const bizProfit = mul(business.profitPerSecond, 10)
+      if (bizProfit.gt(0)) {
+        bankingStore.recordPeriodicIncome('banking.tx_business_profit', bizProfit, 'business', bal)
+      }
+
+      // Real estate rent (aggregated over 10s)
+      const rent = mul(realEstate.rentPerSecond, 10)
+      if (rent.gt(0)) {
+        bankingStore.recordPeriodicIncome('banking.tx_rent_income', rent, 'real_estate', bal)
+      }
+
+      // Deposit interest (aggregated over 10s)
+      const depositInt = mul(deposits.interestPerSecond, 10)
+      if (depositInt.gt(0)) {
+        bankingStore.recordPeriodicIncome('banking.tx_deposit_interest', depositInt, 'deposit', bal)
+      }
+
+      // Loan interest expense (aggregated over 10s)
+      const loanInt = mul(loans.totalInterestPerSecond, 10)
+      if (loanInt.gt(0)) {
+        bankingStore.recordTransaction('banking.tx_loan_interest', mul(loanInt, -1), 'loan', bal)
+      }
+
+      // Update card tier based on current net worth
+      bankingStore.updateCardTier(player.netWorth)
     })
 
     // ─── UI sync ─────────────────────────────────────────────────
