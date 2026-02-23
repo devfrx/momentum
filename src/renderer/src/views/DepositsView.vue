@@ -8,7 +8,6 @@ import Slider from 'primevue/slider'
 import Select from 'primevue/select'
 import { useDepositStore } from '@renderer/stores/useDepositStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
-import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { useOnTick } from '@renderer/composables/useGameLoop'
@@ -27,8 +26,7 @@ import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 
 const depositStore = useDepositStore()
 const player = usePlayerStore()
-const upgrades = useUpgradeStore()
-const { formatCash, formatPercent } = useFormat()
+const { formatCash } = useFormat()
 const { t } = useI18n()
 
 const depositActiveTab = ref('active')
@@ -42,12 +40,6 @@ const depositTabs = computed<TabDef[]>(() => [
 const currentTick = ref(gameEngine.currentTick)
 useOnTick('deposits-tick', (ctx) => {
     currentTick.value = ctx.tick
-})
-
-// Deposit rate bonus from skills/prestige
-const depositRateBonus = computed(() => {
-    const mul = upgrades.getMultiplier('deposit_rate').toNumber()
-    return mul > 1 ? `+${formatPercent(mul - 1)}` : t('deposits.no_bonus')
 })
 
 // Category filter
@@ -186,37 +178,6 @@ const depositInfoSections = computed<InfoSection[]>(() => [
         <!-- Event Impact -->
         <EventImpactBanner route-name="deposits" />
 
-        <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-chip bonus-chip">
-                <AppIcon icon="mdi:trending-up" class="stat-chip-icon" />
-                <span class="stat-chip-label">{{ $t('deposits.rate_bonus') }}</span>
-                <span class="stat-chip-value"
-                    :class="{ 'text-success': upgrades.getMultiplier('deposit_rate').gt(1) }">{{ depositRateBonus
-                    }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('deposits.cash') }}</span>
-                <span class="stat-chip-value text-success">{{ formatCash(player.cash) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('deposits.locked') }}</span>
-                <span class="stat-chip-value">{{ formatCash(depositStore.totalLockedBalance) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('deposits.active') }}</span>
-                <span class="stat-chip-value">{{ depositStore.deposits.length }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('deposits.avg_apy') }}</span>
-                <span class="stat-chip-value text-success">{{ (depositStore.averageAPY * 100).toFixed(2) }}%</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('deposits.interest_s') }}</span>
-                <span class="stat-chip-value text-success">{{ formatCash(depositStore.interestPerSecond) }}</span>
-            </div>
-        </div>
-
         <!-- Main Content -->
         <UTabs v-model="depositActiveTab" :tabs="depositTabs">
             <template #active>
@@ -262,43 +223,18 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                         <div class="history-details">
                             <span>{{ $t('deposits.interest_label') }} <strong class="text-success">{{
                                 formatCash(entry.totalInterestEarned)
-                            }}</strong></span>
+                                    }}</strong></span>
                             <span>{{ $t('deposits.apy_label') }} {{ (entry.effectiveAPY * 100).toFixed(1) }}%</span>
                             <span v-if="entry.earlyWithdrawal" class="text-warning">{{
                                 $t('deposits.early_withdrawal', { penalty: formatCash(entry.penaltyPaid) })
-                            }}</span>
+                                }}</span>
                             <span class="history-status" :class="entry.status">{{ entry.status.replace(/_/g, ' ')
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
             </template>
         </UTabs>
-
-        <!-- Deposit Stats Card -->
-        <div class="deposit-lifetime-stats">
-            <h4>{{ $t('deposits.statistics') }}</h4>
-            <div class="stat-row">
-                <span>{{ $t('deposits.total_deposited') }}</span>
-                <strong>{{ formatCash(depositStore.totalDeposited) }}</strong>
-            </div>
-            <div class="stat-row">
-                <span>{{ $t('deposits.total_interest') }}</span>
-                <strong class="text-success">{{ formatCash(depositStore.totalInterestEarnedEver) }}</strong>
-            </div>
-            <div class="stat-row">
-                <span>{{ $t('deposits.accounts_opened') }}</span>
-                <strong>{{ depositStore.totalDepositsOpened }}</strong>
-            </div>
-            <div class="stat-row">
-                <span>{{ $t('deposits.matured') }}</span>
-                <strong class="text-success">{{ depositStore.totalDepositsMatured }}</strong>
-            </div>
-            <div class="stat-row">
-                <span>{{ $t('deposits.early_withdrawals') }}</span>
-                <strong class="text-warning">{{ depositStore.totalEarlyWithdrawals }}</strong>
-            </div>
-        </div>
 
         <!-- InfoPanel -->
         <InfoPanel :title="$t('deposits.how_it_works')" :description="$t('deposits.info_desc')"
@@ -329,7 +265,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                     <div class="term-row">
                         <span>{{ $t('deposits.effective_apy') }}</span>
                         <strong class="text-success">{{ (depositStore.getModifiedAPY(selectedDeposit) * 100).toFixed(2)
-                            }}%</strong>
+                        }}%</strong>
                     </div>
                     <div class="term-row">
                         <span>{{ $t('deposits.term') }}</span>
@@ -352,7 +288,7 @@ const depositInfoSections = computed<InfoSection[]>(() => [
                 <div class="dialog-actions">
                     <UButton variant="ghost" @click="showOpenDialog = false">{{ $t('common.cancel') }}</UButton>
                     <UButton variant="success" @click="confirmDeposit">{{ $t('deposits.confirm_deposit')
-                        }}</UButton>
+                    }}</UButton>
                 </div>
             </div>
         </UModal>

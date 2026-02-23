@@ -11,7 +11,6 @@ import { CashDisplay } from '@renderer/components/dashboard'
 import {
     ShopListingCard,
     ShopFilters,
-    ShopStats,
     SellPanel,
     DemandTicker,
     RestorationPanel,
@@ -110,9 +109,6 @@ watch(() => shop.filteredListings.length, () => {
             </div>
             <CashDisplay :label="t('storage.balance')" :value="formatCash(player.cash)" />
         </div>
-
-        <!-- Stats Ribbon -->
-        <ShopStats />
 
         <!-- Demand Ticker -->
         <DemandTicker v-if="shop.demands.length > 0" />

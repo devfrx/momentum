@@ -43,7 +43,7 @@ function severity(level: number): string {
                 <div class="inv-alert__kpi">
                     <span class="inv-alert__kpi-label">{{ t('blackmarket.potential_fine') }}</span>
                     <span class="inv-alert__kpi-value inv-alert__kpi-value--danger">{{ formatCash(inv.fineAmount)
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="inv-alert__kpi">
                     <span class="inv-alert__kpi-label">{{ t('blackmarket.catch_chance') }}</span>
@@ -74,7 +74,7 @@ function severity(level: number): string {
     padding: var(--t-space-3) var(--t-space-4);
     background: var(--t-bg-card);
     border: 1px solid var(--t-danger);
-    border-left: 4px solid var(--t-danger);
+    /* border-left: 4px solid var(--t-danger); */
     border-radius: var(--t-radius-md);
 }
 

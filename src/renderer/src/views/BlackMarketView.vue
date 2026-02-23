@@ -16,7 +16,6 @@ import {
     HeatMeter,
     InvestigationAlert,
     ActiveEffects,
-    BlackMarketStats,
     ActivityLog,
 } from '@renderer/components/blackmarket'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
@@ -31,13 +30,12 @@ const { formatCash } = useFormat()
 const { t } = useI18n()
 const { error: notifyError, warning: notifyWarning } = useNotify()
 
-type ViewTab = 'deals' | 'contacts' | 'stats'
+type ViewTab = 'deals' | 'contacts'
 const activeTab = ref<ViewTab>('deals')
 
 const tabs = computed<TabDef[]>(() => [
     { id: 'deals', label: t('blackmarket.tab_deals'), icon: 'mdi:skull-crossbones', count: bm.availableDeals.length },
     { id: 'contacts', label: t('blackmarket.tab_contacts'), icon: 'mdi:account-group', count: bm.unlockedContacts.length },
-    { id: 'stats', label: t('blackmarket.tab_stats'), icon: 'mdi:chart-box' },
 ])
 
 function handleDealAccepted(_dealId: string, _success: boolean, _message: string): void {
@@ -234,10 +232,6 @@ const infoSections = computed(() => [
                     <p>{{ t('blackmarket.no_contacts') }}</p>
                     <span class="empty-hint">{{ t('blackmarket.no_contacts_hint') }}</span>
                 </div>
-            </template>
-
-            <template #stats>
-                <BlackMarketStats />
             </template>
         </UTabs>
 

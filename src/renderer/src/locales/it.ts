@@ -16,7 +16,7 @@ export default {
     authenticated: 'Autenticato',
     licensed: 'Con Licenza',
     exclusive: 'Esclusivo',
-    prestige: 'Prestigio',
+    prestige: 'Prestigio'
   },
 
   // ─── Condizione Oggetti ───────────────────────────────────────
@@ -28,7 +28,7 @@ export default {
     excellent: 'Eccellente',
     mint: 'Perfetto',
     pristine: 'Immacolato',
-    unknown: 'Sconosciuta',
+    unknown: 'Sconosciuta'
   },
 
   // ─── Comuni / Condivisi ───────────────────────────────────────
@@ -67,7 +67,7 @@ export default {
     import_btn: 'Importa',
     filter_by_category: 'Filtra per categoria',
     all: 'Tutto',
-    cycle: 'ciclo',
+    cycle: 'ciclo'
   },
 
   // ─── Navigazione / Sidebar ────────────────────────────────────
@@ -89,11 +89,12 @@ export default {
     blackmarket: 'Mercato Nero',
     shop: 'Shop Online',
     vault: 'Cassaforte',
+    stats: 'Statistiche',
     group_earn: 'Guadagna',
     group_invest: 'Investi',
     group_finance: 'Finanza',
     group_fun: 'Svago',
-    group_progress: 'Progresso',
+    group_progress: 'Progresso'
   },
 
   // ─── Header ───────────────────────────────────────────────────
@@ -108,13 +109,13 @@ export default {
     switch_dark: 'Passa al tema scuro',
     minimize: 'Riduci',
     maximize: 'Massimizza',
-    close: 'Chiudi',
+    close: 'Chiudi'
   },
 
   // ─── Footer ───────────────────────────────────────────────────
   footer: {
     no_events: 'Nessun evento attivo',
-    active_events: '{n} attivi',
+    active_events: '{n} attivi'
   },
 
   // ─── Events ───────────────────────────────────────────────────
@@ -130,7 +131,7 @@ export default {
       personal: 'Personale',
       global: 'Globale',
       opportunity: 'Opportunità',
-      disaster: 'Disastro',
+      disaster: 'Disastro'
     },
     effects: {
       income_multiplier: 'Moltiplicatore Reddito',
@@ -158,8 +159,8 @@ export default {
       research_cost_modifier: 'Costi Ricerca',
       cash_grant: 'Bonus Contante',
       cash_loss: 'Perdita Contante',
-      unlock: 'Sblocco',
-    },
+      unlock: 'Sblocco'
+    }
   },
 
   // ─── Dashboard ────────────────────────────────────────────────
@@ -180,7 +181,7 @@ export default {
     available_unlock: 'Lavori Disponibili',
     exp_level: 'Esp Lv.{n}',
     requires_level: 'Richiede Lv.{n}',
-    apply: 'Candidati',
+    apply: 'Candidati'
   },
 
   // ─── Moltiplicatori ───────────────────────────────────────────
@@ -213,7 +214,7 @@ export default {
     source_achievement: 'Obiettivo: {name}',
     source_divine: 'Divino: {name}',
     era_affected: 'Era',
-    era_affected_tip: 'Questa categoria è potenziata dal bonus della tua Era attuale',
+    era_affected_tip: 'Questa categoria è potenziata dal bonus della tua Era attuale'
   },
 
   // ─── Attività (Business) ──────────────────────────────────────
@@ -221,10 +222,11 @@ export default {
     title: 'Impero Commerciale',
     subtitle: 'Costruisci, scala e domina mercati infiniti',
     profit: 'Profitto',
-    available_purchase: 'Disponibili per l\'Acquisto',
+    available_purchase: "Disponibili per l'Acquisto",
     buy_for: 'Compra {cost}',
     no_businesses: 'Nessuna Attività',
-    no_businesses_hint: 'Aumenta il tuo patrimonio tramite lavori e investimenti per sbloccare le attività.',
+    no_businesses_hint:
+      'Aumenta il tuo patrimonio tramite lavori e investimenti per sbloccare le attività.',
     how_it_works: 'Come Funzionano le Attività',
     demand: 'domanda',
     sold: 'venduti',
@@ -264,10 +266,12 @@ export default {
     total_profit: 'Profitto totale',
     owned_for: 'Posseduta da',
     purchase_amount: 'Quantità Acquisto:',
-    available_for_purchase: 'Disponibili per l\'Acquisto',
-    empty_hint: 'Aumenta il tuo patrimonio tramite lavori e investimenti per sbloccare le attività.',
+    available_for_purchase: "Disponibili per l'Acquisto",
+    empty_hint:
+      'Aumenta il tuo patrimonio tramite lavori e investimenti per sbloccare le attività.',
     info_title: 'Come Funzionano le Attività',
-    info_desc: 'Ogni attività genera ricavi vendendo prodotti ai clienti. Le attività scalano all\'infinito — sali di livello, apri filiali, assumi consulenti, imposta politiche e sblocca traguardi. I ricavi dipendono da domanda, prezzo, capacità e molteplici livelli di scaling. I costi operativi includono stipendi, affitto, forniture e marketing. Un manager riscuote automaticamente i profitti. Le sinergie tra attività nella stessa categoria forniscono moltiplicatori. Diventa una Mega-Corporation per bonus di dominanza del mercato.',
+    info_desc:
+      "Ogni attività genera ricavi vendendo prodotti ai clienti. Le attività scalano all'infinito — sali di livello, apri filiali, assumi consulenti, imposta politiche e sblocca traguardi. I ricavi dipendono da domanda, prezzo, capacità e molteplici livelli di scaling. I costi operativi includono stipendi, affitto, forniture e marketing. Un manager riscuote automaticamente i profitti. Le sinergie tra attività nella stessa categoria forniscono moltiplicatori. Diventa una Mega-Corporation per bonus di dominanza del mercato.",
 
     // ── Tab ──
     tab_overview: 'Panoramica',
@@ -294,7 +298,7 @@ export default {
     // ── Tab Mercato ──
     no_available: 'Nessuna Attività Disponibile',
     market_hint: 'Aumenta il tuo patrimonio per sbloccare nuove attività.',
-    advisors_hint: 'Compra prima un\'attività per assumere consulenti.',
+    advisors_hint: "Compra prima un'attività per assumere consulenti.",
     size_stand: 'Bancarella',
     size_workshop: 'Laboratorio',
     size_store: 'Negozio',
@@ -322,7 +326,8 @@ export default {
     become_corp: 'Diventa Corporazione',
     corporation: 'Corporazione',
     reputation: 'Reputazione',
-    sell_confirm: 'Sei sicuro di voler vendere "{name}"? Questa azione non può essere annullata. Tutti i livelli, potenziamenti e consulenti andranno persi.',
+    sell_confirm:
+      'Sei sicuro di voler vendere "{name}"? Questa azione non può essere annullata. Tutti i livelli, potenziamenti e consulenti andranno persi.',
 
     // ── Filiali ──
     branches: 'Filiali',
@@ -361,9 +366,9 @@ export default {
 
     // ── Nomi potenziamenti ──
     upg_efficiency_boost: 'Aumento Efficienza',
-    upg_efficiency_boost_desc: 'Aumenta i ricavi attraverso l\'efficienza operativa.',
+    upg_efficiency_boost_desc: "Aumenta i ricavi attraverso l'efficienza operativa.",
     upg_bulk_discount: 'Sconto Volume',
-    upg_bulk_discount_desc: 'Riduce i costi tramite acquisti all\'ingrosso.',
+    upg_bulk_discount_desc: "Riduce i costi tramite acquisti all'ingrosso.",
     upg_brand_awareness: 'Notorietà del Marchio',
     upg_brand_awareness_desc: 'Attrae più clienti attraverso il riconoscimento del marchio.',
     upg_automation: 'Automazione',
@@ -375,7 +380,7 @@ export default {
     upg_recipe_innovation: 'Innovazione Ricette',
     upg_recipe_innovation_desc: 'Attrae clienti con nuove ricette uniche.',
     upg_rd_lab: 'Laboratorio R&S',
-    upg_rd_lab_desc: 'Guida i ricavi attraverso ricerca all\'avanguardia.',
+    upg_rd_lab_desc: "Guida i ricavi attraverso ricerca all'avanguardia.",
     upg_cloud_infra: 'Infrastruttura Cloud',
     upg_cloud_infra_desc: 'Scala la produzione con la potenza del cloud computing.',
     upg_crm_system: 'Sistema CRM',
@@ -385,9 +390,9 @@ export default {
     upg_vip_section: 'Area VIP',
     upg_vip_section_desc: 'Area premium che genera ricavi più alti.',
     upg_assembly_line: 'Linea di Montaggio',
-    upg_assembly_line_desc: 'Aumenta la produzione con l\'efficienza della catena.',
+    upg_assembly_line_desc: "Aumenta la produzione con l'efficienza della catena.",
     upg_algo_trading: 'Trading Algoritmico',
-    upg_algo_trading_desc: 'Trading guidato dall\'IA che aumenta i ricavi.',
+    upg_algo_trading_desc: "Trading guidato dall'IA che aumenta i ricavi.",
 
     // ── Politiche ──
     policies: 'Politiche',
@@ -415,7 +420,7 @@ export default {
     adv_operations: 'Direttore Operativo',
     adv_operations_desc: 'Riscuote automaticamente i profitti e riduce i costi.',
     adv_marketing: 'Direttore Marketing',
-    adv_marketing_desc: 'Aumenta l\'efficienza del marketing e la portata clienti.',
+    adv_marketing_desc: "Aumenta l'efficienza del marketing e la portata clienti.",
     adv_hr: 'Responsabile Risorse Umane',
     adv_hr_desc: 'Aumenta la produzione e forma automaticamente il personale.',
     adv_cfo: 'Direttore Finanziario',
@@ -460,7 +465,7 @@ export default {
     name_hotel: 'Hotel e Resort',
     name_tech_startup: 'Azienda Tecnologica',
     name_factory: 'Stabilimento Industriale',
-    name_bank: 'Banca d\'Investimento',
+    name_bank: "Banca d'Investimento",
 
     // ── Scheda acquisto ──
     category: 'Categoria',
@@ -477,74 +482,126 @@ export default {
     info: {
       revenue: {
         title: 'Ricavi e Vendite',
-        demand: 'Domanda', demand_desc: 'Numero di clienti che desiderano il tuo prodotto',
-        capacity: 'Capacità', capacity_desc: 'Unità massime che la tua attività può produrre',
-        units_sold: 'Unità Vendute', units_sold_desc: 'Unità vendute per tick (minimo tra domanda e capacità)',
-        utilization: 'Utilizzo', utilization_desc: 'Percentuale della capacità in uso',
-        revenue_per_s: 'Ricavi/s', revenue_per_s_desc: 'Ricavi totali generati al secondo',
+        demand: 'Domanda',
+        demand_desc: 'Numero di clienti che desiderano il tuo prodotto',
+        capacity: 'Capacità',
+        capacity_desc: 'Unità massime che la tua attività può produrre',
+        units_sold: 'Unità Vendute',
+        units_sold_desc: 'Unità vendute per tick (minimo tra domanda e capacità)',
+        utilization: 'Utilizzo',
+        utilization_desc: 'Percentuale della capacità in uso',
+        revenue_per_s: 'Ricavi/s',
+        revenue_per_s_desc: 'Ricavi totali generati al secondo'
       },
       demand: {
         title: 'Formula Domanda',
-        base_customers: 'Clienti Base', base_customers_desc: 'Numero iniziale di potenziali clienti',
-        price_factor: 'Fattore Prezzo', price_factor_desc: 'Come il tuo prezzo influenza la domanda',
-        quality_factor: 'Fattore Qualità', quality_factor_desc: 'Come la qualità del prodotto attira clienti',
-        marketing_factor: 'Fattore Marketing', marketing_factor_desc: 'Come la spesa marketing aumenta la visibilità',
-        economy_demand: 'Domanda Economica', economy_demand_desc: 'Moltiplicatore economico globale che influenza tutta la domanda',
-        elasticity: 'Elasticità', elasticity_desc: 'Quanto la domanda è sensibile alle variazioni di prezzo',
-        customer_attraction: 'Attrazione Clienti', customer_attraction_desc: 'Bonus dai moltiplicatori che attraggono più clienti',
+        base_customers: 'Clienti Base',
+        base_customers_desc: 'Numero iniziale di potenziali clienti',
+        price_factor: 'Fattore Prezzo',
+        price_factor_desc: 'Come il tuo prezzo influenza la domanda',
+        quality_factor: 'Fattore Qualità',
+        quality_factor_desc: 'Come la qualità del prodotto attira clienti',
+        marketing_factor: 'Fattore Marketing',
+        marketing_factor_desc: 'Come la spesa marketing aumenta la visibilità',
+        economy_demand: 'Domanda Economica',
+        economy_demand_desc: 'Moltiplicatore economico globale che influenza tutta la domanda',
+        elasticity: 'Elasticità',
+        elasticity_desc: 'Quanto la domanda è sensibile alle variazioni di prezzo',
+        customer_attraction: 'Attrazione Clienti',
+        customer_attraction_desc: 'Bonus dai moltiplicatori che attraggono più clienti'
       },
       price_status: {
         title: 'Etichette Stato Prezzo',
-        optimal: 'Ottimale', optimal_desc: 'Il prezzo è bilanciato — massimizza il profitto',
-        underpriced: 'Sottocosto', underpriced_desc: 'Il prezzo è sotto l\'ottimale — alzarlo potrebbe aumentare il profitto',
-        overpriced: 'Sovrapprezz.', overpriced_desc: 'Il prezzo è sopra l\'ottimale — si perdono alcuni clienti',
-        too_expensive: 'Troppo Caro', too_expensive_desc: 'Il prezzo è così alto che pochissimi clienti comprano',
+        optimal: 'Ottimale',
+        optimal_desc: 'Il prezzo è bilanciato — massimizza il profitto',
+        underpriced: 'Sottocosto',
+        underpriced_desc: "Il prezzo è sotto l'ottimale — alzarlo potrebbe aumentare il profitto",
+        overpriced: 'Sovrapprezz.',
+        overpriced_desc: "Il prezzo è sopra l'ottimale — si perdono alcuni clienti",
+        too_expensive: 'Troppo Caro',
+        too_expensive_desc: 'Il prezzo è così alto che pochissimi clienti comprano'
       },
       costs: {
         title: 'Struttura Costi',
-        wages: 'Stipendi', wages_desc: 'Costo per dipendente ogni tick',
-        rent: 'Affitto', rent_desc: 'Costo fisso di affitto per tick',
-        supplies: 'Forniture', supplies_desc: 'Costo per unità di forniture per la produzione',
-        marketing_spend: 'Spesa Marketing', marketing_spend_desc: 'Costo del marketing ogni tick',
-        cost_reduction: 'Riduzione Costi', cost_reduction_desc: 'Bonus che riducono i costi operativi complessivi',
-        costs_per_s: 'Costi/s', costs_per_s_desc: 'Costi operativi totali al secondo',
+        wages: 'Stipendi',
+        wages_desc: 'Costo per dipendente ogni tick',
+        rent: 'Affitto',
+        rent_desc: 'Costo fisso di affitto per tick',
+        supplies: 'Forniture',
+        supplies_desc: 'Costo per unità di forniture per la produzione',
+        marketing_spend: 'Spesa Marketing',
+        marketing_spend_desc: 'Costo del marketing ogni tick',
+        cost_reduction: 'Riduzione Costi',
+        cost_reduction_desc: 'Bonus che riducono i costi operativi complessivi',
+        costs_per_s: 'Costi/s',
+        costs_per_s_desc: 'Costi operativi totali al secondo'
       },
       profit: {
         title: 'Profitto e Valutazione',
-        profit_per_s: 'Profitto/s', profit_per_s_desc: 'Ricavi meno costi al secondo',
-        avg_profit: 'Profitto Medio', avg_profit_desc: 'Profitto medio nel corso della vita dell\'attività',
-        valuation: 'Valutazione', valuation_desc: 'Valore di vendita attuale dell\'attività',
+        profit_per_s: 'Profitto/s',
+        profit_per_s_desc: 'Ricavi meno costi al secondo',
+        avg_profit: 'Profitto Medio',
+        avg_profit_desc: "Profitto medio nel corso della vita dell'attività",
+        valuation: 'Valutazione',
+        valuation_desc: "Valore di vendita attuale dell'attività"
       },
       controls: {
         title: 'Controlli e Azioni',
-        employees: 'Dipendenti', employees_desc: 'Assumi dipendenti per aumentare la capacità produttiva',
-        price: 'Prezzo', price_desc: 'Imposta il prezzo del prodotto — influenza domanda e ricavi',
-        marketing: 'Marketing', marketing_desc: 'Investi in marketing per attrarre più clienti',
-        quality_upgrade: 'Migliora Qualità', quality_upgrade_desc: 'Migliora la qualità del prodotto per un aumento permanente della domanda',
-        rename: 'Rinomina', rename_desc: 'Doppio clic sul nome dell\'attività per rinominarla',
-        sell: 'Vendi', sell_desc: 'Vendi l\'attività per recuperare la valutazione attuale',
+        employees: 'Dipendenti',
+        employees_desc: 'Assumi dipendenti per aumentare la capacità produttiva',
+        price: 'Prezzo',
+        price_desc: 'Imposta il prezzo del prodotto — influenza domanda e ricavi',
+        marketing: 'Marketing',
+        marketing_desc: 'Investi in marketing per attrarre più clienti',
+        quality_upgrade: 'Migliora Qualità',
+        quality_upgrade_desc:
+          'Migliora la qualità del prodotto per un aumento permanente della domanda',
+        rename: 'Rinomina',
+        rename_desc: "Doppio clic sul nome dell'attività per rinominarla",
+        sell: 'Vendi',
+        sell_desc: "Vendi l'attività per recuperare la valutazione attuale"
       },
       scaling: {
         title: 'Scaling Infinito',
-        levels: 'Livelli', levels_desc: 'Ogni livello aumenta la produzione (×livello^1.05) a costo esponenziale (×1.15^livello)',
-        branches: 'Filiali', branches_desc: 'Apri filiali per sbloccare livelli geografici con moltiplicatori ricavi (fino a ×12 interplanetario)',
-        upgrades: 'Potenziamenti', upgrades_desc: 'Potenziamenti per attività con scaling log₂ — ricavi, riduzione costi, produzione, qualità, dipendenti',
-        synergies: 'Sinergie', synergies_desc: 'Più attività della stessa categoria concedono moltiplicatori sinergia',
-        corporation: 'Corporazione', corporation_desc: 'A livello 50 + 25 filiali, diventa una Mega-Corporation per bonus di dominanza',
-        milestones: 'Traguardi', milestones_desc: 'Bonus automatici ogni 25 livelli, 10 filiali, o 50 livelli potenziamento',
+        levels: 'Livelli',
+        levels_desc:
+          'Ogni livello aumenta la produzione (×livello^1.05) a costo esponenziale (×1.15^livello)',
+        branches: 'Filiali',
+        branches_desc:
+          'Apri filiali per sbloccare livelli geografici con moltiplicatori ricavi (fino a ×12 interplanetario)',
+        upgrades: 'Potenziamenti',
+        upgrades_desc:
+          'Potenziamenti per attività con scaling log₂ — ricavi, riduzione costi, produzione, qualità, dipendenti',
+        synergies: 'Sinergie',
+        synergies_desc: 'Più attività della stessa categoria concedono moltiplicatori sinergia',
+        corporation: 'Corporazione',
+        corporation_desc:
+          'A livello 50 + 25 filiali, diventa una Mega-Corporation per bonus di dominanza',
+        milestones: 'Traguardi',
+        milestones_desc: 'Bonus automatici ogni 25 livelli, 10 filiali, o 50 livelli potenziamento'
       },
       details: {
         title: 'Pannello Dettagli',
-        base_customers: 'Clienti Base', base_customers_desc: 'Ogni tipo di attività ha un numero prefissato di clienti base',
-        price_factor: 'Fattore Prezzo', price_factor_desc: 'Mostra come il tuo prezzo si confronta con il prezzo ottimale',
-        quality_marketing: 'Qualità e Marketing', quality_marketing_desc: 'Qualità e marketing forniscono ciascuno moltiplicatori alla domanda',
-        elasticity: 'Elasticità', elasticity_desc: 'Un\'elasticità maggiore significa che la domanda è più sensibile al prezzo',
-        final_demand: 'Domanda Finale', final_demand_desc: 'Il conteggio clienti risultante dopo tutti i fattori',
-        cost_breakdown: 'Dettaglio Costi', cost_breakdown_desc: 'Mostra stipendi, affitto, forniture e costi marketing per tick',
-        total_revenue_costs_profit: 'Ricavi / Costi / Profitto Totali', total_revenue_costs_profit_desc: 'Totali dalla vita dell\'attività dall\'acquisto',
-        ticks_owned: 'Tick Posseduti', ticks_owned_desc: 'Da quanto tempo possiedi questa attività',
-      },
-    },
+        base_customers: 'Clienti Base',
+        base_customers_desc: 'Ogni tipo di attività ha un numero prefissato di clienti base',
+        price_factor: 'Fattore Prezzo',
+        price_factor_desc: 'Mostra come il tuo prezzo si confronta con il prezzo ottimale',
+        quality_marketing: 'Qualità e Marketing',
+        quality_marketing_desc:
+          'Qualità e marketing forniscono ciascuno moltiplicatori alla domanda',
+        elasticity: 'Elasticità',
+        elasticity_desc:
+          "Un'elasticità maggiore significa che la domanda è più sensibile al prezzo",
+        final_demand: 'Domanda Finale',
+        final_demand_desc: 'Il conteggio clienti risultante dopo tutti i fattori',
+        cost_breakdown: 'Dettaglio Costi',
+        cost_breakdown_desc: 'Mostra stipendi, affitto, forniture e costi marketing per tick',
+        total_revenue_costs_profit: 'Ricavi / Costi / Profitto Totali',
+        total_revenue_costs_profit_desc: "Totali dalla vita dell'attività dall'acquisto",
+        ticks_owned: 'Tick Posseduti',
+        ticks_owned_desc: 'Da quanto tempo possiedi questa attività'
+      }
+    }
   },
 
   // ─── Borsa ────────────────────────────────────────────────────
@@ -558,69 +615,88 @@ export default {
     atl: 'ATL',
     data_points: 'Punti Dati',
     info_title: 'Come Funziona la Borsa',
-    info_desc: 'Compra e vendi azioni di 8 società quotate. I prezzi si muovono ogni tick tramite il Moto Browniano Geometrico — drift realistico, volatilità e shock casuali. Le azioni pagano anche dividendi in base al rendimento annuale. Fissa qualsiasi azione per concentrarti sul grafico dettagliato.',
+    info_desc:
+      'Compra e vendi azioni di 8 società quotate. I prezzi si muovono ogni tick tramite il Moto Browniano Geometrico — drift realistico, volatilità e shock casuali. Le azioni pagano anche dividendi in base al rendimento annuale. Fissa qualsiasi azione per concentrarti sul grafico dettagliato.',
     info: {
       trading: {
         title: 'Trading',
         buy: 'Comprare Azioni',
-        buy_desc: 'Seleziona una quantità e clicca Compra per acquistare azioni al prezzo di mercato corrente. Il costo totale (prezzo × azioni) viene detratto dal tuo cash.',
+        buy_desc:
+          'Seleziona una quantità e clicca Compra per acquistare azioni al prezzo di mercato corrente. Il costo totale (prezzo × azioni) viene detratto dal tuo cash.',
         sell: 'Vendere Azioni',
-        sell_desc: 'Vendi parte o tutta la tua posizione. Ricavo = prezzo × azioni × moltiplicatore stock_returns. Il profitto realizzato è tracciato separatamente.',
+        sell_desc:
+          'Vendi parte o tutta la tua posizione. Ricavo = prezzo × azioni × moltiplicatore stock_returns. Il profitto realizzato è tracciato separatamente.',
         xp: 'Ricompense XP',
-        xp_desc: 'Vendere in profitto dà 10 XP; vendere in perdita dà comunque 3 XP.',
+        xp_desc: 'Vendere in profitto dà 10 XP; vendere in perdita dà comunque 3 XP.'
       },
       portfolio: {
         title: 'Portafoglio',
         positions: 'Posizioni',
-        positions_desc: 'Ogni azione posseduta è una posizione. Traccia azioni detenute, prezzo medio di acquisto (ponderato), totale investito e P/L realizzato.',
+        positions_desc:
+          'Ogni azione posseduta è una posizione. Traccia azioni detenute, prezzo medio di acquisto (ponderato), totale investito e P/L realizzato.',
         unrealized: 'P/L Non Realizzato',
-        unrealized_desc: 'Il profitto o la perdita sulla carta di tutte le posizioni aperte: (prezzo corrente × azioni) − totale investito.',
+        unrealized_desc:
+          'Il profitto o la perdita sulla carta di tutte le posizioni aperte: (prezzo corrente × azioni) − totale investito.',
         realized: 'P/L Realizzato',
-        realized_desc: 'Profitto o perdita effettivi bloccati dalla vendita di azioni. Include il moltiplicatore stock_returns dell\'albero abilità applicato al ricavo.',
+        realized_desc:
+          "Profitto o perdita effettivi bloccati dalla vendita di azioni. Include il moltiplicatore stock_returns dell'albero abilità applicato al ricavo."
       },
       charts: {
         title: 'Grafici e Pin',
-        pin: 'Fissa un\'Azione',
-        pin_desc: 'Clicca l\'icona pin su qualsiasi carta per metterla in evidenza. L\'azione fissata ottiene un grafico grande con zoom, panoramica e controlli temporali, più un pannello di trading dedicato.',
+        pin: "Fissa un'Azione",
+        pin_desc:
+          "Clicca l'icona pin su qualsiasi carta per metterla in evidenza. L'azione fissata ottiene un grafico grande con zoom, panoramica e controlli temporali, più un pannello di trading dedicato.",
         ath_atl: 'ATH / ATL',
-        ath_atl_desc: 'I prezzi massimi e minimi storici sono tracciati per ogni asset e mostrati nella vista fissata.',
+        ath_atl_desc:
+          'I prezzi massimi e minimi storici sono tracciati per ogni asset e mostrati nella vista fissata.',
         toggle: 'Mostra/Nascondi Grafici',
-        toggle_desc: 'Usa il pulsante nell\'intestazione per attivare/disattivare i mini-grafici sulle carte non fissate per una griglia più pulita.',
+        toggle_desc:
+          "Usa il pulsante nell'intestazione per attivare/disattivare i mini-grafici sulle carte non fissate per una griglia più pulita."
       },
       price_model: {
         title: 'Simulazione Prezzi',
         gbm: 'Moto Browniano Geometrico',
-        gbm_desc: 'Ogni tick, prezzo = vecchio prezzo × e^((drift − ½ vol²) × dt + vol × √dt × Z), dove Z è una normale standard casuale. dt = 1/30240 (252 giorni di trading × 120 tick/giorno).',
+        gbm_desc:
+          'Ogni tick, prezzo = vecchio prezzo × e^((drift − ½ vol²) × dt + vol × √dt × Z), dove Z è una normale standard casuale. dt = 1/30240 (252 giorni di trading × 120 tick/giorno).',
         drift: 'Drift',
-        drift_desc: 'Il rendimento annuale atteso del titolo (es. 0.08 = 8% annuo). Modificato dalle condizioni di mercato e dagli eventi di settore.',
+        drift_desc:
+          'Il rendimento annuale atteso del titolo (es. 0.08 = 8% annuo). Modificato dalle condizioni di mercato e dagli eventi di settore.',
         volatility: 'Volatilità',
-        volatility_desc: 'Deviazione standard annuale dei rendimenti. Una volatilità più alta significa oscillazioni di prezzo più ampie ad ogni tick.',
+        volatility_desc:
+          'Deviazione standard annuale dei rendimenti. Una volatilità più alta significa oscillazioni di prezzo più ampie ad ogni tick.'
       },
       conditions: {
         title: 'Condizioni di Mercato',
         normal: 'Normale',
-        normal_desc: 'Nessun modificatore di drift o volatilità. Comportamento dei prezzi standard.',
+        normal_desc:
+          'Nessun modificatore di drift o volatilità. Comportamento dei prezzi standard.',
         bull: 'Mercato Toro',
         bull_desc: 'Drift +15%, volatilità ×0.8. I prezzi tendono a salire più stabilmente.',
         bear: 'Mercato Orso',
-        bear_desc: 'Drift −12%, volatilità ×1.2. I prezzi tendono a scendere con maggiore incertezza.',
+        bear_desc:
+          'Drift −12%, volatilità ×1.2. I prezzi tendono a scendere con maggiore incertezza.',
         crash: 'Crollo di Mercato',
         crash_desc: 'Drift −50%, volatilità ×2.5. Cali severi dei prezzi con oscillazioni estreme.',
         bubble: 'Bolla',
-        bubble_desc: 'Drift +40%, volatilità ×1.8. Rapidi aumenti dei prezzi ma con alta instabilità.',
+        bubble_desc:
+          'Drift +40%, volatilità ×1.8. Rapidi aumenti dei prezzi ma con alta instabilità.'
       },
       dividends: {
         title: 'Dividendi',
         yield: 'Rendimento Dividendo',
-        yield_desc: 'Ogni azione ha un rendimento annuale da dividendo (0%–3,8%). I titoli growth (es. GAMEV) non pagano nulla; i titoli value (es. FINBK) pagano di più.',
+        yield_desc:
+          'Ogni azione ha un rendimento annuale da dividendo (0%–3,8%). I titoli growth (es. GAMEV) non pagano nulla; i titoli value (es. FINBK) pagano di più.',
         payout: 'Frequenza Pagamento',
-        payout_desc: 'I dividendi maturano ogni 10 secondi in base a: prezzo × azioni × rendimento annuale × tick trascorsi ÷ 30.240 tick/anno.',
+        payout_desc:
+          'I dividendi maturano ogni 10 secondi in base a: prezzo × azioni × rendimento annuale × tick trascorsi ÷ 30.240 tick/anno.',
         multiplier: 'Moltiplicatore Abilità',
-        multiplier_desc: 'L\'abilità stock_returns dall\'Albero Abilità moltiplica anche i pagamenti dei dividendi, non solo il ricavo di vendita.',
+        multiplier_desc:
+          "L'abilità stock_returns dall'Albero Abilità moltiplica anche i pagamenti dei dividendi, non solo il ricavo di vendita.",
         total: 'Totale Guadagnato',
-        total_desc: 'I guadagni totali da dividendi sono mostrati nella barra delle statistiche e si azzerano al prestigio.',
-      },
-    },
+        total_desc:
+          'I guadagni totali da dividendi sono mostrati nella barra delle statistiche e si azzerano al prestigio.'
+      }
+    }
   },
 
   // ─── Crypto ───────────────────────────────────────────────────
@@ -629,58 +705,74 @@ export default {
     subtitle: 'Scambia criptovalute ad alto rischio e alto rendimento',
     hide_charts: 'Nascondi Grafici',
     show_charts: 'Mostra Grafici',
-    volatility_warning: 'I mercati crypto sono molto volatili. I prezzi possono oscillare del ±30% al giorno!',
+    volatility_warning:
+      'I mercati crypto sono molto volatili. I prezzi possono oscillare del ±30% al giorno!',
     unpin: 'Rimuovi pin',
     ath: 'ATH',
     atl: 'ATL',
     data_points: 'Punti Dati',
     info_title: 'Come Funziona il Crypto',
-    info_desc: 'Scambia 8 criptovalute con volatilità molto più alta delle azioni. I prezzi usano lo stesso modello GBM ma con drift più selvaggio e oscillazioni casuali più ampie. Nessun dividendo — tutti i rendimenti provengono dall\'apprezzamento del prezzo. Fissa qualsiasi token per un grafico dettagliato.',
+    info_desc:
+      "Scambia 8 criptovalute con volatilità molto più alta delle azioni. I prezzi usano lo stesso modello GBM ma con drift più selvaggio e oscillazioni casuali più ampie. Nessun dividendo — tutti i rendimenti provengono dall'apprezzamento del prezzo. Fissa qualsiasi token per un grafico dettagliato.",
     info: {
       trading: {
         title: 'Trading',
         buy: 'Comprare Crypto',
-        buy_desc: 'Scegli un importo in contanti e acquista criptovaluta frazionata al prezzo di mercato corrente. Il costo totale viene detratto dal tuo saldo.',
+        buy_desc:
+          'Scegli un importo in contanti e acquista criptovaluta frazionata al prezzo di mercato corrente. Il costo totale viene detratto dal tuo saldo.',
         sell: 'Vendere Crypto',
-        sell_desc: 'Vendi parte o tutto il tuo holding. Ricavo = prezzo × quantità × moltiplicatore crypto_returns. Il profitto realizzato è tracciato separatamente.',
+        sell_desc:
+          'Vendi parte o tutto il tuo holding. Ricavo = prezzo × quantità × moltiplicatore crypto_returns. Il profitto realizzato è tracciato separatamente.',
         xp: 'Ricompense XP',
-        xp_desc: 'L\'acquisto di qualsiasi crypto dà 5 XP. Vendere in profitto dà 15 XP; vendere in perdita dà comunque 3 XP.',
+        xp_desc:
+          "L'acquisto di qualsiasi crypto dà 5 XP. Vendere in profitto dà 15 XP; vendere in perdita dà comunque 3 XP."
       },
       wallet: {
         title: 'Portafoglio',
         holdings: 'Holdings',
-        holdings_desc: 'Ogni crypto posseduta è un holding nel portafoglio. Traccia quantità detenuta, prezzo medio di acquisto (ponderato), totale investito e P/L realizzato.',
+        holdings_desc:
+          'Ogni crypto posseduta è un holding nel portafoglio. Traccia quantità detenuta, prezzo medio di acquisto (ponderato), totale investito e P/L realizzato.',
         value: 'Valore Portafoglio',
-        value_desc: 'La somma di (prezzo corrente × quantità) per tutti i tuoi holdings, mostrato nella barra delle statistiche.',
+        value_desc:
+          'La somma di (prezzo corrente × quantità) per tutti i tuoi holdings, mostrato nella barra delle statistiche.',
         profit: 'P/L Non Realizzato',
-        profit_desc: 'Profitto o perdita sulla carta di tutti gli holdings aperti: (prezzo corrente × quantità) − totale investito.',
+        profit_desc:
+          'Profitto o perdita sulla carta di tutti gli holdings aperti: (prezzo corrente × quantità) − totale investito.'
       },
       volatility: {
         title: 'Volatilità e Rischio',
         warning: 'Alta Volatilità',
-        warning_desc: 'Gli asset crypto hanno parametri di volatilità molto più alti delle azioni. I prezzi possono oscillare del ±30% in un singolo giorno.',
+        warning_desc:
+          'Gli asset crypto hanno parametri di volatilità molto più alti delle azioni. I prezzi possono oscillare del ±30% in un singolo giorno.',
         no_dividends: 'Staking Rewards',
-        no_dividends_desc: 'Le criptovalute con Proof-of-Stake (ETH, SOL, AVAX, LINK) pagano ricompense staking passivamente. I meme token (DOGE, PEPE, SHIB) non offrono staking.',
+        no_dividends_desc:
+          'Le criptovalute con Proof-of-Stake (ETH, SOL, AVAX, LINK) pagano ricompense staking passivamente. I meme token (DOGE, PEPE, SHIB) non offrono staking.',
         separate_sim: 'Simulazione Separata',
-        separate_sim_desc: 'Il crypto usa la propria istanza di MarketSimulator — le condizioni di mercato possono influenzare il crypto diversamente dalle azioni.',
+        separate_sim_desc:
+          'Il crypto usa la propria istanza di MarketSimulator — le condizioni di mercato possono influenzare il crypto diversamente dalle azioni.'
       },
       charts: {
         title: 'Grafici e Pin',
         pin: 'Fissa un Token',
-        pin_desc: 'Clicca l\'icona pin su qualsiasi carta per metterla in evidenza. Il token fissato ottiene un grafico grande con zoom, panoramica e controlli temporali, più un pannello di trading dedicato.',
+        pin_desc:
+          "Clicca l'icona pin su qualsiasi carta per metterla in evidenza. Il token fissato ottiene un grafico grande con zoom, panoramica e controlli temporali, più un pannello di trading dedicato.",
         ath_atl: 'ATH / ATL',
-        ath_atl_desc: 'I prezzi massimi e minimi storici sono tracciati per ogni crypto e mostrati nella vista fissata.',
+        ath_atl_desc:
+          'I prezzi massimi e minimi storici sono tracciati per ogni crypto e mostrati nella vista fissata.',
         toggle: 'Mostra/Nascondi Grafici',
-        toggle_desc: 'Usa il pulsante nell\'intestazione per attivare/disattivare i mini-grafici sulle carte non fissate per una griglia più pulita.',
+        toggle_desc:
+          "Usa il pulsante nell'intestazione per attivare/disattivare i mini-grafici sulle carte non fissate per una griglia più pulita."
       },
       multipliers: {
         title: 'Moltiplicatori',
         crypto_returns: 'Abilità Crypto Returns',
-        crypto_returns_desc: 'L\'abilità crypto_returns dall\'Albero Abilità moltiplica il tuo ricavo di vendita, rendendo ogni vendita più redditizia.',
+        crypto_returns_desc:
+          "L'abilità crypto_returns dall'Albero Abilità moltiplica il tuo ricavo di vendita, rendendo ogni vendita più redditizia.",
         prestige: 'Bonus Prestigio',
-        prestige_desc: 'Gli upgrade e i perk del prestigio possono potenziare i rendimenti crypto come ulteriore livello di moltiplicatori.',
-      },
-    },
+        prestige_desc:
+          'Gli upgrade e i perk del prestigio possono potenziare i rendimenti crypto come ulteriore livello di moltiplicatori.'
+      }
+    }
   },
 
   // ─── Immobili ─────────────────────────────────────────────────
@@ -691,7 +783,7 @@ export default {
     portfolio_value: 'Valore Portafoglio',
     properties: 'Proprietà',
     your_properties: 'Le Tue Proprietà',
-    available_purchase: 'Disponibili per l\'Acquisto',
+    available_purchase: "Disponibili per l'Acquisto",
     base_rent: 'Affitto Base',
     maintenance: 'Manutenzione',
     tax_rate: 'Aliquota Fiscale',
@@ -734,9 +826,11 @@ export default {
     rent: 'Affitto',
     no_properties_desc: 'Aumenta il tuo patrimonio per sbloccare opportunità immobiliari.',
     no_owned: 'Nessuna Proprietà Posseduta',
-    no_owned_desc: 'Compra proprietà dalla scheda mercato per iniziare a costruire il tuo portafoglio.',
+    no_owned_desc:
+      'Compra proprietà dalla scheda mercato per iniziare a costruire il tuo portafoglio.',
     info_title: 'Come Funzionano gli Immobili',
-    info_desc: 'Gli immobili generano reddito passivo dagli affitti dei locatari. Ogni proprietà ha un numero di unità che possono essere occupate. Il tuo reddito netto al secondo è l\'affitto lordo meno manutenzione, tasse sulla proprietà e assicurazione. L\'occupazione dipende dalle condizioni, dal prezzo dell\'affitto, dall\'economia e dal livello di ristrutturazione — se alzi troppo l\'affitto, meno locatari resteranno. Le proprietà si degradano nel tempo (usura), e puoi ripararle in qualsiasi momento per ripristinare le condizioni. Le ristrutturazioni aumentano permanentemente l\'affitto (+12% per livello) e il valore della proprietà (+5% per livello). Il prezzo di vendita dipende dalle condizioni attuali (50–100% del valore di mercato). Il valore di mercato fluttua con l\'economia, ma non scende mai sotto il 30% del prezzo d\'acquisto. Nuove proprietà si sbloccano man mano che il tuo patrimonio cresce.',
+    info_desc:
+      "Gli immobili generano reddito passivo dagli affitti dei locatari. Ogni proprietà ha un numero di unità che possono essere occupate. Il tuo reddito netto al secondo è l'affitto lordo meno manutenzione, tasse sulla proprietà e assicurazione. L'occupazione dipende dalle condizioni, dal prezzo dell'affitto, dall'economia e dal livello di ristrutturazione — se alzi troppo l'affitto, meno locatari resteranno. Le proprietà si degradano nel tempo (usura), e puoi ripararle in qualsiasi momento per ripristinare le condizioni. Le ristrutturazioni aumentano permanentemente l'affitto (+12% per livello) e il valore della proprietà (+5% per livello). Il prezzo di vendita dipende dalle condizioni attuali (50–100% del valore di mercato). Il valore di mercato fluttua con l'economia, ma non scende mai sotto il 30% del prezzo d'acquisto. Nuove proprietà si sbloccano man mano che il tuo patrimonio cresce.",
 
     // Chiavi dettagli espandibili
     financials: 'Finanze',
@@ -780,7 +874,8 @@ export default {
     opportunities: 'Opportunità',
     no_opportunities: 'Nessuna opportunità disponibile al momento.',
     scan_hint: 'Prova a esplorare il mercato per trovare affari premium nascosti.',
-    buy_hint: 'Esplora le opportunità o perlustra il mercato per trovare la tua prossima proprietà.',
+    buy_hint:
+      'Esplora le opportunità o perlustra il mercato per trovare la tua prossima proprietà.',
     improvement_shop: 'Negozio Migliorie',
     slots_remaining: '{count} slot rimanenti',
     improvements_full: 'Tutti gli slot migliorie sono occupati.',
@@ -793,14 +888,14 @@ export default {
     tab: {
       map: 'Mappa Città',
       opportunities: 'Opportunità',
-      portfolio: 'Portafoglio',
+      portfolio: 'Portafoglio'
     },
 
     // Legenda mappa
     map: {
       opportunity: 'Opportunità',
       hot_deal: 'Affare Imperdibile',
-      owned: 'Di proprietà',
+      owned: 'Di proprietà'
     },
 
     // Opportunità
@@ -814,7 +909,7 @@ export default {
       scout: 'Perlustrazione',
       locate: 'Mostra sulla Mappa',
       neighborhood: 'Vicinato',
-      structural: 'Struttura',
+      structural: 'Struttura'
     },
 
     // Gradi Posizione
@@ -823,7 +918,7 @@ export default {
       a: 'A — Premium',
       b: 'B — Standard',
       c: 'C — Economico',
-      d: 'D — Popolare',
+      d: 'D — Popolare'
     },
 
     // Bonus portafoglio
@@ -838,31 +933,38 @@ export default {
       rent_tick: 'Affitto/tick',
       portfolio_value: 'Valore Portafoglio',
       opportunities: 'Opportunità',
-      hot_deals: 'Affari Imperdibili',
+      hot_deals: 'Affari Imperdibili'
     },
 
     // Migliorie
     improvements: {
       security_system: 'Sistema di Sicurezza',
-      security_system_desc: 'Sistema di sorveglianza e allarme avanzato per proteggere gli inquilini e ridurre l\'usura.',
+      security_system_desc:
+        "Sistema di sorveglianza e allarme avanzato per proteggere gli inquilini e ridurre l'usura.",
       parking_garage: 'Garage Parcheggio',
-      parking_garage_desc: 'Parcheggio coperto dedicato per gli inquilini, aumenta occupazione e valore.',
+      parking_garage_desc:
+        'Parcheggio coperto dedicato per gli inquilini, aumenta occupazione e valore.',
       fitness_center: 'Centro Fitness',
-      fitness_center_desc: 'Palestra e area benessere interna che attira inquilini attenti alla salute.',
+      fitness_center_desc:
+        'Palestra e area benessere interna che attira inquilini attenti alla salute.',
       concierge: 'Servizio Concierge',
-      concierge_desc: 'Team di concierge professionale che offre un\'esperienza premium agli inquilini.',
+      concierge_desc:
+        "Team di concierge professionale che offre un'esperienza premium agli inquilini.",
       smart_systems: 'Sistemi Intelligenti',
-      smart_systems_desc: 'Automazione IoT dell\'edificio per efficienza energetica e comodità degli inquilini.',
+      smart_systems_desc:
+        "Automazione IoT dell'edificio per efficienza energetica e comodità degli inquilini.",
       solar_panels: 'Pannelli Solari',
-      solar_panels_desc: 'Installazione solare sul tetto che riduce i costi energetici e aumenta il valore.',
+      solar_panels_desc:
+        'Installazione solare sul tetto che riduce i costi energetici e aumenta il valore.',
       rooftop_garden: 'Giardino sul Tetto',
       rooftop_garden_desc: 'Spazio paesaggistico sul tetto per svago e eventi degli inquilini.',
       lobby_renovation: 'Rinnovo Hall',
-      lobby_renovation_desc: 'Rifacimento completo della hall con design moderno e finiture premium.',
+      lobby_renovation_desc:
+        'Rifacimento completo della hall con design moderno e finiture premium.',
       ev_charging: 'Ricarica Veicoli Elettrici',
       ev_charging_desc: 'Stazioni di ricarica per veicoli elettrici per inquilini eco-consapevoli.',
       coworking_space: 'Spazio Coworking',
-      coworking_space_desc: 'Area di lavoro condivisa che attira freelancer e lavoratori da remoto.',
+      coworking_space_desc: 'Area di lavoro condivisa che attira freelancer e lavoratori da remoto.'
     },
 
     // Tratti
@@ -876,7 +978,8 @@ export default {
       energy_efficient: 'Efficienza Energetica',
       energy_efficient_desc: 'Edificio green con pannelli solari e isolamento efficiente.',
       historic_charm: 'Fascino Storico',
-      historic_charm_desc: 'Edificio storico con dettagli d\'epoca che giustificano affitti più alti.',
+      historic_charm_desc:
+        "Edificio storico con dettagli d'epoca che giustificano affitti più alti.",
       transit_hub: 'Nodo Trasporti',
       transit_hub_desc: 'A pochi passi dalle principali linee di trasporto pubblico.',
       rooftop_terrace: 'Terrazza sul Tetto',
@@ -884,7 +987,7 @@ export default {
       smart_home: 'Casa Intelligente',
       smart_home_desc: 'Edificio completamente automatizzato con integrazione IoT.',
       needs_renovation: 'Da Ristrutturare',
-      needs_renovation_desc: 'Richiede lavori significativi — un\'opportunità da fixer-upper.',
+      needs_renovation_desc: "Richiede lavori significativi — un'opportunità da fixer-upper.",
       noisy_area: 'Zona Rumorosa',
       noisy_area_desc: 'Situata vicino a una strada trafficata o zona movida.',
       flood_zone: 'Zona Alluvionale',
@@ -892,7 +995,7 @@ export default {
       old_wiring: 'Impianto Vecchio',
       old_wiring_desc: 'Infrastruttura elettrica obsoleta che necessita aggiornamento.',
       limited_parking: 'Parcheggio Limitato',
-      limited_parking_desc: 'Carenza di posti auto, meno attraente per inquilini con auto.',
+      limited_parking_desc: 'Carenza di posti auto, meno attraente per inquilini con auto.'
     },
 
     // Stili di gestione
@@ -904,115 +1007,207 @@ export default {
       premium: 'Premium',
       premium_desc: 'Spese maggiori ma inquilini migliori e usura più lenta.',
       luxury: 'Lusso',
-      luxury_desc: 'Gestione di alto livello con massimo potenziale di affitto.',
+      luxury_desc: 'Gestione di alto livello con massimo potenziale di affitto.'
     },
 
     // Personalizzazione
     custom: {
       traits: 'Tratti della Proprietà',
-      management: 'Stile di Gestione',
+      management: 'Stile di Gestione'
     },
 
     tip: {
       base_rent: 'Affitto iniziale per tick al 100% di occupazione, prima dei bonus.',
       units: 'Numero di unità affittabili. Più unità = più inquilini.',
-      roi: 'Tempo stimato per recuperare il prezzo d\'acquisto dall\'affitto netto.',
-      true_value: 'Valore di mercato stimato in base all\'economia e alle condizioni.',
+      roi: "Tempo stimato per recuperare il prezzo d'acquisto dall'affitto netto.",
+      true_value: "Valore di mercato stimato in base all'economia e alle condizioni.",
       net_rent: 'Affitto al netto di manutenzione, tasse e assicurazione.',
-      value_change: 'Variazione percentuale del valore dall\'acquisto.',
-      portfolio_bonus: 'Possedere più proprietà della stessa categoria dà un bonus all\'affitto.',
-      condition: 'Stato fisico dell\'edificio. Condizione bassa = meno inquilini e costi maggiori.',
-      occupancy: 'Percentuale di unità attualmente affittate. Dipende da condizione, prezzo e economia.',
+      value_change: "Variazione percentuale del valore dall'acquisto.",
+      portfolio_bonus: "Possedere più proprietà della stessa categoria dà un bonus all'affitto.",
+      condition: "Stato fisico dell'edificio. Condizione bassa = meno inquilini e costi maggiori.",
+      occupancy:
+        'Percentuale di unità attualmente affittate. Dipende da condizione, prezzo e economia.'
     },
 
     info: {
       basics: {
         title: 'Basi Immobiliari',
-        units: 'Unità', units_desc: 'Quante unità affittabili contiene la proprietà. Mostrato come "occupate / totali" nella barra occupazione.',
-        category: 'Categoria', category_desc: 'Il tipo di proprietà (Residenziale, Commerciale, Ricettivo, Lusso). È solo un\'etichetta di riferimento.',
-        base_rent: 'Affitto Base', base_rent_desc: 'Il reddito iniziale per tick con occupazione al 100% prima di bonus o moltiplicatori.',
-        current_value: 'Valore Attuale', current_value_desc: 'Il valore di mercato attuale della proprietà. Può aumentare o diminuire nel tempo in base all\'economia.',
+        units: 'Unità',
+        units_desc:
+          'Quante unità affittabili contiene la proprietà. Mostrato come "occupate / totali" nella barra occupazione.',
+        category: 'Categoria',
+        category_desc:
+          "Il tipo di proprietà (Residenziale, Commerciale, Ricettivo, Lusso). È solo un'etichetta di riferimento.",
+        base_rent: 'Affitto Base',
+        base_rent_desc:
+          'Il reddito iniziale per tick con occupazione al 100% prima di bonus o moltiplicatori.',
+        current_value: 'Valore Attuale',
+        current_value_desc:
+          "Il valore di mercato attuale della proprietà. Può aumentare o diminuire nel tempo in base all'economia."
       },
       condition: {
         title: 'Condizione e Usura',
-        condition: 'Condizione', condition_desc: 'Lo stato fisico della proprietà (0–100%). Parte da 100% e diminuisce lentamente nel tempo. Condizione più bassa significa meno inquilini e costi di manutenzione più alti.',
-        wear_rate: 'Tasso di Usura', wear_rate_desc: 'Quanto velocemente diminuisce la condizione. Ogni proprietà ha un tasso diverso mostrato nel pannello dettagli.',
-        repair: 'Riparazione', repair_desc: 'Quando la condizione scende sotto il 70%, appare il pulsante Ripara. Cliccalo per ripristinare la condizione al 100% con un costo basato sul danno.',
-        low_condition_penalty: 'Condizione Bassa', low_condition_penalty_desc: 'Se la condizione scende molto (sotto 30%), la proprietà inizia a perdere valore più velocemente.',
+        condition: 'Condizione',
+        condition_desc:
+          'Lo stato fisico della proprietà (0–100%). Parte da 100% e diminuisce lentamente nel tempo. Condizione più bassa significa meno inquilini e costi di manutenzione più alti.',
+        wear_rate: 'Tasso di Usura',
+        wear_rate_desc:
+          'Quanto velocemente diminuisce la condizione. Ogni proprietà ha un tasso diverso mostrato nel pannello dettagli.',
+        repair: 'Riparazione',
+        repair_desc:
+          'Quando la condizione scende sotto il 70%, appare il pulsante Ripara. Cliccalo per ripristinare la condizione al 100% con un costo basato sul danno.',
+        low_condition_penalty: 'Condizione Bassa',
+        low_condition_penalty_desc:
+          'Se la condizione scende molto (sotto 30%), la proprietà inizia a perdere valore più velocemente.'
       },
       occupancy: {
         title: 'Occupazione',
-        formula: 'Cosa la influenza', formula_desc: 'L\'occupazione mostra quante unità sono affittate. Dipende da condizione, prezzo affitto, economia e livello di ristrutturazione.',
-        condition_factor: 'Condizione', condition_factor_desc: 'Condizione migliore significa che più inquilini vogliono affittare. Mantieni la proprietà ben curata.',
-        price_factor: 'Prezzo Affitto', price_factor_desc: 'Prezzi più alti riducono l\'occupazione. Prezzi più bassi attirano più inquilini. Trova il giusto equilibrio.',
-        economy_factor: 'Economia', economy_factor_desc: 'Durante l\'espansione economica, la domanda di affitti aumenta. Durante la contrazione, diminuisce.',
-        renovation_bonus: 'Bonus Ristrutturazione', renovation_bonus_desc: 'Ogni livello di ristrutturazione dà un piccolo bonus all\'occupazione, rendendo più facile mantenere le unità occupate.',
+        formula: 'Cosa la influenza',
+        formula_desc:
+          "L'occupazione mostra quante unità sono affittate. Dipende da condizione, prezzo affitto, economia e livello di ristrutturazione.",
+        condition_factor: 'Condizione',
+        condition_factor_desc:
+          'Condizione migliore significa che più inquilini vogliono affittare. Mantieni la proprietà ben curata.',
+        price_factor: 'Prezzo Affitto',
+        price_factor_desc:
+          "Prezzi più alti riducono l'occupazione. Prezzi più bassi attirano più inquilini. Trova il giusto equilibrio.",
+        economy_factor: 'Economia',
+        economy_factor_desc:
+          "Durante l'espansione economica, la domanda di affitti aumenta. Durante la contrazione, diminuisce.",
+        renovation_bonus: 'Bonus Ristrutturazione',
+        renovation_bonus_desc:
+          "Ogni livello di ristrutturazione dà un piccolo bonus all'occupazione, rendendo più facile mantenere le unità occupate."
       },
       financials: {
         title: 'Finanze',
-        gross_rent: 'Lordo/s', gross_rent_desc: 'Totale affitto riscosso al secondo da tutte le unità occupate, prima delle spese.',
-        maintenance: 'Manutenzione', maintenance_desc: 'Costi di mantenimento continui. Più alti quando la condizione è bassa.',
-        property_tax: 'Tassa di Proprietà', property_tax_desc: 'Tassa annuale sul valore della proprietà, detratta continuamente. L\'aliquota varia per proprietà.',
-        insurance: 'Assicurazione', insurance_desc: 'Costo annuale fisso basato sul valore della proprietà.',
-        net_income: 'Netto/s', net_income_desc: 'Il tuo profitto effettivo al secondo dopo tutte le spese. Se negativo, stai perdendo soldi su questa proprietà.',
+        gross_rent: 'Lordo/s',
+        gross_rent_desc:
+          'Totale affitto riscosso al secondo da tutte le unità occupate, prima delle spese.',
+        maintenance: 'Manutenzione',
+        maintenance_desc: 'Costi di mantenimento continui. Più alti quando la condizione è bassa.',
+        property_tax: 'Tassa di Proprietà',
+        property_tax_desc:
+          "Tassa annuale sul valore della proprietà, detratta continuamente. L'aliquota varia per proprietà.",
+        insurance: 'Assicurazione',
+        insurance_desc: 'Costo annuale fisso basato sul valore della proprietà.',
+        net_income: 'Netto/s',
+        net_income_desc:
+          'Il tuo profitto effettivo al secondo dopo tutte le spese. Se negativo, stai perdendo soldi su questa proprietà.'
       },
       controls: {
         title: 'Controlli',
-        rent_multiplier: 'Prezzo Affitto', rent_multiplier_desc: 'Regola l\'affitto da ×0.5 (sconto) a ×3.0 (premium). Affitto più alto = più reddito per inquilino ma meno inquilini.',
-        renovate: 'Ristruttura', renovate_desc: 'Miglioramento permanente che aumenta l\'affitto base (+12%) e il valore della proprietà (+5%). Ogni proprietà ha un livello massimo di ristrutturazione.',
-        renovation_cost: 'Costo Ristrutturazione', renovation_cost_desc: 'Il costo aumenta ad ogni livello di miglioramento. Mostrato sul pulsante Ristruttura.',
-        repair: 'Riparazione', repair_desc: 'Ripristina la condizione al 100%. Appare solo quando la condizione è sotto il 70%. Il costo dipende da quanto riparo è necessario.',
-        sell: 'Vendi', sell_desc: 'Vendi la proprietà per il 90% del suo valore attuale. Una condizione scarsa riduce ulteriormente il prezzo di vendita.',
-        rename: 'Rinomina', rename_desc: 'Doppio clic sul nome della proprietà o tocca l\'icona matita per darle un nome personalizzato.',
+        rent_multiplier: 'Prezzo Affitto',
+        rent_multiplier_desc:
+          "Regola l'affitto da ×0.5 (sconto) a ×3.0 (premium). Affitto più alto = più reddito per inquilino ma meno inquilini.",
+        renovate: 'Ristruttura',
+        renovate_desc:
+          "Miglioramento permanente che aumenta l'affitto base (+12%) e il valore della proprietà (+5%). Ogni proprietà ha un livello massimo di ristrutturazione.",
+        renovation_cost: 'Costo Ristrutturazione',
+        renovation_cost_desc:
+          'Il costo aumenta ad ogni livello di miglioramento. Mostrato sul pulsante Ristruttura.',
+        repair: 'Riparazione',
+        repair_desc:
+          'Ripristina la condizione al 100%. Appare solo quando la condizione è sotto il 70%. Il costo dipende da quanto riparo è necessario.',
+        sell: 'Vendi',
+        sell_desc:
+          'Vendi la proprietà per il 90% del suo valore attuale. Una condizione scarsa riduce ulteriormente il prezzo di vendita.',
+        rename: 'Rinomina',
+        rename_desc:
+          "Doppio clic sul nome della proprietà o tocca l'icona matita per darle un nome personalizzato."
       },
       market_value: {
         title: 'Valore di Mercato',
-        appreciation: 'Variazioni di Valore', appreciation_desc: 'Il valore della proprietà cambia nel tempo in base all\'economia. In tempi buoni, i valori aumentano. In tempi cattivi, possono diminuire.',
-        economy_multiplier: 'Effetto Economia', economy_multiplier_desc: 'In espansione, le proprietà si apprezzano. In contrazione, si deprezzano. Osserva gli indicatori economici.',
-        value_floor: 'Valore Minimo', value_floor_desc: 'Una proprietà non può mai perdere più del 70% del suo prezzo d\'acquisto originale.',
+        appreciation: 'Variazioni di Valore',
+        appreciation_desc:
+          "Il valore della proprietà cambia nel tempo in base all'economia. In tempi buoni, i valori aumentano. In tempi cattivi, possono diminuire.",
+        economy_multiplier: 'Effetto Economia',
+        economy_multiplier_desc:
+          'In espansione, le proprietà si apprezzano. In contrazione, si deprezzano. Osserva gli indicatori economici.',
+        value_floor: 'Valore Minimo',
+        value_floor_desc:
+          "Una proprietà non può mai perdere più del 70% del suo prezzo d'acquisto originale."
       },
       details: {
         title: 'Pannello Dettagli',
-        purchase_price: 'Prezzo d\'Acquisto', purchase_price_desc: 'Il prezzo originale che hai pagato per questa proprietà.',
-        base_stats: 'Statistiche Base', base_stats_desc: 'Mostra affitto base, tasso di usura, aliquota fiscale e manutenzione. L\'affitto base aumenta con ogni ristrutturazione.',
-        lifetime_totals: 'Totali Vita', lifetime_totals_desc: 'Totale affitti riscossi, spese pagate e reddito netto da quando hai comprato questa proprietà.',
+        purchase_price: "Prezzo d'Acquisto",
+        purchase_price_desc: 'Il prezzo originale che hai pagato per questa proprietà.',
+        base_stats: 'Statistiche Base',
+        base_stats_desc:
+          "Mostra affitto base, tasso di usura, aliquota fiscale e manutenzione. L'affitto base aumenta con ogni ristrutturazione.",
+        lifetime_totals: 'Totali Vita',
+        lifetime_totals_desc:
+          'Totale affitti riscossi, spese pagate e reddito netto da quando hai comprato questa proprietà.'
       },
       scouting: {
         title: 'Perlustrazione',
-        how: 'Come Funziona', how_desc: 'Paga per perlustrare il mercato. Ogni perlustrazione rivela nuove proprietà acquistabili.',
-        cost: 'Costo Perlustrazione', cost_desc: 'Il costo aumenta ad ogni perlustrazione. Si riduce lentamente nel tempo con un cooldown.',
-        cooldown: 'Tempo di Attesa', cooldown_desc: 'Dopo la perlustrazione, c\'è un breve periodo di attesa prima di poter perlustrare di nuovo.',
-        reveals: 'Scoperte', reveals_desc: 'Ogni perlustrazione rivela 3 nuove opportunità immobiliari. Le proprietà non viste scompaiono dopo un po\'.',
+        how: 'Come Funziona',
+        how_desc:
+          'Paga per perlustrare il mercato. Ogni perlustrazione rivela nuove proprietà acquistabili.',
+        cost: 'Costo Perlustrazione',
+        cost_desc:
+          'Il costo aumenta ad ogni perlustrazione. Si riduce lentamente nel tempo con un cooldown.',
+        cooldown: 'Tempo di Attesa',
+        cooldown_desc:
+          "Dopo la perlustrazione, c'è un breve periodo di attesa prima di poter perlustrare di nuovo.",
+        reveals: 'Scoperte',
+        reveals_desc:
+          "Ogni perlustrazione rivela 3 nuove opportunità immobiliari. Le proprietà non viste scompaiono dopo un po'."
       },
       improvements_info: {
         title: 'Migliorie',
-        what: 'Cosa Sono', what_desc: 'Miglioramenti permanenti da installare su una proprietà per aumentare l\'affitto, ridurre l\'usura o migliorare l\'occupazione.',
-        slots: 'Slot', slots_desc: 'Ogni proprietà ha un numero limitato di slot per migliorie in base al suo modello.',
-        install: 'Installazione', install_desc: 'Apri il pannello migliorie dalla vista dettaglio della proprietà. Ogni miglioria ha un costo una tantum.',
+        what: 'Cosa Sono',
+        what_desc:
+          "Miglioramenti permanenti da installare su una proprietà per aumentare l'affitto, ridurre l'usura o migliorare l'occupazione.",
+        slots: 'Slot',
+        slots_desc:
+          'Ogni proprietà ha un numero limitato di slot per migliorie in base al suo modello.',
+        install: 'Installazione',
+        install_desc:
+          'Apri il pannello migliorie dalla vista dettaglio della proprietà. Ogni miglioria ha un costo una tantum.'
       },
       traits_info: {
         title: 'Tratti',
-        what: 'Cosa Sono', what_desc: 'Modificatori casuali assegnati quando una proprietà viene generata. Non possono essere cambiati.',
-        positive: 'Tratti Positivi', positive_desc: 'Badge verdi che aumentano l\'affitto, riducono l\'usura o migliorano l\'occupazione.',
-        negative: 'Tratti Negativi', negative_desc: 'Badge rossi che aumentano i costi, accelerano l\'usura o riducono l\'occupazione.',
+        what: 'Cosa Sono',
+        what_desc:
+          'Modificatori casuali assegnati quando una proprietà viene generata. Non possono essere cambiati.',
+        positive: 'Tratti Positivi',
+        positive_desc:
+          "Badge verdi che aumentano l'affitto, riducono l'usura o migliorano l'occupazione.",
+        negative: 'Tratti Negativi',
+        negative_desc:
+          "Badge rossi che aumentano i costi, accelerano l'usura o riducono l'occupazione."
       },
       grades: {
         title: 'Gradi di Posizione',
-        what: 'Cosa Sono', what_desc: 'Ogni proprietà ha un grado di posizione da D (peggiore) a S (migliore). Gradi più alti significano più affitto e apprezzamento più veloce.',
-        effect: 'Effetto sull\'Affitto', effect_desc: 'Grado S dà ×1.50 affitto, Grado A dà ×1.25, Grado B dà ×1.00, Grado C dà ×0.80, Grado D dà ×0.60.',
+        what: 'Cosa Sono',
+        what_desc:
+          'Ogni proprietà ha un grado di posizione da D (peggiore) a S (migliore). Gradi più alti significano più affitto e apprezzamento più veloce.',
+        effect: "Effetto sull'Affitto",
+        effect_desc:
+          'Grado S dà ×1.50 affitto, Grado A dà ×1.25, Grado B dà ×1.00, Grado C dà ×0.80, Grado D dà ×0.60.'
       },
       styles: {
         title: 'Stili di Gestione',
-        what: 'Cosa Sono', what_desc: 'Scegli come gestire ogni proprietà. Lo stile influisce su reddito, velocità di usura e costi di manutenzione.',
-        budget: 'Economico', budget_desc: 'Costi minimi ma usura più rapida e affitti più bassi. Buono per proprietà economiche.',
-        luxury: 'Lusso', luxury_desc: 'Costi massimi ma affitti premium e usura minima. Ideale per proprietà di alto valore.',
+        what: 'Cosa Sono',
+        what_desc:
+          'Scegli come gestire ogni proprietà. Lo stile influisce su reddito, velocità di usura e costi di manutenzione.',
+        budget: 'Economico',
+        budget_desc:
+          'Costi minimi ma usura più rapida e affitti più bassi. Buono per proprietà economiche.',
+        luxury: 'Lusso',
+        luxury_desc:
+          'Costi massimi ma affitti premium e usura minima. Ideale per proprietà di alto valore.'
       },
       portfolio: {
         title: 'Bonus Portafoglio',
-        what: 'Come Funziona', what_desc: 'Possedere più proprietà nella stessa categoria sblocca bonus affitto: +5% a 2, +12% a 5, +25% a 10 proprietà.',
-        categories: 'Categorie', categories_desc: 'Residenziale, Commerciale, Ricettivo e Lusso hanno ciascuno il proprio percorso bonus portafoglio.',
-      },
-    },
+        what: 'Come Funziona',
+        what_desc:
+          'Possedere più proprietà nella stessa categoria sblocca bonus affitto: +5% a 2, +12% a 5, +25% a 10 proprietà.',
+        categories: 'Categorie',
+        categories_desc:
+          'Residenziale, Commerciale, Ricettivo e Lusso hanno ciascuno il proprio percorso bonus portafoglio.'
+      }
+    }
   },
 
   // ─── Investimenti / Startup ───────────────────────────────────
@@ -1064,62 +1259,80 @@ export default {
     min_label: 'Min:',
     invest_amount: 'Investi {amount}',
     info_title: 'Come Funzionano gli Investimenti',
-    info_desc: 'Capitale di rischio ad alto rischio: investi in startup con diverse fasi, settori e tratti. Ricerca per rivelare dati nascosti, poi investi e attendi la maturità. Gli investimenti riusciti pagano un moltiplicatore; quelli falliti perdono tutto.',
+    info_desc:
+      'Capitale di rischio ad alto rischio: investi in startup con diverse fasi, settori e tratti. Ricerca per rivelare dati nascosti, poi investi e attendi la maturità. Gli investimenti riusciti pagano un moltiplicatore; quelli falliti perdono tutto.',
     info: {
       opportunities: {
         title: 'Opportunità',
         refresh: 'Timer Aggiornamento',
-        refresh_desc: '3–6 nuove opportunità appaiono ogni ora (36.000 tick). Ognuna ha settore, fase, range di investimento e moltiplicatore di rendimento.',
+        refresh_desc:
+          '3–6 nuove opportunità appaiono ogni ora (36.000 tick). Ognuna ha settore, fase, range di investimento e moltiplicatore di rendimento.',
         expiry: 'Scadenza',
-        expiry_desc: 'Le opportunità scadono dopo un tempo stabilito. Le Offerte Speciali valgono di più ma scadono prima — controlla il conto alla rovescia.',
+        expiry_desc:
+          'Le opportunità scadono dopo un tempo stabilito. Le Offerte Speciali valgono di più ma scadono prima — controlla il conto alla rovescia.',
         sectors: 'Settori',
-        sectors_desc: 'Ogni startup appartiene a un settore (Tech, Salute, Finanza, ecc.). I bonus settoriali da abilità o eventi possono aumentare le probabilità di successo.',
+        sectors_desc:
+          'Ogni startup appartiene a un settore (Tech, Salute, Finanza, ecc.). I bonus settoriali da abilità o eventi possono aumentare le probabilità di successo.',
         traits: 'Tratti',
-        traits_desc: 'I tratti positivi (es. Team Esperto +12%, Crescita Virale +10%) aumentano successo o rendimento. I tratti negativi (es. Burn Rate −15%) li riducono.',
+        traits_desc:
+          'I tratti positivi (es. Team Esperto +12%, Crescita Virale +10%) aumentano successo o rendimento. I tratti negativi (es. Burn Rate −15%) li riducono.'
       },
       research: {
         title: 'Ricerca',
         quick_scan: 'Scansione Rapida',
-        quick_scan_desc: 'Costa ~8% dell\'investimento minimo. Rivela un range approssimativo di successo (±10%). Dà 20 XP.',
+        quick_scan_desc:
+          "Costa ~8% dell'investimento minimo. Rivela un range approssimativo di successo (±10%). Dà 20 XP.",
         due_diligence: 'Due Diligence',
-        due_diligence_desc: 'Costa ~18% dell\'investimento minimo. Rivela la probabilità esatta e un rating di rischio (1–5). Dà 50 XP.',
+        due_diligence_desc:
+          "Costa ~18% dell'investimento minimo. Rivela la probabilità esatta e un rating di rischio (1–5). Dà 50 XP.",
         deep_analysis: 'Analisi Profonda',
-        deep_analysis_desc: 'Costa ~35% dell\'investimento minimo. Rivela il punteggio fondatore (1–100) e aggiunge +4% probabilità di successo. Dà 120 XP.',
+        deep_analysis_desc:
+          "Costa ~35% dell'investimento minimo. Rivela il punteggio fondatore (1–100) e aggiunge +4% probabilità di successo. Dà 120 XP."
       },
       stages: {
         title: 'Fasi',
         seed: 'Seed',
-        seed_desc: 'Fase iniziale. Range di investimento basso, rischio massimo (×1,5), rendimento massimo (×2,0), maturità più lunga.',
+        seed_desc:
+          'Fase iniziale. Range di investimento basso, rischio massimo (×1,5), rendimento massimo (×2,0), maturità più lunga.',
         series_a: 'Serie A',
-        series_a_desc: 'Fase di crescita. Rischio moderato (×1,2), buon rendimento (×1,5), maturità moderata.',
+        series_a_desc:
+          'Fase di crescita. Rischio moderato (×1,2), buon rendimento (×1,5), maturità moderata.',
         series_b: 'Serie B',
         series_b_desc: 'Fase consolidata. Fattori di rischio e rendimento di base (×1,0).',
         series_c: 'Serie C',
-        series_c_desc: 'Fase avanzata. Rischio inferiore (×0,8), rendimento ridotto (×0,9), maturità più veloce.',
+        series_c_desc:
+          'Fase avanzata. Rischio inferiore (×0,8), rendimento ridotto (×0,9), maturità più veloce.',
         pre_ipo: 'Pre-IPO',
-        pre_ipo_desc: 'Fase finale. Rischio minimo (×0,5), rendimento minimo (×0,6), maturità più rapida. Range di investimento più alto.',
+        pre_ipo_desc:
+          'Fase finale. Rischio minimo (×0,5), rendimento minimo (×0,6), maturità più rapida. Range di investimento più alto.'
       },
       investing: {
         title: 'Investire e Maturità',
         invest: 'Investire',
-        invest_desc: 'Scegli un importo nel range min–max e conferma. Il cash è bloccato fino alla risoluzione dell\'investimento. Dà 20 XP.',
+        invest_desc:
+          "Scegli un importo nel range min–max e conferma. Il cash è bloccato fino alla risoluzione dell'investimento. Dà 20 XP.",
         maturity: 'Maturità',
-        maturity_desc: 'Ogni investimento matura nel tempo (barra di progresso). Al completamento, un lancio casuale contro la probabilità di successo determina l\'esito.',
+        maturity_desc:
+          "Ogni investimento matura nel tempo (barra di progresso). Al completamento, un lancio casuale contro la probabilità di successo determina l'esito.",
         success: 'Successo',
-        success_desc: 'Se il lancio ha successo, puoi riscuotere importo investito × moltiplicatore di rendimento. Dà 100 XP.',
+        success_desc:
+          'Se il lancio ha successo, puoi riscuotere importo investito × moltiplicatore di rendimento. Dà 100 XP.',
         failure: 'Fallimento',
-        failure_desc: 'Se il lancio fallisce, l\'intero importo investito è perso.',
+        failure_desc: "Se il lancio fallisce, l'intero importo investito è perso."
       },
       modifiers: {
         title: 'Modificatori',
         skill_tree: 'Abilità Successo Startup',
-        skill_tree_desc: 'L\'abilità startup_success dall\'Albero Abilità aggiunge un bonus globale a tutte le probabilità di successo.',
+        skill_tree_desc:
+          "L'abilità startup_success dall'Albero Abilità aggiunge un bonus globale a tutte le probabilità di successo.",
         events: 'Eventi di Mercato',
-        events_desc: 'Eventi come Boom Startup o Inverno VC possono spostare le probabilità di successo e i moltiplicatori di rendimento su tutte le opportunità.',
+        events_desc:
+          'Eventi come Boom Startup o Inverno VC possono spostare le probabilità di successo e i moltiplicatori di rendimento su tutte le opportunità.',
         prestige: 'Reset Prestigio',
-        prestige_desc: 'Tutti gli investimenti startup, lo storico e le statistiche vengono azzerati al prestigio.',
-      },
-    },
+        prestige_desc:
+          'Tutti gli investimenti startup, lo storico e le statistiche vengono azzerati al prestigio.'
+      }
+    }
   },
 
   // ─── Prestiti ─────────────────────────────────────────────────
@@ -1148,7 +1361,8 @@ export default {
     on_time: 'Puntuali:',
     late: 'In ritardo:',
     how_it_works: 'Come Funzionano i Prestiti',
-    info_desc: 'I prestiti ti permettono di prendere in prestito contanti ora e ripagarli nel tempo con gli interessi. Il tuo punteggio di credito (0–100) determina a quali prestiti puoi accedere e a quale tasso — un credito migliore significa interessi più bassi. I rimborsi sono manuali: scegli tu quando effettuare un pagamento o saldare per intero. Saltare un pagamento programmato danneggia il tuo credito e comporta penali per ritardo. Ci sono sei categorie di prestito: Personale (piccolo, veloce), Aziendale (più grande, serve buon credito), Mutuo (tasso basso, garantito da immobili), Predatorio (nessun controllo credito, tasso molto alto), Investimento (garantito dal portafoglio) e Speciale (condizioni uniche). Alcuni prestiti richiedono un collaterale basato su asset — come un\'attività, un immobile o un portafoglio — che resta bloccato fino al rimborso. Puoi rifinanziare un prestito esistente per ottenere condizioni migliori se il tuo credito migliora. Costruisci il tuo credito effettuando pagamenti puntuali, mantenendo il debito basso e avendo un mix di tipi di prestito.',
+    info_desc:
+      "I prestiti ti permettono di prendere in prestito contanti ora e ripagarli nel tempo con gli interessi. Il tuo punteggio di credito (0–100) determina a quali prestiti puoi accedere e a quale tasso — un credito migliore significa interessi più bassi. I rimborsi sono manuali: scegli tu quando effettuare un pagamento o saldare per intero. Saltare un pagamento programmato danneggia il tuo credito e comporta penali per ritardo. Ci sono sei categorie di prestito: Personale (piccolo, veloce), Aziendale (più grande, serve buon credito), Mutuo (tasso basso, garantito da immobili), Predatorio (nessun controllo credito, tasso molto alto), Investimento (garantito dal portafoglio) e Speciale (condizioni uniche). Alcuni prestiti richiedono un collaterale basato su asset — come un'attività, un immobile o un portafoglio — che resta bloccato fino al rimborso. Puoi rifinanziare un prestito esistente per ottenere condizioni migliori se il tuo credito migliora. Costruisci il tuo credito effettuando pagamenti puntuali, mantenendo il debito basso e avendo un mix di tipi di prestito.",
     apply_title: 'Richiedi Prestito',
     loan_amount: 'Importo Prestito',
     interest_rate: 'Tasso di Interesse',
@@ -1217,74 +1431,134 @@ export default {
       util_debt: 'Debito',
       util_limit: 'Limite',
       payment_history: 'Storico Pagamenti',
-      payment_history_desc: 'Il fattore più importante (35 pt). Si costruisce pagando i prestiti in tempo. Pagamenti mancati o in ritardo sottraggono punti pesantemente.',
+      payment_history_desc:
+        'Il fattore più importante (35 pt). Si costruisce pagando i prestiti in tempo. Pagamenti mancati o in ritardo sottraggono punti pesantemente.',
       payment_history_tip: 'Paga i prestiti prima della scadenza del periodo di grazia.',
       credit_utilization: 'Rapporto Debito / Limite',
-      credit_utilization_desc: 'Misura quanto del tuo limite massimo di credito è occupato da debito attivo (30 pt). NON riguarda quali soldi stai spendendo — confronta solo il debito totale con il tuo limite di credito. Sotto il 30% = sano.',
-      credit_utilization_tip: 'I tuoi soldi personali non c\'entrano. Questo guarda solo: debito totale ÷ limite credito massimo. Ripaga i prestiti per abbassarlo.',
+      credit_utilization_desc:
+        'Misura quanto del tuo limite massimo di credito è occupato da debito attivo (30 pt). NON riguarda quali soldi stai spendendo — confronta solo il debito totale con il tuo limite di credito. Sotto il 30% = sano.',
+      credit_utilization_tip:
+        "I tuoi soldi personali non c'entrano. Questo guarda solo: debito totale ÷ limite credito massimo. Ripaga i prestiti per abbassarlo.",
       credit_age: 'Età Credito',
-      credit_age_desc: 'La durata della tua storia creditizia (15 pt). I punti crescono nel tempo finché hai prestiti attivi.',
+      credit_age_desc:
+        'La durata della tua storia creditizia (15 pt). I punti crescono nel tempo finché hai prestiti attivi.',
       credit_age_tip: 'Mantieni almeno un prestito attivo per costruire storico.',
       credit_mix: 'Mix Credito',
-      credit_mix_desc: 'Varietà di categorie di prestito utilizzate (10 pt). Avere diversi tipi (personale, aziendale, mutuo) guadagna più punti.',
+      credit_mix_desc:
+        'Varietà di categorie di prestito utilizzate (10 pt). Avere diversi tipi (personale, aziendale, mutuo) guadagna più punti.',
       credit_mix_tip: 'Prova diverse categorie di prestito per un bonus diversità.',
       new_credit: 'Nuovi Crediti',
-      new_credit_desc: 'Impatto delle recenti richieste di prestito (10 pt). Richiedere molti prestiti velocemente riduce temporaneamente questo punteggio.',
-      new_credit_tip: 'Distanzia le nuove richieste di almeno 30 minuti.',
+      new_credit_desc:
+        'Impatto delle recenti richieste di prestito (10 pt). Richiedere molti prestiti velocemente riduce temporaneamente questo punteggio.',
+      new_credit_tip: 'Distanzia le nuove richieste di almeno 30 minuti.'
     },
     info: {
       credit_score: {
         title: 'Punteggio di Credito',
-        range: 'Il Tuo Punteggio', range_desc: 'Va da 0 a 100. Un punteggio più alto sblocca prestiti migliori con tassi di interesse più bassi.',
-        on_time: 'Pagamenti Puntuali', on_time_desc: 'Effettuare i pagamenti in tempo migliora il tuo punteggio di credito.',
-        late_missed: 'Ritardi / Mancati', late_missed_desc: 'Pagamenti in ritardo o mancati danneggiano significativamente il tuo punteggio.',
-        debt_ratio: 'Debito Totale', debt_ratio_desc: 'Avere troppo debito rispetto ai tuoi beni abbassa il punteggio. Ripaga i prestiti per migliorarlo.',
-        loan_history: 'Storico Prestiti', loan_history_desc: 'Rimborsare con successo più prestiti nel tempo costruisce il tuo credito.',
+        range: 'Il Tuo Punteggio',
+        range_desc:
+          'Va da 0 a 100. Un punteggio più alto sblocca prestiti migliori con tassi di interesse più bassi.',
+        on_time: 'Pagamenti Puntuali',
+        on_time_desc: 'Effettuare i pagamenti in tempo migliora il tuo punteggio di credito.',
+        late_missed: 'Ritardi / Mancati',
+        late_missed_desc:
+          'Pagamenti in ritardo o mancati danneggiano significativamente il tuo punteggio.',
+        debt_ratio: 'Debito Totale',
+        debt_ratio_desc:
+          'Avere troppo debito rispetto ai tuoi beni abbassa il punteggio. Ripaga i prestiti per migliorarlo.',
+        loan_history: 'Storico Prestiti',
+        loan_history_desc:
+          'Rimborsare con successo più prestiti nel tempo costruisce il tuo credito.'
       },
       credit_factors: {
         title: 'Fattori del Punteggio',
-        payment_history: 'Storico Pagamenti (35 pt)', payment_history_desc: 'Il fattore più importante. Basato sui tuoi pagamenti puntuali vs ritardati/mancati. Ogni pagamento puntuale aggiunge punti, mentre i mancati li sottraggono pesantemente.',
-        credit_utilization: 'Rapporto Debito / Limite (30 pt)', credit_utilization_desc: 'Confronta il tuo debito totale con il tuo limite massimo di credito. NON traccia quali soldi spendi — solo: debito totale ÷ limite credito. Sotto il 30% è ideale. Saturare la capacità di prestito danneggia questo punteggio.',
-        credit_age: 'Età Credito (15 pt)', credit_age_desc: 'L\'età media dei tuoi conti credito. Una storia creditizia più lunga è meglio. Mantenere vecchi prestiti attivi (anche a €0) aiuta.',
-        credit_mix: 'Mix Credito (10 pt)', credit_mix_desc: 'Avere una varietà di tipi di credito (personale, aziendale, mutuo) dimostra che sai gestire diversi tipi di prestito responsabilmente.',
-        new_credit: 'Nuovi Crediti (10 pt)', new_credit_desc: 'Aprire molti nuovi prestiti rapidamente abbassa temporaneamente il punteggio. Distanzia i nuovi prestiti ed evita di aprirne più contemporaneamente.',
+        payment_history: 'Storico Pagamenti (35 pt)',
+        payment_history_desc:
+          'Il fattore più importante. Basato sui tuoi pagamenti puntuali vs ritardati/mancati. Ogni pagamento puntuale aggiunge punti, mentre i mancati li sottraggono pesantemente.',
+        credit_utilization: 'Rapporto Debito / Limite (30 pt)',
+        credit_utilization_desc:
+          'Confronta il tuo debito totale con il tuo limite massimo di credito. NON traccia quali soldi spendi — solo: debito totale ÷ limite credito. Sotto il 30% è ideale. Saturare la capacità di prestito danneggia questo punteggio.',
+        credit_age: 'Età Credito (15 pt)',
+        credit_age_desc:
+          "L'età media dei tuoi conti credito. Una storia creditizia più lunga è meglio. Mantenere vecchi prestiti attivi (anche a €0) aiuta.",
+        credit_mix: 'Mix Credito (10 pt)',
+        credit_mix_desc:
+          'Avere una varietà di tipi di credito (personale, aziendale, mutuo) dimostra che sai gestire diversi tipi di prestito responsabilmente.',
+        new_credit: 'Nuovi Crediti (10 pt)',
+        new_credit_desc:
+          'Aprire molti nuovi prestiti rapidamente abbassa temporaneamente il punteggio. Distanzia i nuovi prestiti ed evita di aprirne più contemporaneamente.'
       },
       categories: {
         title: 'Tipi di Prestito',
-        personal: 'Personale', personal_desc: 'Piccoli prestiti non garantiti con approvazione rapida e tassi moderati.',
-        business: 'Aziendale', business_desc: 'Prestiti più grandi per imprese. Richiede un buon credito.',
-        mortgage: 'Mutuo', mortgage_desc: 'Garantito da proprietà. Tassi più bassi ma richiede garanzia.',
-        high_risk: 'Alto Rischio', high_risk_desc: 'Nessun controllo creditizio richiesto, ma con tassi di interesse molto alti.',
+        personal: 'Personale',
+        personal_desc: 'Piccoli prestiti non garantiti con approvazione rapida e tassi moderati.',
+        business: 'Aziendale',
+        business_desc: 'Prestiti più grandi per imprese. Richiede un buon credito.',
+        mortgage: 'Mutuo',
+        mortgage_desc: 'Garantito da proprietà. Tassi più bassi ma richiede garanzia.',
+        high_risk: 'Alto Rischio',
+        high_risk_desc:
+          'Nessun controllo creditizio richiesto, ma con tassi di interesse molto alti.'
       },
       interest: {
         title: 'Interessi e Pagamenti',
-        apr: 'TAN', apr_desc: 'Tasso Annuo Nominale mostrato su ogni prestito. È il tasso di interesse annuale.',
-        effective_rate: 'Il Tuo Tasso', effective_rate_desc: 'Il tuo tasso effettivo dipende dal punteggio di credito. Credito migliore = tasso più basso.',
-        payment_schedule: 'Pagamenti', payment_schedule_desc: 'Gli interessi vengono addebitati continuamente. I pagamenti automatici vengono detratti in base alla durata del prestito.',
-        amortisation: 'Come Funzionano', amortisation_desc: 'Ogni pagamento copre prima gli interessi, poi riduce il saldo residuo.',
+        apr: 'TAN',
+        apr_desc:
+          'Tasso Annuo Nominale mostrato su ogni prestito. È il tasso di interesse annuale.',
+        effective_rate: 'Il Tuo Tasso',
+        effective_rate_desc:
+          'Il tuo tasso effettivo dipende dal punteggio di credito. Credito migliore = tasso più basso.',
+        payment_schedule: 'Pagamenti',
+        payment_schedule_desc:
+          'Gli interessi vengono addebitati continuamente. I pagamenti automatici vengono detratti in base alla durata del prestito.',
+        amortisation: 'Come Funzionano',
+        amortisation_desc: 'Ogni pagamento copre prima gli interessi, poi riduce il saldo residuo.'
       },
       collateral: {
         title: 'Garanzia',
-        unsecured: 'Non Garantito', unsecured_desc: 'Nessuna garanzia necessaria. Tassi più alti perché il prestatore assume più rischio.',
-        cash_collateral: 'Garanzia Contanti', cash_collateral_desc: 'Parte dei tuoi contanti viene bloccata fino al rimborso del prestito.',
-        collateral_ratio: 'Importo Garanzia', collateral_ratio_desc: 'Alcuni prestiti richiedono di bloccare più contanti di quanto prendi in prestito come sicurezza.',
-        margin_call: 'Rimborso Forzato', margin_call_desc: 'Se il valore della garanzia scende troppo, potresti dover rimborsare immediatamente.',
+        unsecured: 'Non Garantito',
+        unsecured_desc:
+          'Nessuna garanzia necessaria. Tassi più alti perché il prestatore assume più rischio.',
+        cash_collateral: 'Garanzia Contanti',
+        cash_collateral_desc:
+          'Parte dei tuoi contanti viene bloccata fino al rimborso del prestito.',
+        collateral_ratio: 'Importo Garanzia',
+        collateral_ratio_desc:
+          'Alcuni prestiti richiedono di bloccare più contanti di quanto prendi in prestito come sicurezza.',
+        margin_call: 'Rimborso Forzato',
+        margin_call_desc:
+          'Se il valore della garanzia scende troppo, potresti dover rimborsare immediatamente.'
       },
       defaults: {
         title: 'Insolvenze e Penalità',
-        missed: 'Pagamento Mancato', missed_desc: 'Se non hai abbastanza contanti quando un pagamento è dovuto, conta come mancato.',
-        late_penalty: 'Penalità Ritardo', late_penalty_desc: 'I pagamenti mancati comportano una commissione extra.',
-        default: 'Insolvenza', default_desc: 'Troppi pagamenti mancati causano l\'insolvenza del prestito. Questo danneggia gravemente il credito e perdi qualsiasi garanzia.',
-        max_active: 'Limiti Prestito', max_active_desc: 'Ogni tipo di prestito ha un numero massimo di prestiti attivi contemporanei.',
+        missed: 'Pagamento Mancato',
+        missed_desc:
+          'Se non hai abbastanza contanti quando un pagamento è dovuto, conta come mancato.',
+        late_penalty: 'Penalità Ritardo',
+        late_penalty_desc: 'I pagamenti mancati comportano una commissione extra.',
+        default: 'Insolvenza',
+        default_desc:
+          "Troppi pagamenti mancati causano l'insolvenza del prestito. Questo danneggia gravemente il credito e perdi qualsiasi garanzia.",
+        max_active: 'Limiti Prestito',
+        max_active_desc:
+          'Ogni tipo di prestito ha un numero massimo di prestiti attivi contemporanei.'
       },
       refinancing: {
         title: 'Rifinanziamento',
-        what_is: 'Cos\'è?', what_is_desc: 'Sostituisci il tuo prestito attuale con uno nuovo, idealmente a un tasso di interesse più basso.',
-        eligibility: 'Requisiti', eligibility_desc: 'Devi essere approvato per il nuovo prestito e deve coprire il tuo saldo residuo.',
-        early_fee: 'Penale Rimborso Anticipato', early_fee_desc: 'Alcuni prestiti addebitano una penale per il rimborso anticipato. Questa si applica anche al rifinanziamento.',
-        strategy: 'Consiglio', strategy_desc: 'Migliora prima il tuo punteggio di credito, poi rifinanzia i prestiti ad alto tasso per risparmiare sugli interessi.',
-      },
-    },
+        what_is: "Cos'è?",
+        what_is_desc:
+          'Sostituisci il tuo prestito attuale con uno nuovo, idealmente a un tasso di interesse più basso.',
+        eligibility: 'Requisiti',
+        eligibility_desc:
+          'Devi essere approvato per il nuovo prestito e deve coprire il tuo saldo residuo.',
+        early_fee: 'Penale Rimborso Anticipato',
+        early_fee_desc:
+          'Alcuni prestiti addebitano una penale per il rimborso anticipato. Questa si applica anche al rifinanziamento.',
+        strategy: 'Consiglio',
+        strategy_desc:
+          'Migliora prima il tuo punteggio di credito, poi rifinanzia i prestiti ad alto tasso per risparmiare sugli interessi.'
+      }
+    }
   },
 
   // ─── Depositi ─────────────────────────────────────────────────
@@ -1314,7 +1588,8 @@ export default {
     matured: 'Maturati',
     early_withdrawals: 'Prelievi Anticipati',
     how_it_works: 'Come Funzionano i Depositi',
-    info_desc: 'I depositi ti permettono di bloccare contanti in conti fruttiferi per guadagnare reddito passivo. Ogni conto ha un APY (rendimento percentuale annuo) e una frequenza di capitalizzazione che determina quanto velocemente cresce il tuo saldo. I conti a termine fisso bloccano i tuoi soldi per un periodo stabilito — prelevare anticipatamente ti costa una percentuale degli interessi maturati, ma il capitale è sempre al sicuro. I conti flessibili ti permettono di prelevare in qualsiasi momento senza penali ma offrono tassi più bassi. Alcuni conti sono volatili: offrono un APY più alto, ma le oscillazioni di mercato casuali possono azzerare gli interessi maturati. Il tuo APY effettivo è potenziato dal tasso base dell\'economia, dal punteggio di credito, dai bonus dell\'albero abilità, dai potenziamenti prestigio e dagli eventi attivi. Mantenere oltre la scadenza concede un bonus fedeltà. Nuovi tipi di conto si sbloccano man mano che il tuo patrimonio e punteggio di credito migliorano.',
+    info_desc:
+      "I depositi ti permettono di bloccare contanti in conti fruttiferi per guadagnare reddito passivo. Ogni conto ha un APY (rendimento percentuale annuo) e una frequenza di capitalizzazione che determina quanto velocemente cresce il tuo saldo. I conti a termine fisso bloccano i tuoi soldi per un periodo stabilito — prelevare anticipatamente ti costa una percentuale degli interessi maturati, ma il capitale è sempre al sicuro. I conti flessibili ti permettono di prelevare in qualsiasi momento senza penali ma offrono tassi più bassi. Alcuni conti sono volatili: offrono un APY più alto, ma le oscillazioni di mercato casuali possono azzerare gli interessi maturati. Il tuo APY effettivo è potenziato dal tasso base dell'economia, dal punteggio di credito, dai bonus dell'albero abilità, dai potenziamenti prestigio e dagli eventi attivi. Mantenere oltre la scadenza concede un bonus fedeltà. Nuovi tipi di conto si sbloccano man mano che il tuo patrimonio e punteggio di credito migliorano.",
     open_title: 'Apri Conto Deposito',
     deposit_amount: 'Importo Deposito',
     effective_apy: 'APY Effettivo',
@@ -1347,39 +1622,75 @@ export default {
     info: {
       account_types: {
         title: 'Tipi di Conto',
-        savings: 'Risparmio', savings_desc: 'Conti flessibili. Puoi prelevare in qualsiasi momento senza penalità, ma il tasso di interesse è più basso.',
-        fixed: 'Deposito Vincolato', fixed_desc: 'Il tuo denaro è bloccato per un periodo stabilito. Interessi più alti, ma prelevare prima costa parte degli interessi maturati.',
-        premium: 'Premium', premium_desc: 'Conti speciali per alto patrimonio. Tassi di interesse migliori e capitalizzazione più frequente.',
-        special: 'Speciale', special_desc: 'Tipi di conto unici con caratteristiche o requisiti speciali.',
+        savings: 'Risparmio',
+        savings_desc:
+          'Conti flessibili. Puoi prelevare in qualsiasi momento senza penalità, ma il tasso di interesse è più basso.',
+        fixed: 'Deposito Vincolato',
+        fixed_desc:
+          'Il tuo denaro è bloccato per un periodo stabilito. Interessi più alti, ma prelevare prima costa parte degli interessi maturati.',
+        premium: 'Premium',
+        premium_desc:
+          'Conti speciali per alto patrimonio. Tassi di interesse migliori e capitalizzazione più frequente.',
+        special: 'Speciale',
+        special_desc: 'Tipi di conto unici con caratteristiche o requisiti speciali.'
       },
       interest: {
         title: 'Interessi',
-        apy: 'APY', apy_desc: 'Rendimento Percentuale Annuale — il tasso di interesse annuo che guadagni sul tuo deposito.',
-        effective_apy: 'APY Effettivo', effective_apy_desc: 'Il tuo tasso effettivo dopo tutti i bonus da abilità, prestigio ed economia.',
-        compounding: 'Capitalizzazione', compounding_desc: 'Quanto spesso gli interessi vengono aggiunti al tuo saldo. Capitalizzazione più frequente significa crescita più veloce.',
-        economy_rate: 'Bonus Economia', economy_rate_desc: 'Quando l\'economia ha tassi di interesse più alti, tutti i depositi guadagnano un po\' di più.',
+        apy: 'APY',
+        apy_desc:
+          'Rendimento Percentuale Annuale — il tasso di interesse annuo che guadagni sul tuo deposito.',
+        effective_apy: 'APY Effettivo',
+        effective_apy_desc:
+          'Il tuo tasso effettivo dopo tutti i bonus da abilità, prestigio ed economia.',
+        compounding: 'Capitalizzazione',
+        compounding_desc:
+          'Quanto spesso gli interessi vengono aggiunti al tuo saldo. Capitalizzazione più frequente significa crescita più veloce.',
+        economy_rate: 'Bonus Economia',
+        economy_rate_desc:
+          "Quando l'economia ha tassi di interesse più alti, tutti i depositi guadagnano un po' di più."
       },
       terms: {
         title: 'Termini',
-        term: 'Termine', term_desc: 'Per quanto tempo il tuo denaro è bloccato. "Flessibile" significa che puoi prelevare quando vuoi.',
-        maturity: 'Scadenza', maturity_desc: 'Quando un deposito vincolato raggiunge il suo termine completo, matura e puoi prelevare senza penalità.',
-        early_withdrawal: 'Prelievo Anticipato', early_withdrawal_desc: 'Prelevare prima della scadenza ti fa perdere parte degli interessi maturati. Il tuo deposito originale è sempre al sicuro.',
-        loyalty_bonus: 'Bonus Fedeltà', loyalty_bonus_desc: 'Mantieni il deposito oltre la data di scadenza per guadagnare interessi extra come ricompensa.',
+        term: 'Termine',
+        term_desc:
+          'Per quanto tempo il tuo denaro è bloccato. "Flessibile" significa che puoi prelevare quando vuoi.',
+        maturity: 'Scadenza',
+        maturity_desc:
+          'Quando un deposito vincolato raggiunge il suo termine completo, matura e puoi prelevare senza penalità.',
+        early_withdrawal: 'Prelievo Anticipato',
+        early_withdrawal_desc:
+          'Prelevare prima della scadenza ti fa perdere parte degli interessi maturati. Il tuo deposito originale è sempre al sicuro.',
+        loyalty_bonus: 'Bonus Fedeltà',
+        loyalty_bonus_desc:
+          'Mantieni il deposito oltre la data di scadenza per guadagnare interessi extra come ricompensa.'
       },
       risk: {
         title: 'Livelli di Rischio',
-        fdic: 'Sicuro', fdic_desc: 'Il tuo deposito originale è completamente protetto. Non puoi perdere il capitale.',
-        standard: 'Standard', standard_desc: 'Il capitale è al sicuro, ma il tasso di interesse può cambiare in base alle condizioni di mercato.',
-        volatile: 'Volatile', volatile_desc: 'Rendimenti potenziali più alti, ma eventi casuali possono ridurre o azzerare gli interessi maturati.',
+        fdic: 'Sicuro',
+        fdic_desc:
+          'Il tuo deposito originale è completamente protetto. Non puoi perdere il capitale.',
+        standard: 'Standard',
+        standard_desc:
+          'Il capitale è al sicuro, ma il tasso di interesse può cambiare in base alle condizioni di mercato.',
+        volatile: 'Volatile',
+        volatile_desc:
+          'Rendimenti potenziali più alti, ma eventi casuali possono ridurre o azzerare gli interessi maturati.'
       },
       modifiers: {
         title: 'Bonus',
-        credit_score: 'Punteggio Credito', credit_score_desc: 'Un punteggio di credito più alto può sbloccare tassi APY migliori su alcuni conti.',
-        skill_tree: 'Albero Abilità', skill_tree_desc: 'Certe abilità aumentano gli interessi che guadagni su tutti i depositi.',
-        prestige: 'Prestigio', prestige_desc: 'I potenziamenti prestigio possono aggiungere APY bonus permanente a tutti i tuoi depositi.',
-        events: 'Eventi', events_desc: 'Eventi di gioco casuali possono temporaneamente aumentare o diminuire i tassi sui depositi.',
-      },
-    },
+        credit_score: 'Punteggio Credito',
+        credit_score_desc:
+          'Un punteggio di credito più alto può sbloccare tassi APY migliori su alcuni conti.',
+        skill_tree: 'Albero Abilità',
+        skill_tree_desc: 'Certe abilità aumentano gli interessi che guadagni su tutti i depositi.',
+        prestige: 'Prestigio',
+        prestige_desc:
+          'I potenziamenti prestigio possono aggiungere APY bonus permanente a tutti i tuoi depositi.',
+        events: 'Eventi',
+        events_desc:
+          'Eventi di gioco casuali possono temporaneamente aumentare o diminuire i tassi sui depositi.'
+      }
+    }
   },
 
   // ─── Gioco d'azzardo / Casinò ────────────────────────────────
@@ -1412,7 +1723,7 @@ export default {
     new_round: 'Nuovo Turno',
     // Definizioni giochi
     game_blackjack: 'Blackjack',
-    game_blackjack_desc: 'Batti il banco arrivando a 21. L\'abilità paga.',
+    game_blackjack_desc: "Batti il banco arrivando a 21. L'abilità paga.",
     game_roulette: 'Roulette',
     game_roulette_desc: 'Scommetti su colori, numeri o intervalli.',
     game_slots: 'Slot Machine',
@@ -1566,7 +1877,8 @@ export default {
     sl_wins_desc: '{count} vittorie! Migliore: {best}',
     sl_multiplier_suffix: 'moltiplicatore',
     sl_paytable_title: 'Tabella Premi',
-    sl_paytable_note: 'Più linee possono vincere contemporaneamente. I moltiplicatori vengono sommati.',
+    sl_paytable_note:
+      'Più linee possono vincere contemporaneamente. I moltiplicatori vengono sommati.',
     sl_odds: 'Quote e Pagamenti',
     // Etichette Roulette
     rl_red: 'Rosso',
@@ -1608,181 +1920,273 @@ export default {
     lt_cant_afford_multi: 'Non hai abbastanza per {n} biglietti ({cost})',
     lt_abilities_found: 'Abilità Trovate:',
     info_title: 'Come Funziona il Casinò',
-    info_desc: 'Sette giochi con probabilità, vincite e stili unici. Il tuo Bonus Fortuna da abilità, prestigio ed eventi dà alla maggior parte dei giochi una meccanica di Seconda Chance. Ogni gioco traccia statistiche individuali. Scegli un gioco dalla lobby e gestisci il tuo bankroll.',
+    info_desc:
+      'Sette giochi con probabilità, vincite e stili unici. Il tuo Bonus Fortuna da abilità, prestigio ed eventi dà alla maggior parte dei giochi una meccanica di Seconda Chance. Ogni gioco traccia statistiche individuali. Scegli un gioco dalla lobby e gestisci il tuo bankroll.',
     // Sezioni InfoPanel lobby
     info_lobby: {
       games: {
         title: 'Giochi Disponibili',
         blackjack: 'Blackjack',
-        blackjack_desc: 'Gioco da tavolo. Avvicinati a 21 più del banco senza sballare. Probabilità base ~49%. Paga 2× o 3× (blackjack naturale). La fortuna dà protezione Anti-Sballo.',
+        blackjack_desc:
+          'Gioco da tavolo. Avvicinati a 21 più del banco senza sballare. Probabilità base ~49%. Paga 2× o 3× (blackjack naturale). La fortuna dà protezione Anti-Sballo.',
         roulette: 'Roulette',
-        roulette_desc: 'Gioco da tavolo con scommesse interne ed esterne. Scommessa diretta paga 36×. Scommesse esterne (rosso/nero, pari/dispari) pagano 2×. La fortuna dà Seconda Chance.',
+        roulette_desc:
+          'Gioco da tavolo con scommesse interne ed esterne. Scommessa diretta paga 36×. Scommesse esterne (rosso/nero, pari/dispari) pagano 2×. La fortuna dà Seconda Chance.',
         slots: 'Slot',
-        slots_desc: 'Gioco a macchina con abbinamento simboli. 7 linee di pagamento (3 righe, 2 diagonali, 2 piramidi). Jackpot fino a 100×. ~3% margine del banco. La fortuna dà Seconda Chance.',
+        slots_desc:
+          'Gioco a macchina con abbinamento simboli. 7 linee di pagamento (3 righe, 2 diagonali, 2 piramidi). Jackpot fino a 100×. ~3% margine del banco. La fortuna dà Seconda Chance.',
         coinflip: 'Testa o Croce',
-        coinflip_desc: 'Scommessa rapida — scegli testa o croce. Probabilità eque 50/50. Paga 2× la tua puntata. La fortuna dà Seconda Chance.',
+        coinflip_desc:
+          'Scommessa rapida — scegli testa o croce. Probabilità eque 50/50. Paga 2× la tua puntata. La fortuna dà Seconda Chance.',
         dice: 'Dadi',
-        dice_desc: 'Scommessa rapida — scegli un obiettivo e sopra/sotto. Probabilità e vincite variano per numero obiettivo. La fortuna dà Seconda Chance.',
+        dice_desc:
+          'Scommessa rapida — scegli un obiettivo e sopra/sotto. Probabilità e vincite variano per numero obiettivo. La fortuna dà Seconda Chance.',
         plinko: 'Plinko',
-        plinko_desc: 'Gioco a macchina — fai cadere una palla tra i pioli. Scegli numero righe e livello di rischio. I colpi ai bordi pagano fino a 30×. Nessuna meccanica fortuna.',
+        plinko_desc:
+          'Gioco a macchina — fai cadere una palla tra i pioli. Scegli numero righe e livello di rischio. I colpi ai bordi pagano fino a 30×. Nessuna meccanica fortuna.',
         lottery: 'Lotteria',
-        lottery_desc: 'Scegli numeri e spera in un abbinamento. Fino a 100.000× jackpot. La fortuna dà Seconda Chance e bonus fortuna crescente.',
+        lottery_desc:
+          'Scegli numeri e spera in un abbinamento. Fino a 100.000× jackpot. La fortuna dà Seconda Chance e bonus fortuna crescente.'
       },
       luck: {
         title: 'Sistema Fortuna',
         bonus: 'Bonus Fortuna',
-        bonus_desc: 'Calcolato dal nodo gambling_luck dell\'albero abilità. Mostrato come percentuale nella barra delle statistiche.',
+        bonus_desc:
+          "Calcolato dal nodo gambling_luck dell'albero abilità. Mostrato come percentuale nella barra delle statistiche.",
         formula: 'Rendimenti Decrescenti',
-        formula_desc: 'Bonus fortuna = 1 − (1 / moltiplicatore). Un moltiplicatore 2× dà 50% fortuna; 5× dà 80%. Moltiplicatori più alti danno guadagni incrementali minori.',
+        formula_desc:
+          'Bonus fortuna = 1 − (1 / moltiplicatore). Un moltiplicatore 2× dà 50% fortuna; 5× dà 80%. Moltiplicatori più alti danno guadagni incrementali minori.',
         second_chance: 'Seconda Chance',
-        second_chance_desc: 'Se perdi, c\'è una probabilità (bonus fortuna)% di rilanciare automaticamente. La maggior parte dei giochi lo supporta tranne Plinko.',
+        second_chance_desc:
+          "Se perdi, c'è una probabilità (bonus fortuna)% di rilanciare automaticamente. La maggior parte dei giochi lo supporta tranne Plinko.",
         biased_random: 'Casuale Orientato',
-        biased_random_desc: 'Alcuni giochi spostano il risultato casuale verso un esito favorevole del bonus fortuna × 50%.',
+        biased_random_desc:
+          'Alcuni giochi spostano il risultato casuale verso un esito favorevole del bonus fortuna × 50%.'
       },
       stats: {
         title: 'Statistiche',
         per_game: 'Tracciamento Per Gioco',
-        per_game_desc: 'Ogni gioco traccia indipendentemente: partite giocate, vittorie, sconfitte, profitto netto e vincita singola più alta.',
+        per_game_desc:
+          'Ogni gioco traccia indipendentemente: partite giocate, vittorie, sconfitte, profitto netto e vincita singola più alta.',
         win_rate: 'Percentuale Vittorie',
-        win_rate_desc: 'La tua percentuale di vittorie complessiva su tutti i giochi, mostrata nella barra delle statistiche.',
+        win_rate_desc:
+          'La tua percentuale di vittorie complessiva su tutti i giochi, mostrata nella barra delle statistiche.',
         xp: 'Ricompense XP',
-        xp_desc: 'Vincere una scommessa dà 2 XP. Perdere dà 0,5 XP.',
+        xp_desc: 'Vincere una scommessa dà 2 XP. Perdere dà 0,5 XP.'
       },
       divine: {
         title: 'Abilità Divine',
         what: 'Cosa Sono?',
-        what_desc: 'Bonus passivi ultra-rari sbloccati esclusivamente da premi della lotteria ad alta rarità. Persistono attraverso i reset del prestigio.',
+        what_desc:
+          'Bonus passivi ultra-rari sbloccati esclusivamente da premi della lotteria ad alta rarità. Persistono attraverso i reset del prestigio.',
         effect: 'Effetti',
-        effect_desc: 'Ogni abilità divina fornisce un moltiplicatore permanente a una categoria di reddito specifica (es. ricavi business, rendimenti azioni).',
+        effect_desc:
+          'Ogni abilità divina fornisce un moltiplicatore permanente a una categoria di reddito specifica (es. ricavi business, rendimenti azioni).',
         persist: 'Persistenza',
-        persist_desc: 'Le abilità divine e lo storico delle vincite alla lotteria non vengono mai azzerati — nemmeno dal prestigio.',
-      },
+        persist_desc:
+          'Le abilità divine e lo storico delle vincite alla lotteria non vengono mai azzerati — nemmeno dal prestigio.'
+      }
     },
     // Sezioni InfoPanel
     info: {
       blackjack: {
         how_title: 'Come si Gioca',
-        objective: 'Obiettivo', objective_desc: 'Avvicinarsi a 21 più del banco senza sballare (superare 21).',
-        card_values: 'Valore Carte', card_values_desc: 'Carte numeriche = valore nominale. Figure (J/Q/K) = 10. Asso = 11 (o 1 se ti fa sballare).',
-        dealer_rules: 'Regole Banco', dealer_rules_desc: 'Il banco pesca fino ad avere almeno 17. Poi si ferma.',
+        objective: 'Obiettivo',
+        objective_desc: 'Avvicinarsi a 21 più del banco senza sballare (superare 21).',
+        card_values: 'Valore Carte',
+        card_values_desc:
+          'Carte numeriche = valore nominale. Figure (J/Q/K) = 10. Asso = 11 (o 1 se ti fa sballare).',
+        dealer_rules: 'Regole Banco',
+        dealer_rules_desc: 'Il banco pesca fino ad avere almeno 17. Poi si ferma.',
         actions_title: 'Le Tue Azioni',
-        hit: 'Carta', hit_desc: 'Pesca una carta.',
-        stand: 'Stai', stand_desc: 'Tieni le tue carte e termina il turno.',
-        double_down: 'Raddoppia', double_down_desc: 'Raddoppia la puntata, prendi esattamente un\'altra carta.',
+        hit: 'Carta',
+        hit_desc: 'Pesca una carta.',
+        stand: 'Stai',
+        stand_desc: 'Tieni le tue carte e termina il turno.',
+        double_down: 'Raddoppia',
+        double_down_desc: "Raddoppia la puntata, prendi esattamente un'altra carta.",
         payout_title: 'Vincite',
-        win: 'Vittoria', win_desc: 'Vinci 2× la tua puntata.',
-        blackjack: 'Blackjack', blackjack_desc: '21 con le prime 2 carte paga 2.5× la puntata.',
-        push: 'Pareggio', push_desc: 'Stesso punteggio del banco — la puntata torna indietro.',
-        bust: 'Sballato', bust_desc: 'Superato 21 — perdi la puntata.',
+        win: 'Vittoria',
+        win_desc: 'Vinci 2× la tua puntata.',
+        blackjack: 'Blackjack',
+        blackjack_desc: '21 con le prime 2 carte paga 2.5× la puntata.',
+        push: 'Pareggio',
+        push_desc: 'Stesso punteggio del banco — la puntata torna indietro.',
+        bust: 'Sballato',
+        bust_desc: 'Superato 21 — perdi la puntata.'
       },
       roulette: {
         how_title: 'Come si Gioca',
-        european: 'Roulette', european_desc: 'Ruota con numeri 0–36. Piazzi scommesse e speri che la pallina fermi sul tuo numero.',
-        placing_bets: 'Piazzare Scommesse', placing_bets_desc: 'Clicca dove vuoi scommettere. Ogni click piazza un chip. Clicca di nuovo per toglierlo.',
-        spin: 'Gira', spin_desc: 'Premi GIRA per far partire la ruota. Le vincite vengono calcolate quando la pallina si ferma.',
+        european: 'Roulette',
+        european_desc:
+          'Ruota con numeri 0–36. Piazzi scommesse e speri che la pallina fermi sul tuo numero.',
+        placing_bets: 'Piazzare Scommesse',
+        placing_bets_desc:
+          'Clicca dove vuoi scommettere. Ogni click piazza un chip. Clicca di nuovo per toglierlo.',
+        spin: 'Gira',
+        spin_desc:
+          'Premi GIRA per far partire la ruota. Le vincite vengono calcolate quando la pallina si ferma.',
         inside_title: 'Scommesse su Numeri',
-        straight: 'Numero Singolo', straight_desc: 'Scommetti su un numero solo. Paga 36×.',
+        straight: 'Numero Singolo',
+        straight_desc: 'Scommetti su un numero solo. Paga 36×.',
         outside_title: 'Scommesse Esterne',
-        red_black: 'Rosso / Nero', red_black_desc: 'Scommetti sul colore. Paga 2×.',
-        even_odd: 'Pari / Dispari', even_odd_desc: 'Scommetti se il numero sarà pari o dispari. Paga 2×.',
-        high_low: '1–18 / 19–36', high_low_desc: 'Scommetti sulla metà bassa o alta. Paga 2×.',
-        dozen: 'Dozzina', dozen_desc: 'Scommetti su 12 numeri (1–12, 13–24, o 25–36). Paga 3×.',
-        column: 'Colonna', column_desc: 'Scommetti su una colonna verticale. Paga 3×.',
+        red_black: 'Rosso / Nero',
+        red_black_desc: 'Scommetti sul colore. Paga 2×.',
+        even_odd: 'Pari / Dispari',
+        even_odd_desc: 'Scommetti se il numero sarà pari o dispari. Paga 2×.',
+        high_low: '1–18 / 19–36',
+        high_low_desc: 'Scommetti sulla metà bassa o alta. Paga 2×.',
+        dozen: 'Dozzina',
+        dozen_desc: 'Scommetti su 12 numeri (1–12, 13–24, o 25–36). Paga 3×.',
+        column: 'Colonna',
+        column_desc: 'Scommetti su una colonna verticale. Paga 3×.',
         payout_title: 'Vincite',
-        pay_straight: 'Numero Singolo', pay_straight_desc: 'Paga 36× la puntata.',
-        pay_outside: 'Colore / Pari / Metà', pay_outside_desc: 'Paga 2× la puntata.',
-        pay_dozen: 'Dozzina / Colonna', pay_dozen_desc: 'Paga 3× la puntata.',
+        pay_straight: 'Numero Singolo',
+        pay_straight_desc: 'Paga 36× la puntata.',
+        pay_outside: 'Colore / Pari / Metà',
+        pay_outside_desc: 'Paga 2× la puntata.',
+        pay_dozen: 'Dozzina / Colonna',
+        pay_dozen_desc: 'Paga 3× la puntata.'
       },
       coinflip: {
         how_title: 'Come si Gioca',
-        choose_side: 'Scegli', choose_side_desc: 'Scegli Testa o Croce.',
-        place_bet: 'Scommetti', place_bet_desc: 'Imposta la puntata e premi LANCIA.',
-        fair_coin: 'Lancio', fair_coin_desc: '50/50 di probabilità per ogni lato.',
+        choose_side: 'Scegli',
+        choose_side_desc: 'Scegli Testa o Croce.',
+        place_bet: 'Scommetti',
+        place_bet_desc: 'Imposta la puntata e premi LANCIA.',
+        fair_coin: 'Lancio',
+        fair_coin_desc: '50/50 di probabilità per ogni lato.',
         payout_title: 'Vincite',
-        correct: 'Indovini', correct_desc: 'Vinci 2× la tua puntata.',
-        wrong: 'Sbagli', wrong_desc: 'Perdi la tua puntata.',
+        correct: 'Indovini',
+        correct_desc: 'Vinci 2× la tua puntata.',
+        wrong: 'Sbagli',
+        wrong_desc: 'Perdi la tua puntata.'
       },
       dice: {
         how_title: 'Come si Gioca',
-        two_dice: 'Due Dadi', two_dice_desc: 'Vengono lanciati due dadi. La somma va da 2 a 12.',
-        pick_target: 'Obiettivo', pick_target_desc: 'Usa il cursore per scegliere un numero obiettivo.',
-        over_under: 'Sopra o Sotto', over_under_desc: 'Scommetti se il totale sarà SOPRA o SOTTO il tuo obiettivo. Centro esatto = perdi.',
+        two_dice: 'Due Dadi',
+        two_dice_desc: 'Vengono lanciati due dadi. La somma va da 2 a 12.',
+        pick_target: 'Obiettivo',
+        pick_target_desc: 'Usa il cursore per scegliere un numero obiettivo.',
+        over_under: 'Sopra o Sotto',
+        over_under_desc:
+          'Scommetti se il totale sarà SOPRA o SOTTO il tuo obiettivo. Centro esatto = perdi.',
         odds_title: 'Quote',
-        dynamic: 'Moltiplicatore', dynamic_desc: 'Scommesse più difficili pagano di più. Vedi le quote mostrate per ogni scelta.',
-        house_edge: 'Margine', house_edge_desc: '3% di margine del banco sui moltiplicatori.',
-        example_over7: 'Obiettivi Bassi', example_over7_desc: 'Scommettere SOPRA un numero basso è più facile, quindi paga meno.',
-        example_under4: 'Obiettivi Alti', example_under4_desc: 'Scommettere SOTTO un numero basso è più difficile, quindi paga di più.',
+        dynamic: 'Moltiplicatore',
+        dynamic_desc:
+          'Scommesse più difficili pagano di più. Vedi le quote mostrate per ogni scelta.',
+        house_edge: 'Margine',
+        house_edge_desc: '3% di margine del banco sui moltiplicatori.',
+        example_over7: 'Obiettivi Bassi',
+        example_over7_desc: 'Scommettere SOPRA un numero basso è più facile, quindi paga meno.',
+        example_under4: 'Obiettivi Alti',
+        example_under4_desc:
+          'Scommettere SOTTO un numero basso è più difficile, quindi paga di più.'
       },
       plinko: {
         how_title: 'Come si Gioca',
-        set_bet: 'Puntata', set_bet_desc: 'Imposta quanto vuoi scommettere.',
-        pick_rows: 'Righe', pick_rows_desc: 'Più righe = più pioli = più rimbalzi e più varietà nei moltiplicatori.',
-        choose_risk: 'Rischio', choose_risk_desc: 'Basso = vincite costanti. Alto = vincite rare ma grandi (o perdite).',
-        drop_ball: 'Lancia', drop_ball_desc: 'Premi LANCIA per far cadere la pallina. Atterra in una casella moltiplicatore.',
+        set_bet: 'Puntata',
+        set_bet_desc: 'Imposta quanto vuoi scommettere.',
+        pick_rows: 'Righe',
+        pick_rows_desc: 'Più righe = più pioli = più rimbalzi e più varietà nei moltiplicatori.',
+        choose_risk: 'Rischio',
+        choose_risk_desc: 'Basso = vincite costanti. Alto = vincite rare ma grandi (o perdite).',
+        drop_ball: 'Lancia',
+        drop_ball_desc:
+          'Premi LANCIA per far cadere la pallina. Atterra in una casella moltiplicatore.',
         mult_title: 'Moltiplicatori',
         multipliers_title: 'Moltiplicatori',
-        center: 'Centro', center_desc: 'Moltiplicatori bassi ma probabilità alta.',
-        edge: 'Lati', edge_desc: 'Moltiplicatori alti ma rari.',
-        luck: 'Fortuna al Gioco', luck_desc: 'La tua abilità di fortuna al gioco aumenta tutte le vincite.',
+        center: 'Centro',
+        center_desc: 'Moltiplicatori bassi ma probabilità alta.',
+        edge: 'Lati',
+        edge_desc: 'Moltiplicatori alti ma rari.',
+        luck: 'Fortuna al Gioco',
+        luck_desc: 'La tua abilità di fortuna al gioco aumenta tutte le vincite.',
         max_title: 'Vincite Massime',
-        low: 'Rischio Basso', low_desc: 'Fino a 3× la puntata',
-        medium: 'Rischio Medio', medium_desc: 'Fino a 8× la puntata',
-        high: 'Rischio Alto', high_desc: 'Fino a 30× la puntata',
+        low: 'Rischio Basso',
+        low_desc: 'Fino a 3× la puntata',
+        medium: 'Rischio Medio',
+        medium_desc: 'Fino a 8× la puntata',
+        high: 'Rischio Alto',
+        high_desc: 'Fino a 30× la puntata'
       },
       slots: {
         how_title: 'Come Giocare',
-        reels: 'Griglia 3×3', reels_desc: 'La macchina ha una griglia 3×3 di simboli. Ogni colonna gira indipendentemente.',
-        lines: '7 Linee di Pagamento', lines_desc: 'Tre righe orizzontali, due diagonali e due pattern a piramide. Tutte le linee vengono valutate e le vincite si sommano.',
+        reels: 'Griglia 3×3',
+        reels_desc:
+          'La macchina ha una griglia 3×3 di simboli. Ogni colonna gira indipendentemente.',
+        lines: '7 Linee di Pagamento',
+        lines_desc:
+          'Tre righe orizzontali, due diagonali e due pattern a piramide. Tutte le linee vengono valutate e le vincite si sommano.',
         payout_title: 'Pagamenti',
-        jackpot: 'Jackpot (777)', jackpot_desc: 'Tre 7 sulla riga centrale paga 100× la puntata. Sovrascrive le altre vincite.',
-        center3: 'Tris (Centro)', center3_desc: 'Tre simboli uguali sulla riga centrale paga 9× la puntata.',
-        row3: 'Tris (Altre)', row3_desc: 'Tre simboli uguali su righe superiore/inferiore o diagonali paga 5× la puntata.',
-        pyramid: 'Piramide', pyramid_desc: 'Due simboli nella stessa colonna (sopra+sotto di un lato) che corrispondono al simbolo centrale paga 1.5× la puntata.',
-      },
-    },
+        jackpot: 'Jackpot (777)',
+        jackpot_desc:
+          'Tre 7 sulla riga centrale paga 100× la puntata. Sovrascrive le altre vincite.',
+        center3: 'Tris (Centro)',
+        center3_desc: 'Tre simboli uguali sulla riga centrale paga 9× la puntata.',
+        row3: 'Tris (Altre)',
+        row3_desc:
+          'Tre simboli uguali su righe superiore/inferiore o diagonali paga 5× la puntata.',
+        pyramid: 'Piramide',
+        pyramid_desc:
+          'Due simboli nella stessa colonna (sopra+sotto di un lato) che corrispondono al simbolo centrale paga 1.5× la puntata.'
+      }
+    }
   },
 
   // ─── Albero Abilità ───────────────────────────────────────────
   skilltree: {
     title: 'Albero Abilità',
     subtitle: 'Sblocca potenziamenti permanenti per il tuo impero',
-    info_title: 'Come Funziona l\'Albero Abilità',
-    info_desc: 'Acquista nodi abilità con i contanti per ottenere bonus moltiplicativi su tutti i sistemi di gioco. Cinque alberi con 75 nodi ciascuno. Le abilità si azzerano alla rinascita prestigio.',
+    info_title: "Come Funziona l'Albero Abilità",
+    info_desc:
+      'Acquista nodi abilità con i contanti per ottenere bonus moltiplicativi su tutti i sistemi di gioco. Cinque alberi con 75 nodi ciascuno. Le abilità si azzerano alla rinascita prestigio.',
     info: {
       nodes: {
         title: 'Nodi e Acquisto',
         cash_cost: 'Costo in Contanti',
-        cash_cost_desc: 'Ogni nodo costa contanti (non punti abilità). I costi vanno da $500 in Business a $5 Quadrilioni nell\'albero Prestigio. Devi avere saldo sufficiente.',
+        cash_cost_desc:
+          "Ogni nodo costa contanti (non punti abilità). I costi vanno da $500 in Business a $5 Quadrilioni nell'albero Prestigio. Devi avere saldo sufficiente.",
         binary: 'Acquisto Una Tantum',
-        binary_desc: 'Ogni nodo è acquistato o no — non ci sono livelli. Comprare un nodo concede il suo effetto fino alla rinascita prestigio. Guadagni anche 10 XP per acquisto.',
+        binary_desc:
+          'Ogni nodo è acquistato o no — non ci sono livelli. Comprare un nodo concede il suo effetto fino alla rinascita prestigio. Guadagni anche 10 XP per acquisto.',
         no_refund: 'Nessun Rimborso',
-        no_refund_desc: 'Non esiste un sistema di respec o rimborso. I contanti spesi nelle abilità sono persi. Pianifica la tua build con attenzione.',
+        no_refund_desc:
+          'Non esiste un sistema di respec o rimborso. I contanti spesi nelle abilità sono persi. Pianifica la tua build con attenzione.'
       },
       categories: {
         title: 'Categorie e Percorsi',
         five_trees: 'Cinque Alberi Categoria',
-        five_trees_desc: 'Business (lavori, ricavi, marketing), Finanza (azioni, crypto, immobili), Gambling (fortuna, strategia, compostezza), Impero (XP, reddito, offline), Prestigio (guadagno PP, memoria, evoluzione).',
+        five_trees_desc:
+          'Business (lavori, ricavi, marketing), Finanza (azioni, crypto, immobili), Gambling (fortuna, strategia, compostezza), Impero (XP, reddito, offline), Prestigio (guadagno PP, memoria, evoluzione).',
         three_paths: 'Percorsi Ramificati',
-        three_paths_desc: 'Ogni albero ha tre percorsi (sinistra, centro, destra) che si dividono presto e convergono alle righe cardine 8, 12 e 16. La riga finale (17) ha due potenti nodi capstone.',
+        three_paths_desc:
+          'Ogni albero ha tre percorsi (sinistra, centro, destra) che si dividono presto e convergono alle righe cardine 8, 12 e 16. La riga finale (17) ha due potenti nodi capstone.',
         capstones: 'Nodi Capstone',
-        capstones_desc: 'I capstone della riga 17 sono i nodi più costosi e potenti. Esempi: CEO Onnisciente (+6% reddito totale), Dio del Caso (+12% fortuna gambling), Il Creatore (+6% reddito totale a $5Q).',
+        capstones_desc:
+          'I capstone della riga 17 sono i nodi più costosi e potenti. Esempi: CEO Onnisciente (+6% reddito totale), Dio del Caso (+12% fortuna gambling), Il Creatore (+6% reddito totale a $5Q).'
       },
       prerequisites: {
         title: 'Prerequisiti e Pianificazione',
         chain: 'Catene Prerequisiti',
-        chain_desc: 'Ogni nodo elenca prerequisiti che devono tutti essere acquistati prima. I nodi appaiono come Bloccati (grigi) finché i prerequisiti non sono soddisfatti, poi Disponibili (evidenziati), poi Acquistati (verdi).',
+        chain_desc:
+          'Ogni nodo elenca prerequisiti che devono tutti essere acquistati prima. I nodi appaiono come Bloccati (grigi) finché i prerequisiti non sono soddisfatti, poi Disponibili (evidenziati), poi Acquistati (verdi).',
         strategy: 'Strategia Build',
-        strategy_desc: 'Non puoi comprare ogni nodo subito — i costi crescono rapidamente. Concentrati su un percorso per categoria inizialmente, poi espandi nelle run successive dopo il prestigio.',
+        strategy_desc:
+          'Non puoi comprare ogni nodo subito — i costi crescono rapidamente. Concentrati su un percorso per categoria inizialmente, poi espandi nelle run successive dopo il prestigio.'
       },
       effects: {
         title: 'Effetti e Moltiplicatori',
         stacking: 'Accumulo Moltiplicativo',
-        stacking_desc: 'I bonus si accumulano moltiplicativamente: tre nodi +3% danno 1,03³ ≈ +9,27% totale, non +9%. Questo rende ogni nodo aggiuntivo leggermente più prezioso.',
+        stacking_desc:
+          'I bonus si accumulano moltiplicativamente: tre nodi +3% danno 1,03³ ≈ +9,27% totale, non +9%. Questo rende ogni nodo aggiuntivo leggermente più prezioso.',
         targets: 'Obiettivi Effetto',
-        targets_desc: 'I nodi possono potenziare: reddito totale, ricavi business, efficienza lavoro, riduzione costi, attrazione clienti, rendimenti azioni, rendimenti crypto, affitti immobiliari, fortuna gambling, guadagno XP, efficienza offline, guadagno prestigio, tassi prestiti e tassi depositi.',
+        targets_desc:
+          'I nodi possono potenziare: reddito totale, ricavi business, efficienza lavoro, riduzione costi, attrazione clienti, rendimenti azioni, rendimenti crypto, affitti immobiliari, fortuna gambling, guadagno XP, efficienza offline, guadagno prestigio, tassi prestiti e tassi depositi.',
         prestige_reset: 'Reset Prestigio',
-        prestige_reset_desc: 'Tutti i progressi dell\'albero abilità vengono cancellati alla rinascita prestigio. Devi riacquistare i nodi a ogni run. I potenziamenti e vantaggi prestigio persistono, ma i nodi abilità no.',
-      },
+        prestige_reset_desc:
+          "Tutti i progressi dell'albero abilità vengono cancellati alla rinascita prestigio. Devi riacquistare i nodi a ogni run. I potenziamenti e vantaggi prestigio persistono, ma i nodi abilità no."
+      }
     },
     unlocked: 'Sbloccati',
     balance: 'Saldo',
@@ -1792,7 +2196,7 @@ export default {
     cost: 'Costo',
     prerequisites: 'Prerequisiti',
     unlock_skill: 'Sblocca Abilità',
-    requires: 'Richiede: {list}',
+    requires: 'Richiede: {list}'
   },
 
   // ─── Prestigio ────────────────────────────────────────────────
@@ -1800,68 +2204,87 @@ export default {
     title: 'Prestigio',
     subtitle: 'Rinasci per ottenere bonus permanenti e sbloccare nuove ere',
     info_title: 'Come Funziona il Prestigio',
-    info_desc: 'Sacrifica i tuoi progressi per bonus permanenti. La Rinascita resetta la maggior parte dei sistemi ma concede Punti Prestigio basati sul totale dei contanti guadagnati. Spendi punti in Potenziamenti, Vantaggi e avanza attraverso le Ere. Obiettivi e Abilità Divine persistono per sempre.',
+    info_desc:
+      'Sacrifica i tuoi progressi per bonus permanenti. La Rinascita resetta la maggior parte dei sistemi ma concede Punti Prestigio basati sul totale dei contanti guadagnati. Spendi punti in Potenziamenti, Vantaggi e avanza attraverso le Ere. Obiettivi e Abilità Divine persistono per sempre.',
     info: {
       points: {
         title: 'Punti Prestigio',
         formula: 'Formula Punti',
-        formula_desc: 'Punti = floor((totaleContantiGuadagnati ÷ 100M) ^ 0,2). Servono almeno $100M di contanti totali guadagnati per il prestigio. Moltiplicati da albero abilità, potenziamenti, traguardi e vantaggi.',
+        formula_desc:
+          'Punti = floor((totaleContantiGuadagnati ÷ 100M) ^ 0,2). Servono almeno $100M di contanti totali guadagnati per il prestigio. Moltiplicati da albero abilità, potenziamenti, traguardi e vantaggi.',
         threshold: 'Soglia Minima',
-        threshold_desc: 'Devi guadagnare almeno 1 punto per effettuare una rinascita. Visualizza il guadagno potenziale nel Pannello Prestigio prima di confermare.',
+        threshold_desc:
+          'Devi guadagnare almeno 1 punto per effettuare una rinascita. Visualizza il guadagno potenziale nel Pannello Prestigio prima di confermare.'
       },
       rebirth: {
         title: 'Rinascita',
         resets: 'Cosa Viene Azzerato',
-        resets_desc: 'Contanti, attività, lavori, azioni, crypto, immobili, startup, albero abilità, statistiche gambling, prestiti e depositi vengono tutti cancellati.',
+        resets_desc:
+          'Contanti, attività, lavori, azioni, crypto, immobili, startup, albero abilità, statistiche gambling, prestiti e depositi vengono tutti cancellati.',
         keeps: 'Cosa Persiste',
-        keeps_desc: 'Punti prestigio, potenziamenti, vantaggi, traguardi, progresso era, obiettivi, abilità divine e storico vincite lotteria vengono mantenuti per sempre.',
+        keeps_desc:
+          'Punti prestigio, potenziamenti, vantaggi, traguardi, progresso era, obiettivi, abilità divine e storico vincite lotteria vengono mantenuti per sempre.',
         starting_bonuses: 'Bonus Iniziali',
-        starting_bonuses_desc: 'Dopo la rinascita, certi vantaggi e potenziamenti concedono contanti e XP iniziali così la tua prossima run inizia più forte.',
+        starting_bonuses_desc:
+          'Dopo la rinascita, certi vantaggi e potenziamenti concedono contanti e XP iniziali così la tua prossima run inizia più forte.'
       },
       eras: {
         title: 'Ere',
         progression: 'Progressione Ere',
-        progression_desc: 'Avanza attraverso 6 ere: Novizio → Apprendista → Praticante → Esperto → Virtuoso → Trascendente. Ogni era richiede più punti totali e rinascite.',
+        progression_desc:
+          'Avanza attraverso 6 ere: Novizio → Apprendista → Praticante → Esperto → Virtuoso → Trascendente. Ogni era richiede più punti totali e rinascite.',
         bonus: 'Bonus Era',
-        bonus_desc: 'Ogni era fornisce un bonus globale: Novizio 0%, Apprendista +3%, Praticante +6%, Esperto +10%, Virtuoso +15%, Trascendente +25%.',
+        bonus_desc:
+          'Ogni era fornisce un bonus globale: Novizio 0%, Apprendista +3%, Praticante +6%, Esperto +10%, Virtuoso +15%, Trascendente +25%.'
       },
       upgrades: {
         title: 'Potenziamenti',
         repeatable: 'Livelli Ripetibili',
-        repeatable_desc: 'Spendi punti prestigio per livellare i potenziamenti. Ogni livello aumenta l\'effetto e il costo. Costo = costoBase × scalaCosto^livello.',
+        repeatable_desc:
+          "Spendi punti prestigio per livellare i potenziamenti. Ogni livello aumenta l'effetto e il costo. Costo = costoBase × scalaCosto^livello.",
         effects: 'Tipi di Effetto',
-        effects_desc: 'I potenziamenti possono aumentare: moltiplicatore globale, guadagno prestigio, efficienza lavoro, bonus offline, contanti/XP iniziali, riduzione costi, categorie di reddito e altro.',
+        effects_desc:
+          'I potenziamenti possono aumentare: moltiplicatore globale, guadagno prestigio, efficienza lavoro, bonus offline, contanti/XP iniziali, riduzione costi, categorie di reddito e altro.',
         categories: 'Categorie',
-        categories_desc: 'I potenziamenti sono organizzati per categoria con icone e colori. Ogni categoria si concentra su un aspetto diverso del tuo impero.',
+        categories_desc:
+          'I potenziamenti sono organizzati per categoria con icone e colori. Ogni categoria si concentra su un aspetto diverso del tuo impero.'
       },
       perks: {
         title: 'Vantaggi',
         one_time: 'Acquisto Una Tantum',
-        one_time_desc: 'I vantaggi si comprano una volta e forniscono un effetto permanente. Alcuni sono sblocchi potenti che cambiano le meccaniche di gioco.',
+        one_time_desc:
+          'I vantaggi si comprano una volta e forniscono un effetto permanente. Alcuni sono sblocchi potenti che cambiano le meccaniche di gioco.',
         prerequisites: 'Prerequisiti',
-        prerequisites_desc: 'Alcuni vantaggi richiedono che altri vantaggi siano acquistati prima, e possono anche richiedere un\'era minima per lo sblocco.',
+        prerequisites_desc:
+          "Alcuni vantaggi richiedono che altri vantaggi siano acquistati prima, e possono anche richiedere un'era minima per lo sblocco.",
         types: 'Tipi di Vantaggi',
-        types_desc: 'Le categorie includono: Automazione, Potenziamento, Sblocco e Qualità della Vita. Controlla l\'icona per identificare il tipo.',
+        types_desc:
+          "Le categorie includono: Automazione, Potenziamento, Sblocco e Qualità della Vita. Controlla l'icona per identificare il tipo."
       },
       milestones: {
         title: 'Traguardi e Obiettivi',
         auto_unlock: 'Sblocco Automatico',
-        auto_unlock_desc: 'I traguardi si sbloccano automaticamente quando raggiungi condizioni come punti totali, rinascite o soglie di contanti totali guadagnati.',
+        auto_unlock_desc:
+          'I traguardi si sbloccano automaticamente quando raggiungi condizioni come punti totali, rinascite o soglie di contanti totali guadagnati.',
         achievements: 'Obiettivi',
-        achievements_desc: 'Traccia i progressi in tutti i sistemi di gioco. Alcuni obiettivi sono nascosti fino allo sblocco. Gli obiettivi della lotteria concedono bonus moltiplicatori permanenti.',
+        achievements_desc:
+          'Traccia i progressi in tutti i sistemi di gioco. Alcuni obiettivi sono nascosti fino allo sblocco. Gli obiettivi della lotteria concedono bonus moltiplicatori permanenti.',
         divine: 'Abilità Divine',
-        divine_desc: 'Bonus ultra-rari da premi della lotteria ad alta rarità. Forniscono moltiplicatori di reddito permanenti e non vengono mai azzerati.',
-      },
+        divine_desc:
+          'Bonus ultra-rari da premi della lotteria ad alta rarità. Forniscono moltiplicatori di reddito permanenti e non vengono mai azzerati.'
+      }
     },
     tab_upgrades: 'Potenziamenti',
     tab_perks: 'Vantaggi',
     tab_milestones: 'Traguardi',
     tab_achievements: 'Obiettivi',
-    achievements_desc: 'Tieni traccia dei tuoi progressi con gli obiettivi. Gli obiettivi della lotteria concedono bonus permanenti.',
+    achievements_desc:
+      'Tieni traccia dei tuoi progressi con gli obiettivi. Gli obiettivi della lotteria concedono bonus permanenti.',
     divine_abilities: 'Abilità Divine',
     ach_hidden: 'Obiettivo nascosto — continua a giocare per scoprirlo!',
     perks_desc: 'Sblocchi permanenti una tantum che forniscono potenti bonus.',
-    milestones_desc: 'Obiettivi automatici che concedono bonus cumulativi man mano che progredisci.',
+    milestones_desc:
+      'Obiettivi automatici che concedono bonus cumulativi man mano che progredisci.',
     total_points: 'Punti Totali',
     rebirths: 'Rinascite',
     milestones: 'Traguardi',
@@ -1875,11 +2298,13 @@ export default {
     points: 'punti',
     rebirth_btn: 'RINASCITA',
     rebirth_badge: 'Rinascite',
-    rebirth_warning: 'La rinascita resetta contanti, attività e investimenti. Potenziamenti, vantaggi, traguardi e obiettivi di prestigio vengono mantenuti.',
+    rebirth_warning:
+      'La rinascita resetta contanti, attività e investimenti. Potenziamenti, vantaggi, traguardi e obiettivi di prestigio vengono mantenuti.',
     confirm_title: 'Conferma Rinascita',
     confirm_question: 'Sei sicuro di voler rinascere?',
     confirm_gain: 'Otterrai {n} punti prestigio.',
-    confirm_warning: 'Questo resetterà i tuoi progressi ma manterrà tutti i potenziamenti di prestigio.',
+    confirm_warning:
+      'Questo resetterà i tuoi progressi ma manterrà tutti i potenziamenti di prestigio.',
     confirm_rebirth: 'Conferma Rinascita',
     // Effetti potenziamento
     effect_all_income: '+{n}% Tutti i Redditi',
@@ -1915,7 +2340,7 @@ export default {
     progress_next_era: 'Progresso verso Prossima Era',
     max_era_reached: 'Era Massima Raggiunta!',
     upgrades: 'Potenziamenti',
-    global_multi: 'Moltiplicatore Globale',
+    global_multi: 'Moltiplicatore Globale'
   },
 
   // ─── Impostazioni ─────────────────────────────────────────────
@@ -1969,7 +2394,8 @@ export default {
     hard_reset: 'Reset Completo',
     hard_reset_desc: 'Cancella tutti i progressi. Questa azione è irreversibile.',
     reset_btn: 'RESETTA',
-    hard_reset_warning: 'Sei assolutamente sicuro? Questo cancellerà <strong>TUTTI</strong> i progressi, inclusi potenziamenti e obiettivi di prestigio.',
+    hard_reset_warning:
+      'Sei assolutamente sicuro? Questo cancellerà <strong>TUTTI</strong> i progressi, inclusi potenziamenti e obiettivi di prestigio.',
     yes_reset: 'Sì, Resetta Tutto',
     reset_failed: 'Reset fallito',
     notation: 'Notazione Numerica',
@@ -1986,7 +2412,7 @@ export default {
     export_save: 'Esporta Salvataggio',
     import_save: 'Importa Salvataggio',
     confirm_prestige_desc_alt: 'Chiedi conferma prima del reset di prestigio',
-    theme_desc_alt: 'Passa tra tema scuro e chiaro',
+    theme_desc_alt: 'Passa tra tema scuro e chiaro'
   },
 
   // ─── Mercato / Pannello Trading ───────────────────────────────
@@ -2020,13 +2446,17 @@ export default {
     how_markets_work: 'Come Funzionano i Mercati',
     how_markets_work_tip: 'Come funzionano i mercati',
     info_tick_title: 'Velocità Tick',
-    info_tick_desc: 'Controlla ogni quanto avviene un <strong>singolo movimento di prezzo</strong>. A <strong>1s</strong>, ogni secondo appare una nuova candela sul grafico. A <strong>30s</strong>, un nuovo punto di prezzo viene tracciato ogni 30 secondi. Ogni tick è sempre un singolo movimento — nessun raggruppamento o salto.',
+    info_tick_desc:
+      'Controlla ogni quanto avviene un <strong>singolo movimento di prezzo</strong>. A <strong>1s</strong>, ogni secondo appare una nuova candela sul grafico. A <strong>30s</strong>, un nuovo punto di prezzo viene tracciato ogni 30 secondi. Ogni tick è sempre un singolo movimento — nessun raggruppamento o salto.',
     info_gbm_title: 'Modello di Prezzo (GBM)',
-    info_gbm_desc: 'I prezzi seguono il <strong>Moto Browniano Geometrico</strong>, lo stesso modello usato nel pricing delle opzioni Black-Scholes. Ogni asset ha un <em>drift</em> (rendimento annuo atteso) e <em>volatilità</em> (casualità del prezzo). Maggiore volatilità = oscillazioni più ampie.',
+    info_gbm_desc:
+      'I prezzi seguono il <strong>Moto Browniano Geometrico</strong>, lo stesso modello usato nel pricing delle opzioni Black-Scholes. Ogni asset ha un <em>drift</em> (rendimento annuo atteso) e <em>volatilità</em> (casualità del prezzo). Maggiore volatilità = oscillazioni più ampie.',
     info_conditions_title: 'Condizioni di Mercato',
-    info_conditions_desc: 'Eventi casuali possono innescare condizioni <strong>Rialziste</strong>, <strong>Ribassiste</strong>, <strong>di Crash</strong> o <strong>di Bolla</strong> che spostano temporaneamente drift e volatilità per tutti gli asset. Attenzione alle notizie!',
+    info_conditions_desc:
+      'Eventi casuali possono innescare condizioni <strong>Rialziste</strong>, <strong>Ribassiste</strong>, <strong>di Crash</strong> o <strong>di Bolla</strong> che spostano temporaneamente drift e volatilità per tutti gli asset. Attenzione alle notizie!',
     info_pin_title: 'Fissa e Focalizza',
-    info_pin_desc: 'Clicca l\'<strong>icona puntina</strong> su qualsiasi card di asset per fissarlo in alto con un grande grafico interattivo. Passa il mouse per il mirino, scorri per zoomare, trascina per spostarti. Usa i pulsanti intervallo (1m / 5m / 15m / 1h / Tutto) per cambiare la finestra visibile.',
+    info_pin_desc:
+      "Clicca l'<strong>icona puntina</strong> su qualsiasi card di asset per fissarlo in alto con un grande grafico interattivo. Passa il mouse per il mirino, scorri per zoomare, trascina per spostarti. Usa i pulsanti intervallo (1m / 5m / 15m / 1h / Tutto) per cambiare la finestra visibile.",
     pin_to_focus: 'Fissa in primo piano',
     unpin: 'Rimuovi fissaggio',
     ath: 'ATH',
@@ -2095,130 +2525,170 @@ export default {
     signal_buy: 'Opportunità di Acquisto',
     signal_sell: 'Considera di Prendere Profitto',
     signal_hold: 'Mantieni Posizione',
-    signal_caution: 'Cautela — Alto Rischio',
+    signal_caution: 'Cautela — Alto Rischio'
   },
 
   // ─── Guida al Trading (Modal Fullscreen) ──────────────────────
   guide: {
     title: 'Guida al Trading',
-    desc_stock: 'Tutto quello che devi sapere per leggere i grafici, piazzare operazioni e gestire le tue posizioni azionarie come un professionista.',
-    desc_crypto: 'Tutto quello che devi sapere per leggere i grafici, piazzare operazioni e gestire le tue posizioni crypto come un professionista.',
+    desc_stock:
+      'Tutto quello che devi sapere per leggere i grafici, piazzare operazioni e gestire le tue posizioni azionarie come un professionista.',
+    desc_crypto:
+      'Tutto quello che devi sapere per leggere i grafici, piazzare operazioni e gestire le tue posizioni crypto come un professionista.',
 
     // ── 1. Basi delle Candele ──
     candles: {
       title: 'Leggere le Candele',
-      what: 'Cos\'è una Candela?',
-      what_desc: 'Ogni candela rappresenta un "tick" di movimento del prezzo. Mostra 4 valori: Apertura (prezzo all\'inizio), Chiusura (prezzo alla fine), Massimo (punto più alto) e Minimo (punto più basso). Insieme formano la classica forma a candela sul grafico.',
+      what: "Cos'è una Candela?",
+      what_desc:
+        'Ogni candela rappresenta un "tick" di movimento del prezzo. Mostra 4 valori: Apertura (prezzo all\'inizio), Chiusura (prezzo alla fine), Massimo (punto più alto) e Minimo (punto più basso). Insieme formano la classica forma a candela sul grafico.',
       body: 'Il Corpo',
-      body_desc: 'Il rettangolo spesso è il "corpo". Va dall\'Apertura alla Chiusura. Un corpo alto significa che il prezzo si è mosso molto durante quel tick. Un corpo sottile significa che si è mosso poco.',
+      body_desc:
+        'Il rettangolo spesso è il "corpo". Va dall\'Apertura alla Chiusura. Un corpo alto significa che il prezzo si è mosso molto durante quel tick. Un corpo sottile significa che si è mosso poco.',
       wicks: 'Gli Stoppini (Ombre)',
-      wicks_desc: 'Le linee sottili sopra e sotto il corpo si chiamano "stoppini" o "ombre". Lo stoppino superiore mostra quanto il prezzo è salito prima di ritracciare. Lo stoppino inferiore mostra quanto è sceso prima di recuperare.',
+      wicks_desc:
+        'Le linee sottili sopra e sotto il corpo si chiamano "stoppini" o "ombre". Lo stoppino superiore mostra quanto il prezzo è salito prima di ritracciare. Lo stoppino inferiore mostra quanto è sceso prima di recuperare.',
       green: 'Candela Verde (Rialzista)',
-      green_desc: 'Quando la Chiusura è PIÙ ALTA dell\'Apertura, la candela è verde. Significa che il prezzo è SALITO durante quel tick. La base del corpo = Apertura, la cima = Chiusura.',
+      green_desc:
+        "Quando la Chiusura è PIÙ ALTA dell'Apertura, la candela è verde. Significa che il prezzo è SALITO durante quel tick. La base del corpo = Apertura, la cima = Chiusura.",
       red: 'Candela Rossa (Ribassista)',
-      red_desc: 'Quando la Chiusura è PIÙ BASSA dell\'Apertura, la candela è rossa. Significa che il prezzo è SCESO durante quel tick. La cima del corpo = Apertura, la base = Chiusura.',
+      red_desc:
+        "Quando la Chiusura è PIÙ BASSA dell'Apertura, la candela è rossa. Significa che il prezzo è SCESO durante quel tick. La cima del corpo = Apertura, la base = Chiusura."
     },
 
     // ── 2. Lettura dei Pattern ──
     patterns: {
       title: 'Cosa Ti Dicono le Candele',
       long_body: 'Corpo Lungo',
-      long_body_desc: 'Un corpo molto alto (di qualsiasi colore) indica forte slancio. Verde = i compratori hanno dominato. Rosso = i venditori hanno dominato. Più grande è il corpo, più forte è il movimento.',
+      long_body_desc:
+        'Un corpo molto alto (di qualsiasi colore) indica forte slancio. Verde = i compratori hanno dominato. Rosso = i venditori hanno dominato. Più grande è il corpo, più forte è il movimento.',
       small_body: 'Corpo Piccolo (Doji)',
-      small_body_desc: 'Quando Apertura e Chiusura sono quasi uguali, il corpo è minuscolo. Significa indecisione — né compratori né venditori hanno vinto. Appare spesso prima di un\'inversione di tendenza.',
+      small_body_desc:
+        "Quando Apertura e Chiusura sono quasi uguali, il corpo è minuscolo. Significa indecisione — né compratori né venditori hanno vinto. Appare spesso prima di un'inversione di tendenza.",
       long_wick_up: 'Stoppino Superiore Lungo',
-      long_wick_up_desc: 'Il prezzo è salito rapidamente ma è stato respinto in basso entro la chiusura. I venditori hanno reagito. Spesso è un segnale ribassista, specialmente dopo un trend rialzista.',
+      long_wick_up_desc:
+        'Il prezzo è salito rapidamente ma è stato respinto in basso entro la chiusura. I venditori hanno reagito. Spesso è un segnale ribassista, specialmente dopo un trend rialzista.',
       long_wick_down: 'Stoppino Inferiore Lungo',
-      long_wick_down_desc: 'Il prezzo è sceso ma i compratori lo hanno spinto di nuovo su. Spesso è un segnale rialzista, specialmente dopo un trend ribassista. A volte chiamato "martello".',
+      long_wick_down_desc:
+        'Il prezzo è sceso ma i compratori lo hanno spinto di nuovo su. Spesso è un segnale rialzista, specialmente dopo un trend ribassista. A volte chiamato "martello".',
       consecutive: 'Colori Consecutivi',
-      consecutive_desc: 'Più candele verdi di fila = trend rialzista (i prezzi salgono). Più candele rosse = trend ribassista (i prezzi scendono). Un cambio di colore dopo una serie può segnalare un\'inversione.',
+      consecutive_desc:
+        "Più candele verdi di fila = trend rialzista (i prezzi salgono). Più candele rosse = trend ribassista (i prezzi scendono). Un cambio di colore dopo una serie può segnalare un'inversione."
     },
 
     // ── 3. Interazione con il Grafico ──
     chart_ui: {
       title: 'Usare il Grafico',
       zoom: 'Zoom Avanti/Indietro',
-      zoom_desc: 'Usa la rotella del mouse (o il pinch) per zoomare nel grafico. Zoomare avanti mostra le singole candele in dettaglio. Zoomare indietro mostra il quadro generale.',
+      zoom_desc:
+        'Usa la rotella del mouse (o il pinch) per zoomare nel grafico. Zoomare avanti mostra le singole candele in dettaglio. Zoomare indietro mostra il quadro generale.',
       pan: 'Scorrimento / Trascinamento',
-      pan_desc: 'Clicca e trascina a sinistra o destra per scorrere la cronologia dei prezzi. Ti permette di rivedere l\'azione dei prezzi passata.',
+      pan_desc:
+        "Clicca e trascina a sinistra o destra per scorrere la cronologia dei prezzi. Ti permette di rivedere l'azione dei prezzi passata.",
       crosshair: 'Mirino',
-      crosshair_desc: 'Passa il mouse sul grafico per vedere un mirino con il prezzo esatto e il tempo in quel punto. Ottimo per controllare livelli precisi.',
+      crosshair_desc:
+        'Passa il mouse sul grafico per vedere un mirino con il prezzo esatto e il tempo in quel punto. Ottimo per controllare livelli precisi.',
       time_range: 'Pulsanti Intervallo Temporale',
-      time_range_desc: 'Usa i pulsanti 1m / 5m / 15m / 1h / Tutto sopra il grafico per cambiare quante candele sono visibili. Intervalli più brevi mostrano dettagli recenti, intervalli più lunghi mostrano il trend completo.',
+      time_range_desc:
+        'Usa i pulsanti 1m / 5m / 15m / 1h / Tutto sopra il grafico per cambiare quante candele sono visibili. Intervalli più brevi mostrano dettagli recenti, intervalli più lunghi mostrano il trend completo.',
       buy_line: 'Linea Prezzo Medio di Acquisto',
-      buy_line_desc: 'Se hai una posizione, una linea tratteggiata orizzontale mostra il tuo prezzo medio di acquisto. Quando il prezzo attuale è sopra questa linea, sei in profitto. Sotto = perdita.',
+      buy_line_desc:
+        'Se hai una posizione, una linea tratteggiata orizzontale mostra il tuo prezzo medio di acquisto. Quando il prezzo attuale è sopra questa linea, sei in profitto. Sotto = perdita.'
     },
 
     // ── 4. Modalità di Trading ──
     modes: {
       title: 'Come Fare Trading',
       qty: 'Modalità Quantità',
-      qty_desc: 'Inserisci un numero specifico di azioni (titoli) o monete (crypto) che vuoi comprare o vendere. Il costo stimato è mostrato sotto. Clicca Compra o Vendi per eseguire istantaneamente al prezzo di mercato.',
+      qty_desc:
+        'Inserisci un numero specifico di azioni (titoli) o monete (crypto) che vuoi comprare o vendere. Il costo stimato è mostrato sotto. Clicca Compra o Vendi per eseguire istantaneamente al prezzo di mercato.',
       pct: 'Modalità Percentuale',
-      pct_desc: 'Scegli quale % del tuo denaro disponibile spendere (10%, 25%, 50%, o 100%). Il sistema calcola quante azioni/monete puoi comprare. Rapido e facile per dimensionare le posizioni.',
+      pct_desc:
+        'Scegli quale % del tuo denaro disponibile spendere (10%, 25%, 50%, o 100%). Il sistema calcola quante azioni/monete puoi comprare. Rapido e facile per dimensionare le posizioni.',
       limit: 'Modalità Ordine Limite',
-      limit_desc: 'Imposta un prezzo obiettivo e l\'ordine si esegue automaticamente quando il mercato lo raggiunge. Perfetto per comprare nei ribassi o vendere a prezzi obiettivo senza guardare il grafico costantemente.',
+      limit_desc:
+        "Imposta un prezzo obiettivo e l'ordine si esegue automaticamente quando il mercato lo raggiunge. Perfetto per comprare nei ribassi o vendere a prezzi obiettivo senza guardare il grafico costantemente."
     },
 
     // ── 5. Tipi di Ordine ──
     orders: {
       title: 'Tipi di Ordine Spiegati',
       market: 'Ordine a Mercato',
-      market_desc: 'Compra o vende immediatamente al prezzo corrente. Usato nelle modalità Quantità e Percentuale. Veloce ma ottieni qualsiasi sia il prezzo attuale.',
+      market_desc:
+        'Compra o vende immediatamente al prezzo corrente. Usato nelle modalità Quantità e Percentuale. Veloce ma ottieni qualsiasi sia il prezzo attuale.',
       limit_buy: 'Acquisto Limite',
-      limit_buy_desc: 'Imposta un prezzo SOTTO il prezzo di mercato corrente. Quando il prezzo scende al (o sotto il) tuo obiettivo, il sistema compra automaticamente per te. Usalo per "comprare il calo" senza stare a guardare.',
+      limit_buy_desc:
+        'Imposta un prezzo SOTTO il prezzo di mercato corrente. Quando il prezzo scende al (o sotto il) tuo obiettivo, il sistema compra automaticamente per te. Usalo per "comprare il calo" senza stare a guardare.',
       limit_sell: 'Vendita Limite',
-      limit_sell_desc: 'Imposta un prezzo SOPRA il prezzo di mercato corrente. Quando il prezzo sale al (o sopra il) tuo obiettivo, il sistema vende per te. Usalo per bloccare i profitti a un prezzo specifico.',
+      limit_sell_desc:
+        'Imposta un prezzo SOPRA il prezzo di mercato corrente. Quando il prezzo sale al (o sopra il) tuo obiettivo, il sistema vende per te. Usalo per bloccare i profitti a un prezzo specifico.',
       stop_loss: 'Stop Loss',
-      stop_loss_desc: 'Una vendita automatica che si attiva quando il prezzo SCENDE al tuo obiettivo. Ti protegge da grandi perdite. Esempio: compri a $100, imposti stop loss a $90 — se scende a $90, la posizione viene venduta automaticamente.',
+      stop_loss_desc:
+        'Una vendita automatica che si attiva quando il prezzo SCENDE al tuo obiettivo. Ti protegge da grandi perdite. Esempio: compri a $100, imposti stop loss a $90 — se scende a $90, la posizione viene venduta automaticamente.',
       take_profit: 'Take Profit',
-      take_profit_desc: 'Una vendita automatica che si attiva quando il prezzo SALE al tuo obiettivo. Blocca i guadagni senza dover monitorare manualmente. Esempio: compri a $100, take profit a $130 — vende automaticamente a $130.',
+      take_profit_desc:
+        'Una vendita automatica che si attiva quando il prezzo SALE al tuo obiettivo. Blocca i guadagni senza dover monitorare manualmente. Esempio: compri a $100, take profit a $130 — vende automaticamente a $130.',
       expiration: 'Scadenza Ordine',
-      expiration_desc: 'Gli ordini possono essere GTC (Valido fino a Cancellazione — resta attivo indefinitamente), o impostati per scadere dopo 1 giorno, 7 giorni, 30 giorni o 90 giorni. Gli ordini scaduti vengono cancellati e i fondi liberati.',
+      expiration_desc:
+        'Gli ordini possono essere GTC (Valido fino a Cancellazione — resta attivo indefinitamente), o impostati per scadere dopo 1 giorno, 7 giorni, 30 giorni o 90 giorni. Gli ordini scaduti vengono cancellati e i fondi liberati.'
     },
 
     // ── 6. Posizione & P/L ──
     position: {
       title: 'Capire la Tua Posizione',
       avg_price: 'Prezzo Medio di Acquisto',
-      avg_price_desc: 'Se compri lo stesso asset più volte a prezzi diversi, il tuo prezzo medio è la media ponderata. Esempio: compri 10 a $50, poi 10 a $60 → media = $55.',
+      avg_price_desc:
+        'Se compri lo stesso asset più volte a prezzi diversi, il tuo prezzo medio è la media ponderata. Esempio: compri 10 a $50, poi 10 a $60 → media = $55.',
       unrealized: 'P/L Non Realizzato',
-      unrealized_desc: 'Il tuo profitto o perdita "su carta". È (prezzo attuale × quantità) meno (totale investito). Cambia ad ogni tick. Guadagni o perdi effettivamente solo quando vendi.',
+      unrealized_desc:
+        'Il tuo profitto o perdita "su carta". È (prezzo attuale × quantità) meno (totale investito). Cambia ad ogni tick. Guadagni o perdi effettivamente solo quando vendi.',
       realized: 'P/L Realizzato',
-      realized_desc: 'Il profitto o perdita effettivo dalle vendite completate. Una volta che vendi, il P/L diventa "realizzato" e viene aggiunto permanentemente al tuo risultato.',
+      realized_desc:
+        'Il profitto o perdita effettivo dalle vendite completate. Una volta che vendi, il P/L diventa "realizzato" e viene aggiunto permanentemente al tuo risultato.',
       pnl_pct: 'Percentuale P/L',
-      pnl_pct_desc: 'Mostra il tuo profitto/perdita come percentuale di quanto hai investito. +20% significa che sei in guadagno del 20% sul tuo investimento. Utile per confrontare le performance tra asset diversi.',
+      pnl_pct_desc:
+        'Mostra il tuo profitto/perdita come percentuale di quanto hai investito. +20% significa che sei in guadagno del 20% sul tuo investimento. Utile per confrontare le performance tra asset diversi.'
     },
 
     // ── 7. Metriche Chiave ──
     metrics: {
       title: 'Metriche Chiave',
       ath: 'ATH (Massimo Storico)',
-      ath_desc: 'Il prezzo più alto mai raggiunto da questo asset. Mostrato in verde. La percentuale "distanza" mostra quanto il prezzo corrente è lontano dall\'ATH.',
+      ath_desc:
+        'Il prezzo più alto mai raggiunto da questo asset. Mostrato in verde. La percentuale "distanza" mostra quanto il prezzo corrente è lontano dall\'ATH.',
       atl: 'ATL (Minimo Storico)',
-      atl_desc: 'Il prezzo più basso mai raggiunto da questo asset. Mostrato in rosso. La percentuale "distanza" mostra quanto sopra l\'ATL si trova il prezzo corrente.',
+      atl_desc:
+        'Il prezzo più basso mai raggiunto da questo asset. Mostrato in rosso. La percentuale "distanza" mostra quanto sopra l\'ATL si trova il prezzo corrente.',
       change: 'Variazione % Prezzo',
-      change_desc: 'La variazione percentuale tra il tick precedente e il prezzo corrente. Pillola verde = prezzo salito. Pillola rossa = prezzo sceso. Mostrato nell\'intestazione.',
+      change_desc:
+        "La variazione percentuale tra il tick precedente e il prezzo corrente. Pillola verde = prezzo salito. Pillola rossa = prezzo sceso. Mostrato nell'intestazione.",
       dividends: 'Dividendi',
-      dividends_desc: 'Alcune azioni pagano reddito passivo (dividendi) basato sul loro rendimento annuale. I dividendi maturano ogni 10 secondi e vengono aggiunti al tuo saldo automaticamente.',
+      dividends_desc:
+        'Alcune azioni pagano reddito passivo (dividendi) basato sul loro rendimento annuale. I dividendi maturano ogni 10 secondi e vengono aggiunti al tuo saldo automaticamente.',
       staking: 'Ricompense di Staking',
-      staking_desc: 'Le crypto Proof-of-Stake guadagnano ricompense di staking passive mentre le detieni. Non tutte le crypto hanno lo staking — i meme token tipicamente hanno rendimento zero.',
+      staking_desc:
+        'Le crypto Proof-of-Stake guadagnano ricompense di staking passive mentre le detieni. Non tutte le crypto hanno lo staking — i meme token tipicamente hanno rendimento zero.'
     },
 
     // ── 8. Consigli e Strategia ──
     tips: {
       title: 'Consigli e Strategia',
       diversify: 'Diversifica',
-      diversify_desc: 'Non mettere tutti i tuoi soldi in un solo asset. Distribuisci su più asset per ridurre il rischio. Se uno crolla, gli altri potrebbero essere ancora profittevoli.',
+      diversify_desc:
+        'Non mettere tutti i tuoi soldi in un solo asset. Distribuisci su più asset per ridurre il rischio. Se uno crolla, gli altri potrebbero essere ancora profittevoli.',
       dca: 'Dollar-Cost Average (DCA)',
-      dca_desc: 'Invece di comprare tutto in una volta, compra quantità più piccole nel tempo. Questo livella il tuo prezzo medio e riduce il rischio di comprare nel momento peggiore.',
+      dca_desc:
+        'Invece di comprare tutto in una volta, compra quantità più piccole nel tempo. Questo livella il tuo prezzo medio e riduce il rischio di comprare nel momento peggiore.',
       stop_loss: 'Usa Sempre gli Stop Loss',
-      stop_loss_desc: 'Imposta un ordine stop loss al 10-20% sotto il tuo prezzo di acquisto. Questo limita la tua perdita massima se il mercato si muove contro di te. Meglio perdere poco che perdere tutto.',
+      stop_loss_desc:
+        'Imposta un ordine stop loss al 10-20% sotto il tuo prezzo di acquisto. Questo limita la tua perdita massima se il mercato si muove contro di te. Meglio perdere poco che perdere tutto.',
       conditions: 'Osserva le Condizioni di Mercato',
-      conditions_desc: 'Fai attenzione al banner delle Condizioni di Mercato (Toro, Orso, Crash, Bolla). Durante i mercati Toro, i prezzi tendono a salire. Durante i Crash, considera di vendere o restare fuori fino alla ripresa.',
+      conditions_desc:
+        'Fai attenzione al banner delle Condizioni di Mercato (Toro, Orso, Crash, Bolla). Durante i mercati Toro, i prezzi tendono a salire. Durante i Crash, considera di vendere o restare fuori fino alla ripresa.',
       patience: 'Sii Paziente',
-      patience_desc: 'Non vendere in panico alla prima candela rossa. I mercati naturalmente salgono e scendono. Se i fondamentali sono solidi, i cali a breve termine sono normali. Usa il grafico per vedere il trend generale.',
-    },
+      patience_desc:
+        'Non vendere in panico alla prima candela rossa. I mercati naturalmente salgono e scendono. Se i fondamentali sono solidi, i cali a breve termine sono normali. Usa il grafico per vedere il trend generale.'
+    }
   },
 
   // ─── Riepilogo Offline ────────────────────────────────────────
@@ -2226,7 +2696,7 @@ export default {
     welcome_back: 'Bentornato!',
     time_away: 'Tempo assente',
     efficiency: 'Efficienza offline',
-    no_income: 'Nessuna fonte di reddito attiva durante l\'assenza.',
+    no_income: "Nessuna fonte di reddito attiva durante l'assenza.",
     total_earned: 'Totale Contanti Guadagnati',
     collect: 'Riscuoti',
     job_income: 'Reddito Lavoro',
@@ -2235,7 +2705,7 @@ export default {
     dividends: 'Dividendi',
     staking: 'Ricompense Staking',
     deposit_interest: 'Interessi Deposito (aggiunti ai saldi)',
-    loan_interest: 'Interessi Prestito (aggiunti al debito)',
+    loan_interest: 'Interessi Prestito (aggiunti al debito)'
   },
 
   // ─── Grafici ──────────────────────────────────────────────────
@@ -2253,14 +2723,15 @@ export default {
     pl_label: 'P/L',
     candle: 'Candlestick',
     line: 'Grafico a Linee',
-    no_candles: 'Nessun dato candlestick ancora — continua a fare trading per generare candele OHLC.',
+    no_candles:
+      'Nessun dato candlestick ancora — continua a fare trading per generare candele OHLC.',
     tip_range: 'Mostra le ultime {n} candele sul grafico',
     tip_range_all: 'Mostra tutte le candele disponibili',
     tip_reset_zoom: 'Reimposta zoom e panoramica al range selezionato',
     tip_price_live: 'Prezzo di mercato attuale con variazione nel range selezionato',
     tip_high: 'Prezzo più alto nel range visibile',
     tip_low: 'Prezzo più basso nel range visibile',
-    tip_chart_area: 'Scrolla per zoomare, trascina per scorrere',
+    tip_chart_area: 'Scrolla per zoomare, trascina per scorrere'
   },
 
   // ─── Ordini Limite ────────────────────────────────────────────
@@ -2298,7 +2769,8 @@ export default {
     current_market: 'Mercato',
     tip_mode_qty: 'Compra o vendi un numero specifico di azioni/monete',
     tip_mode_pct: 'Compra usando una percentuale dei tuoi contanti disponibili',
-    tip_mode_limit: 'Piazza ordini automatici che si eseguono al raggiungimento di un prezzo obiettivo',
+    tip_mode_limit:
+      'Piazza ordini automatici che si eseguono al raggiungimento di un prezzo obiettivo',
     tip_qty_input: 'Numero di azioni o monete da scambiare',
     tip_buy: 'Compra al prezzo di mercato attuale',
     tip_sell: 'Vendi al prezzo di mercato attuale',
@@ -2307,15 +2779,18 @@ export default {
     tip_limit_buy: 'Acquista automaticamente quando il prezzo scende al target o sotto',
     tip_limit_sell: 'Vendi automaticamente quando il prezzo sale al target o sopra',
     tip_stop_loss: 'Vendi automaticamente per limitare le perdite se il prezzo scende al target',
-    tip_take_profit: 'Vendi automaticamente per bloccare i profitti quando il prezzo raggiunge il target',
-    tip_target_price: 'Il prezzo a cui l\'ordine verrà attivato',
+    tip_take_profit:
+      'Vendi automaticamente per bloccare i profitti quando il prezzo raggiunge il target',
+    tip_target_price: "Il prezzo a cui l'ordine verrà attivato",
     tip_set_market: 'Imposta il prezzo obiettivo al prezzo di mercato attuale',
     tip_limit_qty: 'Numero di azioni/monete per questo ordine',
-    tip_expiration: 'Per quanto tempo l\'ordine resta attivo prima di annullarsi automaticamente',
-    tip_expire_gtc: 'Good Till Cancelled — resta attivo finchè non viene eseguito o annullato manualmente',
+    tip_expiration: "Per quanto tempo l'ordine resta attivo prima di annullarsi automaticamente",
+    tip_expire_gtc:
+      'Good Till Cancelled — resta attivo finchè non viene eseguito o annullato manualmente',
     tip_cost_estimate: 'Totale stimato per questo ordine al prezzo obiettivo',
-    tip_place_order: 'Invia questo ordine limite — si eseguirà automaticamente quando le condizioni sono soddisfatte',
-    tip_cancel_order: 'Annulla questo ordine in sospeso',
+    tip_place_order:
+      'Invia questo ordine limite — si eseguirà automaticamente quando le condizioni sono soddisfatte',
+    tip_cancel_order: 'Annulla questo ordine in sospeso'
   },
 
   // ─── Dev Cheats ───────────────────────────────────────────────
@@ -2375,7 +2850,7 @@ export default {
     bm_heat_label: 'Calore:',
     bm_effects_label: 'Effetti:',
     bm_investigations_label: 'Indagini:',
-    bm_contacts_label: 'Contatti:',
+    bm_contacts_label: 'Contatti:'
   },
 
   // ─── Aste Garage (Storage Wars) ───────────────────────────────
@@ -2392,7 +2867,7 @@ export default {
     starting_bid: 'Offerta iniziale',
     items_inside: 'Oggetti dentro',
     unknown_items: '???',
-    enter_auction: 'Entra all\'asta',
+    enter_auction: "Entra all'asta",
 
     auction_in_progress: 'Asta in corso',
     round_n: 'Round {n}',
@@ -2406,7 +2881,7 @@ export default {
     your_bid: 'La tua offerta',
     place_bid: 'Fai offerta',
     leave_auction: 'Abbandona asta',
-    you_won: 'Hai vinto l\'asta!',
+    you_won: "Hai vinto l'asta!",
     auction_lost: 'Hai perso questa asta.',
     going_once: 'Uno!',
     going_twice: 'Due!',
@@ -2419,9 +2894,11 @@ export default {
     tactic_intimidate: 'Intimidisci',
     tactic_bluff: 'Bluffa',
     tactic_sniper: 'Offerta Sniper',
-    tactic_intimidate_desc: 'Mostra dominanza — spaventa i deboli, ma può provocare quelli aggressivi.',
+    tactic_intimidate_desc:
+      'Mostra dominanza — spaventa i deboli, ma può provocare quelli aggressivi.',
     tactic_bluff_desc: 'Fingi entusiasmo — può ingannare offerenti cauti facendoli ritirare.',
-    tactic_sniper_desc: 'Offerta last-second con un sovrapprezzo — coglie di sorpresa gli NPC. Solo durante le fasi finali.',
+    tactic_sniper_desc:
+      'Offerta last-second con un sovrapprezzo — coglie di sorpresa gli NPC. Solo durante le fasi finali.',
 
     // Reazioni tattiche
     intimidate_dropped: 'Si è ritirato!',
@@ -2445,12 +2922,12 @@ export default {
     tell_whistling: 'Fischietta con disinvoltura...',
     tell_looking_around: 'Si guarda intorno distrattamente...',
     tell_scratching_head: 'Si gratta la testa...',
-    tell_watching_closely: 'Osserva l\'asta attentamente...',
+    tell_watching_closely: "Osserva l'asta attentamente...",
     tell_arms_crossed: 'In piedi con le braccia incrociate...',
     tell_locked_in: 'Concentrato — non se ne va.',
-    tell_looking_confused: 'Sembra un po\' confuso...',
+    tell_looking_confused: "Sembra un po' confuso...",
     tell_fidgeting: 'Giocherella con le mani...',
-    tell_eyeing_exit: 'Guarda verso l\'uscita...',
+    tell_eyeing_exit: "Guarda verso l'uscita...",
     tell_smirking: 'Sorriso compiaciuto...',
     tell_poker_face: 'Faccia da poker perfetta.',
     tell_avoiding_eye_contact: 'Evita lo sguardo...',
@@ -2459,9 +2936,10 @@ export default {
     lot_tier_junk: 'Scarto',
     lot_tier_junk_desc: 'Un lotto trascurato — perlopiù robaccia, ma non si sa mai...',
     lot_tier_standard: 'Standard',
-    lot_tier_standard_desc: 'Un\'unità tipica con un mix equilibrato di oggetti.',
+    lot_tier_standard_desc: "Un'unità tipica con un mix equilibrato di oggetti.",
     lot_tier_notable: 'Notevole',
-    lot_tier_notable_desc: 'Questo lotto ha attirato attenzione — potrebbe nascondere qualcosa di speciale.',
+    lot_tier_notable_desc:
+      'Questo lotto ha attirato attenzione — potrebbe nascondere qualcosa di speciale.',
     lot_tier_premium: 'Premium',
     lot_tier_premium_desc: 'Un lotto di alta qualità con ottime probabilità di trovare pezzi rari.',
     lot_tier_legendary: 'Leggendario',
@@ -2472,35 +2950,44 @@ export default {
     lot_event_nervous_bidder: 'Offerente Nervoso',
     lot_event_nervous_bidder_desc: 'Un rivale si lascia prendere dal panico e si ritira.',
     lot_event_leaked_manifest: 'Manifesto Trapelato',
-    lot_event_leaked_manifest_desc: 'Qualcuno ha fatto trapelare parte del contenuto — un offerente rivela il suo budget.',
+    lot_event_leaked_manifest_desc:
+      'Qualcuno ha fatto trapelare parte del contenuto — un offerente rivela il suo budget.',
     lot_event_auctioneer_discount: 'Sconto del Banditore',
-    lot_event_auctioneer_discount_desc: 'Il banditore abbassa l\'incremento per questo lotto.',
+    lot_event_auctioneer_discount_desc: "Il banditore abbassa l'incremento per questo lotto.",
     lot_event_forgotten_safe: 'Cassaforte Dimenticata',
-    lot_event_forgotten_safe_desc: 'Una cassaforte nascosta è stata scoperta nell\'unità — oggetto extra garantito!',
+    lot_event_forgotten_safe_desc:
+      "Una cassaforte nascosta è stata scoperta nell'unità — oggetto extra garantito!",
     lot_event_bonus_crate: 'Cassa Bonus',
-    lot_event_bonus_crate_desc: 'Una cassa extra è stata trovata in fondo all\'unità.',
+    lot_event_bonus_crate_desc: "Una cassa extra è stata trovata in fondo all'unità.",
     lot_event_pristine_find: 'Ritrovamento Perfetto',
     lot_event_pristine_find_desc: 'Uno degli oggetti è in condizioni sorprendentemente perfette.',
     lot_event_entry_refund: 'Rimborso Ingresso',
-    lot_event_entry_refund_desc: 'Il banditore emette un rimborso parziale sulla quota d\'ingresso.',
+    lot_event_entry_refund_desc: "Il banditore emette un rimborso parziale sulla quota d'ingresso.",
     lot_event_lucky_break: 'Colpo di Fortuna',
     lot_event_lucky_break_desc: 'La fortuna sorride — un oggetto ottiene un upgrade di rarità!',
     lot_event_insurance_payout: 'Rimborso Assicurativo',
-    lot_event_insurance_payout_desc: 'Un reclamo precedente è stato risolto — ricevi un piccolo bonus.',
+    lot_event_insurance_payout_desc:
+      'Un reclamo precedente è stato risolto — ricevi un piccolo bonus.',
     lot_event_bidding_war: 'Guerra di Offerte',
-    lot_event_bidding_war_desc: 'La tensione sale! Tutti gli offerenti alzano le loro offerte massime.',
+    lot_event_bidding_war_desc:
+      'La tensione sale! Tutti gli offerenti alzano le loro offerte massime.',
     lot_event_auctioneer_surcharge: 'Sovrapprezzo Banditore',
-    lot_event_auctioneer_surcharge_desc: 'Il banditore alza l\'incremento a causa dell\'alta domanda.',
+    lot_event_auctioneer_surcharge_desc:
+      "Il banditore alza l'incremento a causa dell'alta domanda.",
     lot_event_water_damage: 'Danno da Acqua',
-    lot_event_water_damage_desc: 'L\'acqua è penetrata nell\'unità — alcuni oggetti potrebbero essere danneggiati.',
+    lot_event_water_damage_desc:
+      "L'acqua è penetrata nell'unità — alcuni oggetti potrebbero essere danneggiati.",
     lot_event_late_shark: 'Squalo in Ritardo',
-    lot_event_late_shark_desc: 'Un offerente facoltoso arriva in ritardo e si unisce all\'asta!',
+    lot_event_late_shark_desc: "Un offerente facoltoso arriva in ritardo e si unisce all'asta!",
     lot_event_crowd_surge: 'Afflusso di Folla',
-    lot_event_crowd_surge_desc: 'La folla si ingrossa — un nuovo offerente si fa avanti a metà asta.',
+    lot_event_crowd_surge_desc:
+      'La folla si ingrossa — un nuovo offerente si fa avanti a metà asta.',
     lot_event_mystery_box: 'Scatola Misteriosa',
-    lot_event_mystery_box_desc: 'Una scatola sigillata viene aggiunta al lotto — potrebbe essere qualsiasi cosa!',
+    lot_event_mystery_box_desc:
+      'Una scatola sigillata viene aggiunta al lotto — potrebbe essere qualsiasi cosa!',
     lot_event_famous_owner: 'Proprietario Famoso',
-    lot_event_famous_owner_desc: 'Si dice che questa unità appartenesse a qualcuno di famoso — bonus XP!',
+    lot_event_famous_owner_desc:
+      'Si dice che questa unità appartenesse a qualcuno di famoso — bonus XP!',
     lot_event_power_outage: 'Blackout',
     lot_event_power_outage_desc: 'Le luci tremolano — le offerte si fermano e un rivale si ritira.',
 
@@ -2532,7 +3019,7 @@ export default {
     // Sessione P&L
     session_pnl_title: 'P&L Sessione',
     session_reset: 'Reset',
-    session_entry_fees: 'Quote d\'ingresso',
+    session_entry_fees: "Quote d'ingresso",
     session_bids: 'Offerte aste',
     session_appraisals: 'Valutazioni',
     session_storage_fees: 'Costi deposito',
@@ -2542,39 +3029,48 @@ export default {
     session_entered: 'entrate',
     session_won: 'vinte',
     session_sold: 'venduti',
-    session_empty: 'Nessuna attività in questa sessione. Entra in un\'asta per iniziare.',
+    session_empty: "Nessuna attività in questa sessione. Entra in un'asta per iniziare.",
 
     no_auctions: 'Nessuna asta disponibile al momento.',
-    no_auctions_hint: 'Nuove aste appaiono periodicamente. Sblocca più sedi aumentando il tuo saldo.',
+    no_auctions_hint:
+      'Nuove aste appaiono periodicamente. Sblocca più sedi aumentando il tuo saldo.',
 
     info_title: 'Come funzionano le Aste Garage',
-    info_desc: 'Fai offerte su unità di stoccaggio abbandonate senza sapere cosa c\'è dentro. Raccogli oggetti, falli valutare per scoprire il vero valore, e vendi per profitto!',
-    info_how_title: 'Processo d\'asta',
+    info_desc:
+      "Fai offerte su unità di stoccaggio abbandonate senza sapere cosa c'è dentro. Raccogli oggetti, falli valutare per scoprire il vero valore, e vendi per profitto!",
+    info_how_title: "Processo d'asta",
     info_browse: 'Esplora',
     info_browse_desc: 'Guarda le unità disponibili con indizi sul contenuto.',
     info_bid: 'Offri',
-    info_bid_desc: 'Competi contro offerenti NPC. Ognuno ha personalità diverse – alcuni aggressivi, altri cauti.',
+    info_bid_desc:
+      'Competi contro offerenti NPC. Ognuno ha personalità diverse – alcuni aggressivi, altri cauti.',
     info_win: 'Vinci',
-    info_win_desc: 'Se hai l\'offerta più alta quando scade il tempo, l\'unità è tua.',
+    info_win_desc: "Se hai l'offerta più alta quando scade il tempo, l'unità è tua.",
     info_appraise: 'Valuta',
-    info_appraise_desc: 'Assumi periti per valutare gli oggetti. Periti migliori costano di più ma sono più precisi.',
+    info_appraise_desc:
+      'Assumi periti per valutare gli oggetti. Periti migliori costano di più ma sono più precisi.',
     info_sell: 'Vendi',
-    info_sell_desc: 'Vendi oggetti per profitto. Una tassa del 20% è applicata (35% se non valutato). Valuta prima per massimizzare i ricavi!',
+    info_sell_desc:
+      'Vendi oggetti per profitto. Una tassa del 20% è applicata (35% se non valutato). Valuta prima per massimizzare i ricavi!',
     info_tips_title: 'Consigli',
     info_tip_peek: 'Leggi gli indizi',
-    info_tip_peek_desc: 'Gli indizi rivelano le categorie degli oggetti. Impara a leggerli per stimare il valore.',
+    info_tip_peek_desc:
+      'Gli indizi rivelano le categorie degli oggetti. Impara a leggerli per stimare il valore.',
     info_tip_bidders: 'Osserva gli offerenti',
-    info_tip_bidders_desc: 'Offerenti aggressivi alzano i prezzi. Se molti si ritirano presto, l\'unità potrebbe non valere molto.',
+    info_tip_bidders_desc:
+      "Offerenti aggressivi alzano i prezzi. Se molti si ritirano presto, l'unità potrebbe non valere molto.",
     info_tip_appraise: 'Investi nelle valutazioni',
-    info_tip_appraise_desc: 'Periti migliori possono scoprire bonus nascosti, moltiplicando significativamente il valore.',
+    info_tip_appraise_desc:
+      'Periti migliori possono scoprire bonus nascosti, moltiplicando significativamente il valore.',
     info_tip_luck: 'La fortuna conta',
-    info_tip_luck_desc: 'I bonus fortuna dal casinò e dall\'albero abilità influenzano la qualità degli oggetti.',
+    info_tip_luck_desc:
+      "I bonus fortuna dal casinò e dall'albero abilità influenzano la qualità degli oggetti.",
 
     ach_first_win: 'Hai vinto la tua prima asta.',
     ach_treasure_hunter: 'Trovato un oggetto leggendario o mitico.',
     ach_flipper: 'Venduti 50 oggetti dalle aste.',
     ach_storage_mogul: 'Vinte 25 aste.',
-    ach_jackpot_unit: 'Trovata un\'unità dal valore 10x il prezzo pagato.',
+    ach_jackpot_unit: "Trovata un'unità dal valore 10x il prezzo pagato."
   },
 
   // ─── Shop Online ──────────────────────────────────────────────
@@ -2693,7 +3189,8 @@ export default {
     workshop_cost_1step: 'Costo (+1 fase)',
     workshop_restore_1: 'Restaura +1',
     workshop_restore_max: 'Restaura al Max',
-    workshop_no_items: 'Nessun oggetto da restaurare. Compra oggetti in condizioni inferiori dallo shop!',
+    workshop_no_items:
+      'Nessun oggetto da restaurare. Compra oggetti in condizioni inferiori dallo shop!',
 
     // ── Statistiche Restauro ────────────────────────────────
     stat_restored: 'Restaurati',
@@ -2709,7 +3206,7 @@ export default {
     auction_bidder: 'Miglior Offerente',
     auction_bidders_count: 'Offerenti',
     auction_cancel: 'Annulla Asta',
-    auction_none_active: "Nessuna asta attiva. Metti in vendita oggetti per ricevere offerte!",
+    auction_none_active: 'Nessuna asta attiva. Metti in vendita oggetti per ricevere offerte!',
     auction_list_item: "Metti un Oggetto all'Asta",
     auction_list: "Metti all'Asta",
     auction_max_reached: 'Numero massimo di aste attive raggiunto. Attendi che una finisca.',
@@ -2731,13 +3228,14 @@ export default {
     auction_heat_cool: 'Calmo',
     auction_buy_now_label: 'Compralo Subito',
     auction_source_vault: 'Cassaforte',
-    auction_source_storage: 'Magazzino',
+    auction_source_storage: 'Magazzino'
   },
 
   // ─── Cassaforte ───────────────────────────────────────────────
   vault: {
     title: 'Cassaforte Personale',
-    subtitle: 'Il tuo magazzino protetto. Oggetti e contanti qui sono al sicuro da tutti gli eventi.',
+    subtitle:
+      'Il tuo magazzino protetto. Oggetti e contanti qui sono al sicuro da tutti gli eventi.',
     tab_items: 'Oggetti',
     tab_cash: 'Contanti',
     search_placeholder: 'Cerca nella cassaforte...',
@@ -2781,12 +3279,12 @@ export default {
     sell: 'Vendi',
     upgrade_capacity: 'Potenzia Capacità',
     upgrade_capacity_desc: '+{slots} slot',
-    vault_full: 'Cassaforte piena. Potenzia la capacità per aggiungere altri oggetti.',
+    vault_full: 'Cassaforte piena. Potenzia la capacità per aggiungere altri oggetti.'
   },
 
   // ─── Pannello Info ────────────────────────────────────────────
   info: {
-    how_it_works: 'Come funziona',
+    how_it_works: 'Come funziona'
   },
 
   // ─── Mercato Nero ─────────────────────────────────────────────
@@ -2846,7 +3344,7 @@ export default {
     block_cooldown: 'In ricarica…',
     block_loyalty: 'Richiede {needed} lealtà (hai {current})',
     block_tier: 'Richiede grado di reputazione {tier}',
-    block_no_items: 'Nessun oggetto nell\'inventario',
+    block_no_items: "Nessun oggetto nell'inventario",
     block_daily_limit: 'Limite giornaliero raggiunto ({limit}/{limit})',
     block_no_stocks: 'Nessuna azione posseduta',
     block_no_crypto: 'Nessuna crypto posseduta',
@@ -2891,9 +3389,9 @@ export default {
     stat_heat_total: 'Calore Totale',
     stat_investigations: 'Indagini',
     notify_deal_success: 'Affare completato con successo!',
-    notify_deal_failed: 'L\'affare è andato storto...',
+    notify_deal_failed: "L'affare è andato storto...",
     notify_insufficient_cash: 'Cassa insufficiente.',
-    notify_deal_not_available: 'L\'affare non è più disponibile.',
+    notify_deal_not_available: "L'affare non è più disponibile.",
     notify_ability_success: 'Abilità usata con successo!',
     notify_contact_not_found: 'Contatto non trovato.',
     notify_ability_not_found: 'Abilità non trovata.',
@@ -2910,7 +3408,7 @@ export default {
     notify_insider_no_assets: 'Nessun asset disponibile per insider trading.',
     notify_fence_sold: 'Venduto "{item}" per {value} (+{premium}% premium)',
     notify_fence_bulk: 'Venduti {count} oggetti per {value} (+{premium}% premium)',
-    notify_fence_no_items: 'Nessun oggetto nell\'inventario da vendere.',
+    notify_fence_no_items: "Nessun oggetto nell'inventario da vendere.",
     notify_fence_daily_limit: 'Limite giornaliero ricettatore raggiunto.',
     notify_contraband: 'Contrabbando: guadagnati {value}!',
     notify_supply_run: 'Rifornimento attivo — riduzione costi + boost business per {duration}s',
@@ -2926,90 +3424,119 @@ export default {
     notify_dismiss_no_inv: 'Nessuna indagine attiva.',
 
     deal_leaked_earnings: 'Report Utili Trapelato',
-    deal_leaked_earnings_desc: 'Un insider aziendale vende i dati degli utili del prossimo trimestre prima dell\'annuncio pubblico.',
+    deal_leaked_earnings_desc:
+      "Un insider aziendale vende i dati degli utili del prossimo trimestre prima dell'annuncio pubblico.",
     deal_market_whisper: 'Sussurro di Mercato',
     deal_market_whisper_desc: 'Intel di strada sui trend di mercato da trader ben connessi.',
     deal_crypto_alpha: 'Crypto Alpha',
     deal_crypto_alpha_desc: 'Allocazione pre-lancio di token da un gruppo di sviluppatori anonimi.',
     deal_blackmail_files: 'File Compromettenti',
-    deal_blackmail_files_desc: 'File compromettenti su un dirigente potente. Usali con saggezza — o verrai bruciato.',
+    deal_blackmail_files_desc:
+      'File compromettenti su un dirigente potente. Usali con saggezza — o verrai bruciato.',
     deal_fallen_truck: 'Camion Caduto',
-    deal_fallen_truck_desc: 'Un camion pieno di merci è "caduto" dall\'autostrada. Soldi facili se riesci a spostarlo.',
+    deal_fallen_truck_desc:
+      'Un camion pieno di merci è "caduto" dall\'autostrada. Soldi facili se riesci a spostarlo.',
     deal_surplus_electronics: 'Elettronica in Eccesso',
-    deal_surplus_electronics_desc: 'Magazzino di elettronica "non registrata" disponibile a prezzo scontato.',
+    deal_surplus_electronics_desc:
+      'Magazzino di elettronica "non registrata" disponibile a prezzo scontato.',
     deal_storage_tip: 'Soffiata Aste',
     deal_storage_tip_desc: 'Un banditore ha un debito — ti sussurrerà quali unità valgono la pena.',
-    deal_weapons_cache: 'Deposito d\'Armi',
-    deal_weapons_cache_desc: 'Una spedizione militare è "scomparsa". Estremamente rischioso ma il guadagno è enorme.',
+    deal_weapons_cache: "Deposito d'Armi",
+    deal_weapons_cache_desc:
+      'Una spedizione militare è "scomparsa". Estremamente rischioso ma il guadagno è enorme.',
     deal_offshore_account: 'Conto Offshore',
     deal_offshore_account_desc: 'Apri un conto offshore non tracciabile per entrate esentasse.',
     deal_money_laundering: 'Riciclaggio',
     deal_money_laundering_desc: 'Ripulisci denaro sporco attraverso una rete di società fittizie.',
     deal_loan_forgery: 'Falsificazione Prestiti',
-    deal_loan_forgery_desc: 'Documenti falsi per ottenere condizioni di prestito migliori dalle banche ignare.',
+    deal_loan_forgery_desc:
+      'Documenti falsi per ottenere condizioni di prestito migliori dalle banche ignare.',
     deal_performance_enhancers: 'Potenziatori',
-    deal_performance_enhancers_desc: 'Potenziatori sperimentali di produttività per te e i tuoi dipendenti.',
+    deal_performance_enhancers_desc:
+      'Potenziatori sperimentali di produttività per te e i tuoi dipendenti.',
     deal_gambling_rig: 'Trucco al Casinò',
-    deal_gambling_rig_desc: 'Un croupier al casinò può spostare le probabilità a tuo favore... a un prezzo.',
+    deal_gambling_rig_desc:
+      'Un croupier al casinò può spostare le probabilità a tuo favore... a un prezzo.',
     deal_business_accelerator: 'Acceleratore Aziendale',
-    deal_business_accelerator_desc: 'Ormone della crescita industriale per le tue attività. Non chiedere cosa contiene.',
+    deal_business_accelerator_desc:
+      'Ormone della crescita industriale per le tue attività. Non chiedere cosa contiene.',
     deal_hostile_takeover: 'Acquisizione Ostile',
-    deal_hostile_takeover_desc: 'Usa materiale di ricatto per costringere un concorrente a vendere a prezzi stracciati.',
+    deal_hostile_takeover_desc:
+      'Usa materiale di ricatto per costringere un concorrente a vendere a prezzi stracciati.',
     deal_market_manipulation: 'Manipolazione di Mercato',
     deal_market_manipulation_desc: 'Coordina uno schema pump-and-dump su più exchange.',
     deal_dark_web_auction: 'Asta Dark Web',
-    deal_dark_web_auction_desc: 'Fai offerte su asset digitali rari in un\'asta clandestina esclusiva.',
-    deal_golden_heist: 'Il Colpo d\'Oro',
-    deal_golden_heist_desc: 'Il colpo della vita — un caveau pieno di lingotti d\'oro con una sicurezza sorprendentemente blanda.',
+    deal_dark_web_auction_desc:
+      "Fai offerte su asset digitali rari in un'asta clandestina esclusiva.",
+    deal_golden_heist: "Il Colpo d'Oro",
+    deal_golden_heist_desc:
+      "Il colpo della vita — un caveau pieno di lingotti d'oro con una sicurezza sorprendentemente blanda.",
     deal_shadow_empire: 'Impero Ombra',
-    deal_shadow_empire_desc: 'Costruisci un\'economia ombra parallela che convoglia ricchezza nelle tue attività legittime.',
+    deal_shadow_empire_desc:
+      "Costruisci un'economia ombra parallela che convoglia ricchezza nelle tue attività legittime.",
     deal_phantom_protocol: 'Protocollo Fantasma',
-    deal_phantom_protocol_desc: 'Attiva un protocollo fantasma che cancella la tua traccia di calore e potenzia le operazioni.',
+    deal_phantom_protocol_desc:
+      'Attiva un protocollo fantasma che cancella la tua traccia di calore e potenzia le operazioni.',
     contact_broker_name: 'Marcus "La Soffiata" Vance',
     contact_broker_title: 'Broker di Mercato',
-    contact_broker_desc: 'Un insider di mercato ben connesso che vende dritte su azioni e criptovalute.',
+    contact_broker_desc:
+      'Un insider di mercato ben connesso che vende dritte su azioni e criptovalute.',
     contact_fence_name: 'Silvia "Mani Veloci" Torres',
     contact_fence_title: 'Ricettatrice',
-    contact_fence_desc: 'Esperta nel muovere merci rapidamente. Può vendere i tuoi oggetti a prezzi premium.',
+    contact_fence_desc:
+      'Esperta nel muovere merci rapidamente. Può vendere i tuoi oggetti a prezzi premium.',
     contact_smuggler_name: 'Viktor "Rotta Fantasma" Kozlov',
     contact_smuggler_title: 'Contrabbandiere',
-    contact_smuggler_desc: 'Trasporta contrabbando oltre i confini. Può fornire merci rare e forniture aziendali.',
+    contact_smuggler_desc:
+      'Trasporta contrabbando oltre i confini. Può fornire merci rare e forniture aziendali.',
     contact_hacker_name: 'Zero Day',
     contact_hacker_title: 'Hacker',
-    contact_hacker_desc: 'Hacker anonimo che può manipolare i mercati digitali e sabotare i concorrenti.',
-    contact_fixer_name: 'L\'Architetto',
+    contact_hacker_desc:
+      'Hacker anonimo che può manipolare i mercati digitali e sabotare i concorrenti.',
+    contact_fixer_name: "L'Architetto",
     contact_fixer_title: 'Risolutore',
-    contact_fixer_desc: 'Il risolutore definitivo. Può far sparire le indagini e ripulire il tuo calore.',
+    contact_fixer_desc:
+      'Il risolutore definitivo. Può far sparire le indagini e ripulire il tuo calore.',
     ability_stock_tip: 'Soffiata Azioni',
-    ability_stock_tip_desc: 'Ottieni informazioni privilegiate sul prossimo movimento di un\'azione.',
+    ability_stock_tip_desc:
+      "Ottieni informazioni privilegiate sul prossimo movimento di un'azione.",
     ability_crypto_tip: 'Soffiata Crypto',
-    ability_crypto_tip_desc: 'Ottieni informazioni privilegiate sul prossimo movimento di una crypto.',
+    ability_crypto_tip_desc:
+      'Ottieni informazioni privilegiate sul prossimo movimento di una crypto.',
     ability_insider_trade: 'Insider Trading',
     ability_insider_trade_desc: 'Esegui un potente insider trade che manipola i prezzi di mercato.',
     ability_fence_sell: 'Vendita Premium',
-    ability_fence_sell_desc: 'Vendi oggetti a prezzi superiori al mercato attraverso canali sotterranei.',
-    ability_fence_bulk: 'Vendita all\'Ingrosso',
-    ability_fence_bulk_desc: 'Liquida tutti gli oggetti del magazzino a un prezzo premium in una transazione.',
+    ability_fence_sell_desc:
+      'Vendi oggetti a prezzi superiori al mercato attraverso canali sotterranei.',
+    ability_fence_bulk: "Vendita all'Ingrosso",
+    ability_fence_bulk_desc:
+      'Liquida tutti gli oggetti del magazzino a un prezzo premium in una transazione.',
     ability_fence_forge: 'Falsifica Provenienza',
-    ability_fence_forge_desc: 'Falsifica documenti di provenienza per aumentare permanentemente il valore di un oggetto. Genera calore.',
+    ability_fence_forge_desc:
+      'Falsifica documenti di provenienza per aumentare permanentemente il valore di un oggetto. Genera calore.',
     ability_fence_network: 'Rete Sotterranea',
-    ability_fence_network_desc: 'Attiva rete di acquirenti sotterranei: tutti i prezzi di vendita aumentati per 5 minuti.',
+    ability_fence_network_desc:
+      'Attiva rete di acquirenti sotterranei: tutti i prezzi di vendita aumentati per 5 minuti.',
     ability_contraband: 'Corsa Contrabbando',
     ability_contraband_desc: 'Ricevi merci di contrabbando ad alto valore convertite in contanti.',
     ability_supply_run: 'Rifornimento',
-    ability_supply_run_desc: 'Forniture di contrabbando riducono i costi aziendali e aumentano i ricavi.',
+    ability_supply_run_desc:
+      'Forniture di contrabbando riducono i costi aziendali e aumentano i ricavi.',
     ability_hack_stock: 'Hack Borsa',
-    ability_hack_stock_desc: 'Manipola il prezzo di un\'azione casuale su o giù.',
+    ability_hack_stock_desc: "Manipola il prezzo di un'azione casuale su o giù.",
     ability_hack_crypto: 'Hack Exchange Crypto',
     ability_hack_crypto_desc: 'Manipola il prezzo di una crypto casuale su o giù.',
     ability_ddos: 'Attacco DDoS',
-    ability_ddos_desc: 'Interruzione massiva che raddoppia i ricavi aziendali e aumenta tutte le entrate.',
+    ability_ddos_desc:
+      'Interruzione massiva che raddoppia i ricavi aziendali e aumenta tutte le entrate.',
     ability_clear_event: 'Rimuovi Evento',
-    ability_clear_event_desc: 'Fai sparire un evento negativo. Il costo varia in base alla gravità.',
+    ability_clear_event_desc:
+      'Fai sparire un evento negativo. Il costo varia in base alla gravità.',
     ability_clear_heat: 'Ripulisci Calore',
-    ability_clear_heat_desc: 'Riduci drasticamente il tuo livello di calore attraverso contatti segreti.',
+    ability_clear_heat_desc:
+      'Riduci drasticamente il tuo livello di calore attraverso contatti segreti.',
     ability_dismiss_investigation: 'Archivia Indagine',
-    ability_dismiss_investigation_desc: 'Paga per far sparire un\'indagine attiva.',
+    ability_dismiss_investigation_desc: "Paga per far sparire un'indagine attiva.",
 
     // Log di attività
     log_title: 'Registro Attività',
@@ -3041,7 +3568,7 @@ export default {
     log_stock_tip_detail: 'Prezzo attuale: {price} — Previsione: {direction}',
     log_crypto_tip: 'Soffiata crypto: {asset} ({ticker}) {arrow} — Affidabilità {confidence}%',
     log_crypto_tip_detail: 'Prezzo attuale: {price} — Previsione: {direction}',
-    log_tip_no_assets: 'Nessun asset {market} disponibile per l\'analisi',
+    log_tip_no_assets: "Nessun asset {market} disponibile per l'analisi",
     log_insider_trade: 'Insider trade: {asset} ({ticker}) pompato +{pct}% [{market}]',
     log_insider_trade_detail: 'Prima: {priceBefore} → Dopo: {priceAfter}',
     log_insider_no_assets: 'Nessun asset disponibile per insider trading',
@@ -3049,9 +3576,9 @@ export default {
     // Voci log — Ricettatore
     log_fence_sold: 'Venduto "{item}" con +{premium}% premium',
     log_fence_sold_detail: 'Guadagnati {value} — {remaining} vendite rimanenti oggi',
-    log_fence_bulk: 'Vendita all\'ingrosso: {count} oggetti a +{premium}% premium',
+    log_fence_bulk: "Vendita all'ingrosso: {count} oggetti a +{premium}% premium",
     log_fence_bulk_detail: 'Totale guadagnato: {total}',
-    log_fence_no_items: 'Nessun oggetto nell\'inventario da vendere',
+    log_fence_no_items: "Nessun oggetto nell'inventario da vendere",
     log_fence_daily_limit: 'Limite giornaliero vendite raggiunto',
     log_fence_forged: 'Provenienza falsificata per "{item}" — +{boost}% valore',
     log_fence_forged_detail: 'Valore: {oldValue} → {newValue} (costo: {cost})',
@@ -3078,7 +3605,8 @@ export default {
     log_heat_cleared: 'Calore ridotto di {removed} — ora a {heat}',
     log_heat_cleared_detail: 'Favori bruciati — lealtà ridotta',
     log_investigation_dismissed: 'Indagine archiviata — Costo {cost}',
-    log_dismiss_side_effects: 'Corrompere funzionari ha attirato attenzione: +{heatGain} calore, −{loyaltyCost} lealtà',
+    log_dismiss_side_effects:
+      'Corrompere funzionari ha attirato attenzione: +{heatGain} calore, −{loyaltyCost} lealtà',
     log_fixer_no_events: 'Nessun evento negativo da rimuovere',
     log_fixer_no_cash: 'Fondi insufficienti — servono {cost}',
     log_dismiss_no_cash: 'Fondi insufficienti — servono {cost} per archiviare',
@@ -3089,7 +3617,7 @@ export default {
     notify_scammed: 'Sei stato truffato! Il contatto ha preso i tuoi soldi ed è sparito.',
     notify_no_investigations: 'Nessuna indagine attiva da archiviare.',
     notify_no_assets: 'Nessun asset disponibile per questa operazione.',
-    notify_no_items: 'Nessun oggetto nell\'inventario da vendere.',
+    notify_no_items: "Nessun oggetto nell'inventario da vendere.",
     notify_daily_limit: 'Limite giornaliero di vendita raggiunto — attendi il prossimo ciclo.',
     notify_no_events: 'Nessun evento negativo da rimuovere.',
 
@@ -3098,29 +3626,38 @@ export default {
 
     // Info panel
     info_title: 'Guida al Mercato Nero',
-    info_desc: 'Il mercato nero offre affari ad alto rischio e alta ricompensa dal mondo criminale. Naviga con attenzione — ogni affare lascia una traccia.',
+    info_desc:
+      'Il mercato nero offre affari ad alto rischio e alta ricompensa dal mondo criminale. Naviga con attenzione — ogni affare lascia una traccia.',
 
     // Sezione: Rotazione Affari
     info_deals_title: 'Rotazione Affari',
     info_deals_rotation: 'Timer Rotazione',
-    info_deals_rotation_desc: 'Gli affari ruotano ogni 15–60 minuti (9.000–36.000 tick). Un timer casuale viene scelto all\'interno di questo intervallo dopo ogni rotazione.',
+    info_deals_rotation_desc:
+      "Gli affari ruotano ogni 15–60 minuti (9.000–36.000 tick). Un timer casuale viene scelto all'interno di questo intervallo dopo ogni rotazione.",
     info_deals_pool: 'Pool Affari',
-    info_deals_pool_desc: '3–8 affari disponibili contemporaneamente, selezionati casualmente dalle categorie sbloccate in base al tuo livello di reputazione.',
+    info_deals_pool_desc:
+      '3–8 affari disponibili contemporaneamente, selezionati casualmente dalle categorie sbloccate in base al tuo livello di reputazione.',
     info_deals_risk: 'Tiro Rischio',
-    info_deals_risk_desc: 'Quando accetti un affare, un tiro 0–100 viene confrontato con il rischio % dell\'affare. Se il tiro è sotto il rischio, l\'affare fallisce e le conseguenze si attivano (ognuna con probabilità indipendente).',
+    info_deals_risk_desc:
+      "Quando accetti un affare, un tiro 0–100 viene confrontato con il rischio % dell'affare. Se il tiro è sotto il rischio, l'affare fallisce e le conseguenze si attivano (ognuna con probabilità indipendente).",
     info_deals_heat_success: 'Calore al Successo',
-    info_deals_heat_success_desc: 'Gli affari riusciti aggiungono 2 × (rischio / 50) calore. Un affare al 50% di rischio aggiunge 2 calore; uno al 10% aggiunge 0,4.',
+    info_deals_heat_success_desc:
+      'Gli affari riusciti aggiungono 2 × (rischio / 50) calore. Un affare al 50% di rischio aggiunge 2 calore; uno al 10% aggiunge 0,4.',
     info_deals_heat_fail: 'Calore al Fallimento',
-    info_deals_heat_fail_desc: 'Gli affari falliti aggiungono 8 calore fissi indipendentemente dal rischio.',
+    info_deals_heat_fail_desc:
+      'Gli affari falliti aggiungono 8 calore fissi indipendentemente dal rischio.',
     info_deals_xp_fail: 'XP al Fallimento',
-    info_deals_xp_fail_desc: 'Gli affari falliti concedono comunque il 30% della ricompensa XP (arrotondato per eccesso).',
+    info_deals_xp_fail_desc:
+      'Gli affari falliti concedono comunque il 30% della ricompensa XP (arrotondato per eccesso).',
     info_deals_categories: 'Categorie Affari',
-    info_deals_categories_desc: 'Intel & Merci (Tier 0+), Finanza (Tier 1+), Boost (Tier 2+), Speciale (Tier 3+), Leggendario (solo Tier 5). Ogni affare ha un peso — peso più alto = più probabile.',
+    info_deals_categories_desc:
+      'Intel & Merci (Tier 0+), Finanza (Tier 1+), Boost (Tier 2+), Speciale (Tier 3+), Leggendario (solo Tier 5). Ogni affare ha un peso — peso più alto = più probabile.',
 
     // Sezione: Sistema Calore
     info_heat_title: 'Sistema Calore',
     info_heat_max: 'Range Calore',
-    info_heat_max_desc: 'Il calore va da 0 a 100 (con cap). Decade passivamente a 0,002 per tick (0,02/sec, 1,2/min).',
+    info_heat_max_desc:
+      'Il calore va da 0 a 100 (con cap). Decade passivamente a 0,002 per tick (0,02/sec, 1,2/min).',
     info_heat_lv0: 'Livello 0 — Pulito (0–19 calore)',
     info_heat_lv0_desc: 'Nessuna penalità. Tutto nella norma.',
     info_heat_lv1: 'Livello 1 — Notato (20–39 calore)',
@@ -3130,16 +3667,20 @@ export default {
     info_heat_lv3: 'Livello 3 — Ricercato (60–79 calore)',
     info_heat_lv3_desc: 'Costi affari +25%, rischio +10, 3% probabilità indagine (ogni 100 tick).',
     info_heat_lv4: 'Livello 4 — Braccato (80–94 calore)',
-    info_heat_lv4_desc: 'Reddito ×0,90 (penalità 10%), costi affari +40%, rischio +20, 8% probabilità indagine.',
+    info_heat_lv4_desc:
+      'Reddito ×0,90 (penalità 10%), costi affari +40%, rischio +20, 8% probabilità indagine.',
     info_heat_lv5: 'Livello 5 — Più Ricercato (95–100 calore)',
-    info_heat_lv5_desc: 'Reddito ×0,75 (penalità 25%), costi affari +60%, rischio +35, 15% probabilità indagine.',
+    info_heat_lv5_desc:
+      'Reddito ×0,75 (penalità 25%), costi affari +60%, rischio +35, 15% probabilità indagine.',
     info_heat_inv_check: 'Innesco Indagine',
-    info_heat_inv_check_desc: 'Ogni 100 tick (~10s), se il livello di calore ha una penalità investigation_chance, viene fatto un tiro casuale. Se innescato, gravità = ceil(calore / 20), max 5.',
+    info_heat_inv_check_desc:
+      'Ogni 100 tick (~10s), se il livello di calore ha una penalità investigation_chance, viene fatto un tiro casuale. Se innescato, gravità = ceil(calore / 20), max 5.',
 
     // Sezione: Livelli Reputazione
     info_rep_title: 'Livelli Reputazione',
     info_rep_overview: 'Come Funziona la Reputazione',
-    info_rep_overview_desc: 'Completa affari per guadagnare punti reputazione. Il totale degli affari completati determina il tuo livello. Livelli più alti sbloccano nuove categorie, contatti, riduzione rischio e sconti.',
+    info_rep_overview_desc:
+      'Completa affari per guadagnare punti reputazione. Il totale degli affari completati determina il tuo livello. Livelli più alti sbloccano nuove categorie, contatti, riduzione rischio e sconti.',
     info_rep_t0: 'Tier 0 — Sconosciuto (0 affari)',
     info_rep_t0_desc: 'Nessun bonus. Sblocca: Intel, Merci.',
     info_rep_t1: 'Tier 1 — Conosciuto (10 affari)',
@@ -3151,53 +3692,70 @@ export default {
     info_rep_t4: 'Tier 4 — Temuto (100 affari)',
     info_rep_t4_desc: 'Rischio −20, prezzi −20%. Tutte le categorie sbloccate.',
     info_rep_t5: 'Tier 5 — Leggendario (200 affari)',
-    info_rep_t5_desc: 'Rischio −30, prezzi −25%. Sblocca: affari Leggendari, contatto Il Risolutore.',
+    info_rep_t5_desc:
+      'Rischio −30, prezzi −25%. Sblocca: affari Leggendari, contatto Il Risolutore.',
 
     // Sezione: Contatti & Lealtà
     info_contacts_title: 'Contatti & Lealtà',
     info_contacts_overview: 'Contatti NPC',
-    info_contacts_overview_desc: '5 contatti, ognuno con abilità uniche legate a lealtà e tier: Broker (Tier 0), Ricettatore (Tier 0), Contrabbandiere (Tier 1), Hacker (Tier 2), Risolutore (Tier 5).',
+    info_contacts_overview_desc:
+      '5 contatti, ognuno con abilità uniche legate a lealtà e tier: Broker (Tier 0), Ricettatore (Tier 0), Contrabbandiere (Tier 1), Hacker (Tier 2), Risolutore (Tier 5).',
     info_contacts_loyalty_gain: 'Lealtà per Uso',
-    info_contacts_loyalty_gain_desc: 'Broker: +2, Ricettatore: +1, Contrabbandiere: +2, Hacker: +3, Risolutore: +5. Tutti i contatti hanno lealtà massima 100.',
+    info_contacts_loyalty_gain_desc:
+      'Broker: +2, Ricettatore: +1, Contrabbandiere: +2, Hacker: +3, Risolutore: +5. Tutti i contatti hanno lealtà massima 100.',
     info_contacts_loyalty_recovery: 'Recupero Passivo Lealtà',
-    info_contacts_loyalty_recovery_desc: 'Ogni 300 tick (~30s), tutti i contatti guadagnano +1 lealtà automaticamente (fino al massimo).',
+    info_contacts_loyalty_recovery_desc:
+      'Ogni 300 tick (~30s), tutti i contatti guadagnano +1 lealtà automaticamente (fino al massimo).',
     info_contacts_heat: 'Calore Contatti',
     info_contacts_heat_desc: 'Ogni uso riuscito di abilità contatto aggiunge +1 calore.',
     info_contacts_daily: 'Ciclo Giornaliero',
-    info_contacts_daily_desc: 'I contatori d\'uso giornalieri si resettano ogni 36.000 tick (~1 ora). Il Ricettatore ha un limite di 3 vendite giornaliere.',
+    info_contacts_daily_desc:
+      "I contatori d'uso giornalieri si resettano ogni 36.000 tick (~1 ora). Il Ricettatore ha un limite di 3 vendite giornaliere.",
 
     // Sezione: Tradimento & Truffa
     info_betrayal_title: 'Rischio Tradimento & Truffa',
     info_betrayal_formula: 'Probabilità Tradimento',
-    info_betrayal_formula_desc: 'Base: 4%. Se calore > 40, +0,2% per punto calore sopra 40. Se lealtà < 40, +5%. Max 35%. Al tradimento: +15–25 calore casuale, indagine (gravità 2–4), −15 lealtà, cooldown doppio.',
+    info_betrayal_formula_desc:
+      'Base: 4%. Se calore > 40, +0,2% per punto calore sopra 40. Se lealtà < 40, +5%. Max 35%. Al tradimento: +15–25 calore casuale, indagine (gravità 2–4), −15 lealtà, cooldown doppio.',
     info_scam_formula: 'Probabilità Truffa',
-    info_scam_formula_desc: 'Base: 6%. Se lealtà < 40, +10%. Max 30%. Alla truffa: il contatto prende il pagamento, non consegna nulla, −10 lealtà, cooldown normale.',
+    info_scam_formula_desc:
+      'Base: 6%. Se lealtà < 40, +10%. Max 30%. Alla truffa: il contatto prende il pagamento, non consegna nulla, −10 lealtà, cooldown normale.',
     info_betrayal_trust: 'Soglia Fiducia',
-    info_betrayal_trust_desc: 'Una lealtà sotto 40 è la zona di pericolo — sia tradimento che truffa aumentano. Mantieni la lealtà sopra 40 per interazioni più sicure.',
+    info_betrayal_trust_desc:
+      'Una lealtà sotto 40 è la zona di pericolo — sia tradimento che truffa aumentano. Mantieni la lealtà sopra 40 per interazioni più sicure.',
     info_betrayal_roll: 'Ordine Tiro Rischio',
-    info_betrayal_roll_desc: 'Un singolo tiro casuale viene verificato: prima contro la probabilità di tradimento, poi contro tradimento + truffa. Solo uno può attivarsi per interazione.',
+    info_betrayal_roll_desc:
+      'Un singolo tiro casuale viene verificato: prima contro la probabilità di tradimento, poi contro tradimento + truffa. Solo uno può attivarsi per interazione.',
 
     // Sezione: Scaling Ricchezza
     info_scaling_title: 'Scaling Ricchezza',
     info_scaling_formula: 'Formula di Scaling',
-    info_scaling_formula_desc: 'Tutti i costi/ricompense degli affari e dei contatti si scalano con il tuo denaro: moltiplicatore = clamp(log₁₀(denaro) − 1, 1, cap). A $100 o meno → ×1, $10K → ×3, $1M → ×5, $100M → ×7.',
+    info_scaling_formula_desc:
+      'Tutti i costi/ricompense degli affari e dei contatti si scalano con il tuo denaro: moltiplicatore = clamp(log₁₀(denaro) − 1, 1, cap). A $100 o meno → ×1, $10K → ×3, $1M → ×5, $100M → ×7.',
     info_scaling_caps: 'Limiti di Scala',
-    info_scaling_caps_desc: 'Costi/ricompense affari: ×500 max. Perdita denaro al fallimento: ×200 max. Multe indagine: ×50 max. Costi/ricompense contatti: ×500 max.',
+    info_scaling_caps_desc:
+      'Costi/ricompense affari: ×500 max. Perdita denaro al fallimento: ×200 max. Multe indagine: ×50 max. Costi/ricompense contatti: ×500 max.',
     info_scaling_flat: 'Valori Non Scalati',
-    info_scaling_flat_desc: 'Calore, reputazione, rischio, XP e effetti moltiplicatore (income_boost, gambling_edge, ecc.) sono fissi — non si scalano con la ricchezza.',
+    info_scaling_flat_desc:
+      'Calore, reputazione, rischio, XP e effetti moltiplicatore (income_boost, gambling_edge, ecc.) sono fissi — non si scalano con la ricchezza.',
 
     // Sezione: Sistema Indagini
     info_inv_title: 'Sistema Indagini',
     info_inv_trigger: 'Come Iniziano le Indagini',
-    info_inv_trigger_desc: 'Le indagini sono innescate da: conseguenze fallimento affari, tradimenti dei contatti o controlli passivi calore (ogni 100 tick). Max 3 indagini contemporanee.',
+    info_inv_trigger_desc:
+      'Le indagini sono innescate da: conseguenze fallimento affari, tradimenti dei contatti o controlli passivi calore (ogni 100 tick). Max 3 indagini contemporanee.',
     info_inv_severity: 'Gravità',
-    info_inv_severity_desc: 'La gravità va da 1 a 5. Dal calore: gravità = ceil(calore / 20). Da affari/tradimenti: gravità definita per conseguenza (tipicamente 2–5).',
+    info_inv_severity_desc:
+      'La gravità va da 1 a 5. Dal calore: gravità = ceil(calore / 20). Da affari/tradimenti: gravità definita per conseguenza (tipicamente 2–5).',
     info_inv_duration: 'Durata',
-    info_inv_duration_desc: 'Ogni indagine dura 5–15 minuti (3.000–9.000 tick, casuale). Si risolve automaticamente alla scadenza del timer.',
+    info_inv_duration_desc:
+      'Ogni indagine dura 5–15 minuti (3.000–9.000 tick, casuale). Si risolve automaticamente alla scadenza del timer.',
     info_inv_catch: 'Probabilità Cattura',
-    info_inv_catch_desc: 'Probabilità cattura = 30% + (gravità × 10%). Gravità 1: 40%, Gravità 3: 60%, Gravità 5: 80%.',
+    info_inv_catch_desc:
+      'Probabilità cattura = 30% + (gravità × 10%). Gravità 1: 40%, Gravità 3: 60%, Gravità 5: 80%.',
     info_inv_fine: 'Importo Multa',
-    info_inv_fine_desc: 'Multa = denaro attuale × 5% × gravità. Se non puoi pagare la multa intera, viene preso tutto il denaro rimanente.',
+    info_inv_fine_desc:
+      'Multa = denaro attuale × 5% × gravità. Se non puoi pagare la multa intera, viene preso tutto il denaro rimanente.',
     info_inv_caught: 'Se Catturato',
     info_inv_caught_desc: 'Paghi la multa e ricevi un picco di calore di gravità × 5.',
     info_inv_dodged: 'Se Evitato',
@@ -3206,45 +3764,216 @@ export default {
     // Sezione: Effetti Attivi
     info_effects_title: 'Effetti Attivi',
     info_effects_max: 'Effetti Massimi',
-    info_effects_max_desc: 'Fino a 10 effetti possono essere attivi contemporaneamente. I nuovi effetti vengono scartati se il cap è raggiunto.',
+    info_effects_max_desc:
+      'Fino a 10 effetti possono essere attivi contemporaneamente. I nuovi effetti vengono scartati se il cap è raggiunto.',
     info_effects_duration: 'Durata',
-    info_effects_duration_desc: 'Ogni effetto ha una durata basata sui tick impostata dall\'affare o abilità. Gli effetti calano ogni tick di gioco e vengono rimossi alla scadenza.',
+    info_effects_duration_desc:
+      "Ogni effetto ha una durata basata sui tick impostata dall'affare o abilità. Gli effetti calano ogni tick di gioco e vengono rimossi alla scadenza.",
     info_effects_stacking: 'Sovrapposizione',
-    info_effects_stacking_desc: 'Più effetti dello stesso tipo si moltiplicano tra loro. Per esempio, due income_boost di ×1,5 e ×2,0 producono un moltiplicatore combinato di ×3,0.',
+    info_effects_stacking_desc:
+      'Più effetti dello stesso tipo si moltiplicano tra loro. Per esempio, due income_boost di ×1,5 e ×2,0 producono un moltiplicatore combinato di ×3,0.',
 
     // Sezione: Abilità Contatti
     info_abilities_title: 'Abilità Contatti',
     info_broker_abilities: 'Abilità Broker',
-    info_broker_abilities_desc: 'Stock Tip ($500, 5min CD) — prevedi direzione azione. Crypto Tip ($800, 5min CD, 20 lealtà) — prevedi direzione crypto. Insider Trade ($5.000, 15min CD, 60 lealtà, Tier 3) — pompa prezzo azione. Precisione: 50% base + 5% per 10 lealtà.',
+    info_broker_abilities_desc:
+      'Stock Tip ($500, 5min CD) — prevedi direzione azione. Crypto Tip ($800, 5min CD, 20 lealtà) — prevedi direzione crypto. Insider Trade ($5.000, 15min CD, 60 lealtà, Tier 3) — pompa prezzo azione. Precisione: 50% base + 5% per 10 lealtà.',
     info_fence_abilities: 'Abilità Ricettatore',
-    info_fence_abilities_desc: 'Premium Sell (gratis, 1min CD) — vendi un oggetto a ×1,2 valore. Bulk Deal (gratis, 3min CD, 40 lealtà, Tier 2) — vendi tutto a un premio. Limite giornaliero: 3 operazioni.',
+    info_fence_abilities_desc:
+      'Premium Sell (gratis, 1min CD) — vendi un oggetto a ×1,2 valore. Bulk Deal (gratis, 3min CD, 40 lealtà, Tier 2) — vendi tutto a un premio. Limite giornaliero: 3 operazioni.',
     info_smuggler_abilities: 'Abilità Contrabbandiere',
-    info_smuggler_abilities_desc: 'Contraband Run ($2.000, 10min CD, Tier 1) — guadagna denaro da contrabbando valutato 0,8×–3,0× base. Supply Run ($5.000, 20min CD, 50 lealtà, Tier 3) — riduzione costi + boost affari.',
+    info_smuggler_abilities_desc:
+      'Contraband Run ($2.000, 10min CD, Tier 1) — guadagna denaro da contrabbando valutato 0,8×–3,0× base. Supply Run ($5.000, 20min CD, 50 lealtà, Tier 3) — riduzione costi + boost affari.',
     info_hacker_abilities: 'Abilità Hacker',
-    info_hacker_abilities_desc: 'Hack Stock ($3.000, 10min CD, Tier 2) — manipola un\'azione ±30% per 1 minuto. Hack Crypto ($4.000, 10min CD, 20 lealtà, Tier 2) — manipola crypto ±30%. DDoS ($10.000, 30min CD, 70 lealtà, Tier 4) — reddito ×1,5 + affari ×2,0.',
+    info_hacker_abilities_desc:
+      "Hack Stock ($3.000, 10min CD, Tier 2) — manipola un'azione ±30% per 1 minuto. Hack Crypto ($4.000, 10min CD, 20 lealtà, Tier 2) — manipola crypto ±30%. DDoS ($10.000, 30min CD, 70 lealtà, Tier 4) — reddito ×1,5 + affari ×2,0.",
     info_fixer_abilities: 'Abilità Risolutore',
-    info_fixer_abilities_desc: 'Clear Event (costo dinamico, 15min CD, Tier 5) — rimuovi evento negativo, costo = $500 × gravità × (tick rimanenti / 100). Clear Heat ($15.000, 30min CD, 30 lealtà) — riduzione drastica calore. Dismiss Investigation (costo dinamico, 1h CD, 60 lealtà) — archivia indagine attiva.',
+    info_fixer_abilities_desc:
+      'Clear Event (costo dinamico, 15min CD, Tier 5) — rimuovi evento negativo, costo = $500 × gravità × (tick rimanenti / 100). Clear Heat ($15.000, 30min CD, 30 lealtà) — riduzione drastica calore. Dismiss Investigation (costo dinamico, 1h CD, 60 lealtà) — archivia indagine attiva.',
 
     // Sezione: Prestigio
     info_prestige_title: 'Reset Prestigio',
     info_prestige_kept: 'Preservato al Prestigio',
-    info_prestige_kept_desc: 'Livello reputazione, totale affari completati/falliti, punti reputazione, stati contatti (lealtà, interazioni), statistiche vita (denaro speso/guadagnato, calore accumulato, multe pagate).',
+    info_prestige_kept_desc:
+      'Livello reputazione, totale affari completati/falliti, punti reputazione, stati contatti (lealtà, interazioni), statistiche vita (denaro speso/guadagnato, calore accumulato, multe pagate).',
     info_prestige_reset: 'Resettato al Prestigio',
-    info_prestige_reset_desc: 'Affari attuali, cooldown affari, effetti attivi, calore (a 0), indagini attive, log attività e timer rotazione vengono tutti azzerati.',
+    info_prestige_reset_desc:
+      'Affari attuali, cooldown affari, effetti attivi, calore (a 0), indagini attive, log attività e timer rotazione vengono tutti azzerati.',
 
     // Sezione: Consigli
     info_tips_title: 'Consigli & Strategia',
     info_tip_heat: 'Gestisci il Calore',
-    info_tip_heat_desc: 'Il calore decade a 0,002/tick (≈1,2/min). Dopo affari intensi, pausa qualche minuto per far scendere il calore sotto le soglie pericolose.',
+    info_tip_heat_desc:
+      'Il calore decade a 0,002/tick (≈1,2/min). Dopo affari intensi, pausa qualche minuto per far scendere il calore sotto le soglie pericolose.',
     info_tip_rep: 'Costruisci Reputazione',
-    info_tip_rep_desc: 'Inizia con affari Intel a basso rischio (5–22% rischio) per costruire rep in sicurezza. Servono 200 affari per il Tier 5.',
+    info_tip_rep_desc:
+      'Inizia con affari Intel a basso rischio (5–22% rischio) per costruire rep in sicurezza. Servono 200 affari per il Tier 5.',
     info_tip_fixer: 'Usa il Risolutore',
-    info_tip_fixer_desc: 'Al Tier 5, il Risolutore può ripulire il calore e archiviare indagini — una rete di sicurezza inestimabile.',
+    info_tip_fixer_desc:
+      'Al Tier 5, il Risolutore può ripulire il calore e archiviare indagini — una rete di sicurezza inestimabile.',
     info_tip_loyalty: 'Sicurezza Lealtà',
-    info_tip_loyalty_desc: 'Mantieni la lealtà dei contatti sopra 40 per evitare probabilità elevate di tradimento (+5%) e truffa (+10%). Il recupero passivo dà +1 ogni 30 secondi.',
+    info_tip_loyalty_desc:
+      'Mantieni la lealtà dei contatti sopra 40 per evitare probabilità elevate di tradimento (+5%) e truffa (+10%). Il recupero passivo dà +1 ogni 30 secondi.',
     info_tip_scaling: 'Consapevolezza Ricchezza',
-    info_tip_scaling_desc: 'Costi e ricompense si scalano con il denaro tramite log₁₀. Un bankroll più grande significa posta più alta ma guadagni proporzionalmente maggiori.',
+    info_tip_scaling_desc:
+      'Costi e ricompense si scalano con il denaro tramite log₁₀. Un bankroll più grande significa posta più alta ma guadagni proporzionalmente maggiori.',
     info_tip_investigations: 'Gestione Indagini',
-    info_tip_investigations_desc: 'Mantieni il calore sotto 60 per evitare controlli periodici. Se indagato, un caso gravità 1 ha solo il 40% di cattura contro l\'80% a gravità 5.',
+    info_tip_investigations_desc:
+      "Mantieni il calore sotto 60 per evitare controlli periodici. Se indagato, un caso gravità 1 ha solo il 40% di cattura contro l'80% a gravità 5."
   },
+
+  // ─── Statistiche ──────────────────────────────────────────
+  stats: {
+    title: 'Statistiche',
+    subtitle: '{count} metriche in {groups} categorie',
+    search_placeholder: 'Cerca statistiche…',
+    collapse_all: 'Comprimi',
+    expand_all: 'Espandi',
+    no_results: 'Nessuna statistica corrisponde alla ricerca.',
+
+    // Titoli gruppi
+    group_player: 'Panoramica Giocatore',
+    group_business: 'Impero Aziendale',
+    group_jobs: 'Occupazione',
+    group_stocks: 'Mercato Azionario',
+    group_crypto: 'Criptovalute',
+    group_realestate: 'Immobiliare',
+    group_investments: 'Investimenti Startup',
+    group_loans: 'Prestiti & Credito',
+    group_deposits: 'Depositi Bancari',
+    group_gambling: 'Casinò & Gioco',
+    group_storage: 'Aste Magazzini',
+    group_blackmarket: 'Mercato Nero',
+    group_shop: 'Shop Online',
+    group_vault: 'Cassaforte',
+    group_prestige: 'Prestigio & Progressione',
+    group_skills: 'Albero Abilità',
+
+    // Giocatore
+    net_worth: 'Patrimonio Netto',
+    total_earned: 'Totale Guadagnato',
+    total_spent: 'Totale Speso',
+    current_cash: 'Contanti Disponibili',
+    level: 'Livello',
+    prestige_points: 'Punti Prestigio',
+    rebirths: 'Rinascite',
+    achievements: 'Obiettivi',
+
+    // Business
+    biz_count: 'Attività',
+    biz_profit_s: 'Profitto / sec',
+    biz_value: 'Valore Totale',
+    biz_levels: 'Livelli Totali',
+    biz_branches: 'Filiali',
+    biz_corps: 'Corporazioni',
+
+    // Lavori
+    jobs_active: 'Lavori Attivi',
+    jobs_unlocked: 'Sbloccati',
+    jobs_income_s: 'Reddito / sec',
+
+    // Azioni
+    stock_positions: 'Posizioni',
+    stock_portfolio: 'Valore Portafoglio',
+    stock_unrealized: 'P/L Non Realizzato',
+    stock_realized: 'P/L Realizzato',
+    stock_dividends: 'Dividendi Guadagnati',
+
+    // Crypto
+    crypto_holdings: 'Possedimenti',
+    crypto_wallet: 'Valore Wallet',
+    crypto_unrealized: 'P/L Non Realizzato',
+    crypto_realized: 'P/L Realizzato',
+    crypto_staking: 'Ricompense Staking',
+
+    // Immobiliare
+    re_properties: 'Proprietà',
+    re_rent_tick: 'Affitto / tick',
+    re_portfolio: 'Valore Portafoglio',
+    re_opportunities: 'Opportunità',
+
+    // Investimenti
+    inv_active: 'Attivi',
+    inv_win_rate: 'Tasso Successo',
+    inv_invested: 'Totale Investito',
+    inv_returned: 'Totale Restituito',
+    inv_net: 'Profitto Netto',
+
+    // Prestiti
+    loan_active: 'Prestiti Attivi',
+    loan_debt: 'Debito Totale',
+    loan_credit: 'Punteggio Credito',
+    loan_taken: 'Prestiti Presi',
+    loan_repaid: 'Rimborsati in Tempo',
+    loan_defaults: 'Insolvenze',
+    loan_interest_paid: 'Interessi Pagati',
+
+    // Depositi
+    dep_active: 'Depositi Attivi',
+    dep_locked: 'Saldo Bloccato',
+    dep_avg_apy: 'APY Medio',
+    dep_interest_s: 'Interessi / sec',
+    dep_total_deposited: 'Totale Depositato',
+    dep_total_interest: 'Totale Interessi',
+    dep_opened: 'Depositi Aperti',
+    dep_matured: 'Maturati',
+    dep_early_withdraw: 'Prelievi Anticipati',
+
+    // Gioco d'azzardo
+    gamb_played: 'Partite Giocate',
+    gamb_win_rate: 'Tasso Vittoria',
+    gamb_total_won: 'Totale Vinto',
+    gamb_total_lost: 'Totale Perso',
+    gamb_net: 'Profitto Netto',
+    gamb_best_win: 'Miglior Vincita',
+    gamb_worst_loss: 'Peggior Perdita',
+    gamb_luck: 'Moltiplicatore Fortuna',
+
+    // Magazzini
+    stor_auctions: 'Aste Vinte',
+    stor_items_sold: 'Oggetti Venduti',
+    stor_revenue: 'Ricavi Vendite',
+    stor_spent: 'Totale Speso',
+    stor_net: 'Profitto Netto',
+    stor_biggest_flip: 'Miglior Affare',
+
+    // Mercato Nero
+    bm_deals_done: 'Affari Conclusi',
+    bm_deals_failed: 'Affari Falliti',
+    bm_cash_spent: 'Denaro Speso',
+    bm_cash_earned: 'Denaro Guadagnato',
+    bm_net: 'Profitto Netto',
+    bm_fines: 'Multe Pagate',
+    bm_heat: 'Calore Accumulato',
+    bm_investigations: 'Indagini',
+
+    // Shop
+    shop_bought: 'Oggetti Comprati',
+    shop_spent: 'Denaro Speso',
+    shop_sales: 'Ricavi Vendite',
+    shop_profit: 'Profitto Netto',
+    shop_uniques: 'Oggetti Unici',
+    shop_restored: 'Oggetti Restaurati',
+    shop_auctions: 'Aste Effettuate',
+    shop_auction_rev: 'Ricavi Aste',
+    shop_best_deal: 'Miglior Affare',
+
+    // Cassaforte
+    vault_items: 'Oggetti Conservati',
+    vault_stored_cash: 'Denaro Conservato',
+    vault_total_stored: 'Totale Conservato',
+    vault_sale_revenue: 'Ricavi Vendite',
+    vault_upgrades: 'Potenziamenti',
+
+    // Prestigio
+    prest_points: 'Punti Guadagnati',
+    prest_rebirths: 'Rinascite',
+    prest_milestones: 'Traguardi',
+    prest_perks: 'Vantaggi',
+    prest_upgrade_levels: 'Livelli Potenziamento',
+    prest_global_multi: 'Moltiplicatore Globale',
+
+    // Abilità
+    skill_unlocked: 'Abilità Sbloccate'
+  }
 }

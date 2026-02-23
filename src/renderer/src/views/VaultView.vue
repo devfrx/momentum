@@ -7,7 +7,7 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import { UTabs, UButton } from '@renderer/components/ui'
 import type { TabDef } from '@renderer/components/ui'
 import { CashDisplay } from '@renderer/components/dashboard'
-import { VaultPanel, VaultCashPanel, VaultStats, TransferDialog } from '@renderer/components/vault'
+import { VaultPanel, VaultCashPanel, TransferDialog } from '@renderer/components/vault'
 import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -59,9 +59,6 @@ const tabs = computed<TabDef[]>(() => [
                 <CashDisplay :label="t('storage.balance')" :value="formatCash(player.cash)" />
             </div>
         </div>
-
-        <!-- Stats Ribbon -->
-        <VaultStats />
 
         <!-- Tab Navigation -->
         <UTabs v-model="activeTab" :tabs="tabs">

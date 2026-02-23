@@ -18,7 +18,7 @@ interface NavGroup {
     items: NavItem[]
 }
 
-const ROUTE_ORDER = ['/', '/business', '/stocks', '/crypto', '/realestate', '/investments', '/loans', '/deposits', '/gambling', '/storage', '/blackmarket', '/shop', '/vault', '/skills', '/prestige', '/settings', '/dev']
+const ROUTE_ORDER = ['/', '/business', '/stocks', '/crypto', '/realestate', '/investments', '/loans', '/deposits', '/gambling', '/storage', '/blackmarket', '/shop', '/vault', '/skills', '/prestige', '/stats', '/settings', '/dev']
 
 const GROUP_DEFS = [
     { labelKey: '', paths: ['/'] },
@@ -26,7 +26,7 @@ const GROUP_DEFS = [
     { labelKey: 'nav.group_invest', paths: ['/realestate', '/investments', '/deposits'] },
     { labelKey: 'nav.group_finance', paths: ['/loans'] },
     { labelKey: 'nav.group_fun', paths: ['/gambling', '/storage', '/blackmarket', '/shop', '/vault'] },
-    { labelKey: 'nav.group_progress', paths: ['/skills', '/prestige'] },
+    { labelKey: 'nav.group_progress', paths: ['/skills', '/prestige', '/stats'] },
 ]
 
 const BOTTOM_PATHS = ['/settings', '/dev']

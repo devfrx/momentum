@@ -10,7 +10,7 @@ import { UTabs } from '@renderer/components/ui'
 import type { TabDef } from '@renderer/components/ui'
 import { CashDisplay } from '@renderer/components/dashboard'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
-import { AuctionCard, AuctionBidding, InventoryPanel, StorageStats, SessionPnL } from '@renderer/components/storage'
+import { AuctionCard, AuctionBidding, InventoryPanel, SessionPnL } from '@renderer/components/storage'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -80,9 +80,6 @@ const infoSections = computed(() => [
                 </div>
                 <CashDisplay :label="t('storage.balance')" :value="formatCash(player.cash)" />
             </div>
-
-            <!-- Stats Ribbon -->
-            <StorageStats />
 
             <!-- Tab Navigation -->
             <UTabs v-model="activeTab" :tabs="tabs">

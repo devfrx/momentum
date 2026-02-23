@@ -27,7 +27,7 @@ const expanded = ref(false)
 const conditionConfig = computed(() => {
     const map: Record<MarketCondition, { icon: string; color: string; label: string; bgClass: string }> = {
         normal: { icon: 'mdi:minus-circle-outline', color: 'var(--t-text-muted)', label: t('market.condition_normal'), bgClass: 'condition-normal' },
-        bull: { icon: 'mdi:bull', color: 'var(--t-success)', label: t('market.condition_bull'), bgClass: 'condition-bull' },
+        bull: { icon: 'mdi:trending-up', color: 'var(--t-success)', label: t('market.condition_bull'), bgClass: 'condition-bull' },
         bear: { icon: 'mdi:arrow-down-bold', color: 'var(--t-danger)', label: t('market.condition_bear'), bgClass: 'condition-bear' },
         crash: { icon: 'mdi:alert-octagon', color: 'var(--t-danger)', label: t('market.condition_crash'), bgClass: 'condition-crash' },
         bubble: { icon: 'mdi:rocket-launch', color: 'var(--t-warning)', label: t('market.condition_bubble'), bgClass: 'condition-bubble' },
@@ -288,11 +288,11 @@ function formatConditionTime(ticks: number): string {
 
 /* Condition-specific border accent */
 .condition-bull {
-    border-left: 3px solid var(--t-success);
+    /* border-left: 3px solid var(--t-success); */
 }
 
 .condition-bear {
-    border-left: 3px solid var(--t-danger);
+    /* border-left: 3px solid var(--t-danger); */
 }
 
 .condition-crash {
@@ -306,7 +306,7 @@ function formatConditionTime(ticks: number): string {
 }
 
 .condition-normal {
-    border-left: 3px solid var(--t-border);
+    /* border-left: 3px solid var(--t-border); */
 }
 
 /* ─── Main Row ─── */

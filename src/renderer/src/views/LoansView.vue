@@ -8,7 +8,6 @@ import Slider from 'primevue/slider'
 import Select from 'primevue/select'
 import { useLoanStore } from '@renderer/stores/useLoanStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
-import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { useOnTick } from '@renderer/composables/useGameLoop'
@@ -29,8 +28,7 @@ import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 
 const loanStore = useLoanStore()
 const player = usePlayerStore()
-const upgrades = useUpgradeStore()
-const { formatCash, formatPercent } = useFormat()
+const { formatCash } = useFormat()
 const { t } = useI18n()
 
 const loanActiveTab = ref('active')
@@ -44,15 +42,6 @@ const loanTabs = computed<TabDef[]>(() => [
 const currentTick = ref(gameEngine.currentTick)
 useOnTick('loans-tick', (ctx) => {
     currentTick.value = ctx.tick
-})
-
-// Loan rate discount from skills/prestige (values < 1 mean discount)
-const loanRateDiscount = computed(() => {
-    const mul = upgrades.getMultiplier('loan_rate').toNumber()
-    if (mul < 1) {
-        return `-${formatPercent(1 - mul)}`
-    }
-    return t('loans.no_discount')
 })
 
 // Category filter
@@ -160,11 +149,6 @@ function confirmRefinance() {
     refinanceTarget.value = null
 }
 
-// Stats
-const totalDebt = computed(() => loanStore.totalDebt)
-const activeLoansCount = computed(() => loanStore.loans.length)
-const avgRate = computed(() => loanStore.averageInterestRate)
-
 // InfoPanel sections – comprehensive loan documentation
 const loanInfoSections = computed<InfoSection[]>(() => [
     {
@@ -258,70 +242,10 @@ const loanInfoSections = computed<InfoSection[]>(() => [
         <!-- Event Impact -->
         <EventImpactBanner route-name="loans" />
 
-        <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-chip bonus-chip">
-                <AppIcon icon="mdi:percent-circle-outline" class="stat-chip-icon" />
-                <span class="stat-chip-label">{{ $t('loans.rate_discount') }}</span>
-                <span class="stat-chip-value" :class="{ 'text-success': upgrades.getMultiplier('loan_rate').lt(1) }">{{
-                    loanRateDiscount }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('loans.cash') }}</span>
-                <span class="stat-chip-value text-success">{{ formatCash(player.cash) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('loans.total_debt') }}</span>
-                <span class="stat-chip-value text-danger">{{ formatCash(totalDebt) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('loans.active_loans') }}</span>
-                <span class="stat-chip-value">{{ activeLoansCount }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('loans.avg_rate') }}</span>
-                <span class="stat-chip-value">{{ (avgRate * 100).toFixed(1) }}%</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('loans.credit_score') }}</span>
-                <span class="stat-chip-value" :class="{
-                    'text-success': loanStore.creditScore >= 70,
-                    'text-warning': loanStore.creditScore >= 40 && loanStore.creditScore < 70,
-                    'text-danger': loanStore.creditScore < 40
-                }">{{ loanStore.creditScore }}</span>
-            </div>
-        </div>
-
         <div class="loans-layout">
             <!-- Sidebar: Credit Score -->
             <aside class="loans-sidebar">
                 <CreditScoreWidget />
-
-                <div class="sidebar-section">
-                    <h4 class="sidebar-section-title">
-                        <AppIcon icon="mdi:chart-bar" class="sidebar-section-icon" />
-                        {{ $t('loans.statistics') }}
-                    </h4>
-                    <div class="sidebar-stats">
-                        <div class="sidebar-stat">
-                            <span class="sidebar-stat-label">{{ $t('loans.total_taken') }}</span>
-                            <span class="sidebar-stat-value">{{ loanStore.totalLoansTaken }}</span>
-                        </div>
-                        <div class="sidebar-stat">
-                            <span class="sidebar-stat-label">{{ $t('loans.repaid_on_time') }}</span>
-                            <span class="sidebar-stat-value text-success">{{ loanStore.totalLoansRepaidOnTime }}</span>
-                        </div>
-                        <div class="sidebar-stat">
-                            <span class="sidebar-stat-label">{{ $t('loans.defaults') }}</span>
-                            <span class="sidebar-stat-value text-danger">{{ loanStore.totalLoansDefaulted }}</span>
-                        </div>
-                        <div class="sidebar-stat">
-                            <span class="sidebar-stat-label">{{ $t('loans.total_interest_paid') }}</span>
-                            <span class="sidebar-stat-value text-warning">{{ formatCash(loanStore.totalInterestPaidEver)
-                                }}</span>
-                        </div>
-                    </div>
-                </div>
             </aside>
 
             <main class="loans-main">
@@ -371,9 +295,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                                 </div>
                                 <div class="history-details">
                                     <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                        }}</span>
+                                    }}</span>
                                     <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                        }} {{ entry.latePayments
+                                    }} {{ entry.latePayments
                                         }}</span>
                                     <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                 </div>
@@ -448,7 +372,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
                 <div class="dialog-actions">
                     <UButton variant="ghost" @click="showRefinanceDialog = false">{{ $t('common.cancel')
-                        }}</UButton>
+                    }}</UButton>
                     <UButton variant="ghost" :disabled="!refinanceTarget" @click="confirmRefinance">{{
                         $t('loans.refinance') }}</UButton>
                 </div>

@@ -123,30 +123,6 @@ const businessInfoSections = computed<InfoSection[]>(() => [
         <!-- Event Impact -->
         <EventImpactBanner route-name="business" />
 
-        <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('business.stat_businesses') }}</span>
-                <span class="stat-chip-value text-sky">{{ totalBiz }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('business.stat_levels') }}</span>
-                <span class="stat-chip-value text-gold">{{ totalLevels }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('business.stat_branches') }}</span>
-                <span class="stat-chip-value text-emerald">{{ totalBranches }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('business.stat_corps') }}</span>
-                <span class="stat-chip-value text-red">{{ corpCount }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('business.stat_value') }}</span>
-                <span class="stat-chip-value text-emerald">{{ formatCash(business.totalBusinessValue) }}</span>
-            </div>
-        </div>
-
         <!-- Tab Navigation -->
         <UTabs v-model="activeTab" :tabs="businessTabs">
             <template #overview>

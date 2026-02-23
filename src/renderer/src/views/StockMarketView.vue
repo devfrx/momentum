@@ -8,7 +8,6 @@ import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
 import AssetCard from '@renderer/components/market/AssetCard.vue'
-import MarketStats from '@renderer/components/market/MarketStats.vue'
 import MarketSettings from '@renderer/components/market/MarketSettings.vue'
 import MarketConditionBanner from '@renderer/components/market/MarketConditionBanner.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
@@ -175,11 +174,6 @@ const stockInfoSections = computed<InfoSection[]>(() => [
 
         <!-- Market Condition Indicator -->
         <MarketConditionBanner :analysis="stocks.marketAnalysis" type="stock" />
-
-        <!-- Stats Bar -->
-        <MarketStats :portfolio-value="stocks.totalPortfolioValue" :unrealized-profit="stocks.unrealizedProfit"
-            :realized-profit="stocks.totalRealizedProfit" :dividends-earned="stocks.totalDividendsEarned"
-            :position-count="stocks.portfolio.length" type="stock" />
 
         <!-- Pinned / Focus Asset -->
         <section v-if="pinnedAsset" class="pinned-section">

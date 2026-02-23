@@ -93,9 +93,6 @@ function graphNodesForCategory(categoryId: string): GraphNode[] {
         }))
 }
 
-// ─── Stats ──────────────────────────────────────────────────
-const purchasedCount = computed(() => upgrades.nodes.filter((n) => n.purchased).length)
-
 function purchasedInCategory(catId: string): number {
     return upgrades.nodes.filter((n) => n.category === catId && n.purchased).length
 }
@@ -148,20 +145,6 @@ function buySelected(): void {
 
         <!-- Event Impact -->
         <EventImpactBanner route-name="skills" />
-
-        <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-chip">
-                <AppIcon icon="mdi:check-decagram" class="text-success" />
-                <span class="stat-chip-label">{{ $t('skilltree.unlocked') }}</span>
-                <span class="stat-chip-value">{{ purchasedCount }} / {{ upgrades.nodes.length }}</span>
-            </div>
-            <div class="stat-chip">
-                <AppIcon icon="mdi:cash" />
-                <span class="stat-chip-label">{{ $t('skilltree.balance') }}</span>
-                <span class="stat-chip-value">{{ formatCash(player.cash) }}</span>
-            </div>
-        </div>
 
         <!-- Category Selector -->
         <div class="st-categories">

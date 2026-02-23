@@ -109,6 +109,12 @@ const router = createRouter({
       meta: { titleKey: 'nav.prestige', icon: 'mdi:star-circle' }
     },
     {
+      path: '/stats',
+      name: 'stats',
+      component: () => import('@renderer/views/StatsView.vue'),
+      meta: { titleKey: 'nav.stats', icon: 'mdi:chart-box' }
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('@renderer/views/SettingsView.vue'),
@@ -149,5 +155,6 @@ export type RouteName =
   | 'vault'
   | 'skills'
   | 'prestige'
+  | 'stats'
   | 'settings'
   | 'dev'

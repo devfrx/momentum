@@ -31,7 +31,6 @@ import {
     EraProgress,
     MilestoneCard,
     PerkCard,
-    PrestigeStats
 } from '@renderer/components/prestige'
 import { UPGRADE_CATEGORY_INFO, type PrestigeUpgradeDef } from '@renderer/data/prestige'
 import { rarityCssVar } from '@renderer/data/rarity'
@@ -143,46 +142,6 @@ const upgradeCategories = computed(() => {
         info: UPGRADE_CATEGORY_INFO[category as keyof typeof UPGRADE_CATEGORY_INFO] || { label: category, icon: 'mdi:star', color: THEME.textMuted }
     }))
 })
-
-// Stats for the stats bar
-const prestigeStats = computed(() => [
-    {
-        label: t('prestige.points'),
-        value: formatNumber(prestige.totalPointsEarned),
-        icon: 'mdi:star-four-points',
-        color: prestige.currentEra.themeColor
-    },
-    {
-        label: t('prestige.rebirths'),
-        value: prestige.rebirthCount.toString(),
-        icon: 'mdi:reload',
-        color: THEME.info
-    },
-    {
-        label: t('prestige.milestones'),
-        value: `${prestige.unlockedMilestones}/${prestige.milestones.length}`,
-        icon: 'mdi:flag-checkered',
-        color: THEME.success
-    },
-    {
-        label: t('prestige.perks'),
-        value: `${prestige.purchasedPerks}/${prestige.perks.length}`,
-        icon: 'mdi:diamond',
-        color: THEME.purple
-    },
-    {
-        label: t('prestige.upgrade_levels'),
-        value: prestige.totalUpgradeLevels.toString(),
-        icon: 'mdi:arrow-up-bold-circle',
-        color: THEME.warning
-    },
-    {
-        label: t('prestige.global_multi'),
-        value: formatMultiplier(prestige.globalMultiplier),
-        icon: 'mdi:trending-up',
-        color: THEME.success
-    },
-])
 
 // Perks with prerequisite checking
 const perksWithStatus = computed(() =>
@@ -299,11 +258,6 @@ function formatAchReward(reward: { type: string; target?: string; value: number 
         <!-- Era Progress -->
         <EraProgress :current-era="prestige.currentEra" :next-era="prestige.nextEra" :progress="prestige.eraProgress"
             :total-points="formatNumber(prestige.totalPointsEarned)" />
-
-        <!-- Stats Bar -->
-        <section class="stats-section">
-            <PrestigeStats :stats="prestigeStats" />
-        </section>
 
         <!-- Prestige Panel -->
         <PrestigePanel :current-points="formatNumber(prestige.points)"

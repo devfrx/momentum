@@ -248,30 +248,6 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
         <!-- Event Impact -->
         <EventImpactBanner route-name="realestate" />
 
-        <!-- ─── Stats Bar ─── -->
-        <div class="stats-bar">
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ t('realestate.stat.properties') }}</span>
-                <span class="stat-chip-value text-sky">{{ realEstate.properties.length }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ t('realestate.stat.rent_tick') }}</span>
-                <span class="stat-chip-value text-emerald">{{ formatCash(realEstate.totalRentPerTick) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ t('realestate.stat.portfolio_value') }}</span>
-                <span class="stat-chip-value text-gold">{{ formatCash(realEstate.totalPropertyValue) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ t('realestate.stat.opportunities') }}</span>
-                <span class="stat-chip-value text-sky">{{ realEstate.availableOpportunities.length }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ t('realestate.stat.hot_deals') }}</span>
-                <span class="stat-chip-value text-red">{{ realEstate.hotDeals.length }}</span>
-            </div>
-        </div>
-
         <!-- ════════════════════════════════════════════════════════════════
          LEVEL 1 — Skyline Overview
          ════════════════════════════════════════════════════════════════ -->

@@ -203,32 +203,6 @@ const investInfoSections = computed<InfoSection[]>(() => [
         <!-- Event Impact -->
         <EventImpactBanner route-name="investments" />
 
-        <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('investments.active') }}</span>
-                <span class="stat-chip-value text-sky">{{ startups.activeInvestments.length }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('investments.win_rate') }}</span>
-                <span class="stat-chip-value text-emerald">{{ formatRate(startups.winRate) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('investments.total_invested') }}</span>
-                <span class="stat-chip-value text-gold">{{ formatCash(startups.totalInvested) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('investments.total_returns') }}</span>
-                <span class="stat-chip-value text-emerald">{{ formatCash(startups.totalReturned) }}</span>
-            </div>
-            <div class="stat-chip">
-                <span class="stat-chip-label">{{ $t('investments.net_profit') }}</span>
-                <span class="stat-chip-value" :class="startups.netProfit.gte(0) ? 'text-emerald' : 'text-red'">
-                    {{ formatCash(startups.netProfit) }}
-                </span>
-            </div>
-        </div>
-
         <!-- Refresh Timer -->
         <div class="refresh-timer-section">
             <div class="refresh-timer">
@@ -298,7 +272,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                                 :stroke-dashoffset="226.2 * (1 - getInvestmentProgress(inv) / 100)" />
                         </svg>
                         <span class="inv-card__ring-pct">{{ getInvestmentProgress(inv).toFixed(0)
-                        }}<small>%</small></span>
+                            }}<small>%</small></span>
                     </div>
                     <!-- Info -->
                     <div class="inv-card__info">
@@ -318,12 +292,12 @@ const investInfoSections = computed<InfoSection[]>(() => [
                             <div class="inv-card__metric">
                                 <span class="inv-card__metric-lbl">{{ $t('investments.success') }}</span>
                                 <span class="inv-card__metric-val text-sky">{{ formatRate(inv.successChance * 100)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="inv-card__metric">
                                 <span class="inv-card__metric-lbl">{{ $t('investments.return_label') }}</span>
                                 <span class="inv-card__metric-val text-emerald">{{ inv.returnMultiplier.toFixed(1)
-                                }}x</span>
+                                    }}x</span>
                             </div>
                         </div>
                         <div class="inv-card__time">
@@ -562,7 +536,7 @@ const investInfoSections = computed<InfoSection[]>(() => [
                 <div class="dialog-potential">
                     <span>{{ $t('investments.potential_returns') }}</span>
                     <strong class="text-emerald">{{ formatCash(D(investAmount * selectedOpp.baseReturnMultiplier))
-                    }}</strong>
+                        }}</strong>
                 </div>
             </div>
 

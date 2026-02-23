@@ -14,33 +14,13 @@ import { THEME } from '@renderer/assets/theme/colors'
 
 const gambling = useGamblingStore()
 const player = usePlayerStore()
-const { formatCash, formatNumber, formatPercent } = useFormat()
+const { formatCash, formatNumber } = useFormat()
 const { t } = useI18n()
 
 type GameType = 'coinflip' | 'dice' | 'slots' | 'roulette' | 'blackjack' | 'plinko' | 'lottery'
 
 /** Which full-screen mini-game is open (null = lobby) */
 const activeSubGame = ref<GameType | null>(null)
-
-// ─── Luck bonus (from skills, prestige, events) ─────────────
-const luckBonus = computed(() => {
-    const mul = gambling.getLuckMultiplier()
-    return mul > 1 ? `+${formatPercent(mul - 1)}` : t('gambling.no_bonus')
-})
-
-// ─── Stats for the header ribbon ─────────────────────────────
-const overallStats = computed(() => {
-    const winRate = gambling.gamesPlayed > 0
-        ? Math.round((Object.values(gambling.gameStats).reduce((s, g) => s + g.won, 0) / gambling.gamesPlayed) * 100)
-        : 0
-    return [
-        { label: t('gambling.luck_bonus'), value: luckBonus.value, icon: 'mdi:clover', colorClass: gambling.getLuckMultiplier() > 1 ? 'bonus' : '' },
-        { label: t('gambling.played'), value: formatNumber(gambling.gamesPlayed), icon: 'mdi:gamepad-variant-outline' },
-        { label: t('gambling.win_rate'), value: `${winRate}%`, icon: 'mdi:percent-outline' },
-        { label: t('gambling.net'), value: formatCash(gambling.netProfit), icon: 'mdi:chart-line', colorClass: gambling.netProfit.gte(0) ? 'positive' : 'negative' },
-        { label: t('gambling.best_win'), value: formatCash(gambling.biggestWin), icon: 'mdi:trophy-outline' },
-    ]
-})
 
 // ─── Game definitions ────────────────────────────────────────
 const games = computed(() => [
@@ -207,15 +187,6 @@ const gamblingInfoSections = computed<InfoSection[]>(() => [
 
             <!-- Event Impact -->
             <EventImpactBanner route-name="gambling" />
-
-            <!-- Stats Ribbon -->
-            <div class="stats-bar">
-                <div v-for="stat in overallStats" :key="stat.label" class="stat-chip">
-                    <AppIcon :icon="stat.icon" class="stat-chip-icon" />
-                    <span class="stat-chip-label">{{ stat.label }}</span>
-                    <span class="stat-chip-value" :class="stat.colorClass">{{ stat.value }}</span>
-                </div>
-            </div>
 
             <!-- Games Grid -->
             <div class="casino-grid">

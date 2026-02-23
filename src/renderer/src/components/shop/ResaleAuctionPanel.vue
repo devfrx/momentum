@@ -253,7 +253,7 @@ const HISTORY_STATUS_ICONS: Record<string, string> = {
                 </div>
 
                 <template #footer>
-                    <UButton variant="ghost" size="xs" icon="mdi:close-circle-outline"
+                    <UButton variant="danger" size="sm" icon="mdi:close-circle-outline"
                         @click="shop.cancelAuction(auction.id)">
                         {{ t('shop.auction_cancel') }}
                     </UButton>

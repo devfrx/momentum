@@ -8,7 +8,6 @@ import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
 import AssetCard from '@renderer/components/market/AssetCard.vue'
-import MarketStats from '@renderer/components/market/MarketStats.vue'
 import MarketSettings from '@renderer/components/market/MarketSettings.vue'
 import MarketConditionBanner from '@renderer/components/market/MarketConditionBanner.vue'
 import PriceChart from '@renderer/components/charts/PriceChart.vue'
@@ -170,10 +169,6 @@ const cryptoInfoSections = computed<InfoSection[]>(() => [
             <AppIcon icon="mdi:alert-circle" class="text-xl" />
             <span>{{ $t('crypto.volatility_warning') }}</span>
         </div>
-
-        <!-- Stats Bar -->
-        <MarketStats :portfolio-value="crypto.totalWalletValue" :unrealized-profit="crypto.unrealizedProfit"
-            :realized-profit="crypto.totalRealizedProfit" :position-count="crypto.wallet.length" type="crypto" />
 
         <!-- Pinned / Focus Asset -->
         <section v-if="pinnedAsset" class="pinned-section">
