@@ -6,15 +6,15 @@ import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { D, ZERO, mul } from '@renderer/core/BigNum'
 
 const emit = defineEmits<{ back: [] }>()
 const { t } = useI18n()
 
-const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const { formatCash } = useFormat()
 
 // ─── State ───────────────────────────────────────────────────
@@ -37,14 +37,14 @@ const betDecimal = computed(() => D(betAmount.value))
 const canFlip = computed(() =>
     !flipping.value &&
     betAmount.value > 0 &&
-    player.cash.gte(betDecimal.value)
+    chipStore.chipBalance.gte(betDecimal.value)
 )
 const stats = computed(() => gambling.getStats('coinflip'))
 
 // ─── Flip logic ──────────────────────────────────────────────
 function flip(): void {
     if (!canFlip.value) return
-    if (!player.spendCash(betDecimal.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (!chipStore.spendChips(betDecimal.value)) return
 
     flipping.value = true
     showResult.value = false
@@ -110,7 +110,7 @@ function playFlip(outcome: Side, isFinal: boolean, onLand?: () => void): void {
                     const isWin = outcome === chosenSide.value
                     if (isWin) {
                         const winPayout = mul(betDecimal.value, 2)
-                        player.earnCash(winPayout, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+                        chipStore.addChips(winPayout)
                         gambling.recordWin('coinflip', betDecimal.value, winPayout)
                         payout.value = winPayout
                         won.value = true
@@ -137,11 +137,11 @@ function newRound(): void {
 
 // ─── Bet helpers ─────────────────────────────────────────────
 function setBet(amount: number): void {
-    betAmount.value = Math.max(1, Math.min(amount, player.cash.toNumber()))
+    betAmount.value = Math.max(1, Math.min(amount, chipStore.chipBalance.toNumber()))
 }
 function halfBet(): void { setBet(Math.max(1, Math.floor(betAmount.value / 2))) }
 function doubleBet(): void { setBet(betAmount.value * 2) }
-function maxBet(): void { setBet(player.cash.toNumber()) }
+function maxBet(): void { setBet(chipStore.chipBalance.toNumber()) }
 
 // ─── Info Panel ──────────────────────────────────────────────
 const coinFlipInfo = computed<InfoSection[]>(() => [
@@ -177,8 +177,8 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                 {{ $t('gambling.cf_title') }}
             </h2>
             <div class="balance-chip">
-                <AppIcon icon="mdi:cash" />
-                {{ formatCash(player.cash) }}
+                <AppIcon icon="mdi:poker-chip" />
+                {{ formatCash(chipStore.chipBalance) }}
             </div>
         </div>
 
@@ -237,14 +237,14 @@ const coinFlipInfo = computed<InfoSection[]>(() => [
                 <div class="bet-row">
                     <UButton variant="ghost" size="xs" @click="halfBet" :disabled="flipping">1/2</UButton>
                     <div class="bet-display">
-                        <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
+                        <input type="number" v-model.number="betAmount" :min="1" :max="chipStore.chipBalance.toNumber()"
                             class="bet-input" :disabled="flipping" />
                     </div>
                     <UButton variant="ghost" size="xs" @click="doubleBet" :disabled="flipping">x2</UButton>
                 </div>
                 <div class="bet-presets">
                     <UButton v-for="pct in [10, 25, 50]" :key="pct" variant="ghost" size="xs"
-                        @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="flipping">
+                        @click="setBet(Math.floor(chipStore.chipBalance.toNumber() * pct / 100))" :disabled="flipping">
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="flipping">{{ $t('gambling.max')

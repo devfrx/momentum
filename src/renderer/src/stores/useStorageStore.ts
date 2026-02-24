@@ -11,6 +11,7 @@ import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul, max } from '@renderer/core/BigNum'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 import {
   generateAuction,
   calculateBidderBehavior,
@@ -262,8 +263,8 @@ export const useStorageStore = defineStore('storage', () => {
     if (excess <= 0) return
     const fee = D(excess * STORAGE_FEE_PER_ITEM)
     const player = usePlayerStore()
-    if (player.cash.gte(fee)) {
-      player.spendCash(fee)
+    if (player.cardBalance.gte(fee)) {
+      if (!player.spendFromCard(fee, { key: 'banking.tx_storage_fee', cat: 'storage' })) return
       totalSpentOnStorageFees.value = add(totalSpentOnStorageFees.value, fee)
       session.value.storageFees = add(session.value.storageFees, fee)
     }
@@ -304,11 +305,10 @@ export const useStorageStore = defineStore('storage', () => {
     const location = getLocation(auction.locationId)
     if (!location) return false
 
-    // Check entry fee
-    if (player.cash.lt(location.entryFee)) return false
-
-    // Pay entry fee
-    player.spendCash(location.entryFee, { key: 'banking.tx_storage_auction', cat: 'storage' })
+    // Card payment (handles balance check + fee + deduction from cardBalance)
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(location.entryFee, 'banking.tx_storage_auction', 'storage'))
+      return false
     totalSpentOnEntryFees.value = add(totalSpentOnEntryFees.value, location.entryFee)
     session.value.entryFees = add(session.value.entryFees, location.entryFee)
     session.value.auctionsEntered++
@@ -339,7 +339,7 @@ export const useStorageStore = defineStore('storage', () => {
 
     const minBid = auction.currentBid.add(auction.bidIncrement)
     if (amount.lt(minBid)) return false
-    if (player.cash.lt(amount)) return false
+    if (player.cardBalance.lt(amount)) return false
 
     auction.currentBid = amount
     auction.currentBidder = 'player'
@@ -681,7 +681,7 @@ export const useStorageStore = defineStore('storage', () => {
         const loc = getLocation(auction.locationId)
         if (loc) {
           const refundAmount = loc.entryFee.mul(0.6)
-          player.earnCash(refundAmount, { key: 'banking.tx_storage_refund', cat: 'storage' })
+          player.earnToCard(refundAmount, { key: 'banking.tx_storage_refund', cat: 'storage' })
         }
         break
       }
@@ -741,7 +741,8 @@ export const useStorageStore = defineStore('storage', () => {
     if (auction.currentBidder === 'player') {
       // Player won — but must still afford it at close time
       const cost = auction.currentBid
-      if (!player.spendCash(cost, { key: 'banking.tx_storage_buy_unit', cat: 'storage' })) {
+      const cardPayment = useCardPaymentStore()
+      if (!cardPayment.quickPay(cost, 'banking.tx_storage_buy_unit', 'storage')) {
         // Can't afford anymore — lose the auction
         auction.status = 'lost'
         totalAuctionsLost.value++
@@ -926,7 +927,7 @@ export const useStorageStore = defineStore('storage', () => {
 
     const sniperAmount = calcSniperBidAmount(auction.currentBid, auction.bidIncrement)
     const player = usePlayerStore()
-    if (player.cash.lt(sniperAmount)) return false
+    if (player.cardBalance.lt(sniperAmount)) return false
 
     tactics.sniperUsesLeft--
     tactics.lastTacticRound = auction.roundsElapsed
@@ -1017,10 +1018,10 @@ export const useStorageStore = defineStore('storage', () => {
     if (!appraiser) return false
 
     const player = usePlayerStore()
-    if (player.cash.lt(appraiser.costPerItem)) return false
-
-    // Pay appraisal fee
-    player.spendCash(appraiser.costPerItem, { key: 'banking.tx_storage_appraise', cat: 'storage' })
+    // Card payment (handles balance check + fee + deduction from cardBalance)
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(appraiser.costPerItem, 'banking.tx_storage_appraise', 'storage'))
+      return false
     totalSpentOnAppraisals.value = add(totalSpentOnAppraisals.value, appraiser.costPerItem)
     session.value.appraisalSpend = add(session.value.appraisalSpend, appraiser.costPerItem)
 
@@ -1074,7 +1075,7 @@ export const useStorageStore = defineStore('storage', () => {
     const sellMul = getSellMultiplier()
     const finalValue = mul(afterTax, sellMul)
 
-    player.earnCash(finalValue, { key: 'banking.tx_storage_sell', cat: 'storage' })
+    player.earnToCard(finalValue, { key: 'banking.tx_storage_sell', cat: 'storage' })
     totalItemsSold.value++
     totalSaleRevenue.value = add(totalSaleRevenue.value, finalValue)
     session.value.saleRevenue = add(session.value.saleRevenue, finalValue)

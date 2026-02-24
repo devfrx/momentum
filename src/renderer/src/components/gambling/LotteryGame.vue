@@ -18,6 +18,7 @@ import LotteryTicket from './LotteryTicket.vue'
 import LotteryDraw from './LotteryDraw.vue'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -41,6 +42,7 @@ const emit = defineEmits<{ back: [] }>()
 
 const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const achievements = useAchievementStore()
 const settings = useSettingsStore()
 const { formatCash, formatNumber } = useFormat()
@@ -120,12 +122,12 @@ const selectedTicket = computed<LotteryTicketDef>(() =>
 )
 
 const canAfford = computed(() =>
-    player.cash.gte(D(selectedTicket.value.ticketCost))
+    chipStore.chipBalance.gte(D(selectedTicket.value.ticketCost))
 )
 
 /** Can afford N tickets for multi-draw */
 const canAffordMulti = computed(() =>
-    player.cash.gte(D(selectedTicket.value.ticketCost * settings.lotteryMultiDraw))
+    chipStore.chipBalance.gte(D(selectedTicket.value.ticketCost * settings.lotteryMultiDraw))
 )
 
 const drawSpeed = computed(() => settings.lotteryDrawSpeed)
@@ -247,7 +249,7 @@ function executeSingleDrawWithLuck(
     let unlockedAbility: DivineAbilityDef | null = null
 
     if (fullResult.prizeTier) {
-        player.earnCash(D(payout), { key: 'banking.tx_gambling_win', cat: 'gambling' })
+        chipStore.addChips(D(payout))
         gambling.recordWin('lottery', cost, D(payout))
         gambling.recordLotteryWin(ticket.id, fullResult.prizeTier.label)
 
@@ -317,7 +319,7 @@ async function handlePlay(numbers: number[], bonus: number | null): Promise<void
     const drawCount = settings.lotteryMultiDraw
     const totalCost = D(ticket.ticketCost * drawCount)
 
-    if (!player.spendCash(totalCost, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (!chipStore.spendChips(totalCost)) return
 
     isDrawing.value = true
     currentResult.value = null

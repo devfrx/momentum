@@ -21,6 +21,7 @@ import {
 } from '@renderer/data/realestate'
 import BuildingSilhouette from './BuildingSilhouette.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import CardBoundBadge from '@renderer/components/ui/CardBoundBadge.vue'
 import { UButton, UAccordion, UTooltip } from '@renderer/components/ui'
 import Tag from 'primevue/tag'
 import Slider from 'primevue/slider'
@@ -136,14 +137,14 @@ const canAffordRepair = computed(
     () =>
         property.value &&
         repairCost.value &&
-        player.cash.gte(repairCost.value) &&
+        player.cardBalance.gte(repairCost.value) &&
         property.value.condition < 98,
 )
 const canAffordRenovate = computed(
     () =>
         property.value &&
         renovateCost.value &&
-        player.cash.gte(renovateCost.value) &&
+        player.cardBalance.gte(renovateCost.value) &&
         property.value.renovationLevel < property.value.maxRenovationLevel,
 )
 
@@ -274,6 +275,7 @@ watch(
                             <span v-for="s in property.renovationLevel" :key="s" class="pf-star">&#9733;</span>
                             Lv.{{ property.renovationLevel }}
                         </span>
+                        <CardBoundBadge :entityKey="`realestate:${property.id}`" />
                     </div>
 
                     <div v-if="traits.length > 0" class="pf-hero__traits">
@@ -352,7 +354,7 @@ watch(
                 <span class="pf-strip__label">{{ t('realestate.roi') }}</span>
                 <span class="pf-strip__val"
                     :class="paybackDays < 30 ? 'c-green' : paybackDays === Infinity ? 'c-red' : ''">{{
-                    paybackLabel }}</span>
+                        paybackLabel }}</span>
             </div>
         </div>
 
@@ -416,7 +418,7 @@ watch(
                         <span class="pf-row__l">{{ t('realestate.roi') }}</span>
                         <span class="pf-row__v"
                             :class="paybackDays < 30 ? 'c-green' : paybackDays === Infinity ? 'c-red' : ''">{{
-                            paybackLabel
+                                paybackLabel
                             }}</span>
                     </div>
                     <div class="pf-row">

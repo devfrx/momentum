@@ -9,6 +9,7 @@ import BusinessBranchPanel from './BusinessBranchPanel.vue'
 import BusinessSynergyBadge from './BusinessSynergyBadge.vue'
 import BusinessMilestoneList from './BusinessMilestoneList.vue'
 import BuyAmountSelector from './BuyAmountSelector.vue'
+import CardBoundBadge from '@renderer/components/ui/CardBoundBadge.vue'
 import { UTooltip, UAccordion, UButton, UCard } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
@@ -157,6 +158,7 @@ function adjustMarketing(delta: number): void {
                             <AppIcon icon="mdi:star" /> {{ business.reputation.toFixed(0) }}
                         </span>
                     </UTooltip>
+                    <CardBoundBadge :entityKey="`business:${business.id}`" />
                 </div>
             </div>
         </div>

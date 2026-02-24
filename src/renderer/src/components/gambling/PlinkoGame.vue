@@ -20,8 +20,8 @@ import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import PlinkoBoard from './PlinkoBoard.vue'
 import { useFormat } from '@renderer/composables/useFormat'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { D, mul } from '@renderer/core/BigNum'
 import { PlinkoEngine, type PlinkoRisk } from '@renderer/core/PlinkoEngine'
 import { THEME, RISK_COLORS } from '@renderer/assets/theme/colors'
@@ -29,8 +29,8 @@ import { THEME, RISK_COLORS } from '@renderer/assets/theme/colors'
 const emit = defineEmits<{ back: [] }>()
 
 const { t } = useI18n()
-const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const { formatCash, formatNumber } = useFormat()
 
 // ─── Board configuration ─────────────────────────────────────
@@ -84,7 +84,7 @@ const boardRef = ref<InstanceType<typeof PlinkoBoard> | null>(null)
 const betDecimal = computed(() => D(betAmount.value))
 const canDrop = computed(() =>
     betAmount.value > 0 &&
-    player.cash.gte(betDecimal.value) &&
+    chipStore.chipBalance.gte(betDecimal.value) &&
     !dropping.value
 )
 const stats = computed(() => gambling.getStats('plinko'))
@@ -110,7 +110,7 @@ const maxMultiplier = computed(() =>
 // ─── Drop logic ─────────────────────────────────────────────
 function drop(): void {
     if (!canDrop.value) return
-    if (!player.spendCash(betDecimal.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (!chipStore.spendChips(betDecimal.value)) return
 
     dropping.value = true
     showResultFlash.value = false
@@ -129,12 +129,12 @@ function onBallLanded(bucketIndex: number, multiplier: number, _ballId: number):
     const isWin = multiplier >= 1
 
     if (isWin) {
-        player.earnCash(payoutAmount, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+        chipStore.addChips(payoutAmount)
         gambling.recordWin('plinko', betDecimal.value, payoutAmount)
     } else {
         // Partial return: the payout is less than the bet
         if (multiplier > 0) {
-            player.earnCash(payoutAmount, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+            chipStore.addChips(payoutAmount)
         }
         gambling.recordLoss('plinko', betDecimal.value)
     }
@@ -165,7 +165,7 @@ function toggleAutoDrop(): void {
         autoDropInterval = setInterval(() => {
             if (canDrop.value) {
                 drop()
-            } else if (!player.cash.gte(betDecimal.value)) {
+            } else if (!chipStore.chipBalance.gte(betDecimal.value)) {
                 // Stop if insufficient funds
                 autoDrop.value = false
                 if (autoDropInterval) clearInterval(autoDropInterval)
@@ -184,11 +184,11 @@ onUnmounted(() => {
 
 // ─── Bet helpers ────────────────────────────────────────────
 function setBet(amount: number): void {
-    betAmount.value = Math.max(1, Math.min(amount, player.cash.toNumber()))
+    betAmount.value = Math.max(1, Math.min(amount, chipStore.chipBalance.toNumber()))
 }
 function halfBet(): void { setBet(Math.max(1, Math.floor(betAmount.value / 2))) }
 function doubleBet(): void { setBet(betAmount.value * 2) }
-function maxBet(): void { setBet(player.cash.toNumber()) }
+function maxBet(): void { setBet(chipStore.chipBalance.toNumber()) }
 
 // ─── Info Panel ─────────────────────────────────────────────
 const plinkoInfo = computed<InfoSection[]>(() => [
@@ -235,8 +235,8 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                 {{ $t('gambling.pk_title') }}
             </h2>
             <div class="balance-chip">
-                <AppIcon icon="mdi:cash" />
-                {{ formatCash(player.cash) }}
+                <AppIcon icon="mdi:poker-chip" />
+                {{ formatCash(chipStore.chipBalance) }}
             </div>
         </div>
 
@@ -301,14 +301,14 @@ const plinkoInfo = computed<InfoSection[]>(() => [
                     <div class="bet-row">
                         <UButton variant="ghost" size="xs" @click="halfBet" :disabled="autoDrop">1/2</UButton>
                         <div class="bet-display">
-                            <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
+                            <input type="number" v-model.number="betAmount" :min="1" :max="chipStore.chipBalance.toNumber()"
                                 class="bet-input" :disabled="autoDrop" />
                         </div>
                         <UButton variant="ghost" size="xs" @click="doubleBet" :disabled="autoDrop">×2</UButton>
                     </div>
                     <div class="bet-presets">
                         <UButton variant="ghost" size="xs" v-for="pct in [10, 25, 50]" :key="pct"
-                            @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="autoDrop">
+                            @click="setBet(Math.floor(chipStore.chipBalance.toNumber() * pct / 100))" :disabled="autoDrop">
                             {{ pct }}%
                         </UButton>
                         <UButton variant="warning" size="xs" @click="maxBet" :disabled="autoDrop">{{

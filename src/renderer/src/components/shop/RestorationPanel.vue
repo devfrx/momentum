@@ -110,7 +110,7 @@ function showRestoreMax(item: any): boolean {
                     {{ t('shop.workshop_slots', { used: shop.activeRestorations, total: shop.restorationSlotCount }) }}
                 </span>
                 <UButton v-if="shop.canUpgradeSlots" variant="ghost" size="sm" icon="mdi:plus"
-                    :disabled="player.cash.lt(shop.nextSlotUpgradeCost)" @click="shop.upgradeRestorationSlots()">
+                    :disabled="player.cardBalance.lt(shop.nextSlotUpgradeCost)" @click="shop.upgradeRestorationSlots()">
                     {{ t('shop.workshop_upgrade_slot', { cost: formatCash(shop.nextSlotUpgradeCost) }) }}
                 </UButton>
             </div>

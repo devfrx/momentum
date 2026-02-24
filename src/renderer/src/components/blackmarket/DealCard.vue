@@ -5,6 +5,7 @@
  */
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton, UCard } from '@renderer/components/ui'
+import BlackMarketPaymentToggle from './BlackMarketPaymentToggle.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import type { BlackMarketDeal } from '@renderer/data/blackmarket'
@@ -14,7 +15,7 @@ const props = defineProps<{
     disabled?: boolean
 }>()
 
-defineEmits<{ accept: [dealId: string] }>()
+defineEmits<{ accept: [dealId: string, method: 'cash' | 'crypto', assetId?: string] }>()
 
 const { formatCash, formatNumber } = useFormat()
 const { t } = useI18n()
@@ -105,8 +106,8 @@ function categoryIcon(category: string): string {
         </div>
 
         <template #footer>
-            <UButton variant="primary" size="sm" icon="mdi:check" block :disabled="disabled"
-                @click="$emit('accept', deal.id)">{{ t('blackmarket.accept_deal') }}</UButton>
+            <BlackMarketPaymentToggle :cost="deal.cost" :external-disabled="disabled"
+                @pay="(method, assetId) => $emit('accept', deal.id, method, assetId)" />
         </template>
     </UCard>
 </template>

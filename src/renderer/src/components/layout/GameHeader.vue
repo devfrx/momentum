@@ -66,7 +66,8 @@ const xpProgress = computed(() => {
     return Math.min(100, player.xp.div(player.xpToNextLevel).mul(100).toNumber())
 })
 
-const isInDebt = computed(() => player.cash.lt(0))
+const isInDebt = computed(() => player.cardBalance.lt(0))
+const hasWalletCash = computed(() => player.cash.gt(0))
 
 function toggleTheme(): void {
     settings.theme = settings.theme === 'dark' ? 'light' : 'dark'
@@ -95,17 +96,28 @@ function handleClose(): void {
             <span class="brand-text">FINANX</span>
         </div>
 
-        <!-- Hero Cash -->
+        <!-- Hero Cash — Card Balance (primary) -->
         <UTooltip
-            :text="isInDebt ? $t('header.in_debt') + ': ' + formatCashFull(player.cash) : formatCashFull(player.cash)"
+            :text="isInDebt ? $t('header.in_debt') + ': ' + formatCashFull(player.cardBalance) : formatCashFull(player.cardBalance)"
             placement="bottom">
             <div class="hero-stat" :class="{ 'hero-stat--debt': isInDebt }">
+                <AppIcon icon="mdi:credit-card" class="hero-card-icon" />
                 <AppIcon v-if="isInDebt" icon="mdi:alert-circle" class="debt-icon" />
-                <span class="hero-value" :class="{ 'hero-value--debt': isInDebt }">{{ formatCash(player.cash) }}</span>
+                <span class="hero-value" :class="{ 'hero-value--debt': isInDebt }">{{ formatCash(player.cardBalance)
+                }}</span>
                 <span class="hero-profit" :class="{ negative: totalIncomePerSecond.lt(0) }">
                     <AppIcon icon="mdi:trending-up" class="hero-profit-icon" />
                     {{ formatCash(totalIncomePerSecond) }}{{ $t('common.per_second') }}
                 </span>
+            </div>
+        </UTooltip>
+
+        <!-- Wallet Cash (secondary, only if > 0) -->
+        <UTooltip v-if="hasWalletCash" :text="$t('header.wallet') + ': ' + formatCashFull(player.cash)"
+            placement="bottom">
+            <div class="hud-chip wallet-chip">
+                <AppIcon icon="mdi:wallet" class="hud-wallet-icon" />
+                <span class="hud-chip-value wallet-value">{{ formatCash(player.cash, 2) }}</span>
             </div>
         </UTooltip>
 
@@ -181,14 +193,19 @@ function handleClose(): void {
     display: flex;
     align-items: center;
     height: var(--t-header-height);
-    background: var(--t-bg-header);
-    border-bottom: 1px solid var(--t-border);
+    background: var(--t-glass-bg);
+    backdrop-filter: blur(var(--t-glass-blur));
+    -webkit-backdrop-filter: blur(var(--t-glass-blur));
+    border: 1px solid var(--t-glass-border);
+    border-radius: var(--t-radius-xl);
+    box-shadow: var(--t-glass-shadow);
     padding: 0 var(--t-space-3);
     position: relative;
     z-index: 100;
     -webkit-app-region: drag;
     user-select: none;
     gap: var(--t-space-3);
+    margin: var(--t-space-2) var(--t-space-2) 0;
 }
 
 .drag-region {
@@ -385,5 +402,25 @@ function handleClose(): void {
     height: 14px;
     background: var(--t-border);
     margin: 0 var(--t-space-1);
+}
+
+.hero-card-icon {
+    font-size: 0.9rem;
+    color: var(--t-text-muted);
+    margin-right: 0.25rem;
+}
+
+.hud-wallet-icon {
+    font-size: 0.7rem;
+    color: var(--t-success);
+    margin-right: 0.15rem;
+}
+
+.wallet-chip {
+    border-color: color-mix(in srgb, var(--t-success) 30%, transparent);
+}
+
+.wallet-value {
+    color: var(--t-success) !important;
 }
 </style>

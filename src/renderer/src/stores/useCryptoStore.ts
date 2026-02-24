@@ -16,6 +16,7 @@ import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
 import { useEventStore } from './useEventStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 
 export interface CryptoHolding {
   assetId: string
@@ -177,28 +178,27 @@ export const useCryptoStore = defineStore('crypto', () => {
 
     if (totalPayout.gt(0)) {
       const adjustedPayout = mul(totalPayout, cryptoReturnsMul)
-      player.earnCash(adjustedPayout, { key: 'banking.tx_crypto_staking', cat: 'investment' })
+      player.earnToCard(adjustedPayout, { key: 'banking.tx_crypto_staking', cat: 'investment' })
       totalStakingEarned.value = add(totalStakingEarned.value, adjustedPayout)
     }
   }
 
   function buyCrypto(assetId: string, amount: number): Decimal | null {
     const asset = assets.value.find((a) => a.id === assetId)
-    if (!asset || amount <= 0) return null
+    if (!amount || amount <= 0) return null
 
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
     const cost = D(asset.currentPrice * amount)
+    const total = cardPayment.calculateTotal(cost)
 
-    // Check and spend cash
-    if (!gte(player.cash, cost)) return null
-    if (
-      !player.spendCash(cost, {
-        key: 'banking.tx_crypto_buy',
-        cat: 'investment',
-        params: { name: asset.name }
-      })
-    )
+    // Check cardBalance (including fee)
+    if (!gte(player.cardBalance, total)) return null
+
+    // Use quickPay (silent) — no dialog. Works correctly with limit orders.
+    if (!cardPayment.quickPay(cost, 'banking.tx_crypto_buy', 'investment', { name: asset.name })) {
       return null
+    }
 
     const existing = wallet.value.find((h) => h.assetId === assetId)
 
@@ -240,7 +240,7 @@ export const useCryptoStore = defineStore('crypto', () => {
     totalRealizedProfit.value = add(totalRealizedProfit.value, multipliedProfit)
 
     // Add revenue to player cash
-    player.earnCash(revenue, {
+    player.earnToCard(revenue, {
       key: 'banking.tx_crypto_sell',
       cat: 'investment',
       params: { name: asset.name }

@@ -27,6 +27,8 @@ import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import { useBankingStore } from '@renderer/stores/useBankingStore'
+import { useCardPaymentStore } from '@renderer/stores/useCardPaymentStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { hydrateDecimals, ZERO, add, mul } from '@renderer/core/BigNum'
 import { economySim } from '@renderer/core/EconomySim'
 import { gameEngine } from '@renderer/core/GameEngine'
@@ -78,6 +80,8 @@ export function useInitGame() {
       const shopStore = useShopStore()
       const limitOrderStore = useLimitOrderStore()
       const bankingStore = useBankingStore()
+      const cardPaymentStore = useCardPaymentStore()
+      const casinoChipStore = useCasinoChipStore()
 
       // Register the transaction recorder so every earnCash/spendCash/forcePay
       // with meta automatically records into the banking store
@@ -235,6 +239,16 @@ export function useInitGame() {
           bankingStore.loadFromSave(save.banking as Record<string, unknown>)
         }
 
+        // Restore card payment state
+        if (save.cardPayment) {
+          cardPaymentStore.loadFromSave(save.cardPayment as Record<string, unknown>)
+        }
+
+        // Restore casino chip state
+        if (save.casinoChips) {
+          casinoChipStore.loadFromSave(save.casinoChips as Record<string, unknown>)
+        }
+
         // Initialize card if not yet created
         bankingStore.initCard()
 
@@ -260,7 +274,7 @@ export function useInitGame() {
               Date.now(),
               {
                 jobs: jobs.jobIncomePerSecond,
-                business: business.profitPerSecond,
+                business: business.managedProfitPerSecond,
                 realEstate: realEstate.rentPerSecond,
                 dividends: stocks.dividendIncomePerSecond,
                 staking: crypto.stakingIncomePerSecond,
@@ -282,7 +296,10 @@ export function useInitGame() {
 
               // Apply cash earnings (jobs + business + real estate + dividends)
               if (summary.cashEarned.gt(0)) {
-                player.earnCash(summary.cashEarned)
+                player.earnToCard(summary.cashEarned, {
+                  key: 'banking.tx_offline_earnings',
+                  cat: 'other'
+                })
               }
 
               // Apply deposit interest (add to deposit balances, weighted by balance × APY)

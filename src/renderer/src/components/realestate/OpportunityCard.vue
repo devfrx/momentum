@@ -44,7 +44,7 @@ const template = computed(() =>
 )
 
 // ── Affordability ──
-const canAfford = computed(() => player.cash.gte(props.opportunity.askingPrice))
+const canAfford = computed(() => player.cardBalance.gte(props.opportunity.askingPrice))
 
 // ── Scouting state ──
 const currentScoutIdx = computed(() => SCOUT_PHASES.indexOf(props.opportunity.scoutPhase))
@@ -55,7 +55,7 @@ const nextScoutPhase = computed<ScoutPhase | null>(() => {
 const nextScoutCost = computed(() =>
     nextScoutPhase.value ? props.opportunity.scoutCosts[nextScoutPhase.value] : 0,
 )
-const canAffordScout = computed(() => player.cash.gte(nextScoutCost.value))
+const canAffordScout = computed(() => player.cardBalance.gte(nextScoutCost.value))
 
 // ── Progressive reveal gates ──
 const showTraits = computed(() => currentScoutIdx.value >= 1)
@@ -155,8 +155,9 @@ function handleScout(): void {
 }
 
 function handleBuy(): void {
-    const prop = realEstate.buyProperty(props.opportunity.id, Date.now())
-    if (prop) emit('bought', prop.id)
+    realEstate.buyProperty(props.opportunity.id, Date.now(), (propId) => {
+        emit('bought', propId)
+    })
 }
 </script>
 
@@ -263,7 +264,7 @@ function handleBuy(): void {
             <div class="fin-row">
                 <div class="fin-item">
                     <span class="fin-label">
-                        <AppIcon icon="mdi:cash-multiple" /> {{ t('realestate.net_income') }}/day
+                        <AppIcon icon="mdi:cash-multiple" /> {{ t('realestate.net_income') }}/{{ t('realestate.day') }}
                     </span>
                     <span class="fin-value" :class="dailyNetIncome > 0 ? 'fin-value--pos' : 'fin-value--neg'">
                         {{ formatCash(Math.abs(dailyNetIncome)) }}
@@ -271,7 +272,7 @@ function handleBuy(): void {
                 </div>
                 <div class="fin-item">
                     <span class="fin-label">
-                        <AppIcon icon="mdi:calendar-clock" /> Payback
+                        <AppIcon icon="mdi:calendar-clock" /> {{ t('realestate.roi') }}
                     </span>
                     <span class="fin-value" :class="paybackDays < 30 ? 'fin-value--pos' : ''">
                         {{ paybackDays === Infinity ? '∞' : `~${Math.ceil(paybackDays)}d` }}
@@ -283,14 +284,15 @@ function handleBuy(): void {
                     <span class="fin-label">
                         <AppIcon icon="mdi:trending-up" /> {{ t('realestate.appreciation') }}
                     </span>
-                    <span class="fin-value fin-value--pos">+{{ dailyAppreciation.toFixed(1) }}%/day</span>
+                    <span class="fin-value fin-value--pos">+{{ dailyAppreciation.toFixed(1) }}%/{{ t('realestate.day')
+                        }}</span>
                 </div>
                 <div class="fin-item">
                     <span class="fin-label">
                         <AppIcon icon="mdi:tools" /> {{ t('realestate.expense') }}
                     </span>
                     <span class="fin-value fin-value--neg">{{ formatCash(maintenancePerSecond + taxPerSecond)
-                    }}/s</span>
+                        }}/s</span>
                 </div>
             </div>
         </div>
@@ -311,12 +313,12 @@ function handleBuy(): void {
 
             <div class="stat-pill">
                 <AppIcon icon="mdi:puzzle-plus" />
-                <span>{{ maxImprovements }} slots</span>
+                <span>{{ t('realestate.slots_remaining', { count: maxImprovements }) }}</span>
             </div>
 
             <div class="stat-pill">
                 <AppIcon icon="mdi:receipt-text-outline" />
-                <span>{{ formatPercent(opportunity.taxRate * 100) }} tax</span>
+                <span>{{ formatPercent(opportunity.taxRate * 100) }} {{ t('realestate.tax_label') }}</span>
             </div>
         </div>
 

@@ -45,9 +45,7 @@ export const useJobStore = defineStore('jobs', () => {
     return 1 + Math.floor(playerStore.level / 5)
   })
 
-  const activeJobCount = computed(() =>
-    unlockedJobs.value.filter((j) => j.active).length
-  )
+  const activeJobCount = computed(() => unlockedJobs.value.filter((j) => j.active).length)
 
   /**
    * Total income per tick from all active jobs.
@@ -118,7 +116,7 @@ export const useJobStore = defineStore('jobs', () => {
       defId,
       experienceLevel: 0,
       ticksWorked: 0,
-      active: false,
+      active: false
     })
     return true
   }
@@ -177,7 +175,7 @@ export const useJobStore = defineStore('jobs', () => {
     }
 
     if (totalIncome.gt(ZERO)) {
-      playerStore.earnCash(totalIncome)
+      playerStore.earnToCard(totalIncome)
       // Jobs also give XP (slow drip)
       playerStore.addXp(D(0.02))
     }
@@ -214,6 +212,6 @@ export const useJobStore = defineStore('jobs', () => {
     stopJob,
     tick,
     prestigeReset,
-    loadFromSave,
+    loadFromSave
   }
 })

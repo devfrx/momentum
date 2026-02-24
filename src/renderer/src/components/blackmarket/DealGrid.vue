@@ -7,11 +7,13 @@ import AppIcon from '@renderer/components/AppIcon.vue'
 import DealCard from './DealCard.vue'
 import { useBlackMarketStore } from '@renderer/stores/useBlackMarketStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
+import { useCryptoStore } from '@renderer/stores/useCryptoStore'
 import { useI18n } from 'vue-i18n'
-import { gte } from '@renderer/core/BigNum'
+import { gte, D } from '@renderer/core/BigNum'
 
 const blackmarket = useBlackMarketStore()
 const player = usePlayerStore()
+const crypto = useCryptoStore()
 const { t } = useI18n()
 
 const emit = defineEmits<{ accepted: [dealId: string, success: boolean, message: string] }>()
@@ -23,8 +25,22 @@ const rotationMinutes = computed(() => {
     return `${m}:${s.toString().padStart(2, '0')}`
 })
 
-function handleAccept(dealId: string): void {
+function handleAccept(dealId: string, method: 'cash' | 'crypto', assetId?: string): void {
+    // Verify deal still exists before any side-effects
+    const deal = blackmarket.availableDeals.find((d: any) => d.id === dealId)
+    if (!deal) return
+
+    if (method === 'crypto' && assetId) {
+        // Sell crypto to cover the deal cost, then accept
+        const sold = crypto.sellCrypto(assetId, Math.ceil(deal.cost.toNumber() / (crypto.assets?.find((a: any) => a.id === assetId)?.currentPrice ?? 1)))
+        if (!sold) return
+    }
     const result = blackmarket.acceptDeal(dealId)
+    if (!result.success && method === 'crypto') {
+        // Deal acceptance failed after crypto was sold — emit failure so UI can notify
+        emit('accepted', dealId, false, result.message)
+        return
+    }
     emit('accepted', dealId, result.success, result.message)
 }
 

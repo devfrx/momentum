@@ -40,6 +40,7 @@ import {
 } from '@renderer/data/realestate'
 import type { TickContext } from '@renderer/core/GameEngine'
 import { usePlayerStore } from './usePlayerStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 
 // ═══════════════════════════════════════════════════════════════════
 // TYPES
@@ -264,15 +265,22 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     return D(Math.round(p.currentValue.toNumber() * conditionFactor))
   }
 
-  /** Total rent per tick across all properties */
+  /** Total rent per tick across all properties (only positive earners).
+   *  Properties operating at a loss are excluded here because their
+   *  losses are recorded directly via forcePay with TxMeta in tick().
+   *  Including them would double-count the expense in the banking log. */
   const totalRentPerTick = computed<Decimal>(() => {
     let total = ZERO
     for (const p of properties.value) {
-      const net = computePropertyNetRent(p)
-      total = add(total, net)
+      const grossRent = mul(computePropertyRent(p), globalRentMultiplier.value)
+      const maintenance = computePropertyMaintenance(p)
+      const tax = mul(grossRent, p.taxRate)
+      const net = sub(grossRent, add(maintenance, tax))
+      if (net.gt(0)) {
+        total = add(total, net)
+      }
     }
-    // Apply global multiplier from skill tree / prestige / events
-    return mul(total, globalRentMultiplier.value)
+    return total
   })
 
   /** Rent per second (for offline calc) = rentPerTick × 10 */
@@ -322,10 +330,10 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
     // Check cost
     const cost = D(getScoutMarketCost(player.netWorth.toNumber()))
-    if (player.cash.lt(cost)) return []
 
-    // Pay
-    player.spendCash(cost, { key: 'banking.tx_re_scout', cat: 'real_estate' })
+    // Pay via card
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_re_scout', 'real_estate')) return []
 
     // Remove old scouted opportunities (replaced by fresh scout)
     opportunities.value = opportunities.value.filter((o) => !o.isScanned)
@@ -366,18 +374,23 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     if (targetIdx <= currentIdx) return false
 
     const cost = D(opp.scoutCosts[targetPhase])
-    if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost, { key: 'banking.tx_re_scout', cat: 'real_estate' })
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_re_scout', 'real_estate')) return false
     opp.scoutPhase = targetPhase
     return true
   }
 
   /** Buy a property from an opportunity */
-  function buyProperty(oppId: string, currentTick: number): Property | null {
+  function buyProperty(
+    oppId: string,
+    currentTick: number,
+    onCreated?: (propId: string) => void
+  ): boolean {
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
     const oppIdx = opportunities.value.findIndex((o) => o.id === oppId)
-    if (oppIdx < 0) return null
+    if (oppIdx < 0) return false
 
     const opp = opportunities.value[oppIdx]
 
@@ -387,58 +400,67 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       price = D(Math.round(price.toNumber() * (1 - APPRAISAL_DISCOUNT)))
     }
 
-    if (player.cash.lt(price)) return null
+    if (player.cardBalance.lt(cardPayment.calculateTotal(price))) return false
 
-    player.spendCash(price, {
-      key: 'banking.tx_re_buy',
-      cat: 'real_estate',
-      params: { name: opp.name }
-    })
+    const finalPrice = price
+    cardPayment.initiatePayment(
+      finalPrice,
+      'banking.tx_re_buy',
+      'real_estate',
+      () => {
+        // Find template to get maxImprovements
+        const template = PROPERTY_TEMPLATES.find((t) => t.id === opp.templateId)
 
-    // Find template to get maxImprovements
-    const template = PROPERTY_TEMPLATES.find((t) => t.id === opp.templateId)
+        const propId = `prop_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+        const property: Property = {
+          id: propId,
+          templateId: opp.templateId,
+          name: opp.name,
+          icon: opp.icon,
+          category: opp.category,
+          locationGrade: opp.locationGrade,
+          purchasePrice: finalPrice,
+          currentValue: opp.trueValue,
+          baseRent: opp.baseRent,
+          units: opp.units,
+          condition: opp.startingCondition,
+          wearRate: opp.wearRate,
+          taxRate: opp.taxRate,
+          baseAppreciationRate: opp.baseAppreciationRate,
+          baseMaintenance: opp.baseMaintenance,
+          renovationLevel: 0,
+          maxRenovationLevel: opp.maxRenovationLevel,
+          renovationCostMultiplier: opp.renovationCostMultiplier,
+          improvements: [],
+          maxImprovements: template?.maxImprovements ?? 6,
+          traits: opp.traits.map((t) => t.id),
+          managementStyle: 'standard',
+          rentMultiplier: 1.0,
+          customName: null,
+          purchasedAtTick: currentTick,
+          occupancy: 0.7 + Math.random() * 0.25, // 70-95% initial occupancy
+          occupancyRecalcIn: OCCUPANCY_RECALC_TICKS,
+          totalRentCollected: ZERO,
+          totalMaintenancePaid: ZERO
+        }
 
-    const property: Property = {
-      id: `prop_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      templateId: opp.templateId,
-      name: opp.name,
-      icon: opp.icon,
-      category: opp.category,
-      locationGrade: opp.locationGrade,
-      purchasePrice: price,
-      currentValue: opp.trueValue,
-      baseRent: opp.baseRent,
-      units: opp.units,
-      condition: opp.startingCondition,
-      wearRate: opp.wearRate,
-      taxRate: opp.taxRate,
-      baseAppreciationRate: opp.baseAppreciationRate,
-      baseMaintenance: opp.baseMaintenance,
-      renovationLevel: 0,
-      maxRenovationLevel: opp.maxRenovationLevel,
-      renovationCostMultiplier: opp.renovationCostMultiplier,
-      improvements: [],
-      maxImprovements: template?.maxImprovements ?? 6,
-      traits: opp.traits.map((t) => t.id),
-      managementStyle: 'standard',
-      rentMultiplier: 1.0,
-      customName: null,
-      purchasedAtTick: currentTick,
-      occupancy: 0.7 + Math.random() * 0.25, // 70-95% initial occupancy
-      occupancyRecalcIn: OCCUPANCY_RECALC_TICKS,
-      totalRentCollected: ZERO,
-      totalMaintenancePaid: ZERO
-    }
-
-    properties.value.push(property)
-    opportunities.value.splice(oppIdx, 1)
-    totalPropertiesBought.value++
-    return property
+        properties.value.push(property)
+        opportunities.value.splice(oppIdx, 1)
+        totalPropertiesBought.value++
+        // Auto-bind card to new property
+        cardPayment.bindCard(`realestate:${propId}`)
+        onCreated?.(propId)
+      },
+      undefined,
+      { name: opp.name }
+    )
+    return true
   }
 
   /** Sell a property at current market value */
   function sellProperty(propId: string): Decimal | null {
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
     const idx = properties.value.findIndex((p) => p.id === propId)
     if (idx < 0) return null
 
@@ -447,7 +469,7 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const conditionFactor = 0.5 + (prop.condition / 100) * 0.5
     const salePrice = D(Math.round(prop.currentValue.toNumber() * conditionFactor))
 
-    player.earnCash(salePrice, {
+    player.earnToCard(salePrice, {
       key: 'banking.tx_re_sell',
       cat: 'real_estate',
       params: { name: prop.name }
@@ -456,6 +478,8 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     totalSaleProfit.value = add(totalSaleProfit.value, profit)
     totalPropertiesSold.value++
     properties.value.splice(idx, 1)
+    // Unbind card from sold property
+    cardPayment.unbindCard(`realestate:${propId}`)
     return salePrice
   }
 
@@ -471,13 +495,10 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     const cost = D(
       Math.round(baseCost * Math.pow(prop.renovationCostMultiplier, prop.renovationLevel))
     )
-    if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost, {
-      key: 'banking.tx_re_renovate',
-      cat: 'real_estate',
-      params: { name: prop.name }
-    })
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_re_renovate', 'real_estate', { name: prop.name }))
+      return false
     prop.renovationLevel++
     prop.condition = Math.min(100, prop.condition + 15)
     return true
@@ -492,13 +513,10 @@ export const useRealEstateStore = defineStore('realEstate', () => {
 
     const repairAmount = 100 - prop.condition
     const cost = D(Math.round(prop.baseMaintenance.toNumber() * repairAmount * 5 * prop.units))
-    if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost, {
-      key: 'banking.tx_re_repair',
-      cat: 'real_estate',
-      params: { name: prop.name }
-    })
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_re_repair', 'real_estate', { name: prop.name }))
+      return false
     prop.condition = 100
     return true
   }
@@ -520,13 +538,10 @@ export const useRealEstateStore = defineStore('realEstate', () => {
     if (prop.currentValue.toNumber() < imp.minPropertyValue) return false
 
     const cost = D(Math.round(prop.currentValue.toNumber() * imp.costFraction))
-    if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost, {
-      key: 'banking.tx_re_improve',
-      cat: 'real_estate',
-      params: { name: prop.name }
-    })
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_re_improve', 'real_estate', { name: prop.name }))
+      return false
     prop.improvements.push(improvementId)
     // Improvement adds to property value
     prop.currentValue = add(
@@ -593,13 +608,13 @@ export const useRealEstateStore = defineStore('realEstate', () => {
       totalMaintenancePaid.value = add(totalMaintenancePaid.value, totalExpenses)
 
       if (netRent.gt(0)) {
-        player.earnCash(netRent)
+        player.earnToCard(netRent)
         prop.totalRentCollected = add(prop.totalRentCollected, grossRent)
         totalRentEarned.value = add(totalRentEarned.value, grossRent)
       } else if (netRent.lt(0)) {
         // Property is operating at a loss — deduct from cash (can go negative)
         const loss = netRent.abs()
-        player.forcePay(loss)
+        player.forcePay(loss, { key: 'banking.tx_re_loss', cat: 'real_estate' })
         // Still track the gross rent earned (even if net is negative)
         prop.totalRentCollected = add(prop.totalRentCollected, grossRent)
         totalRentEarned.value = add(totalRentEarned.value, grossRent)

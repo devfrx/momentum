@@ -17,13 +17,14 @@ import {
   type ActiveDeposit,
   type DepositHistoryEntry,
   calculateEffectiveAPY,
-  getCompoundIntervalTicks,
+  getCompoundIntervalTicks
 } from '@renderer/data/deposits'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
 import { useEventStore } from './useEventStore'
 import { useLoanStore } from './useLoanStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 import { economySim } from '@renderer/core/EconomySim'
 
 export const useDepositStore = defineStore('deposits', () => {
@@ -107,7 +108,7 @@ export const useDepositStore = defineStore('deposits', () => {
 
     // 4. Event modifiers (deposit_rate_modifier — additive)
     const eventBonus = events.getMultiplier('deposit_rate_modifier')
-    apy *= (1 + eventBonus)
+    apy *= 1 + eventBonus
 
     // 5. Economy simulation: base central-bank rate affects deposits
     //    Higher central bank rate → slightly higher deposit rates
@@ -125,21 +126,25 @@ export const useDepositStore = defineStore('deposits', () => {
     reason?: string
     effectiveAPY: number
   } {
-    const def = DEPOSITS.find(d => d.id === defId)
+    const def = DEPOSITS.find((d) => d.id === defId)
     if (!def) return { eligible: false, reason: 'Unknown deposit type', effectiveAPY: 0 }
 
     const player = usePlayerStore()
     const loanStore = useLoanStore()
 
     if (loanStore.creditScore < def.minCreditScore) {
-      return { eligible: false, reason: `Requires credit score ${def.minCreditScore}`, effectiveAPY: 0 }
+      return {
+        eligible: false,
+        reason: `Requires credit score ${def.minCreditScore}`,
+        effectiveAPY: 0
+      }
     }
     if (player.netWorth.lt(def.minNetWorth)) {
       return { eligible: false, reason: `Requires net worth ${def.minNetWorth}`, effectiveAPY: 0 }
     }
 
     // Max active check
-    const activeCount = deposits.value.filter(d => d.depositDefId === defId && !d.closed).length
+    const activeCount = deposits.value.filter((d) => d.depositDefId === defId && !d.closed).length
     if (activeCount >= def.maxActive) {
       return { eligible: false, reason: `Max ${def.maxActive} active account(s)`, effectiveAPY: 0 }
     }
@@ -151,7 +156,7 @@ export const useDepositStore = defineStore('deposits', () => {
   // ─── Open Deposit ──────────────────────────────────────────
 
   function openDeposit(defId: string, amount: Decimal, currentTick: number): string | null {
-    const def = DEPOSITS.find(d => d.id === defId)
+    const def = DEPOSITS.find((d) => d.id === defId)
     if (!def) return null
 
     const check = canOpenDeposit(defId)
@@ -162,10 +167,10 @@ export const useDepositStore = defineStore('deposits', () => {
     // Validate amount
     if (amount.lt(def.minDeposit)) return null
     if (def.maxDeposit.gt(0) && amount.gt(def.maxDeposit)) return null
-    if (player.cash.lt(amount)) return null
 
-    // Deduct cash
-    if (!player.spendCash(amount)) return null
+    // Card payment (handles balance check + fee + deduction from cardBalance)
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(amount, 'banking.tx_deposit_open', 'deposit')) return null
 
     const id = `dep_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
@@ -184,7 +189,7 @@ export const useDepositStore = defineStore('deposits', () => {
       ticksSinceLastCompound: 0,
       totalCompounds: 0,
       closed: false,
-      loyaltyTicks: 0,
+      loyaltyTicks: 0
     }
 
     deposits.value.push(deposit)
@@ -198,11 +203,15 @@ export const useDepositStore = defineStore('deposits', () => {
 
   // ─── Withdraw ──────────────────────────────────────────────
 
-  function withdraw(depositId: string, amount: Decimal | null, _currentTick: number): Decimal | null {
-    const dep = deposits.value.find(d => d.id === depositId)
+  function withdraw(
+    depositId: string,
+    amount: Decimal | null,
+    _currentTick: number
+  ): Decimal | null {
+    const dep = deposits.value.find((d) => d.id === depositId)
     if (!dep || dep.closed) return null
 
-    const def = DEPOSITS.find(d => d.id === dep.depositDefId)
+    const def = DEPOSITS.find((d) => d.id === dep.depositDefId)
     if (!def) return null
 
     const player = usePlayerStore()
@@ -235,7 +244,7 @@ export const useDepositStore = defineStore('deposits', () => {
     }
 
     // Credit the player
-    player.earnCash(payout)
+    player.earnToCard(payout, { key: 'banking.tx_deposit_withdraw', cat: 'deposit' })
 
     if (isFullWithdrawal) {
       // Close the deposit
@@ -257,7 +266,7 @@ export const useDepositStore = defineStore('deposits', () => {
         matured: dep.matured,
         earlyWithdrawal: isEarly,
         penaltyPaid,
-        status,
+        status
       })
 
       // XP + credit score on maturity
@@ -276,7 +285,7 @@ export const useDepositStore = defineStore('deposits', () => {
       }
 
       // Remove closed deposits from active list
-      deposits.value = deposits.value.filter(d => d.id !== depositId)
+      deposits.value = deposits.value.filter((d) => d.id !== depositId)
     } else {
       // Partial withdrawal — reduce balances proportionally
       const ratio = withdrawAmount.div(dep.currentBalance)
@@ -294,7 +303,7 @@ export const useDepositStore = defineStore('deposits', () => {
     for (const dep of deposits.value) {
       if (dep.closed) continue
 
-      const def = DEPOSITS.find(d => d.id === dep.depositDefId)
+      const def = DEPOSITS.find((d) => d.id === dep.depositDefId)
       if (!def) continue
 
       dep.ticksActive++
@@ -307,9 +316,8 @@ export const useDepositStore = defineStore('deposits', () => {
 
       // Check loyalty bonus activation
       if (dep.matured && !dep.loyaltyActive && def.loyaltyBonusAPY > 0) {
-        const ticksPastMaturity = def.termTicks > 0
-          ? dep.ticksActive - def.termTicks
-          : dep.ticksActive
+        const ticksPastMaturity =
+          def.termTicks > 0 ? dep.ticksActive - def.termTicks : dep.ticksActive
         if (ticksPastMaturity >= def.loyaltyThresholdTicks) {
           dep.loyaltyActive = true
         }
@@ -373,7 +381,10 @@ export const useDepositStore = defineStore('deposits', () => {
     const player = usePlayerStore()
     for (const dep of deposits.value) {
       if (!dep.closed) {
-        player.earnCash(dep.currentBalance)
+        player.earnToCard(dep.currentBalance, {
+          key: 'banking.tx_deposit_prestige',
+          cat: 'deposit'
+        })
       }
     }
     deposits.value = []
@@ -403,7 +414,7 @@ export const useDepositStore = defineStore('deposits', () => {
         ticksSinceLastCompound: d.ticksSinceLastCompound ?? 0,
         totalCompounds: d.totalCompounds ?? 0,
         closed: d.closed ?? false,
-        loyaltyTicks: d.loyaltyTicks ?? 0,
+        loyaltyTicks: d.loyaltyTicks ?? 0
       }))
     }
 
@@ -417,15 +428,19 @@ export const useDepositStore = defineStore('deposits', () => {
         matured: h.matured ?? false,
         earlyWithdrawal: h.earlyWithdrawal ?? false,
         penaltyPaid: h.penaltyPaid ?? ZERO,
-        status: h.status ?? 'completed',
+        status: h.status ?? 'completed'
       }))
     }
 
     if (data.totalDeposited !== undefined) totalDeposited.value = data.totalDeposited ?? ZERO
-    if (data.totalInterestEarnedEver !== undefined) totalInterestEarnedEver.value = data.totalInterestEarnedEver ?? ZERO
-    if (data.totalDepositsOpened !== undefined) totalDepositsOpened.value = data.totalDepositsOpened ?? 0
-    if (data.totalDepositsMatured !== undefined) totalDepositsMatured.value = data.totalDepositsMatured ?? 0
-    if (data.totalEarlyWithdrawals !== undefined) totalEarlyWithdrawals.value = data.totalEarlyWithdrawals ?? 0
+    if (data.totalInterestEarnedEver !== undefined)
+      totalInterestEarnedEver.value = data.totalInterestEarnedEver ?? ZERO
+    if (data.totalDepositsOpened !== undefined)
+      totalDepositsOpened.value = data.totalDepositsOpened ?? 0
+    if (data.totalDepositsMatured !== undefined)
+      totalDepositsMatured.value = data.totalDepositsMatured ?? 0
+    if (data.totalEarlyWithdrawals !== undefined)
+      totalEarlyWithdrawals.value = data.totalEarlyWithdrawals ?? 0
   }
 
   // ─── Return ────────────────────────────────────────────────
@@ -453,6 +468,6 @@ export const useDepositStore = defineStore('deposits', () => {
     withdraw,
     tick,
     prestigeReset,
-    loadFromSave,
+    loadFromSave
   }
 })

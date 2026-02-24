@@ -110,7 +110,8 @@ export default {
     minimize: 'Riduci',
     maximize: 'Massimizza',
     close: 'Chiudi',
-    in_debt: 'IN DEBITO — interessi del 0.5% in maturazione'
+    in_debt: 'IN DEBITO — interessi del 0.5% in maturazione',
+    wallet: 'Contanti Portafoglio'
   },
 
   // ─── Footer ───────────────────────────────────────────────────
@@ -234,6 +235,7 @@ export default {
     // Descrizioni transazioni
     tx_job_income: 'Stipendio lavorativo',
     tx_business_profit: 'Profitto attività',
+    tx_business_loss: 'Perdita operativa attività',
     tx_rent_income: 'Reddito da affitto',
     tx_deposit_interest: 'Interessi deposito',
     tx_loan_interest: 'Interessi prestito',
@@ -282,12 +284,186 @@ export default {
     tx_event_bonus: 'Bonus evento',
     tx_misc_income: 'Entrata varia',
     tx_misc_expense: 'Uscita varia',
+    // Transazioni attività
+    tx_biz_buy: 'Acquisto attività — {name}',
+    tx_biz_sell: 'Vendita attività — {name}',
+    tx_biz_level: 'Livello attività — {name}',
+    tx_biz_branch: 'Nuova filiale — {name}',
+    tx_biz_train: 'Formazione staff — {name}',
+    tx_biz_upgrade: 'Upgrade attività — {name}',
+    tx_biz_advisor: 'Consulente assunto — {name}',
+    tx_biz_collect: 'Profitto raccolto — {name}',
+    tx_biz_quality: 'Upgrade qualità — {name}',
+    tx_biz_auto_train: 'Auto-formazione — {name}',
+    tx_biz_overflow_loss: 'Perdita eccedente attività — {name}',
+    // Transazioni deposito
+    tx_deposit_open: 'Deposito aperto',
+    tx_deposit_withdraw: 'Prelievo deposito',
+    tx_deposit_prestige: 'Deposito chiuso (prestigio)',
+    // Transazioni cassaforte
+    tx_vault_deposit: 'Contanti in cassaforte',
+    tx_vault_withdraw: 'Prelievo dalla cassaforte',
+    tx_vault_sell: 'Oggetto cassaforte venduto',
+    tx_vault_upgrade: 'Aumento capacità cassaforte',
+    // Transazioni startup
+    tx_startup_dd: 'Due diligence — {name}',
+    tx_startup_research: 'Ricerca startup — {name}',
+    tx_startup_invest: 'Investimento startup — {name}',
+    tx_startup_exit: 'Exit startup — {name}',
+    // Transazioni upgrade
+    tx_upgrade_buy: 'Upgrade albero abilità',
+    // Transazioni magazzino
+    tx_storage_fee: 'Costo manutenzione magazzino',
+    // Perdita immobiliare
+    tx_re_loss: 'Perdita operativa proprietà',
+    // Varie
+    tx_debt_interest: 'Interessi sul debito',
+    tx_offline_earnings: 'Guadagni offline',
+    tx_atm_withdraw: 'Prelievo ATM (addebito carta)',
+    tx_atm_cash: 'Contanti ATM ricevuti',
     // Livelli carta
     tier_standard: 'Standard',
     tier_gold: 'Gold',
     tier_platinum: 'Platinum',
     tier_black: 'Black',
-    tier_bonus_desc: 'Bonus carta: +{pct}% a tutte le entrate'
+    tier_bonus_desc: 'Bonus carta: +{pct}% a tutte le entrate',
+    // Pagamento Carta
+    tx_chip_buy: 'Fiches casinò acquistate',
+    tx_chip_cashout: 'Fiches casinò incassate',
+    tx_card_withdraw: 'Prelievo contanti ATM',
+    tx_card_fee: 'Commissione transazione',
+    // Doppio saldo
+    card_balance: 'Saldo Carta',
+    wallet_cash: 'Contanti Portafoglio'
+  },
+
+  // ─── Pagamento Carta ──────────────────────────────────────────
+  card_payment: {
+    title: 'Pagamento Carta',
+    subtitle: 'Conferma il tuo acquisto',
+    enter_last4: 'Ultime 4 cifre',
+    enter_cvv: 'CVV',
+    amount: 'Importo',
+    fee: 'Commissione',
+    fee_rate: 'Commissione {pct}%',
+    total: 'Totale Addebito',
+    confirm: 'Conferma Pagamento',
+    cancel: 'Annulla',
+    processing: 'Elaborazione...',
+    verifying: 'Verifica carta...',
+    authorizing: 'Autorizzazione...',
+    success: 'Pagamento Approvato',
+    success_detail: 'Transazione completata con successo',
+    declined: 'Pagamento Rifiutato',
+    declined_wrong_pin: 'Dati carta errati',
+    declined_limit: 'Limite giornaliero superato',
+    declined_balance: 'Saldo insufficiente',
+    declined_cooldown: 'Attendi prima di riprovare',
+    failed: 'Transazione Fallita',
+    daily_limit: 'Limite Giornaliero',
+    daily_spent: 'Speso Oggi',
+    daily_remaining: 'Rimanente',
+    card_tier_fee: 'Tier {tier}: commissione {pct}%',
+    no_fee: 'Nessuna commissione',
+    quick_pay: 'Pagamento Rapido',
+    secure_badge: 'Protetto da FINANX'
+  },
+
+  // ─── Badge Carta Salvata ──────────────────────────────────────
+  card_bound: {
+    tooltip_title: 'Carta Salvata',
+    fee: 'Commissione',
+    free: 'Gratis'
+  },
+
+  // ─── Fiches Casinò ────────────────────────────────────────────
+  casino_chips: {
+    title: 'Cambio Fiches',
+    subtitle: 'Converti fondi in fiches del casinò',
+    balance: 'Saldo Fiches',
+    buy_chips: 'Acquista Fiches',
+    buy_tab: 'Acquista',
+    cashout_tab: 'Incassa',
+    with_cash: 'Contanti',
+    with_card: 'Carta',
+    buy_with_cash: 'Acquista con Contanti',
+    buy_with_card: 'Acquista con Carta',
+    enter_amount: 'Inserisci importo',
+    you_pay: 'Paghi',
+    tier_bonus: 'Bonus Livello',
+    chips_received: 'Fiches Ricevute',
+    chips_spent: 'Fiches Spese',
+    all: 'Tutte',
+    cashout: 'Incassa',
+    denominations: 'Tagli delle Fiches',
+    cash_amount: 'Importo Contanti',
+    chip_amount: 'Importo Fiches',
+    you_receive: 'Riceverai',
+    rate: 'Tasso di Cambio',
+    rate_bonus: '+{pct}% fiches bonus',
+    cashout_fee: 'Commissione Incasso',
+    cashout_fee_pct: 'Commissione {pct}%',
+    net_receive: 'Importo Netto',
+    confirm_buy: 'Acquista Fiches',
+    confirm_cashout: 'Incassa Fiches',
+    insufficient_cash: 'Contanti insufficienti',
+    insufficient_chips: 'Fiches insufficienti',
+    buy_success: 'Fiches acquistate!',
+    cashout_success: 'Fiches incassate!',
+    chip_white: 'Bianca ($1)',
+    chip_red: 'Rossa ($5)',
+    chip_blue: 'Blu ($25)',
+    chip_green: 'Verde ($100)',
+    chip_black: 'Nera ($500)',
+    chip_purple: 'Viola ($1.000)',
+    chip_gold: 'Oro ($5.000)',
+    total_bought: 'Totale Acquistate',
+    total_cashed: 'Totale Incassate',
+    total_fees: 'Totale Commissioni',
+    conversions: 'Conversioni',
+    use_chips: 'Usa le fiches per giocare al casinò',
+    cash_only_notice:
+      'Le fiches si comprano solo con contanti del portafoglio. Usa il Bancomat per prelevare.'
+  },
+
+  // ─── Terminale ATM ────────────────────────────────────────────
+  atm: {
+    title: 'Terminale ATM',
+    subtitle: 'Preleva dal conto bancario al portafoglio',
+    card_balance: 'Saldo Carta',
+    wallet: 'Contanti Portafoglio',
+    fee_rate: 'Commissione ATM',
+    free: 'GRATIS',
+    daily_remaining: 'Rimanente Oggi',
+    daily_limit: 'Limite Giornaliero',
+    enter_amount: 'Inserisci importo',
+    withdraw_amount: 'Prelievo',
+    fee: 'Commissione ATM',
+    deducted_from_card: 'Addebitato sulla Carta',
+    withdraw: 'Preleva Contanti',
+    max: 'MAX'
+  },
+
+  // ─── Pagamento Mercato Nero ───────────────────────────────────
+  bm_payment: {
+    pay_with: 'Paga con',
+    cash: 'Contanti',
+    crypto: 'Crypto',
+    mode_cash: 'Contanti',
+    mode_crypto: 'Crypto',
+    your_cash: 'I Tuoi Contanti',
+    select_asset: 'Seleziona Asset',
+    select_crypto: 'Seleziona Criptovaluta',
+    units_needed: 'Unità Necessarie',
+    no_crypto: 'Nessun possesso crypto',
+    cost: 'Costo',
+    pay_cash: 'Paga in Contanti',
+    pay_crypto: 'Paga in Crypto',
+    crypto_balance: 'Saldo: {amount}',
+    crypto_value: 'Valore: {value}',
+    insufficient_crypto: 'Saldo crypto insufficiente',
+    sold_crypto: 'Venduti {amount} {name}',
+    no_holdings: 'Nessun possesso crypto'
   },
 
   // ─── Moltiplicatori ───────────────────────────────────────────
@@ -987,6 +1163,8 @@ export default {
     slots_remaining: '{count} slot rimanenti',
     improvements_full: 'Tutti gli slot migliorie sono occupati.',
     no_improvements_available: 'Nessuna miglioria disponibile per questa proprietà.',
+    day: 'giorno',
+    tax_label: 'tasse',
 
     // Schede
     skyline_empty: 'Nessuna proprietà — il tuo skyline è vuoto.',
@@ -1041,6 +1219,62 @@ export default {
       portfolio_value: 'Valore Portafoglio',
       opportunities: 'Opportunità',
       hot_deals: 'Affari Imperdibili'
+    },
+
+    // Perlustrazione
+    scout: {
+      none: 'Non perlustra',
+      drive_by: 'Passaggio Rapido',
+      drive_by_reveals: 'Rivela info base e condizione della proprietà.',
+      inspection: 'Ispezione',
+      inspection_reveals: 'Rivela tratti e statistiche dettagliate.',
+      appraisal: 'Perizia',
+      appraisal_reveals: 'Rivela il valore reale, punteggi nascosti e sblocca uno sconto del 3%.',
+      hidden_info: 'Perlustra questa proprietà per rivelare più dettagli.',
+      action: '{phase} — {cost}'
+    },
+
+    // Distretti
+    district: {
+      rent_mult: 'Molt. Affitto',
+      appreciation: 'Apprezzamento',
+      owned: 'Di proprietà',
+      opportunities: 'Opportunità'
+    },
+
+    // Sinergie distretto
+    synergy: {
+      title: 'Sinergie',
+      none: 'Nessuna sinergia attiva. Compra più proprietà in questo distretto.',
+      next: 'Ancora {count} per la prossima sinergia'
+    },
+
+    // Scansione distretto
+    scan: {
+      title: 'Scansione',
+      desc: 'Scansiona il distretto per rivelare nuove opportunità nascoste.',
+      action: 'Scansiona — {cost}',
+      cooldown: 'Ricarica: {time}'
+    },
+
+    // Mappa
+    map_back: 'Indietro',
+    scan_city: 'Scansiona Città',
+
+    // Tendenze
+    trend: {
+      growing: 'In crescita',
+      declining: 'In calo',
+      bubble: 'Bolla'
+    },
+
+    // Attività zona
+    activity: {
+      dormant: 'Inattivo',
+      quiet: 'Tranquillo',
+      active: 'Attivo',
+      booming: 'In espansione',
+      overheated: 'Surriscaldato'
     },
 
     // Migliorie

@@ -55,7 +55,7 @@ const position = computed(() => {
     return { assetId: h.assetId, shares: h.amount, averageBuyPrice: h.averageBuyPrice, totalInvested: h.totalInvested }
 })
 
-const availableCash = computed(() => player.cash.toNumber() - limitOrderStore.totalReservedCash.toNumber())
+const availableCash = computed(() => player.cardBalance.toNumber() - limitOrderStore.totalReservedCash.toNumber())
 
 /** Local chart mode toggle */
 const chartMode = ref<'line' | 'candle'>('candle')
@@ -127,7 +127,7 @@ function goBack() {
                 <div class="fs-identity">
                     <h2 class="fs-name">{{ asset.name }}</h2>
                     <span class="fs-type-label">{{ $t(type === 'crypto' ? 'market.cryptocurrency' : 'market.stock')
-                    }}</span>
+                        }}</span>
                 </div>
             </div>
 
@@ -218,7 +218,7 @@ function goBack() {
                         <AppIcon :icon="type === 'crypto' ? 'mdi:wallet-outline' : 'mdi:briefcase-outline'" />
                     </div>
                     <span class="fs-empty-text">{{ $t(type === 'crypto' ? 'market.no_holdings' : 'market.no_position')
-                    }}</span>
+                        }}</span>
                     <span class="fs-empty-hint">{{ $t('market.no_position_hint') }}</span>
                 </div>
 

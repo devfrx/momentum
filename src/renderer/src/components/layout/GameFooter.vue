@@ -66,13 +66,18 @@ function toggleEventsPanel(): void {
     display: flex;
     align-items: center;
     height: var(--t-footer-height);
-    background: var(--t-bg-footer);
-    border-top: 1px solid var(--t-border);
+    background: var(--t-glass-bg);
+    backdrop-filter: blur(var(--t-glass-blur));
+    -webkit-backdrop-filter: blur(var(--t-glass-blur));
+    border: 1px solid var(--t-glass-border);
+    border-radius: var(--t-radius-lg);
+    box-shadow: var(--t-glass-shadow);
     padding: 0 var(--t-space-4);
     font-size: var(--t-font-size-xs);
     gap: var(--t-space-4);
     color: var(--t-text-muted);
     user-select: none;
+    margin: 0 var(--t-space-2) var(--t-space-2);
 }
 
 .app-footer.clickable {
@@ -81,11 +86,11 @@ function toggleEventsPanel(): void {
 }
 
 .app-footer.clickable:hover {
-    background: var(--t-bg-muted);
+    background: color-mix(in srgb, var(--t-glass-bg) 90%, var(--t-text) 10%);
 }
 
 .app-footer.clickable:active {
-    background: var(--t-border);
+    background: color-mix(in srgb, var(--t-glass-bg) 85%, var(--t-text) 15%);
 }
 
 .ticker {
@@ -114,10 +119,13 @@ function toggleEventsPanel(): void {
 }
 
 @keyframes bell-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
         transform: scale(1);
     }
+
     50% {
         opacity: 0.5;
         transform: scale(1.1);

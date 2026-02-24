@@ -33,7 +33,7 @@ const { t } = useI18n()
 
 const condition = computed(() => props.listing.item.condition ?? 'good')
 const demandMult = computed(() => shop.getDemandMultiplier(props.listing.item.category))
-const cantAfford = computed(() => player.cash.lt(props.listing.price))
+const cantAfford = computed(() => player.cardBalance.lt(props.listing.price))
 </script>
 
 <template>

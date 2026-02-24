@@ -3,7 +3,7 @@
  */
 import { onMounted, onUnmounted, ref } from 'vue'
 import { gameEngine, type TickContext } from '@renderer/core/GameEngine'
-import { D, ZERO, add, sub, mul } from '@renderer/core/BigNum'
+import { D, ZERO, add, mul, min } from '@renderer/core/BigNum'
 import { Formulas } from '@renderer/core'
 import { economySim } from '@renderer/core/EconomySim'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
@@ -113,12 +113,16 @@ export function useGameLoop() {
     // ─── Debt interest (negative cash penalty) ───────────────────
     // When cash < 0, apply 0.5% interest per 100 ticks (≈ 10 sec)
     // to discourage staying in debt without making it instantly fatal.
+    // Interest is capped: debt considered for interest maxes out at 1e9
+    // and per-tick interest is capped at 5e6 to prevent runaway spirals.
     gameEngine.subscribe('debtInterest', (ctx: TickContext) => {
       if (ctx.tick % 100 !== 0) return
-      if (player.cash.lt(0)) {
-        const debtAmount = player.cash.abs()
-        const interest = mul(debtAmount, 0.005) // 0.5% per 10 sec
-        player.forcePay(interest)
+      if (player.cardBalance.lt(0)) {
+        const MAX_DEBT_FOR_INTEREST = D(1e9)
+        const MAX_INTEREST_PER_TICK = D(5e6)
+        const debtAmount = min(player.cardBalance.abs(), MAX_DEBT_FOR_INTEREST)
+        const interest = min(mul(debtAmount, 0.005), MAX_INTEREST_PER_TICK) // 0.5% per 10 sec, capped
+        player.forcePay(interest, { key: 'banking.tx_debt_interest', cat: 'other' })
       }
     })
 
@@ -204,7 +208,7 @@ export function useGameLoop() {
 
       // Use loan store's totalDebt for comprehensive debt tracking
       player.netWorth = Formulas.calculateNetWorth(
-        player.cash,
+        player.totalFunds,
         business.totalBusinessValue,
         portfolioValue,
         propertyValue,
@@ -293,7 +297,7 @@ export function useGameLoop() {
             met = player.totalCashEarned.gte(condition.value as number)
             break
           case 'cash':
-            met = player.cash.gte(condition.value as number)
+            met = player.totalFunds.gte(condition.value as number)
             break
           case 'netWorth':
             met = player.netWorth.gte(condition.value as number)
@@ -335,7 +339,7 @@ export function useGameLoop() {
           if (reward) {
             switch (reward.type) {
               case 'cash':
-                player.earnCash(D(reward.value), {
+                player.earnToCard(D(reward.value), {
                   key: 'banking.tx_achievement_reward',
                   cat: 'achievement',
                   params: { name: ach.name }
@@ -366,7 +370,7 @@ export function useGameLoop() {
       // Every 100 ticks (10 seconds): record aggregated income/expenses
       if (ctx.tick % 100 !== 0) return
 
-      const bal = player.cash
+      const bal = player.cardBalance
 
       // Job income (aggregated over 10s)
       const jobIncome = mul(jobs.jobIncomePerSecond, 10)
@@ -374,10 +378,18 @@ export function useGameLoop() {
         bankingStore.recordPeriodicIncome('banking.tx_job_income', jobIncome, 'salary', bal)
       }
 
-      // Business profit (aggregated over 10s)
-      const bizProfit = mul(business.profitPerSecond, 10)
+      // Business profit/loss (aggregated over 10s) — only managed businesses
+      // route profit/loss to the wallet; unmanaged businesses accumulate to pendingProfit
+      const bizProfit = mul(business.managedProfitPerSecond, 10)
       if (bizProfit.gt(0)) {
         bankingStore.recordPeriodicIncome('banking.tx_business_profit', bizProfit, 'business', bal)
+      } else if (bizProfit.lt(0)) {
+        bankingStore.recordTransaction(
+          'banking.tx_business_loss',
+          bizProfit, // already negative
+          'business',
+          bal
+        )
       }
 
       // Real estate rent (aggregated over 10s)
@@ -386,17 +398,11 @@ export function useGameLoop() {
         bankingStore.recordPeriodicIncome('banking.tx_rent_income', rent, 'real_estate', bal)
       }
 
-      // Deposit interest (aggregated over 10s)
-      const depositInt = mul(deposits.interestPerSecond, 10)
-      if (depositInt.gt(0)) {
-        bankingStore.recordPeriodicIncome('banking.tx_deposit_interest', depositInt, 'deposit', bal)
-      }
-
-      // Loan interest expense (aggregated over 10s)
-      const loanInt = mul(loans.totalInterestPerSecond, 10)
-      if (loanInt.gt(0)) {
-        bankingStore.recordTransaction('banking.tx_loan_interest', mul(loanInt, -1), 'loan', bal)
-      }
+      // NOTE: Deposit interest and loan interest are NOT recorded here because
+      // they don't flow to/from the player's wallet. Deposit interest accrues
+      // inside deposit balances (withdrawn later), and loan interest increases
+      // loan.remaining (paid when repaying). Recording them here would create
+      // phantom income/expense entries in the banking log.
 
       // Update card tier based on current net worth
       bankingStore.updateCardTier(player.netWorth)

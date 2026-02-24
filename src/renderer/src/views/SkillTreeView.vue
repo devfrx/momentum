@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUpgradeStore } from '@renderer/stores/useUpgradeStore'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
+import { useCardPaymentStore } from '@renderer/stores/useCardPaymentStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import AppIcon from '@renderer/components/AppIcon.vue'
 import { UButton } from '@renderer/components/ui'
@@ -15,6 +16,7 @@ import type { GraphNode } from '@renderer/components/skilltree/SkillTreeGraph.vu
 
 const upgrades = useUpgradeStore()
 const player = usePlayerStore()
+const cardPayment = useCardPaymentStore()
 const { formatCash } = useFormat()
 const { t } = useI18n()
 
@@ -201,8 +203,8 @@ function buySelected(): void {
                     :effect-description="selectedNode.effectDescription" :icon="selectedNode.icon"
                     :cost="formatCash(upgrades.getNodeCost(selectedNode.id))" :purchased="selectedNode.purchased"
                     :available="!selectedNode.purchased && arePrereqsMet(selectedNode)"
-                    :can-afford="player.cash.gte(upgrades.getNodeCost(selectedNode.id))" :prereqs="selectedPrereqs"
-                    :accent="activeMeta.accent" @buy="buySelected" />
+                    :can-afford="player.cardBalance.gte(cardPayment.calculateTotal(upgrades.getNodeCost(selectedNode.id)))"
+                    :prereqs="selectedPrereqs" :accent="activeMeta.accent" @buy="buySelected" />
             </Transition>
         </div>
 

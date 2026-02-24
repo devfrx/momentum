@@ -18,6 +18,10 @@ import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useEventStore } from '@renderer/stores/useEventStore'
+import { useCardPaymentStore } from '@renderer/stores/useCardPaymentStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
+import { useBankingStore } from '@renderer/stores/useBankingStore'
+import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import { EventImpactBanner } from '@renderer/components/events'
 import { useAchievementStore } from '@renderer/stores/useAchievementStore'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -191,11 +195,15 @@ function doPrestige(): void {
     shop.prestigeReset()
     storage.prestigeReset()
     events.prestigeReset()
+    useCardPaymentStore().prestigeReset()
+    useCasinoChipStore().prestigeReset()
+    useBankingStore().prestigeReset()
+    useLimitOrderStore().prestigeReset()
 
     // Apply starting bonuses
     const startingCash = prestige.getStartingCash()
     if (startingCash.gt(0)) {
-        player.earnCash(startingCash, { key: 'banking.tx_prestige_bonus', cat: 'prestige' })
+        player.earnToCard(startingCash, { key: 'banking.tx_prestige_bonus', cat: 'prestige' })
     }
 
     const startingXp = prestige.getStartingXp()

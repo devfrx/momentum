@@ -113,9 +113,9 @@ export const useLimitOrderStore = defineStore('limitOrders', () => {
       ? calculateOrderCost(params.targetPrice, params.quantity)
       : ZERO
 
-    // For buy orders: check player has enough unreserved cash
+    // For buy orders: check player has enough unreserved card balance
     if (isBuyOrder(params.orderType)) {
-      const availableCash = sub(player.cash, totalReservedCash.value)
+      const availableCash = sub(player.cardBalance, totalReservedCash.value)
       if (!gte(availableCash, reservedCash)) return null
     }
 
@@ -123,15 +123,20 @@ export const useLimitOrderStore = defineStore('limitOrders', () => {
     if (isSellOrder(params.orderType)) {
       // Calculate how many shares/coins are already committed to other pending sell orders
       const committedQty = activeOrders.value
-        .filter(o => o.assetId === params.assetId && o.marketType === params.marketType && isSellOrder(o.orderType))
+        .filter(
+          (o) =>
+            o.assetId === params.assetId &&
+            o.marketType === params.marketType &&
+            isSellOrder(o.orderType)
+        )
         .reduce((sum, o) => sum + o.quantity, 0)
 
       if (params.marketType === 'stock') {
         const position = stocks.getPosition(params.assetId)
-        if (!position || (position.shares - committedQty) < params.quantity) return null
+        if (!position || position.shares - committedQty < params.quantity) return null
       } else {
         const holding = crypto.getHolding(params.assetId)
-        if (!holding || (holding.amount - committedQty) < params.quantity) return null
+        if (!holding || holding.amount - committedQty < params.quantity) return null
       }
     }
 
@@ -294,10 +299,14 @@ export const useLimitOrderStore = defineStore('limitOrders', () => {
 
   function loadFromSave(saved: Record<string, unknown>): void {
     if (saved.orders && Array.isArray(saved.orders)) {
-      orders.value = (saved.orders as LimitOrder[]).filter((o) => o.status === 'pending')
+      orders.value = (saved.orders as LimitOrder[])
+        .filter((o) => o.status === 'pending')
+        .map((o) => ({ ...o, reservedCash: D(o.reservedCash as unknown as string | number) }))
     }
     if (saved.orderHistory && Array.isArray(saved.orderHistory)) {
-      orderHistory.value = (saved.orderHistory as LimitOrder[]).slice(-50)
+      orderHistory.value = (saved.orderHistory as LimitOrder[])
+        .slice(-50)
+        .map((o) => ({ ...o, reservedCash: D(o.reservedCash as unknown as string | number) }))
     }
     if (typeof saved.totalOrdersFilled === 'number') {
       totalOrdersFilled.value = saved.totalOrdersFilled
@@ -309,7 +318,7 @@ export const useLimitOrderStore = defineStore('limitOrders', () => {
       totalOrdersExpired.value = saved.totalOrdersExpired
     }
     if (saved.totalProfitFromOrders !== undefined) {
-      totalProfitFromOrders.value = saved.totalProfitFromOrders as Decimal
+      totalProfitFromOrders.value = D(saved.totalProfitFromOrders as string | number)
     }
   }
 

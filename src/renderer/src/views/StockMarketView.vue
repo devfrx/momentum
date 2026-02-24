@@ -65,7 +65,7 @@ const pinnedPnL = computed(() => {
     return { value: pnlValue, percent: pnlPercent, currentValue }
 })
 
-const availableCash = computed(() => player.cash.toNumber() - limitOrderStore.totalReservedCash.toNumber())
+const availableCash = computed(() => player.cardBalance.toNumber() - limitOrderStore.totalReservedCash.toNumber())
 
 function openFullscreen(assetId: string) {
     router.push({ name: 'stock-detail', params: { assetId } })

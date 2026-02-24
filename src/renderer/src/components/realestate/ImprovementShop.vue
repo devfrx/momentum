@@ -43,7 +43,7 @@ function getCost(imp: ImprovementDef): number {
 }
 
 function canAfford(imp: ImprovementDef): boolean {
-    return player.cash.gte(getCost(imp))
+    return player.cardBalance.gte(getCost(imp))
 }
 
 function handleInstall(imp: ImprovementDef): void {
@@ -101,7 +101,7 @@ function handleInstall(imp: ImprovementDef): void {
                     <div class="imp-stat" v-if="imp.appreciationMod > 1">
                         <AppIcon icon="mdi:trending-up" size="0.7rem" />
                         <span>{{ formatPercent((imp.appreciationMod - 1) * 100) }} {{ t('realestate.appreciation')
-                            }}</span>
+                        }}</span>
                     </div>
                     <div class="imp-stat" v-if="imp.valueFraction > 0">
                         <AppIcon icon="mdi:home-plus" size="0.7rem" />

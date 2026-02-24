@@ -7,8 +7,8 @@ import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { D, ZERO, mul } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
 import { THEME } from '@renderer/assets/theme/colors'
@@ -16,8 +16,8 @@ import { THEME } from '@renderer/assets/theme/colors'
 const emit = defineEmits<{ back: [] }>()
 const { t } = useI18n()
 
-const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const { formatCash } = useFormat()
 
 // ─── Symbol definitions ─────────────────────────────────────
@@ -237,8 +237,8 @@ function evaluateGrid(grid: SlotSymbol[][]): WinLine[] {
 // ─── Spin logic ──────────────────────────────────────────────
 async function spin(): Promise<void> {
     const bet = D(betAmount.value)
-    if (bet.lte(ZERO) || player.cash.lt(bet) || spinning.value) return
-    if (!player.spendCash(bet, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (bet.lte(ZERO) || chipStore.chipBalance.lt(bet) || spinning.value) return
+    if (!chipStore.spendChips(bet)) return
 
     spinning.value = true
     showResult.value = false
@@ -317,7 +317,7 @@ async function spin(): Promise<void> {
         }
         winningCells.value = cells
 
-        player.earnCash(payout, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+        chipStore.addChips(payout)
         gambling.recordWin('slots', bet, payout)
 
         const bestLine = winLines.reduce((best, w) => w.multiplier > best.multiplier ? w : best)
@@ -340,7 +340,7 @@ async function spin(): Promise<void> {
     // Continue auto-spin
     if (autoSpin.value) {
         autoSpinCount.value++
-        if (player.cash.gte(bet)) {
+        if (chipStore.chipBalance.gte(bet)) {
             setTimeout(() => {
                 if (autoSpin.value) spin()
             }, 800)
@@ -382,7 +382,7 @@ function isWinningCell(reel: number, row: number): boolean {
 }
 
 function setBet(amount: number): void {
-    betAmount.value = Math.max(1, Math.min(amount, player.cash.toNumber()))
+    betAmount.value = Math.max(1, Math.min(amount, chipStore.chipBalance.toNumber()))
 }
 
 function halfBet(): void {
@@ -394,7 +394,7 @@ function doubleBet(): void {
 }
 
 function maxBet(): void {
-    setBet(player.cash.toNumber())
+    setBet(chipStore.chipBalance.toNumber())
 }
 
 function toggleAutoSpin(): void {
@@ -409,7 +409,7 @@ function toggleAutoSpin(): void {
 
 // ─── Computed ────────────────────────────────────────────────
 const stats = computed(() => gambling.getStats('slots'))
-const canSpin = computed(() => !spinning.value && player.cash.gte(D(betAmount.value)) && betAmount.value > 0)
+const canSpin = computed(() => !spinning.value && chipStore.chipBalance.gte(D(betAmount.value)) && betAmount.value > 0)
 const showPaytable = ref(false)
 
 // ─── Info Panel ──────────────────────────────────────────────
@@ -438,8 +438,8 @@ const slotInfo = computed<InfoSection[]>(() => [
 // ─── Init ────────────────────────────────────────────────────
 initReels()
 
-watch(() => player.cash, (cash) => {
-    if (autoSpin.value && cash.lt(D(betAmount.value))) {
+watch(() => chipStore.chipBalance, (bal) => {
+    if (autoSpin.value && bal.lt(D(betAmount.value))) {
         autoSpin.value = false
     }
 })
@@ -457,8 +457,8 @@ watch(() => player.cash, (cash) => {
                 {{ $t('gambling.sl_title') }}
             </h2>
             <div class="balance-chip">
-                <AppIcon icon="mdi:cash" />
-                {{ formatCash(player.cash) }}
+                <AppIcon icon="mdi:poker-chip" />
+                {{ formatCash(chipStore.chipBalance) }}
             </div>
         </div>
 
@@ -553,14 +553,14 @@ watch(() => player.cash, (cash) => {
                 <div class="bet-row">
                     <UButton variant="ghost" size="xs" @click="halfBet">1/2</UButton>
                     <div class="bet-display">
-                        <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
+                        <input type="number" v-model.number="betAmount" :min="1" :max="chipStore.chipBalance.toNumber()"
                             class="bet-input" :disabled="spinning" />
                     </div>
                     <UButton variant="ghost" size="xs" @click="doubleBet">x2</UButton>
                 </div>
                 <div class="bet-presets">
                     <UButton v-for="pct in [10, 25, 50]" :key="pct" variant="ghost" size="xs"
-                        @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="spinning">
+                        @click="setBet(Math.floor(chipStore.chipBalance.toNumber() * pct / 100))" :disabled="spinning">
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="spinning">{{ $t('gambling.max')

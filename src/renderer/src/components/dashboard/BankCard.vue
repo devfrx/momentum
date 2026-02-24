@@ -110,7 +110,7 @@ function saveHolderName(): void {
                     <!-- Balance -->
                     <div class="card-balance-row">
                         <span class="card-balance-label">{{ $t('banking.available_balance') }}</span>
-                        <span class="card-balance-value">{{ formatCash(player.cash) }}</span>
+                        <span class="card-balance-value">{{ formatCash(player.cardBalance) }}</span>
                     </div>
 
                     <!-- Bottom: Name + Expiry -->

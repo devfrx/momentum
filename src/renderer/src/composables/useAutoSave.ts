@@ -26,6 +26,8 @@ import { useVaultStore } from '@renderer/stores/useVaultStore'
 import { useShopStore } from '@renderer/stores/useShopStore'
 import { useLimitOrderStore } from '@renderer/stores/useLimitOrderStore'
 import { useBankingStore } from '@renderer/stores/useBankingStore'
+import { useCardPaymentStore } from '@renderer/stores/useCardPaymentStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { gameEngine } from '@renderer/core/GameEngine'
 import { economySim } from '@renderer/core/EconomySim'
 import { dehydrateDecimals } from '@renderer/core/BigNum'
@@ -105,6 +107,7 @@ export function useAutoSave() {
       // Player state (use prestige store as authoritative source for prestige fields)
       player: {
         cash: player.cash,
+        cardBalance: player.cardBalance,
         totalCashEarned: player.totalCashEarned,
         totalCashSpent: player.totalCashSpent,
         prestigePoints: prestige.points,
@@ -290,6 +293,12 @@ export function useAutoSave() {
 
       // Banking state
       banking: bankingStore.exportState(),
+
+      // Card payment state
+      cardPayment: useCardPaymentStore().exportState(),
+
+      // Casino chip state
+      casinoChips: useCasinoChipStore().exportState(),
 
       // Settings
       settings: {

@@ -20,7 +20,7 @@ const { t } = useI18n()
 const player = usePlayerStore()
 const { formatCash } = useFormat()
 
-const canAfford = computed(() => player.canAfford(props.def.purchasePrice))
+const canAfford = computed(() => player.canAffordCard(props.def.purchasePrice))
 const isUnlocked = computed(() => player.netWorth.gte(props.def.unlockAtNetWorth))
 
 // ── Size-class names (generalized, no real names) ──

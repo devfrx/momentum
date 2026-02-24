@@ -20,6 +20,7 @@ import Decimal from 'break_infinity.js'
 import { D, ZERO, add, sub, mul } from '@renderer/core/BigNum'
 import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 import type { StorageItem } from '@renderer/data/storage/items'
 import { migrateItemRarities } from '@renderer/data/rarity'
 import {
@@ -27,7 +28,7 @@ import {
   VAULT_SLOT_COST_BASE,
   VAULT_SLOT_COST_GROWTH,
   VAULT_UPGRADE_SLOTS,
-  VAULT_SELL_TAX,
+  VAULT_SELL_TAX
 } from '@renderer/data/shop/balance'
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -61,8 +62,8 @@ export const useVaultStore = defineStore('vault', () => {
 
   // ── Computed ───────────────────────────────────────────────
 
-  const capacity = computed(() =>
-    VAULT_BASE_CAPACITY + capacityUpgrades.value * VAULT_UPGRADE_SLOTS,
+  const capacity = computed(
+    () => VAULT_BASE_CAPACITY + capacityUpgrades.value * VAULT_UPGRADE_SLOTS
   )
 
   const itemCount = computed(() => items.value.length)
@@ -81,9 +82,7 @@ export const useVaultStore = defineStore('vault', () => {
   })
 
   /** Total vault value = items + cash. */
-  const totalVaultValue = computed((): Decimal =>
-    add(totalItemsValue.value, storedCash.value),
-  )
+  const totalVaultValue = computed((): Decimal => add(totalItemsValue.value, storedCash.value))
 
   /** Cost for the next capacity upgrade. */
   const nextUpgradeCost = computed((): Decimal => {
@@ -103,7 +102,7 @@ export const useVaultStore = defineStore('vault', () => {
     items.value.push({
       ...item,
       source,
-      vaultedAtTick: Date.now(),
+      vaultedAtTick: Date.now()
     })
     totalItemsStored.value++
     return true
@@ -113,7 +112,7 @@ export const useVaultStore = defineStore('vault', () => {
    * Remove an item from the vault by ID.
    */
   function removeItem(itemId: string): VaultItem | null {
-    const idx = items.value.findIndex(i => i.id === itemId)
+    const idx = items.value.findIndex((i) => i.id === itemId)
     if (idx === -1) return null
     const [removed] = items.value.splice(idx, 1)
     return removed
@@ -125,7 +124,7 @@ export const useVaultStore = defineStore('vault', () => {
   function depositCash(amount: Decimal): boolean {
     const player = usePlayerStore()
     if (player.cash.lt(amount) || amount.lte(ZERO)) return false
-    player.spendCash(amount)
+    if (!player.spendCash(amount, { key: 'banking.tx_vault_deposit', cat: 'other' })) return false
     storedCash.value = add(storedCash.value, amount)
     totalCashDeposited.value = add(totalCashDeposited.value, amount)
     return true
@@ -138,7 +137,7 @@ export const useVaultStore = defineStore('vault', () => {
     if (storedCash.value.lt(amount) || amount.lte(ZERO)) return false
     storedCash.value = sub(storedCash.value, amount)
     const player = usePlayerStore()
-    player.earnCash(amount)
+    player.earnCash(amount, { key: 'banking.tx_vault_withdraw', cat: 'other' })
     totalCashWithdrawn.value = add(totalCashWithdrawn.value, amount)
     return true
   }
@@ -147,7 +146,7 @@ export const useVaultStore = defineStore('vault', () => {
    * Sell an item from the vault (lower tax than storage wars).
    */
   function sellItem(itemId: string): Decimal | null {
-    const idx = items.value.findIndex(i => i.id === itemId)
+    const idx = items.value.findIndex((i) => i.id === itemId)
     if (idx === -1) return null
 
     const item = items.value[idx]
@@ -160,7 +159,7 @@ export const useVaultStore = defineStore('vault', () => {
     const sellMul = upgrades.getMultiplier('all_income')
     const finalValue = mul(afterTax, sellMul).max(D(1))
 
-    player.earnCash(finalValue)
+    player.earnToCard(finalValue, { key: 'banking.tx_vault_sell', cat: 'other' })
     totalItemsSold.value++
     totalSaleRevenue.value = add(totalSaleRevenue.value, finalValue)
     player.addXp(D(1))
@@ -191,8 +190,8 @@ export const useVaultStore = defineStore('vault', () => {
   function upgradeCapacity(): boolean {
     const player = usePlayerStore()
     const cost = nextUpgradeCost.value
-    if (player.cash.lt(cost)) return false
-    player.spendCash(cost)
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_vault_upgrade', 'other')) return false
     capacityUpgrades.value++
     return true
   }
@@ -201,7 +200,7 @@ export const useVaultStore = defineStore('vault', () => {
    * Get all items by a specific source filter.
    */
   function getItemsBySource(source: VaultItem['source']): VaultItem[] {
-    return items.value.filter(i => i.source === source)
+    return items.value.filter((i) => i.source === source)
   }
 
   // ── Prestige / Reset ───────────────────────────────────────
@@ -225,7 +224,7 @@ export const useVaultStore = defineStore('vault', () => {
 
   function exportState(): Record<string, unknown> {
     return {
-      items: items.value.map(i => ({
+      items: items.value.map((i) => ({
         id: i.id,
         name: i.name,
         icon: i.icon,
@@ -238,7 +237,7 @@ export const useVaultStore = defineStore('vault', () => {
         weight: i.weight,
         condition: i.condition,
         source: i.source,
-        vaultedAtTick: i.vaultedAtTick,
+        vaultedAtTick: i.vaultedAtTick
       })),
       storedCash: storedCash.value,
       capacityUpgrades: capacityUpgrades.value,
@@ -246,7 +245,7 @@ export const useVaultStore = defineStore('vault', () => {
       totalItemsSold: totalItemsSold.value,
       totalSaleRevenue: totalSaleRevenue.value,
       totalCashDeposited: totalCashDeposited.value,
-      totalCashWithdrawn: totalCashWithdrawn.value,
+      totalCashWithdrawn: totalCashWithdrawn.value
     }
   }
 
@@ -299,6 +298,6 @@ export const useVaultStore = defineStore('vault', () => {
     prestigeReset,
     fullReset,
     exportState,
-    loadFromSave,
+    loadFromSave
   }
 })

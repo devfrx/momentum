@@ -16,6 +16,8 @@ import MultiplierStats from '@renderer/components/dashboard/MultiplierStats.vue'
 import BankCard from '@renderer/components/dashboard/BankCard.vue'
 import TransactionList from '@renderer/components/dashboard/TransactionList.vue'
 import AccountSummary from '@renderer/components/dashboard/AccountSummary.vue'
+import ChipExchange from '@renderer/components/dashboard/ChipExchange.vue'
+import AtmTerminal from '@renderer/components/dashboard/AtmTerminal.vue'
 import { JOBS } from '@renderer/data/jobs'
 import { EventImpactBanner } from '@renderer/components/events'
 
@@ -104,20 +106,20 @@ function toggleJob(defId: string): void {
                 <div class="hero-header">
                     <div class="hero-header-left">
                         <div class="bank-logo-header">
-                            <AppIcon icon="mdi:credit-card-fast-outline" class="bank-header-icon" />
-                            <span class="bank-header-name">FINANX</span>
+                            <!-- <AppIcon icon="mdi:credit-card-fast-outline" class="bank-header-icon" />
+                            <span class="bank-header-name">FINANX</span> -->
                         </div>
-                        <h1 class="banking-greeting">{{ $t('banking.welcome') }}</h1>
-                        <p class="banking-subtitle">{{ $t('banking.subtitle') }}</p>
+                        <!-- <h1 class="banking-greeting">{{ $t('banking.welcome') }}</h1> -->
+                        <!-- <p class="banking-subtitle">{{ $t('banking.subtitle') }}</p> -->
                     </div>
-                    <div class="hero-flow-pill" :class="{ negative: totalIncomePerSecond.lt(0) }">
+                    <!-- <div class="hero-flow-pill" :class="{ negative: totalIncomePerSecond.lt(0) }">
                         <AppIcon :icon="totalIncomePerSecond.gte(0) ? 'mdi:trending-up' : 'mdi:trending-down'"
                             class="pill-flow-icon" />
                         <span class="pill-flow-value">
                             {{ totalIncomePerSecond.gte(0) ? '+' : '' }}{{ formatCash(totalIncomePerSecond) }}{{
                                 $t('common.per_second') }}
                         </span>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Card: centered, full-width hero -->
@@ -147,6 +149,16 @@ function toggleJob(defId: string): void {
                 <!-- Multipliers -->
                 <section class="banking-section">
                     <MultiplierStats />
+                </section>
+
+                <!-- ATM Terminal -->
+                <section class="banking-section">
+                    <AtmTerminal />
+                </section>
+
+                <!-- Casino Chip Exchange -->
+                <section class="banking-section">
+                    <ChipExchange />
                 </section>
 
                 <!-- Jobs -->
@@ -185,7 +197,7 @@ function toggleJob(defId: string): void {
                                     @click="jobStore.unlockJob(job.id)">
                                     {{ job.requiredLevel > 0 && player.level < job.requiredLevel ?
                                         $t('dashboard.requires_level', { n: job.requiredLevel }) : $t('dashboard.apply')
-                                    }} </UButton>
+                                        }} </UButton>
                             </div>
                         </div>
                     </UAccordion>

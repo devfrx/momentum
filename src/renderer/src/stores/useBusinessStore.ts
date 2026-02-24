@@ -52,6 +52,7 @@ import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
 import { useEventStore } from './useEventStore'
 import { useBlackMarketStore } from './useBlackMarketStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -149,6 +150,22 @@ export const useBusinessStore = defineStore('business', () => {
   })
 
   const profitPerSecond = computed<Decimal>(() => mul(totalProfitPerTick.value, 10))
+
+  /**
+   * Managed-only profit per second — only businesses with a manager
+   * actually route profit/loss to the player's wallet via earnCash/forcePay.
+   * Unmanaged businesses accumulate to pendingProfit instead.
+   * Used by the banking periodic recorder to avoid phantom entries.
+   */
+  const managedProfitPerSecond = computed<Decimal>(() => {
+    let total = ZERO
+    for (const biz of businesses.value) {
+      if (biz.hasManager) {
+        total = add(total, biz.avgProfitPerTick)
+      }
+    }
+    return mul(total, 10)
+  })
 
   const totalBusinessValue = computed<Decimal>(() => {
     let total = ZERO
@@ -268,67 +285,113 @@ export const useBusinessStore = defineStore('business', () => {
 
   // ─── Actions ──────────────────────────────────────────────────
 
-  function buyBusiness(defId: string, customName?: string, customIcon?: string): boolean {
+  /**
+   * Buy a business.
+   * @param silent If true, uses quickPay (no dialog). Used for automated/cheat purchases.
+   *               If false (default), opens the card payment dialog — returns true to indicate
+   *               "payment initiated" (not yet confirmed).
+   */
+  function buyBusiness(
+    defId: string,
+    customName?: string,
+    customIcon?: string,
+    silent = false
+  ): boolean {
     const def = BUSINESS_DEFS.find((d) => d.id === defId)
     if (!def) return false
 
     const player = usePlayerStore()
-    if (!player.spendCash(def.purchasePrice)) return false
+    const cardPayment = useCardPaymentStore()
 
-    const defaultPolicies: Record<string, number> = {}
-    for (const p of POLICIES) {
-      defaultPolicies[p.id] = p.defaultValue
+    // Check if card balance covers total (amount + fee)
+    const total = cardPayment.calculateTotal(def.purchasePrice)
+    if (!gte(player.cardBalance, total)) return false
+
+    const createBusiness = () => {
+      const defaultPolicies: Record<string, number> = {}
+      for (const p of POLICIES) {
+        defaultPolicies[p.id] = p.defaultValue
+      }
+
+      businesses.value.push({
+        id: `${def.id}_${Date.now()}`,
+        defId: def.id,
+        name: customName || def.name,
+        icon: customIcon || def.icon,
+        category: def.category,
+        level: 1,
+        branches: 0,
+        trainingLevel: 0,
+        employees: 1,
+        pricePerUnit: def.optimalPrice,
+        marketingBudget: 0,
+        quality: def.baseQuality,
+        policies: defaultPolicies,
+        upgrades: [],
+        advisors: [],
+        reputation: 50,
+        isCorporation: false,
+        outputPerEmployee: def.outputPerEmployee,
+        baseSalary: def.baseSalary,
+        baseRent: def.baseRent,
+        supplyCostPerUnit: def.supplyCostPerUnit,
+        optimalPrice: def.optimalPrice,
+        baseCustomers: def.baseCustomers,
+        elasticity: def.elasticity,
+        sectorMultiplier: def.sectorMultiplier,
+        qualityUpgradeCost: def.qualityUpgradeCost,
+        purchasePrice: def.purchasePrice,
+        totalRevenue: ZERO,
+        totalCosts: ZERO,
+        totalProfit: ZERO,
+        avgProfitPerTick: ZERO,
+        ticksOwned: 0,
+        currentCustomers: 0,
+        maxCapacity: def.outputPerEmployee,
+        unitsSold: 0,
+        utilization: 0,
+        revenuePerTick: ZERO,
+        costsPerTick: ZERO,
+        profitPerTick: ZERO,
+        priceFactor: 1,
+        qualityFactor: 0.5 + (def.baseQuality / 100) * 1.5,
+        marketingFactor: 1,
+        hasManager: false,
+        managerCost: mul(def.purchasePrice, 0.5),
+        pendingProfit: ZERO
+      })
+
+      player.addXp(D(50))
     }
 
-    businesses.value.push({
-      id: `${def.id}_${Date.now()}`,
-      defId: def.id,
-      name: customName || def.name,
-      icon: customIcon || def.icon,
-      category: def.category,
-      level: 1,
-      branches: 0,
-      trainingLevel: 0,
-      employees: 1,
-      pricePerUnit: def.optimalPrice,
-      marketingBudget: 0,
-      quality: def.baseQuality,
-      policies: defaultPolicies,
-      upgrades: [],
-      advisors: [],
-      reputation: 50,
-      isCorporation: false,
-      outputPerEmployee: def.outputPerEmployee,
-      baseSalary: def.baseSalary,
-      baseRent: def.baseRent,
-      supplyCostPerUnit: def.supplyCostPerUnit,
-      optimalPrice: def.optimalPrice,
-      baseCustomers: def.baseCustomers,
-      elasticity: def.elasticity,
-      sectorMultiplier: def.sectorMultiplier,
-      qualityUpgradeCost: def.qualityUpgradeCost,
-      purchasePrice: def.purchasePrice,
-      totalRevenue: ZERO,
-      totalCosts: ZERO,
-      totalProfit: ZERO,
-      avgProfitPerTick: ZERO,
-      ticksOwned: 0,
-      currentCustomers: 0,
-      maxCapacity: def.outputPerEmployee,
-      unitsSold: 0,
-      utilization: 0,
-      revenuePerTick: ZERO,
-      costsPerTick: ZERO,
-      profitPerTick: ZERO,
-      priceFactor: 1,
-      qualityFactor: 0.5 + (def.baseQuality / 100) * 1.5,
-      marketingFactor: 1,
-      hasManager: false,
-      managerCost: mul(def.purchasePrice, 0.5),
-      pendingProfit: ZERO
-    })
+    if (silent) {
+      // Silent mode: quickPay (no dialog)
+      if (
+        !cardPayment.quickPay(def.purchasePrice, 'banking.tx_biz_buy', 'business', {
+          name: customName || def.name
+        })
+      ) {
+        return false
+      }
+      createBusiness()
+      // Auto-bind card to new business
+      cardPayment.bindCard(`business:${businesses.value[businesses.value.length - 1].id}`)
+      return true
+    }
 
-    player.addXp(D(50))
+    // Dialog mode: initiatePayment → user confirms → createBusiness in onSuccess
+    cardPayment.initiatePayment(
+      def.purchasePrice,
+      'banking.tx_biz_buy',
+      'business',
+      () => {
+        createBusiness()
+        // Auto-bind card to new business
+        cardPayment.bindCard(`business:${businesses.value[businesses.value.length - 1].id}`)
+      },
+      undefined,
+      { name: customName || def.name }
+    )
     return true
   }
 
@@ -337,7 +400,10 @@ export const useBusinessStore = defineStore('business', () => {
     if (!biz) return false
     const cost = getLevelCost(biz)
     const player = usePlayerStore()
-    if (!player.spendCash(cost)) return false
+    const cardPayment = useCardPaymentStore()
+    // Apply card fee via quickPay (no dialog for minor purchases)
+    if (!cardPayment.quickPay(cost, 'banking.tx_biz_level', 'business', { name: biz.name }))
+      return false
     biz.level++
     player.addXp(D(10 + biz.level * 2))
     return true
@@ -357,7 +423,9 @@ export const useBusinessStore = defineStore('business', () => {
     if (!biz) return false
     const cost = getBranchCost(biz)
     const player = usePlayerStore()
-    if (!player.spendCash(cost)) return false
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_biz_branch', 'business', { name: biz.name }))
+      return false
     biz.branches++
     player.addXp(D(25 + biz.branches * 5))
     return true
@@ -368,7 +436,9 @@ export const useBusinessStore = defineStore('business', () => {
     if (!biz) return false
     const cost = getTrainingCost(biz)
     const player = usePlayerStore()
-    if (!player.spendCash(cost)) return false
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_biz_train', 'business', { name: biz.name }))
+      return false
     biz.trainingLevel++
     player.addXp(D(15))
     return true
@@ -383,7 +453,9 @@ export const useBusinessStore = defineStore('business', () => {
     if (upgDef.categories && !upgDef.categories.includes(biz.category)) return false
     const cost = getUpgradeCost(biz, upgradeId)
     const player = usePlayerStore()
-    if (!player.spendCash(cost)) return false
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_biz_upgrade', 'business', { name: biz.name }))
+      return false
     let state = biz.upgrades.find((u) => u.upgradeId === upgradeId)
     if (state) {
       state.level++
@@ -403,7 +475,9 @@ export const useBusinessStore = defineStore('business', () => {
     const currentLevel = state?.level ?? 0
     const cost = advisorCost(biz.purchasePrice, advDef, currentLevel)
     const player = usePlayerStore()
-    if (!player.spendCash(cost)) return false
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_biz_advisor', 'business', { name: biz.name }))
+      return false
     if (state) {
       state.level++
     } else {
@@ -411,7 +485,11 @@ export const useBusinessStore = defineStore('business', () => {
       if (advisorType === 'operations' && !biz.hasManager) {
         biz.hasManager = true
         if (biz.pendingProfit.gt(ZERO)) {
-          player.earnCash(biz.pendingProfit)
+          player.earnToCard(biz.pendingProfit, {
+            key: 'banking.tx_biz_collect',
+            cat: 'business',
+            params: { name: biz.name }
+          })
           biz.pendingProfit = ZERO
         }
       }
@@ -445,10 +523,17 @@ export const useBusinessStore = defineStore('business', () => {
       biz.sectorMultiplier
     )
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
     // Collect pending profit before selling (BUG-02 fix)
     const totalPayout = add(valuation, biz.pendingProfit)
-    player.earnCash(totalPayout)
+    player.earnToCard(totalPayout, {
+      key: 'banking.tx_biz_sell',
+      cat: 'business',
+      params: { name: biz.name }
+    })
     businesses.value.splice(idx, 1)
+    // Unbind card from sold business
+    cardPayment.unbindCard(`business:${businessId}`)
     return totalPayout
   }
 
@@ -481,8 +566,13 @@ export const useBusinessStore = defineStore('business', () => {
   function upgradeQuality(businessId: string): boolean {
     const biz = businesses.value.find((b) => b.id === businessId)
     if (!biz) return false
-    const player = usePlayerStore()
-    if (!player.spendCash(biz.qualityUpgradeCost)) return false
+    const cardPayment = useCardPaymentStore()
+    if (
+      !cardPayment.quickPay(biz.qualityUpgradeCost, 'banking.tx_biz_quality', 'business', {
+        name: biz.name
+      })
+    )
+      return false
     biz.quality++
     biz.qualityUpgradeCost = mul(biz.qualityUpgradeCost, 1.15)
     return true
@@ -502,7 +592,11 @@ export const useBusinessStore = defineStore('business', () => {
     if (!biz || biz.pendingProfit.lte(ZERO)) return ZERO
     const player = usePlayerStore()
     const amount = biz.pendingProfit
-    player.earnCash(amount)
+    player.earnToCard(amount, {
+      key: 'banking.tx_biz_collect',
+      cat: 'business',
+      params: { name: biz.name }
+    })
     biz.pendingProfit = ZERO
     return amount
   }
@@ -746,13 +840,21 @@ export const useBusinessStore = defineStore('business', () => {
       biz.reputation = Math.max(0, Math.min(100, biz.reputation + repDelta))
 
       // ── HR auto-train (every 100 ticks) ──
-      // Guard: skip if cost would exceed 1% of player cash (prevents silent drain)
+      // Guard: skip if cost would exceed 1% of card balance (prevents silent drain)
       const hrAdvisor = biz.advisors.find((a) => a.type === 'hr')
       if (hrAdvisor && hrAdvisor.level > 0 && biz.ticksOwned % 100 === 0) {
         const tCost = getTrainingCost(biz)
         const p = usePlayerStore()
-        const cashCap = mul(p.cash, 0.01)
-        if (tCost.lte(cashCap) && p.spendCash(tCost)) biz.trainingLevel++
+        const cashCap = mul(p.cardBalance, 0.01)
+        if (
+          tCost.lte(cashCap) &&
+          p.spendFromCard(tCost, {
+            key: 'banking.tx_biz_auto_train',
+            cat: 'business',
+            params: { name: biz.name }
+          })
+        )
+          biz.trainingLevel++
       }
 
       // ── Credit / accumulate ──
@@ -761,7 +863,7 @@ export const useBusinessStore = defineStore('business', () => {
       // first, then overflow hits the player's cash.
       if (biz.hasManager) {
         if (profit.gt(ZERO)) {
-          player.earnCash(profit)
+          player.earnToCard(profit)
           player.addXp(D(0.05))
         } else if (profit.lt(ZERO)) {
           const loss = profit.abs()
@@ -777,7 +879,11 @@ export const useBusinessStore = defineStore('business', () => {
           } else {
             const remaining = sub(loss, biz.pendingProfit)
             biz.pendingProfit = ZERO
-            player.forcePay(remaining)
+            player.forcePay(remaining, {
+              key: 'banking.tx_biz_overflow_loss',
+              cat: 'business',
+              params: { name: biz.name }
+            })
           }
         }
       }
@@ -840,6 +946,7 @@ export const useBusinessStore = defineStore('business', () => {
     businesses,
     totalProfitPerTick,
     profitPerSecond,
+    managedProfitPerSecond,
     totalBusinessValue,
     categoryCounts,
     totalBusinessCount,

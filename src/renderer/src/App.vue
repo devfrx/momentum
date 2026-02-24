@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount, computed } from 'vue'
 import { useGameLoop } from '@renderer/composables/useGameLoop'
 import { useAutoSave } from '@renderer/composables/useAutoSave'
 import { useInitGame } from '@renderer/composables/useInitGame'
+import { useCardPaymentStore } from '@renderer/stores/useCardPaymentStore'
 import GameHeader from '@renderer/components/layout/GameHeader.vue'
 import GameSidebar from '@renderer/components/layout/GameSidebar.vue'
 import GameFooter from '@renderer/components/layout/GameFooter.vue'
 import OfflineSummaryDialog from '@renderer/components/OfflineSummaryDialog.vue'
+import CardPaymentDialog from '@renderer/components/dashboard/CardPaymentDialog.vue'
 import Toast from 'primevue/toast'
 
 const { startLoop, stopLoop } = useGameLoop()
 const { startAutoSave, stopAutoSave } = useAutoSave()
 const { initGame, loading, offlineSummary } = useInitGame()
+const cardPayment = useCardPaymentStore()
+
+const showPaymentDialog = computed(() => cardPayment.status !== 'idle')
 
 function dismissOfflineSummary(): void {
   offlineSummary.value = null
@@ -55,6 +60,10 @@ onBeforeUnmount(() => {
 
     <!-- Offline Summary Dialog -->
     <OfflineSummaryDialog v-if="offlineSummary" :summary="offlineSummary" @close="dismissOfflineSummary" />
+
+    <!-- Card Payment Dialog (global, driven by store) -->
+    <CardPaymentDialog :modelValue="showPaymentDialog"
+      @update:modelValue="v => { if (!v) cardPayment.cancelPayment() }" />
   </div>
 </template>
 
@@ -148,6 +157,7 @@ a:hover {
   display: flex;
   flex: 1;
   overflow: hidden;
+  gap: var(--t-space-2);
 }
 
 .app-content {
@@ -155,6 +165,8 @@ a:hover {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0;
+  margin: var(--t-space-2) var(--t-space-2) 0 0;
+  border-radius: var(--t-radius-xl);
 }
 
 /* Page transitions */

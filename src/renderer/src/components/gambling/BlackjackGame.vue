@@ -20,16 +20,16 @@ import type { CardData } from './BlackjackCard.vue'
 import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { D, ZERO, mul, add } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
 
 const emit = defineEmits<{ back: [] }>()
 
 const { t } = useI18n()
-const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const { formatCash } = useFormat()
 
 // ─── Types ───────────────────────────────────────────────────
@@ -152,14 +152,14 @@ const canDouble = computed(() =>
     phase.value === 'playing' &&
     playerCards.length === 2 &&
     !doubled.value &&
-    player.cash.gte(currentBet.value)
+    chipStore.chipBalance.gte(currentBet.value)
 )
 
 // ─── Deal ────────────────────────────────────────────────────
 function deal(): void {
     const bet = D(betAmount.value)
-    if (bet.lte(ZERO) || player.cash.lt(bet)) return
-    if (!player.spendCash(bet, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (bet.lte(ZERO) || chipStore.chipBalance.lt(bet)) return
+    if (!chipStore.spendChips(bet)) return
 
     currentBet.value = bet
     doubled.value = false
@@ -209,7 +209,7 @@ function stand(): void {
 
 function doubleDown(): void {
     if (!canDouble.value) return
-    if (!player.spendCash(currentBet.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (!chipStore.spendChips(currentBet.value)) return
     currentBet.value = add(currentBet.value, currentBet.value)
     doubled.value = true
     playerCards.push(drawCardWithLuck())
@@ -270,21 +270,21 @@ function settleRound(result: Outcome): void {
         case 'blackjack': {
             // 3:2 payout — bet back + 1.5× bet
             const pay = mul(currentBet.value, 2.5)
-            player.earnCash(pay, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+            chipStore.addChips(pay)
             gambling.recordWin('blackjack', currentBet.value, pay)
             lastPayout.value = pay
             break
         }
         case 'win': {
             const pay = mul(currentBet.value, 2)
-            player.earnCash(pay, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+            chipStore.addChips(pay)
             gambling.recordWin('blackjack', currentBet.value, pay)
             lastPayout.value = pay
             break
         }
         case 'push': {
             // Return bet
-            player.earnCash(currentBet.value, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+            chipStore.addChips(currentBet.value)
             // Push is neither win nor loss — record as win with 0 net
             gambling.recordWin('blackjack', currentBet.value, currentBet.value)
             lastPayout.value = null
@@ -313,16 +313,16 @@ function newRound(): void {
 
 // ─── Bet helpers ─────────────────────────────────────────────
 function setBet(amount: number): void {
-    betAmount.value = Math.max(1, Math.min(amount, player.cash.toNumber()))
+    betAmount.value = Math.max(1, Math.min(amount, chipStore.chipBalance.toNumber()))
 }
 function halfBet(): void { setBet(Math.max(1, Math.floor(betAmount.value / 2))) }
 function doubleBet(): void { setBet(betAmount.value * 2) }
-function maxBet(): void { setBet(player.cash.toNumber()) }
+function maxBet(): void { setBet(chipStore.chipBalance.toNumber()) }
 
 // ─── Computed ────────────────────────────────────────────────
 const stats = computed(() => gambling.getStats('blackjack'))
 const isBetting = computed(() => phase.value === 'betting')
-const canDeal = computed(() => isBetting.value && betAmount.value > 0 && player.cash.gte(D(betAmount.value)))
+const canDeal = computed(() => isBetting.value && betAmount.value > 0 && chipStore.chipBalance.gte(D(betAmount.value)))
 
 const outcomeLabel = computed(() => {
     switch (outcome.value) {
@@ -389,8 +389,8 @@ const bjInfo = computed<InfoSection[]>(() => [
                 {{ $t('gambling.bj_title') }}
             </h2>
             <div class="balance-chip">
-                <AppIcon icon="mdi:cash" />
-                {{ formatCash(player.cash) }}
+                <AppIcon icon="mdi:poker-chip" />
+                {{ formatCash(chipStore.chipBalance) }}
             </div>
         </div>
 
@@ -476,14 +476,14 @@ const bjInfo = computed<InfoSection[]>(() => [
                 <div class="bet-row">
                     <UButton variant="ghost" size="xs" @click="halfBet">1/2</UButton>
                     <div class="bet-display">
-                        <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
+                        <input type="number" v-model.number="betAmount" :min="1" :max="chipStore.chipBalance.toNumber()"
                             class="bet-input" />
                     </div>
                     <UButton variant="ghost" size="xs" @click="doubleBet">x2</UButton>
                 </div>
                 <div class="bet-presets">
                     <UButton v-for="pct in [10, 25, 50]" :key="pct" variant="ghost" size="xs"
-                        @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))">
+                        @click="setBet(Math.floor(chipStore.chipBalance.toNumber() * pct / 100))">
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet">{{ $t('gambling.max') }}</UButton>

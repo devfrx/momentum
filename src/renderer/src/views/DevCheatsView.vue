@@ -81,6 +81,29 @@ function setCashZero() {
     addLog('Cash set to $0')
 }
 
+// ─── Card Balance ──────────────────────
+
+function giveCardCash() {
+    const amount = D(cashAmount.value)
+    player.earnToCard(amount)
+    addLog(`+$${cashAmount.value.toLocaleString()} card`)
+}
+
+function giveCardMega() {
+    player.earnToCard(D(1e9))
+    addLog('+$1B card')
+}
+
+function giveCardInfinite() {
+    player.earnToCard(D(1e15))
+    addLog('+$1Qa card')
+}
+
+function setCardZero() {
+    player.cardBalance = D(0)
+    addLog('Card balance set to $0')
+}
+
 // ─── XP / Level ────────────────────────
 
 function giveXp() {
@@ -127,10 +150,10 @@ const businessOptions = computed(() =>
 function buySelectedBusiness() {
     const def = BUSINESS_DEFS.find(d => d.id === selectedBusinessId.value)
     if (!def) { addLog('Business def not found'); return }
-    if (player.cash.lt(def.purchasePrice)) player.earnCash(def.purchasePrice)
+    if (player.cardBalance.lt(def.purchasePrice)) player.earnToCard(def.purchasePrice)
     const tierIdx = sortedBusinessDefs.value.findIndex(d => d.id === def.id)
     const label = t(SIZE_KEYS[tierIdx] ?? 'business.size_stand')
-    if (business.buyBusiness(def.id)) {
+    if (business.buyBusiness(def.id, undefined, undefined, true)) {
         addLog(`Bought ${label} (${formatCash(def.purchasePrice)})`)
     } else {
         addLog(`Failed to buy ${label}`)
@@ -141,8 +164,8 @@ function buyAllBusinesses() {
     let count = 0
     for (const def of BUSINESS_DEFS) {
         const cost = def.purchasePrice
-        if (player.cash.lt(cost)) player.earnCash(cost)
-        if (business.buyBusiness(def.id)) count++
+        if (player.cardBalance.lt(cost)) player.earnToCard(cost)
+        if (business.buyBusiness(def.id, undefined, undefined, true)) count++
     }
     addLog(`Bought ${count} new businesses (${BUSINESS_DEFS.length} total defs)`)
 }
@@ -164,15 +187,15 @@ const startupNWOptions = [
 
 function refreshStartupOpps() {
     startups.refreshOpportunities(gameEngine.currentTick, true)
-    addLog(`Generated ${startups.opportunities.length} new opportunities (NW: ${formatCash(player.cash)})`)
+    addLog(`Generated ${startups.opportunities.length} new opportunities (NW: ${formatCash(player.netWorth)})`)
 }
 
 function refreshWithCustomNW() {
     // Temporarily override to test scaling at different NW levels
-    const realCash = player.cash
-    player.cash = D(startupTestNW.value)
+    const realNW = player.netWorth
+    player.netWorth = D(startupTestNW.value)
     startups.refreshOpportunities(gameEngine.currentTick, true)
-    player.cash = realCash
+    player.netWorth = realNW
     addLog(`Generated ${startups.opportunities.length} opps as if NW=$${startupTestNW.value.toLocaleString()}`)
 }
 
@@ -626,6 +649,10 @@ const multiplierInfo = computed(() => {
                 <span class="stat-chip-value text-gold">{{ formatCash(player.cash) }}</span>
             </div>
             <div class="stat-chip">
+                <span class="stat-chip-label">Card</span>
+                <span class="stat-chip-value text-sky">{{ formatCash(player.cardBalance) }}</span>
+            </div>
+            <div class="stat-chip">
                 <span class="stat-chip-label">{{ t('dev.net_worth') }}</span>
                 <span class="stat-chip-value">{{ formatCash(player.netWorth) }}</span>
             </div>
@@ -661,6 +688,26 @@ const multiplierInfo = computed(() => {
                     <UButton variant="warning" size="sm" @click="giveMegaCash">{{ t('dev.plus_1b') }}</UButton>
                     <UButton variant="danger" size="sm" @click="giveInfiniteCash">{{ t('dev.plus_1qa') }}</UButton>
                     <UButton variant="ghost" size="sm" @click="setCashZero">{{ t('dev.set_zero') }}</UButton>
+                </div>
+            </section>
+
+            <!-- Card Balance Section -->
+            <section class="cheat-section">
+                <h2 class="section-header">
+                    <AppIcon icon="mdi:credit-card" class="section-icon text-sky" /> Card Balance
+                </h2>
+                <div class="cheat-row">
+                    <div class="input-group">
+                        <input v-model.number="cashAmount" type="number" class="cheat-input" min="1" />
+                        <UButton variant="primary" size="sm" icon="mdi:plus" @click="giveCardCash">
+                            + Card
+                        </UButton>
+                    </div>
+                </div>
+                <div class="cheat-buttons">
+                    <UButton variant="warning" size="sm" @click="giveCardMega">+$1B</UButton>
+                    <UButton variant="danger" size="sm" @click="giveCardInfinite">+$1Qa</UButton>
+                    <UButton variant="ghost" size="sm" @click="setCardZero">Set $0</UButton>
                 </div>
             </section>
 

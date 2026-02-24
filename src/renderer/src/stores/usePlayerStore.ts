@@ -1,8 +1,15 @@
 /**
- * usePlayerStore — Core player state
+ * usePlayerStore — Core player state (Dual Pool Architecture)
  *
- * Tracks cash, loans/debt, net worth, XP/level, and global stats.
- * This is the central store that all other stores interact with.
+ * Manages two separate money pools:
+ *   cardBalance — bank / debit card account (legal income goes here)
+ *   cash        — physical wallet (illegal/BM/gambling earnings go here)
+ *
+ * Legal purchases go through the card payment system (deducts from cardBalance).
+ * Black market and gambling use the cash wallet directly.
+ * ATM withdrawals move money from cardBalance → cash (with fee + daily limit).
+ *
+ * Also tracks XP/level, net worth, prestige points, and global stats.
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
@@ -11,8 +18,8 @@ import { D, ZERO, add, sub, mul, gte } from '@renderer/core/BigNum'
 import { useUpgradeStore } from './useUpgradeStore'
 
 /**
- * Transaction metadata — attach to earnCash/spendCash/forcePay to
- * automatically record a banking transaction for that cash operation.
+ * Transaction metadata — attach to earnCash/earnToCard/spendCash/spendFromCard/forcePay
+ * to automatically record a banking transaction for that cash operation.
  */
 export interface TxMeta {
   /** i18n key for the transaction description */
@@ -21,6 +28,8 @@ export interface TxMeta {
   cat: string
   /** Optional i18n params */
   params?: Record<string, string | number>
+  /** Which pool was affected — set automatically by the store functions */
+  pool?: 'card' | 'wallet'
 }
 
 /** Callback signature for the transaction recorder (registered by useInitGame) */
@@ -31,9 +40,17 @@ let _txRecordFn: TxRecordFn | null = null
 
 export const usePlayerStore = defineStore('player', () => {
   // ─── State ────────────────────────────────────────────────────
-  const cash = ref<Decimal>(D(50))
+
+  /** Physical cash wallet — fed by ATM withdrawals, BM income, gambling cashouts */
+  const cash = ref<Decimal>(ZERO)
+
+  /** Bank / debit card account — fed by legal income (salary, business, etc.) */
+  const cardBalance = ref<Decimal>(D(50))
+
+  /** Aggregate lifetime stats (across both pools) */
   const totalCashEarned = ref<Decimal>(D(50))
   const totalCashSpent = ref<Decimal>(ZERO)
+
   const prestigePoints = ref<Decimal>(ZERO)
   const rebirthCount = ref(0)
   const level = ref(1)
@@ -42,18 +59,23 @@ export const usePlayerStore = defineStore('player', () => {
 
   // ─── Computed ─────────────────────────────────────────────────
 
+  /** Total liquid funds across both pools */
+  const totalFunds = computed<Decimal>(() => add(cash.value, cardBalance.value))
+
   /** Total outstanding debt — now tracked by useLoanStore */
   const totalDebt = computed<Decimal>(() => ZERO)
 
+  /** Check if player can afford from wallet cash (used for BM/gambling) */
   const canAfford = (cost: Decimal): boolean => gte(cash.value, cost)
 
+  /** Check if card balance covers a given amount (does NOT include fee) */
+  const canAffordCard = (cost: Decimal): boolean => gte(cardBalance.value, cost)
+
   /**
-   * Net worth = cash + business valuations + portfolio + property + startups – debt.
-   * External stores pass their totals via computeNetWorth().
-   * This reactive shortcut only uses locally-available data;
-   * full net worth is computed in useGameLoop each tick.
+   * Net worth = totalFunds + business valuations + portfolio + property + startups – debt.
+   * Local reactive shortcut; full net worth is computed in useGameLoop each tick.
    */
-  const netWorthLocal = computed<Decimal>(() => sub(cash.value, totalDebt.value))
+  const netWorthLocal = computed<Decimal>(() => sub(totalFunds.value, totalDebt.value))
 
   // Externally-written aggregate net worth (updated by game loop)
   const netWorth = ref<Decimal>(ZERO)
@@ -69,38 +91,81 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   /**
-   * Add cash (from income, job wages, etc.).
-   * Pass optional `meta` to auto-record a banking transaction.
+   * Validate that an amount is finite and positive.
+   * Guards against NaN, Infinity, negative, and zero values corrupting balances.
+   */
+  function _validateAmount(amount: Decimal): boolean {
+    return Number.isFinite(amount.mantissa) && Number.isFinite(amount.exponent) && amount.gt(0)
+  }
+
+  // ─── Wallet Cash (illegal / BM / gambling) ────────────────────
+
+  /**
+   * Add money to the physical cash wallet.
+   * Used for: BM deal proceeds, gambling cashouts, vault withdrawals, ATM.
    */
   function earnCash(amount: Decimal, meta?: TxMeta): void {
+    if (!_validateAmount(amount)) return
     cash.value = add(cash.value, amount)
     totalCashEarned.value = add(totalCashEarned.value, amount)
-    if (meta && _txRecordFn) _txRecordFn(amount, cash.value, meta)
+    if (meta && _txRecordFn) _txRecordFn(amount, cash.value, { ...meta, pool: 'wallet' })
   }
 
   /**
-   * Spend cash (purchases). Returns false if not enough.
-   * Pass optional `meta` to auto-record a banking transaction.
+   * Spend from the physical cash wallet. Returns false if insufficient.
+   * Used for: BM purchases, gambling chip buys, vault deposits.
    */
   function spendCash(amount: Decimal, meta?: TxMeta): boolean {
+    if (!_validateAmount(amount)) return false
     if (!gte(cash.value, amount)) return false
     cash.value = sub(cash.value, amount)
     totalCashSpent.value = add(totalCashSpent.value, amount)
-    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cash.value, meta)
+    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cash.value, { ...meta, pool: 'wallet' })
     return true
   }
 
+  // ─── Card / Bank Account (legal income & purchases) ───────────
+
   /**
-   * Force-deduct cash even if balance goes negative.
-   * Used for mandatory payments the player cannot dodge
-   * (fines, operating losses, penalties, etc.).
-   * Pass optional `meta` to auto-record a banking transaction.
+   * Add money to the card / bank account.
+   * Used for: salary, business revenue, RE rent, dividends, deposits,
+   * stock/crypto sells, startup returns, shop sales, achievement rewards.
+   */
+  function earnToCard(amount: Decimal, meta?: TxMeta): void {
+    if (!_validateAmount(amount)) return
+    cardBalance.value = add(cardBalance.value, amount)
+    totalCashEarned.value = add(totalCashEarned.value, amount)
+    if (meta && _txRecordFn) _txRecordFn(amount, cardBalance.value, { ...meta, pool: 'card' })
+  }
+
+  /**
+   * Spend from the card / bank account. Returns false if insufficient.
+   * Used internally by the card payment system (quickPay / confirmPayment).
+   */
+  function spendFromCard(amount: Decimal, meta?: TxMeta): boolean {
+    if (!_validateAmount(amount)) return false
+    if (!gte(cardBalance.value, amount)) return false
+    cardBalance.value = sub(cardBalance.value, amount)
+    totalCashSpent.value = add(totalCashSpent.value, amount)
+    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cardBalance.value, { ...meta, pool: 'card' })
+    return true
+  }
+
+  // ─── Force Pay (mandatory deductions from bank, can go negative) ─
+
+  /**
+   * Force-deduct from card/bank balance even if it goes negative (overdraft).
+   * Used for mandatory payments the player cannot dodge:
+   * fines, operating losses, penalties, seized assets, debt interest.
    */
   function forcePay(amount: Decimal, meta?: TxMeta): void {
-    cash.value = sub(cash.value, amount)
+    if (!_validateAmount(amount)) return
+    cardBalance.value = sub(cardBalance.value, amount)
     totalCashSpent.value = add(totalCashSpent.value, amount)
-    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cash.value, meta)
+    if (meta && _txRecordFn) _txRecordFn(mul(amount, -1), cardBalance.value, { ...meta, pool: 'card' })
   }
+
+  // ─── XP & Level ───────────────────────────────────────────────
 
   /** Add XP and handle level-up (applies xp_gain multiplier from skill tree) */
   function addXp(amount: Decimal): void {
@@ -116,9 +181,12 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
+  // ─── Persistence ──────────────────────────────────────────────
+
   /** Reset on prestige / era expansion (soft — no forced loss) */
   function prestigeReset(): void {
-    cash.value = D(50)
+    cash.value = ZERO
+    cardBalance.value = D(50)
     totalCashEarned.value = D(50)
     totalCashSpent.value = ZERO
     level.value = 1
@@ -126,9 +194,10 @@ export const usePlayerStore = defineStore('player', () => {
     xpToNextLevel.value = D(100)
   }
 
-  /** Hydrate state from save data */
+  /** Hydrate state from save data (handles v3→v4 migration) */
   function loadFromSave(data: {
     cash: Decimal
+    cardBalance?: Decimal
     totalCashEarned: Decimal
     totalCashSpent: Decimal
     prestigePoints: Decimal
@@ -138,7 +207,15 @@ export const usePlayerStore = defineStore('player', () => {
     xpToNextLevel: Decimal
     netWorth: Decimal
   }): void {
-    cash.value = data.cash
+    // v3→v4 migration: if no cardBalance, all money was in single pool → move to card
+    if (data.cardBalance !== undefined && data.cardBalance !== null) {
+      cash.value = data.cash
+      cardBalance.value = data.cardBalance
+    } else {
+      // Old save: single pool. Move everything to cardBalance, wallet starts empty.
+      cash.value = ZERO
+      cardBalance.value = data.cash
+    }
     totalCashEarned.value = data.totalCashEarned
     totalCashSpent.value = data.totalCashSpent
     prestigePoints.value = data.prestigePoints
@@ -152,6 +229,8 @@ export const usePlayerStore = defineStore('player', () => {
   return {
     // State
     cash,
+    cardBalance,
+    totalFunds,
     totalCashEarned,
     totalCashSpent,
     prestigePoints,
@@ -164,10 +243,13 @@ export const usePlayerStore = defineStore('player', () => {
     totalDebt,
     netWorthLocal,
     canAfford,
+    canAffordCard,
     // Actions
     registerTxRecorder,
     earnCash,
+    earnToCard,
     spendCash,
+    spendFromCard,
     forcePay,
     addXp,
     prestigeReset,

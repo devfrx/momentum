@@ -6,6 +6,7 @@ import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { getLocationGrade, getTrait, MANAGEMENT_STYLES, type ManagementStyle, getImprovement, type PropertyTrait, type ImprovementDef } from '@renderer/data/realestate'
 import AppIcon from '@renderer/components/AppIcon.vue'
+import CardBoundBadge from '@renderer/components/ui/CardBoundBadge.vue'
 import { UAccordion, UButton, UCard } from '@renderer/components/ui'
 import { THEME } from '@renderer/assets/theme/colors'
 import Tag from 'primevue/tag'
@@ -60,8 +61,8 @@ const paybackLabel = computed(() => {
 const repairCost = computed(() => realEstate.getRepairCost(props.property))
 const renovateCost = computed(() => realEstate.getRenovateCost(props.property))
 const sellPrice = computed(() => realEstate.getSellPrice(props.property))
-const canAffordRepair = computed(() => player.cash.gte(repairCost.value) && props.property.condition < 98)
-const canAffordRenovate = computed(() => player.cash.gte(renovateCost.value) && props.property.renovationLevel < props.property.maxRenovationLevel)
+const canAffordRepair = computed(() => player.cardBalance.gte(repairCost.value) && props.property.condition < 98)
+const canAffordRenovate = computed(() => player.cardBalance.gte(renovateCost.value) && props.property.renovationLevel < props.property.maxRenovationLevel)
 
 const conditionColor = computed(() => {
     if (props.property.condition >= 80) return 'var(--t-success)'
@@ -114,6 +115,7 @@ function handleRentSlider(val: number | number[]): void {
                     <span v-if="gradeData" class="prop-card__grade" :style="{ '--_grade-color': gradeData.color }">
                         <AppIcon :icon="gradeData.icon" /> {{ t(gradeData.nameKey) }}
                     </span>
+                    <CardBoundBadge :entityKey="`realestate:${property.id}`" />
                 </div>
             </div>
             <!-- Net rent hero -->
@@ -232,7 +234,7 @@ function handleRentSlider(val: number | number[]): void {
                         <span class="d-label">{{ t('realestate.roi') }}</span>
                         <span class="d-value"
                             :class="paybackDays < 30 ? 'success' : paybackDays === Infinity ? 'danger' : ''">{{
-                            paybackLabel }}</span>
+                                paybackLabel }}</span>
                     </div>
                 </div>
             </div>

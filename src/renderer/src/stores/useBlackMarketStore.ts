@@ -354,7 +354,9 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     }
 
     // Pay for the deal
-    player.spendCash(deal.cost, { key: 'banking.tx_bm_deal', cat: 'blackmarket' })
+    if (!player.spendCash(deal.cost, { key: 'banking.tx_bm_deal', cat: 'blackmarket' })) {
+      return { success: false, message: 'insufficient_cash' }
+    }
     totalCashSpent.value = add(totalCashSpent.value, deal.cost)
 
     // Roll for success
@@ -556,7 +558,7 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     const player = usePlayerStore()
 
     const duration = randomInt(INVESTIGATION_MIN_TICKS, INVESTIGATION_MAX_TICKS)
-    const fineBase = player.cash.mul(INVESTIGATION_FINE_MULT * severity)
+    const fineBase = player.cardBalance.mul(INVESTIGATION_FINE_MULT * severity)
 
     investigations.value.push({
       id: uid(),
@@ -720,7 +722,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     // Check and pay cost
     if (scaledCost.gt(ZERO)) {
       if (!gte(player.cash, scaledCost)) return { success: false, message: 'insufficient_cash' }
-      player.spendCash(scaledCost, { key: 'banking.tx_bm_hire', cat: 'blackmarket' })
+      if (!player.spendCash(scaledCost, { key: 'banking.tx_bm_hire', cat: 'blackmarket' }))
+        return { success: false, message: 'insufficient_cash' }
       totalCashSpent.value = add(totalCashSpent.value, scaledCost)
     }
 
@@ -1257,7 +1260,9 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           )
           return { type: 'fence_forge', forged: false, reason: 'insufficient_cash' }
         }
-        player.spendCash(forgeCost, { key: 'banking.tx_bm_forge', cat: 'blackmarket' })
+        if (!player.spendCash(forgeCost, { key: 'banking.tx_bm_forge', cat: 'blackmarket' })) {
+          return { type: 'fence_forge', forged: false, reason: 'insufficient_cash' }
+        }
         totalCashSpent.value = add(totalCashSpent.value, forgeCost)
 
         // Loyalty-scaled bonus: higher loyalty → closer to max bonus
@@ -1528,7 +1533,14 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
             scalePercentageCost(player.cash, 'standard', Math.min(1, severityFactor * 0.15))
           )
           if (gte(player.cash, cost)) {
-            player.spendCash(cost, { key: 'banking.tx_bm_bribe', cat: 'blackmarket' })
+            if (!player.spendCash(cost, { key: 'banking.tx_bm_bribe', cat: 'blackmarket' })) {
+              return {
+                type: 'fixed',
+                failed: true,
+                reason: 'insufficient_cash',
+                costNeeded: cost.toNumber()
+              }
+            }
             totalCashSpent.value = add(totalCashSpent.value, cost)
             sysState.activeEvents = sysState.activeEvents.filter(
               (e: { eventId: string }) => e.eventId !== target.eventId
@@ -1602,7 +1614,14 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
           // Cost = 60% of the fine — always cheaper than getting caught
           const cost = mul(inv.fineAmount, D(0.6))
           if (gte(player.cash, cost)) {
-            player.spendCash(cost, { key: 'banking.tx_bm_bribe', cat: 'blackmarket' })
+            if (!player.spendCash(cost, { key: 'banking.tx_bm_bribe', cat: 'blackmarket' })) {
+              return {
+                type: 'dismissed',
+                failed: true,
+                reason: 'insufficient_cash',
+                costNeeded: cost.toNumber()
+              }
+            }
             totalCashSpent.value = add(totalCashSpent.value, cost)
             inv.resolved = true
             inv.caught = false
@@ -1649,6 +1668,8 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
       default:
         return null
     }
+    // Fallback — should never be reached (all cases return above)
+    return null
   }
 
   // ─── Multiplier Query (for game systems) ──────────────────

@@ -26,6 +26,7 @@ import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { useVaultStore } from './useVaultStore'
 import { useStorageStore } from './useStorageStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 import {
   generateShopBatch,
   refreshShopPartial,
@@ -334,15 +335,24 @@ export const useShopStore = defineStore('shop', () => {
 
     const listing = listings.value[idx]
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
 
-    if (player.cash.lt(listing.price)) return false
+    if (player.cardBalance.lt(cardPayment.calculateTotal(listing.price))) return false
 
     if (destination === 'vault') {
       const vault = useVaultStore()
       if (vault.isFull) return false
     }
 
-    player.spendCash(listing.price, { key: 'banking.tx_shop_buy', cat: 'shop' })
+    // Use quickPay (no dialog) to prevent double-purchase race condition
+    if (
+      !cardPayment.quickPay(listing.price, 'banking.tx_shop_buy', 'shop', {
+        name: listing.item.name
+      })
+    ) {
+      return false
+    }
+
     totalItemsBought.value++
     totalCashSpentOnPurchases.value = add(totalCashSpentOnPurchases.value, listing.price)
 
@@ -400,7 +410,7 @@ export const useShopStore = defineStore('shop', () => {
     const sellMul = upgrades.getMultiplier('all_income')
     const finalValue = mul(mul(afterFraction, D(demandMult)), sellMul).max(D(1))
 
-    player.earnCash(finalValue, { key: 'banking.tx_shop_sell', cat: 'shop' })
+    player.earnToCard(finalValue, { key: 'banking.tx_shop_sell', cat: 'shop' })
     totalItemsSoldToShop.value++
     totalCashFromSales.value = add(totalCashFromSales.value, finalValue)
 
@@ -496,13 +506,13 @@ export const useShopStore = defineStore('shop', () => {
     }
 
     const cost = calculateRestorationCost(item, currentCondition, targetCondition)
-    if (player.cash.lt(cost)) return false
 
     const steps = getStepsBetween(currentCondition, targetCondition)
     const ticksPerStep = getTicksPerStep(item)
 
-    // Pay upfront
-    player.spendCash(cost, { key: 'banking.tx_shop_restore', cat: 'shop' })
+    // Pay upfront via card
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_shop_restore', 'shop')) return false
     totalRestorationCashSpent.value = add(totalRestorationCashSpent.value, cost)
 
     // Remove item from source
@@ -610,9 +620,9 @@ export const useShopStore = defineStore('shop', () => {
     if (restorationSlotCount.value >= RESTORATION_SLOT_MAX) return false
     const player = usePlayerStore()
     const cost = nextSlotUpgradeCost.value
-    if (player.cash.lt(cost)) return false
 
-    player.spendCash(cost, { key: 'banking.tx_shop_upgrade', cat: 'shop' })
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_shop_upgrade', 'shop')) return false
     restorationSlotCount.value++
     restorationSlots.value.push(null)
     return true
@@ -661,8 +671,8 @@ export const useShopStore = defineStore('shop', () => {
 
     // Pay listing fee
     const listingFee = calculateListingFee(startingPrice)
-    if (player.cash.lt(listingFee)) return false
-    player.spendCash(listingFee, { key: 'banking.tx_shop_auction_list', cat: 'shop' })
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(listingFee, 'banking.tx_shop_auction_list', 'shop')) return false
 
     const demandMult = getDemandMultiplier(item.category)
     const luckBonus = getLuckBonus()
@@ -726,7 +736,7 @@ export const useShopStore = defineStore('shop', () => {
         // Item sold!
         const successFee = calculateSuccessFee(auction.currentBid)
         const proceeds = sub(auction.currentBid, successFee)
-        player.earnCash(proceeds, { key: 'banking.tx_shop_auction_sold', cat: 'shop' })
+        player.earnToCard(proceeds, { key: 'banking.tx_shop_auction_sold', cat: 'shop' })
 
         totalAuctionRevenue.value = add(totalAuctionRevenue.value, proceeds)
         totalAuctionsCompleted.value++

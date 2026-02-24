@@ -9,16 +9,16 @@ import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { D, ZERO, mul, add } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
 
 const emit = defineEmits<{ back: [] }>()
 const { t } = useI18n()
 
-const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const { formatCash } = useFormat()
 
 // ─── Roulette constants ──────────────────────────────────────
@@ -68,7 +68,7 @@ const totalBetCost = computed(() => mul(D(betAmount.value), bets.value.length))
 const canSpin = computed(() =>
     !spinning.value &&
     bets.value.length > 0 &&
-    player.cash.gte(totalBetCost.value) &&
+    chipStore.chipBalance.gte(totalBetCost.value) &&
     betAmount.value > 0
 )
 
@@ -77,7 +77,7 @@ function spin(): void {
     if (!canSpin.value) return
 
     const totalCost = totalBetCost.value
-    if (!player.spendCash(totalCost, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (!chipStore.spendChips(totalCost)) return
 
     spinning.value = true
     showResult.value = false
@@ -154,7 +154,7 @@ function evaluateResult(num: number): void {
     }
 
     if (totalPayout.gt(ZERO)) {
-        player.earnCash(totalPayout, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+        chipStore.addChips(totalPayout)
         gambling.recordWin('roulette', totalBetCost.value, totalPayout)
         lastPayout.value = totalPayout
     } else {
@@ -195,12 +195,12 @@ function newRound(): void {
 
 // ─── Bet helpers ─────────────────────────────────────────────
 function setBet(amount: number): void {
-    betAmount.value = Math.max(1, Math.min(amount, player.cash.toNumber()))
+    betAmount.value = Math.max(1, Math.min(amount, chipStore.chipBalance.toNumber()))
 }
 
 function halfBet(): void { setBet(Math.max(1, Math.floor(betAmount.value / 2))) }
 function doubleBet(): void { setBet(betAmount.value * 2) }
-function maxBet(): void { setBet(player.cash.toNumber()) }
+function maxBet(): void { setBet(chipStore.chipBalance.toNumber()) }
 
 // ─── Computed ────────────────────────────────────────────────
 const stats = computed(() => gambling.getStats('roulette'))
@@ -263,8 +263,8 @@ const rouletteInfo = computed<InfoSection[]>(() => [
                 {{ $t('gambling.rl_title') }}
             </h2>
             <div class="balance-chip">
-                <AppIcon icon="mdi:cash" />
-                {{ formatCash(player.cash) }}
+                <AppIcon icon="mdi:poker-chip" />
+                {{ formatCash(chipStore.chipBalance) }}
             </div>
         </div>
 
@@ -300,14 +300,14 @@ const rouletteInfo = computed<InfoSection[]>(() => [
                         <div class="bet-row">
                             <UButton variant="ghost" size="xs" @click="halfBet">1/2</UButton>
                             <div class="bet-display">
-                                <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
+                                <input type="number" v-model.number="betAmount" :min="1" :max="chipStore.chipBalance.toNumber()"
                                     class="bet-input" :disabled="spinning" />
                             </div>
                             <UButton variant="ghost" size="xs" @click="doubleBet">x2</UButton>
                         </div>
                         <div class="bet-presets">
                             <UButton variant="ghost" size="xs" v-for="pct in [10, 25, 50]" :key="pct"
-                                @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="spinning">
+                                @click="setBet(Math.floor(chipStore.chipBalance.toNumber() * pct / 100))" :disabled="spinning">
                                 {{ pct }}%
                             </UButton>
                             <UButton variant="warning" size="xs" @click="maxBet" :disabled="spinning">{{

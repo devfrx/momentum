@@ -461,7 +461,7 @@ export const useLoanStore = defineStore('loans', () => {
     loans.value.push(loan)
 
     // Credit the cash to player
-    player.earnCash(amount, { key: 'banking.tx_loan_received', cat: 'loan' })
+    player.earnToCard(amount, { key: 'banking.tx_loan_received', cat: 'loan' })
 
     // Record application for credit score
     recentApplications.value.push(currentTick)
@@ -487,7 +487,7 @@ export const useLoanStore = defineStore('loans', () => {
 
     // Cap at remaining balance and available cash
     let toPay = gte(amount, loan.remaining) ? loan.remaining : amount
-    if (!gte(player.cash, toPay)) toPay = player.cash
+    if (!gte(player.cardBalance, toPay)) toPay = player.cardBalance
     if (toPay.lte(ZERO)) return ZERO
 
     // Check for early repayment penalty (only when paying off the entire loan early)
@@ -496,16 +496,17 @@ export const useLoanStore = defineStore('loans', () => {
       if (loan.ticksActive < loan.termTicks) {
         penalty = mul(loan.remaining, def.earlyRepaymentPenalty)
         const totalWithPenalty = add(toPay, penalty)
-        if (!gte(player.cash, totalWithPenalty)) {
+        if (!gte(player.cardBalance, totalWithPenalty)) {
           // Can't afford with penalty, just pay what we can (no penalty applied)
-          toPay = player.cash
+          toPay = player.cardBalance
           penalty = ZERO
         }
       }
     }
 
-    // Deduct principal payment + penalty separately
-    player.spendCash(add(toPay, penalty), { key: 'banking.tx_loan_repay', cat: 'loan' })
+    // Deduct principal payment + penalty from card balance
+    if (!player.spendFromCard(add(toPay, penalty), { key: 'banking.tx_loan_repay', cat: 'loan' }))
+      return ZERO
 
     // Update tracking fields — toPay goes toward the balance, penalty is extra cost
     loan.totalPaid = add(loan.totalPaid, add(toPay, penalty))
@@ -572,9 +573,10 @@ export const useLoanStore = defineStore('loans', () => {
       totalOwed = add(totalOwed, penalty)
     }
 
-    if (!gte(player.cash, totalOwed)) return false
+    if (!gte(player.cardBalance, totalOwed)) return false
 
-    player.spendCash(totalOwed, { key: 'banking.tx_loan_repay_full', cat: 'loan' })
+    if (!player.spendFromCard(totalOwed, { key: 'banking.tx_loan_repay_full', cat: 'loan' }))
+      return false
 
     // Update tracking fields before completing
     loan.totalPaid = add(loan.totalPaid, totalOwed)

@@ -8,6 +8,7 @@ import { D, ZERO, gte } from '@renderer/core/BigNum'
 import { upgradeCost, upgradeEffect } from '@renderer/core/Formulas'
 import type { UpgradeDef, UpgradeTarget } from '@renderer/data/upgrades'
 import { usePlayerStore } from './usePlayerStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 
 /** Map camelCase data target names to snake_case store enum */
 const TARGET_MAP: Record<UpgradeTarget, UpgradeEffectTarget> = {
@@ -25,7 +26,7 @@ const TARGET_MAP: Record<UpgradeTarget, UpgradeEffectTarget> = {
   offlineEfficiency: 'offline_efficiency',
   prestigeGain: 'prestige_gain',
   loanRate: 'loan_rate',
-  depositRate: 'deposit_rate',
+  depositRate: 'deposit_rate'
 }
 
 export type UpgradeEffectTarget =
@@ -165,12 +166,12 @@ export const useUpgradeStore = defineStore('upgrades', () => {
     if (!presMet) return null
 
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
     const cost = upgradeCost(node.baseCost, node.level, node.costPolyExp, node.costExpBase)
-    
-    // Check and spend cash
-    if (!gte(player.cash, cost)) return null
-    if (!player.spendCash(cost)) return null
-    
+
+    // Check and pay via card (handles balance check + fee + deduction)
+    if (!cardPayment.quickPay(cost, 'banking.tx_upgrade_buy', 'upgrade')) return null
+
     node.level++
     node.purchased = true
     _invalidateCache()
@@ -190,7 +191,9 @@ export const useUpgradeStore = defineStore('upgrades', () => {
   }
 
   /** Restore upgrade state from a save */
-  function loadFromSave(savedUpgrades: Array<{ id: string; level?: number; purchased?: boolean }>): void {
+  function loadFromSave(
+    savedUpgrades: Array<{ id: string; level?: number; purchased?: boolean }>
+  ): void {
     if (!Array.isArray(savedUpgrades)) return
     for (const saved of savedUpgrades) {
       const node = nodes.value.find((n) => n.id === saved.id)
@@ -204,7 +207,12 @@ export const useUpgradeStore = defineStore('upgrades', () => {
 
   return {
     nodes,
-    availableUpgrades, getMultiplier, getNodeCost,
-    initUpgrades, purchaseUpgrade, prestigeReset, loadFromSave
+    availableUpgrades,
+    getMultiplier,
+    getNodeCost,
+    initUpgrades,
+    purchaseUpgrade,
+    prestigeReset,
+    loadFromSave
   }
 })

@@ -45,6 +45,12 @@
   --t-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
   --t-shadow-focus: 0 0 0 2px var(--t-bg-base), 0 0 0 4px var(--t-cta);
 
+  /* -- Glass / Float -- */
+  --t-glass-bg: rgba(12, 12, 14, 0.75);
+  --t-glass-border: rgba(255, 255, 255, 0.06);
+  --t-glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --t-glass-blur: 16px;
+
   /* -- CTA / Primary -- white button on dark bg */
   --t-cta: #ffffff;
   --t-cta-hover: color-mix(in srgb, var(--t-cta) 85%, black);
@@ -93,6 +99,12 @@
   --t-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
   --t-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
   --t-shadow-focus: 0 0 0 2px #fff, 0 0 0 4px var(--t-cta);
+
+  /* -- Glass / Float -- */
+  --t-glass-bg: rgba(255, 255, 255, 0.72);
+  --t-glass-border: rgba(0, 0, 0, 0.06);
+  --t-glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --t-glass-blur: 16px;
 
   /* -- CTA / Primary -- black button on light bg */
   --t-cta: #09090b;

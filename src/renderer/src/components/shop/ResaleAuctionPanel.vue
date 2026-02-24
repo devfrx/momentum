@@ -398,7 +398,7 @@ const HISTORY_STATUS_ICONS: Record<string, string> = {
             <template #footer>
                 <UButton variant="ghost" @click="showListDialog = false">{{ t('common.cancel') }}</UButton>
                 <UButton variant="primary" icon="mdi:check"
-                    :disabled="parseFloat(startingPriceInput) <= 0 || player.cash.lt(estimatedListingFee)"
+                    :disabled="parseFloat(startingPriceInput) <= 0 || player.cardBalance.lt(estimatedListingFee)"
                     @click="confirmListing">{{ t('shop.auction_confirm') }}</UButton>
             </template>
         </UModal>

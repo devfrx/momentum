@@ -49,7 +49,7 @@ const scanCooldownFormatted = computed(() => {
 })
 
 const scanCostFormatted = computed(() => formatCash(props.district.scanCost))
-const canAffordScan = computed(() => player.cash.gte(props.district.scanCost))
+const canAffordScan = computed(() => player.cardBalance.gte(props.district.scanCost))
 
 function handleScan(): void {
     realEstate.scanDistrict(props.district.id)
@@ -145,7 +145,7 @@ const tierColors: Record<string, string> = {
                     <AppIcon :icon="opp.icon" />
                     <span class="dp-list-name">{{ opp.name }}</span>
                     <span class="dp-list-price">{{ formatCash(opp.askingPrice) }}</span>
-                    <Tag v-if="opp.isScanned" value="SCAN" severity="info" size="small" />
+                    <Tag v-if="opp.isScanned" :value="t('realestate.opp.scout')" severity="info" size="small" />
                 </div>
             </div>
         </div>

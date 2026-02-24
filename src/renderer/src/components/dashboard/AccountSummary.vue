@@ -81,7 +81,9 @@ const incomeBreakdown = computed(() => [
                     <AppIcon icon="mdi:trending-up" class="flow-icon" />
                     <span class="flow-label">{{ $t('banking.income_per_sec') }}</span>
                 </div>
-                <span class="flow-value positive">+{{ formatCash(totalIncomePerSecond) }}/s</span>
+                <span class="flow-value"
+                    :class="{ positive: totalIncomePerSecond.gte(0), negative: totalIncomePerSecond.lt(0) }">{{
+                        totalIncomePerSecond.gte(0) ? '+' : '' }}{{ formatCash(totalIncomePerSecond) }}/s</span>
             </div>
             <div class="flow-card expense">
                 <div class="flow-header">
@@ -99,6 +101,24 @@ const incomeBreakdown = computed(() => [
                     :class="{ positive: netFlowPerSecond.gte(0), negative: netFlowPerSecond.lt(0) }">
                     {{ netFlowPerSecond.gte(0) ? '+' : '' }}{{ formatCash(netFlowPerSecond) }}/s
                 </span>
+            </div>
+        </div>
+
+        <!-- ═══ Dual Balance ═══ -->
+        <div class="dual-balance">
+            <div class="dual-bal-item">
+                <div class="dual-bal-header">
+                    <AppIcon icon="mdi:credit-card" class="dual-bal-icon" />
+                    <span class="dual-bal-label">{{ $t('banking.card_balance') }}</span>
+                </div>
+                <span class="dual-bal-value">{{ formatCash(player.cardBalance) }}</span>
+            </div>
+            <div class="dual-bal-item wallet-item">
+                <div class="dual-bal-header">
+                    <AppIcon icon="mdi:wallet" class="dual-bal-icon wallet-icon-color" />
+                    <span class="dual-bal-label">{{ $t('banking.wallet_cash') }}</span>
+                </div>
+                <span class="dual-bal-value wallet-color">{{ formatCash(player.cash) }}</span>
             </div>
         </div>
 
@@ -357,6 +377,55 @@ const incomeBreakdown = computed(() => [
     letter-spacing: 0.04em;
     font-weight: var(--t-font-medium);
     text-align: center;
+}
+
+/* ═══ Dual Balance ═══ */
+.dual-balance {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--t-space-3);
+    padding: var(--t-space-3);
+    background: var(--t-bg-elevated);
+    border-radius: var(--t-radius-md);
+}
+
+.dual-bal-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.dual-bal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.dual-bal-icon {
+    font-size: 0.8rem;
+    color: var(--t-text-muted);
+}
+
+.wallet-icon-color {
+    color: var(--t-success);
+}
+
+.dual-bal-label {
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dual-bal-value {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-lg);
+    font-weight: var(--t-font-bold);
+    color: var(--t-text);
+}
+
+.wallet-color {
+    color: var(--t-success);
 }
 
 /* ═══ Responsive ═══ */

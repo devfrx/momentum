@@ -110,7 +110,8 @@ export default {
     minimize: 'Minimize',
     maximize: 'Maximize',
     close: 'Close',
-    in_debt: 'IN DEBT — 0.5% interest accruing'
+    in_debt: 'IN DEBT — 0.5% interest accruing',
+    wallet: 'Wallet Cash'
   },
 
   // ─── Footer ───────────────────────────────────────────────────
@@ -234,6 +235,7 @@ export default {
     // Transaction descriptions
     tx_job_income: 'Job salary',
     tx_business_profit: 'Business profit',
+    tx_business_loss: 'Business operating loss',
     tx_rent_income: 'Rental income',
     tx_deposit_interest: 'Deposit interest',
     tx_loan_interest: 'Loan interest',
@@ -282,12 +284,185 @@ export default {
     tx_event_bonus: 'Event bonus',
     tx_misc_income: 'Miscellaneous income',
     tx_misc_expense: 'Miscellaneous expense',
+    // Business transactions
+    tx_biz_buy: 'Bought business — {name}',
+    tx_biz_sell: 'Sold business — {name}',
+    tx_biz_level: 'Business level up — {name}',
+    tx_biz_branch: 'New branch — {name}',
+    tx_biz_train: 'Staff training — {name}',
+    tx_biz_upgrade: 'Business upgrade — {name}',
+    tx_biz_advisor: 'Advisor hired — {name}',
+    tx_biz_collect: 'Profit collected — {name}',
+    tx_biz_quality: 'Quality upgrade — {name}',
+    tx_biz_auto_train: 'Auto-training — {name}',
+    tx_biz_overflow_loss: 'Business overflow loss — {name}',
+    // Deposit transactions
+    tx_deposit_open: 'Deposit opened',
+    tx_deposit_withdraw: 'Deposit withdrawal',
+    tx_deposit_prestige: 'Deposit closed (prestige)',
+    // Vault transactions
+    tx_vault_deposit: 'Cash moved to vault',
+    tx_vault_withdraw: 'Cash withdrawn from vault',
+    tx_vault_sell: 'Vault item sold',
+    tx_vault_upgrade: 'Vault capacity upgrade',
+    // Startup transactions
+    tx_startup_dd: 'Due diligence — {name}',
+    tx_startup_research: 'Startup research — {name}',
+    tx_startup_invest: 'Startup investment — {name}',
+    tx_startup_exit: 'Startup exit — {name}',
+    // Upgrade transactions
+    tx_upgrade_buy: 'Skill tree upgrade',
+    // Storage transactions
+    tx_storage_fee: 'Storage maintenance fee',
+    // Real estate loss
+    tx_re_loss: 'Property operating loss',
+    // Misc
+    tx_debt_interest: 'Debt interest penalty',
+    tx_offline_earnings: 'Offline earnings',
     // Card tiers
     tier_standard: 'Standard',
     tier_gold: 'Gold',
     tier_platinum: 'Platinum',
     tier_black: 'Black',
-    tier_bonus_desc: 'Card tier bonus: +{pct}% to all income'
+    tier_bonus_desc: 'Card tier bonus: +{pct}% to all income',
+    // Card Payment
+    tx_chip_buy: 'Casino chips purchased',
+    tx_chip_cashout: 'Casino chips cashed out',
+    tx_atm_withdraw: 'ATM cash withdrawal (card debit)',
+    tx_atm_cash: 'ATM cash received',
+    tx_card_withdraw: 'ATM cash withdrawal',
+    tx_card_fee: 'Transaction fee',
+    // Dual balance
+    card_balance: 'Card Balance',
+    wallet_cash: 'Wallet Cash'
+  },
+
+  // ─── Card Payment ────────────────────────────────────────────
+  card_payment: {
+    title: 'Card Payment',
+    subtitle: 'Confirm your purchase',
+    enter_last4: 'Last 4 digits',
+    enter_cvv: 'CVV',
+    amount: 'Amount',
+    fee: 'Transaction Fee',
+    fee_rate: '{pct}% fee',
+    total: 'Total Charge',
+    confirm: 'Confirm Payment',
+    cancel: 'Cancel',
+    processing: 'Processing...',
+    verifying: 'Verifying card...',
+    authorizing: 'Authorizing...',
+    success: 'Payment Approved',
+    success_detail: 'Transaction completed successfully',
+    declined: 'Payment Declined',
+    declined_wrong_pin: 'Incorrect card details',
+    declined_limit: 'Daily limit exceeded',
+    declined_balance: 'Insufficient balance',
+    declined_cooldown: 'Please wait before trying again',
+    failed: 'Transaction Failed',
+    daily_limit: 'Daily Limit',
+    daily_spent: 'Spent Today',
+    daily_remaining: 'Remaining',
+    card_tier_fee: '{tier} tier: {pct}% fee',
+    no_fee: 'No transaction fee',
+    quick_pay: 'Quick Pay',
+    secure_badge: 'Secured by FINANX'
+  },
+
+  // ─── Card Bound Badge ──────────────────────────────────────────
+  card_bound: {
+    tooltip_title: 'Card Saved',
+    fee: 'Fee',
+    free: 'Free'
+  },
+
+  // ─── Casino Chips ─────────────────────────────────────────────
+  casino_chips: {
+    title: 'Chip Exchange',
+    subtitle: 'Convert funds to casino chips',
+    balance: 'Chip Balance',
+    buy_chips: 'Buy Chips',
+    buy_tab: 'Buy',
+    cashout_tab: 'Cash Out',
+    with_cash: 'Cash',
+    with_card: 'Card',
+    buy_with_cash: 'Buy with Cash',
+    buy_with_card: 'Buy with Card',
+    enter_amount: 'Enter amount',
+    you_pay: 'You Pay',
+    tier_bonus: 'Tier Bonus',
+    chips_received: 'Chips Received',
+    chips_spent: 'Chips Spent',
+    all: 'All',
+    cashout: 'Cash Out',
+    denominations: 'Chip Denominations',
+    cash_amount: 'Cash Amount',
+    chip_amount: 'Chip Amount',
+    you_receive: 'You Receive',
+    rate: 'Exchange Rate',
+    rate_bonus: '+{pct}% bonus chips',
+    cashout_fee: 'Cashout Fee',
+    cashout_fee_pct: '{pct}% fee',
+    net_receive: 'Net Amount',
+    confirm_buy: 'Buy Chips',
+    confirm_cashout: 'Cash Out Chips',
+    insufficient_cash: 'Not enough cash',
+    insufficient_chips: 'Not enough chips',
+    buy_success: 'Chips purchased!',
+    cashout_success: 'Chips cashed out!',
+    chip_white: 'White ($1)',
+    chip_red: 'Red ($5)',
+    chip_blue: 'Blue ($25)',
+    chip_green: 'Green ($100)',
+    chip_black: 'Black ($500)',
+    chip_purple: 'Purple ($1,000)',
+    chip_gold: 'Gold ($5,000)',
+    total_bought: 'Total Bought',
+    total_cashed: 'Total Cashed Out',
+    total_fees: 'Total Fees Paid',
+    conversions: 'Conversions',
+    use_chips: 'Use chips to play casino games',
+    cash_only_notice: 'Chips can only be bought with wallet cash. Use the ATM to withdraw.'
+  },
+
+  // ─── ATM Terminal ──────────────────────────────────────────────
+  atm: {
+    title: 'ATM Terminal',
+    subtitle: 'Withdraw from bank account to wallet',
+    card_balance: 'Card Balance',
+    wallet: 'Wallet Cash',
+    fee_rate: 'ATM Fee',
+    free: 'FREE',
+    daily_remaining: 'Remaining Today',
+    daily_limit: 'Daily Limit',
+    enter_amount: 'Enter amount',
+    withdraw_amount: 'Withdraw',
+    fee: 'ATM Fee',
+    deducted_from_card: 'Deducted from Card',
+    withdraw: 'Withdraw Cash',
+    max: 'MAX'
+  },
+
+  // ─── Black Market Payment ─────────────────────────────────────
+  bm_payment: {
+    pay_with: 'Pay with',
+    cash: 'Cash',
+    crypto: 'Crypto',
+    mode_cash: 'Cash',
+    mode_crypto: 'Crypto',
+    your_cash: 'Your Cash',
+    select_asset: 'Select Asset',
+    select_crypto: 'Select Cryptocurrency',
+    units_needed: 'Units Needed',
+    no_crypto: 'No crypto holdings',
+    cost: 'Cost',
+    pay_cash: 'Pay Cash',
+    pay_crypto: 'Pay with Crypto',
+    crypto_balance: 'Balance: {amount}',
+    crypto_value: 'Value: {value}',
+    insufficient_crypto: 'Insufficient crypto balance',
+    sold_crypto: 'Sold {amount} {name}',
+    no_holdings: 'No crypto holdings'
   },
 
   // ─── Multipliers ──────────────────────────────────────────────
@@ -976,6 +1151,8 @@ export default {
     slots_remaining: '{count} slot(s) remaining',
     improvements_full: 'All improvement slots are filled.',
     no_improvements_available: 'No improvements available for this property yet.',
+    day: 'day',
+    tax_label: 'tax',
 
     // Tabs
     skyline_empty: 'No properties yet — your skyline is empty.',
@@ -1030,6 +1207,49 @@ export default {
       portfolio_value: 'Portfolio Value',
       opportunities: 'Opportunities',
       hot_deals: 'Hot Deals'
+    },
+
+    // Districts
+    district: {
+      rent_mult: 'Rent Mult.',
+      appreciation: 'Appreciation',
+      owned: 'Owned',
+      opportunities: 'Opportunities'
+    },
+
+    // District synergies
+    synergy: {
+      title: 'Synergies',
+      none: 'No active synergies. Buy more properties in this district.',
+      next: '{count} more for the next synergy'
+    },
+
+    // District scan
+    scan: {
+      title: 'Scan',
+      desc: 'Scan the district to reveal hidden opportunities.',
+      action: 'Scan — {cost}',
+      cooldown: 'Cooldown: {time}'
+    },
+
+    // Map
+    map_back: 'Back',
+    scan_city: 'Scan City',
+
+    // Trends
+    trend: {
+      growing: 'Growing',
+      declining: 'Declining',
+      bubble: 'Bubble'
+    },
+
+    // Zone activity
+    activity: {
+      dormant: 'Dormant',
+      quiet: 'Quiet',
+      active: 'Active',
+      booming: 'Booming',
+      overheated: 'Overheated'
     },
 
     // Improvements

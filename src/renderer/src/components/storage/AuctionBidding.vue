@@ -48,7 +48,7 @@ const bidAmount = computed(() => {
 })
 
 const canBid = computed(() => {
-    return auction.value?.status === 'active' && player.cash.gte(bidAmount.value)
+    return auction.value?.status === 'active' && player.cardBalance.gte(bidAmount.value)
 })
 
 const isPlayerLeading = computed(() => auction.value?.currentBidder === 'player')
@@ -90,7 +90,7 @@ const canSniper = computed(() => {
     if (!auction.value || !tactics.value) return false
     return auction.value.status === 'active'
         && canSniperBid(auction.value.phase, tactics.value.sniperUsesLeft)
-        && player.cash.gte(sniperAmount.value)
+        && player.cardBalance.gte(sniperAmount.value)
 })
 
 const sniperAmount = computed(() => {
@@ -226,8 +226,8 @@ function reactionClass(outcome: string): string {
 
                     <!-- Wallet inline -->
                     <span class="header-wallet">
-                        <AppIcon icon="mdi:wallet-outline" />
-                        {{ formatCash(player.cash) }}
+                        <AppIcon icon="mdi:credit-card-outline" />
+                        {{ formatCash(player.cardBalance) }}
                     </span>
                 </div>
             </div>
@@ -436,9 +436,9 @@ function reactionClass(outcome: string): string {
 
                 <!-- Balance row -->
                 <div class="balance-strip">
-                    <AppIcon icon="mdi:wallet-outline" />
+                    <AppIcon icon="mdi:credit-card-outline" />
                     <span class="balance-strip__label">Balance</span>
-                    <span class="balance-strip__value">{{ formatCash(player.cash) }}</span>
+                    <span class="balance-strip__value">{{ formatCash(player.cardBalance) }}</span>
                 </div>
             </div>
         </div>

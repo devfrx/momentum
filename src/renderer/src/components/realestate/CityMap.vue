@@ -311,9 +311,10 @@ const activityIcons: Record<ZoneActivity, string> = {
 
         <!-- Scan City button -->
         <div class="city-map__scan">
-            <UButton :disabled="realEstate.isCityScanOnCooldown() || player.cash.lt(5000)" icon="mdi:radar" :label="realEstate.isCityScanOnCooldown()
-                ? `${t('realestate.scan_city')} (${scanCooldownText})`
-                : `${t('realestate.scan_city')} \u2014 ${formatCash(5000)}`" size="sm" @click="handleScanCity" />
+            <UButton :disabled="realEstate.isCityScanOnCooldown() || player.cardBalance.lt(5000)" icon="mdi:radar"
+                :label="realEstate.isCityScanOnCooldown()
+                    ? `${t('realestate.scan_city')} (${scanCooldownText})`
+                    : `${t('realestate.scan_city')} \u2014 ${formatCash(5000)}`" size="sm" @click="handleScanCity" />
             <span v-if="scanCooldownTick >= 0" style="display:none" />
         </div>
 

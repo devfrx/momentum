@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 import { useRealEstateStore, type Property } from '@renderer/stores/useRealEstateStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import BuildingSilhouette from './BuildingSilhouette.vue'
+import CardBoundBadge from '@renderer/components/ui/CardBoundBadge.vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
 
 const { t } = useI18n()
@@ -142,7 +143,7 @@ onBeforeUnmount(() => {
                             <div class="carousel-card__kpi">
                                 <AppIcon icon="mdi:cash" class="carousel-card__kpi-icon text-emerald" />
                                 <span class="text-emerald">{{ formatCash(realEstate.computePropertyNetRent(prop))
-                                }}/t</span>
+                                    }}/t</span>
                             </div>
                             <div class="carousel-card__kpi">
                                 <AppIcon icon="mdi:tag-text-outline" class="carousel-card__kpi-icon text-gold" />
@@ -168,9 +169,13 @@ onBeforeUnmount(() => {
                     <!-- Footer -->
                     <div class="carousel-card__foot">
                         <span class="carousel-card__units">{{ prop.units }} {{ t('realestate.units') }}</span>
-                        <span v-if="prop.renovationLevel > 0" class="carousel-card__reno">
-                            <span v-for="s in prop.renovationLevel" :key="s" class="carousel-card__star">&#9733;</span>
-                        </span>
+                        <div class="carousel-card__foot-right">
+                            <CardBoundBadge :entityKey="`realestate:${prop.id}`" />
+                            <span v-if="prop.renovationLevel > 0" class="carousel-card__reno">
+                                <span v-for="s in prop.renovationLevel" :key="s"
+                                    class="carousel-card__star">&#9733;</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -339,6 +344,12 @@ onBeforeUnmount(() => {
 
 .carousel-card__units {
     line-height: 1;
+}
+
+.carousel-card__foot-right {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-1);
 }
 
 .carousel-card__reno {

@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import Decimal from 'break_infinity.js'
 import { ZERO, D, add, sub, mul, gte } from '@renderer/core/BigNum'
 import { usePlayerStore } from './usePlayerStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 import { rollChance } from '@renderer/core/Formulas'
 import { gameEngine } from '@renderer/core/GameEngine'
 import {
@@ -92,9 +93,7 @@ export const useStartupStore = defineStore('startups', () => {
   // ─────────────────────────────────────────────────────────────────
 
   /** Active investments (not matured yet) */
-  const activeInvestments = computed(() =>
-    investments.value.filter((i) => i.status === 'active')
-  )
+  const activeInvestments = computed(() => investments.value.filter((i) => i.status === 'active'))
 
   /** Succeeded investments awaiting collection */
   const pendingInvestments = computed(() =>
@@ -127,9 +126,7 @@ export const useStartupStore = defineStore('startups', () => {
   )
 
   /** Hot deals in current batch */
-  const hotDeals = computed(() =>
-    availableOpportunities.value.filter((o) => o.isHotDeal)
-  )
+  const hotDeals = computed(() => availableOpportunities.value.filter((o) => o.isHotDeal))
 
   // ─────────────────────────────────────────────────────────────────
   // HELPERS
@@ -158,14 +155,13 @@ export const useStartupStore = defineStore('startups', () => {
     // Only refresh if enough time has passed or forced
     if (!force && timeSinceRefresh < OPPORTUNITY_REFRESH_TICKS && opportunities.value.length > 0) {
       // Just remove expired ones
-      opportunities.value = opportunities.value.filter(
-        (o) => !isOpportunityExpired(o, currentTick)
-      )
+      opportunities.value = opportunities.value.filter((o) => !isOpportunityExpired(o, currentTick))
       return
     }
 
     // Generate new batch
-    const count = MIN_OPPORTUNITIES + Math.floor(Math.random() * (MAX_OPPORTUNITIES - MIN_OPPORTUNITIES + 1))
+    const count =
+      MIN_OPPORTUNITIES + Math.floor(Math.random() * (MAX_OPPORTUNITIES - MIN_OPPORTUNITIES + 1))
     const netWorth = getPlayerNetWorth()
 
     opportunities.value = generateOpportunityBatch(
@@ -188,9 +184,9 @@ export const useStartupStore = defineStore('startups', () => {
     const player = usePlayerStore()
     const cost = D(opp.dueDiligenceCost)
 
-    if (!gte(player.cash, cost)) return false
-
-    player.spendCash(cost)
+    const cardPayment = useCardPaymentStore()
+    if (!cardPayment.quickPay(cost, 'banking.tx_startup_dd', 'investment', { name: opp.name }))
+      return false
     opp.dueDiligenceDone = true
     return true
   }
@@ -215,9 +211,13 @@ export const useStartupStore = defineStore('startups', () => {
     const cost = D(opp.researchCosts[nextPhase])
 
     const player = usePlayerStore()
-    if (!gte(player.cash, cost)) return null
+    if (!gte(player.cardBalance, cost)) return null
 
-    player.spendCash(cost)
+    const cardPayment = useCardPaymentStore()
+    if (
+      !cardPayment.quickPay(cost, 'banking.tx_startup_research', 'investment', { name: opp.name })
+    )
+      return null
     opp.researchPhase = nextPhase
 
     // Backward compat: basic phase = legacy dueDiligenceDone
@@ -232,7 +232,10 @@ export const useStartupStore = defineStore('startups', () => {
 
     // XP scales with research depth (20 / 50 / 120)
     const xpRewards: Record<ResearchPhase, number> = {
-      none: 0, basic: 20, detailed: 50, deep: 120
+      none: 0,
+      basic: 20,
+      detailed: 50,
+      deep: 120
     }
     player.addXp(D(xpRewards[nextPhase]))
 
@@ -242,11 +245,7 @@ export const useStartupStore = defineStore('startups', () => {
   /**
    * Invest in a startup opportunity
    */
-  function invest(
-    opportunityId: string,
-    amount: Decimal,
-    currentTick: number
-  ): boolean {
+  function invest(opportunityId: string, amount: Decimal, currentTick: number): boolean {
     const opp = opportunities.value.find((o) => o.id === opportunityId)
     if (!opp) return false
 
@@ -258,10 +257,13 @@ export const useStartupStore = defineStore('startups', () => {
     if (amountNum < opp.minInvestment || amountNum > opp.maxInvestment) return false
 
     const player = usePlayerStore()
-    if (!gte(player.cash, amount)) return false
 
-    // Deduct cash
-    player.spendCash(amount)
+    // Card payment (handles balance check + fee + deduction from cardBalance)
+    const cardPayment = useCardPaymentStore()
+    if (
+      !cardPayment.quickPay(amount, 'banking.tx_startup_invest', 'investment', { name: opp.name })
+    )
+      return false
 
     // Calculate effective values with bonuses
     const sectorBonus = sectorBonuses.value[opp.sector] || 0
@@ -330,9 +332,7 @@ export const useStartupStore = defineStore('startups', () => {
     }
 
     // Check for expired opportunities and refresh if needed
-    const remainingOpps = opportunities.value.filter(
-      (o) => !isOpportunityExpired(o, currentTick)
-    )
+    const remainingOpps = opportunities.value.filter((o) => !isOpportunityExpired(o, currentTick))
 
     // If most opportunities expired, trigger a refresh
     if (remainingOpps.length < 2) {
@@ -355,7 +355,11 @@ export const useStartupStore = defineStore('startups', () => {
     const returnAmount = mul(inv.investedAmount, effectiveMultiplier)
 
     // Add returns to player cash
-    player.earnCash(returnAmount)
+    player.earnToCard(returnAmount, {
+      key: 'banking.tx_startup_exit',
+      cat: 'investment',
+      params: { name: inv.name }
+    })
 
     inv.status = 'exited'
     totalReturned.value = add(totalReturned.value, returnAmount)
@@ -403,8 +407,8 @@ export const useStartupStore = defineStore('startups', () => {
 
     if (phaseIdx >= 1) {
       // basic: show an approximate ±10% band
-      const lo = Math.max(0, effectiveSuccessChance - 0.10)
-      const hi = Math.min(1, effectiveSuccessChance + 0.10)
+      const lo = Math.max(0, effectiveSuccessChance - 0.1)
+      const hi = Math.min(1, effectiveSuccessChance + 0.1)
       displayedSuccessRange = [lo, hi]
     }
     if (phaseIdx >= 2) {
@@ -493,10 +497,10 @@ export const useStartupStore = defineStore('startups', () => {
       // Migrate old saves: backfill new research fields if missing
       opportunities.value = state.opportunities.map((opp) => {
         if (!opp.researchPhase) {
-          const ddRoundTo = opp.minInvestment >= 1_000_000 ? 100_000
-            : opp.minInvestment >= 10_000 ? 1_000 : 100
+          const ddRoundTo =
+            opp.minInvestment >= 1_000_000 ? 100_000 : opp.minInvestment >= 10_000 ? 1_000 : 100
           const rc = (mult: number) =>
-            Math.max(100, Math.round(opp.minInvestment * mult / ddRoundTo) * ddRoundTo)
+            Math.max(100, Math.round((opp.minInvestment * mult) / ddRoundTo) * ddRoundTo)
           return {
             ...opp,
             researchPhase: (opp.dueDiligenceDone ? 'basic' : 'none') as ResearchPhase,
@@ -513,9 +517,8 @@ export const useStartupStore = defineStore('startups', () => {
       investments.value = state.investments.map((inv) => ({
         ...inv,
         investedAmount: D(inv.investedAmount),
-        returnMultiplier: (inv.returnMultiplier && inv.returnMultiplier >= 1.5)
-          ? inv.returnMultiplier
-          : 1.5 // clamp broken values to minimum
+        returnMultiplier:
+          inv.returnMultiplier && inv.returnMultiplier >= 1.5 ? inv.returnMultiplier : 1.5 // clamp broken values to minimum
       }))
     }
     if (state.lastRefreshTick !== undefined) lastRefreshTick.value = state.lastRefreshTick

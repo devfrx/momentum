@@ -94,12 +94,17 @@ const bottomItems = computed<NavItem[]>(() =>
 .app-sidebar {
     width: var(--t-sidebar-width);
     min-width: var(--t-sidebar-width);
-    background: var(--t-bg-sidebar);
-    border-right: 1px solid var(--t-border);
+    background: var(--t-glass-bg);
+    backdrop-filter: blur(var(--t-glass-blur));
+    -webkit-backdrop-filter: blur(var(--t-glass-blur));
+    border: 1px solid var(--t-glass-border);
+    border-radius: var(--t-radius-xl);
+    box-shadow: var(--t-glass-shadow);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
+    margin: var(--t-space-2) 0 var(--t-space-2) var(--t-space-2);
 }
 
 .sidebar-nav {
@@ -119,7 +124,7 @@ const bottomItems = computed<NavItem[]>(() =>
 .nav-group+.nav-group {
     margin-top: var(--t-space-3);
     padding-top: var(--t-space-3);
-    border-top: 1px solid var(--t-border);
+    border-top: 1px solid var(--t-glass-border);
 }
 
 .nav-group-label {
@@ -148,7 +153,7 @@ const bottomItems = computed<NavItem[]>(() =>
 }
 
 .nav-item:hover {
-    background: var(--t-bg-muted);
+    background: color-mix(in srgb, var(--t-text) 6%, transparent);
     color: var(--t-text);
 }
 
@@ -162,7 +167,7 @@ const bottomItems = computed<NavItem[]>(() =>
 }
 
 .nav-item.active {
-    background: var(--t-bg-muted);
+    background: color-mix(in srgb, var(--t-text) 8%, transparent);
     color: var(--t-text);
     font-weight: var(--t-font-semibold);
 }
@@ -194,7 +199,7 @@ const bottomItems = computed<NavItem[]>(() =>
 
 .sidebar-bottom {
     padding: var(--t-space-2);
-    border-top: 1px solid var(--t-border);
+    border-top: 1px solid var(--t-glass-border);
     display: flex;
     flex-direction: column;
     gap: 1px;

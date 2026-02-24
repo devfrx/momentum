@@ -16,16 +16,16 @@ import InfoPanel from '@renderer/components/layout/InfoPanel.vue'
 import type { InfoSection } from '@renderer/components/layout/InfoPanel.vue'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
-import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { useGamblingStore } from '@renderer/stores/useGamblingStore'
+import { useCasinoChipStore } from '@renderer/stores/useCasinoChipStore'
 import { D, ZERO, mul } from '@renderer/core/BigNum'
 import type Decimal from 'break_infinity.js'
 
 const emit = defineEmits<{ back: [] }>()
 const { t } = useI18n()
 
-const player = usePlayerStore()
 const gambling = useGamblingStore()
+const chipStore = useCasinoChipStore()
 const { formatCash } = useFormat()
 
 // ─── Dice probability table ─────────────────────────────────
@@ -81,7 +81,7 @@ const betDecimal = computed(() => D(betAmount.value))
 const canRoll = computed(() =>
     !rolling.value &&
     betAmount.value > 0 &&
-    player.cash.gte(betDecimal.value) &&
+    chipStore.chipBalance.gte(betDecimal.value) &&
     winWays.value > 0
 )
 
@@ -95,7 +95,7 @@ const potentialPayout = computed(() => {
 // ─── Roll logic ──────────────────────────────────────────────
 function roll(): void {
     if (!canRoll.value) return
-    if (!player.spendCash(betDecimal.value, { key: 'banking.tx_gambling_bet', cat: 'gambling' })) return
+    if (!chipStore.spendChips(betDecimal.value)) return
 
     rolling.value = true
     showResult.value = false
@@ -155,7 +155,7 @@ function playRoll(r1: number, r2: number, isFinal: boolean, onLand?: () => void)
             const isWin = direction.value === 'over' ? sum > target.value : sum < target.value
             if (isWin) {
                 const pay = mul(betDecimal.value, multiplier.value)
-                player.earnCash(pay, { key: 'banking.tx_gambling_win', cat: 'gambling' })
+                chipStore.addChips(pay)
                 gambling.recordWin('dice', betDecimal.value, pay)
                 lastPayout.value = pay
                 won.value = true
@@ -182,11 +182,11 @@ function newRound(): void {
 
 // ─── Bet helpers ─────────────────────────────────────────────
 function setBet(amount: number): void {
-    betAmount.value = Math.max(1, Math.min(amount, player.cash.toNumber()))
+    betAmount.value = Math.max(1, Math.min(amount, chipStore.chipBalance.toNumber()))
 }
 function halfBet(): void { setBet(Math.max(1, Math.floor(betAmount.value / 2))) }
 function doubleBet(): void { setBet(betAmount.value * 2) }
-function maxBet(): void { setBet(player.cash.toNumber()) }
+function maxBet(): void { setBet(chipStore.chipBalance.toNumber()) }
 
 // ─── Info Panel ──────────────────────────────────────────────
 const diceInfo = computed<InfoSection[]>(() => [
@@ -224,8 +224,8 @@ const diceInfo = computed<InfoSection[]>(() => [
                 {{ $t('gambling.dc_title') }}
             </h2>
             <div class="balance-chip">
-                <AppIcon icon="mdi:cash" />
-                {{ formatCash(player.cash) }}
+                <AppIcon icon="mdi:poker-chip" />
+                {{ formatCash(chipStore.chipBalance) }}
             </div>
         </div>
 
@@ -320,14 +320,14 @@ const diceInfo = computed<InfoSection[]>(() => [
                 <div class="bet-row">
                     <UButton variant="ghost" size="xs" @click="halfBet" :disabled="rolling">1/2</UButton>
                     <div class="bet-display">
-                        <input type="number" v-model.number="betAmount" :min="1" :max="player.cash.toNumber()"
+                        <input type="number" v-model.number="betAmount" :min="1" :max="chipStore.chipBalance.toNumber()"
                             class="bet-input" :disabled="rolling" />
                     </div>
                     <UButton variant="ghost" size="xs" @click="doubleBet" :disabled="rolling">x2</UButton>
                 </div>
                 <div class="bet-presets">
                     <UButton variant="ghost" size="xs" v-for="pct in [10, 25, 50]" :key="pct"
-                        @click="setBet(Math.floor(player.cash.toNumber() * pct / 100))" :disabled="rolling">
+                        @click="setBet(Math.floor(chipStore.chipBalance.toNumber() * pct / 100))" :disabled="rolling">
                         {{ pct }}%
                     </UButton>
                     <UButton variant="warning" size="xs" @click="maxBet" :disabled="rolling">{{ $t('gambling.max')

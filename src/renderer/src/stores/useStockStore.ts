@@ -16,6 +16,7 @@ import { usePlayerStore } from './usePlayerStore'
 import { useUpgradeStore } from './useUpgradeStore'
 import { usePrestigeStore } from './usePrestigeStore'
 import { useEventStore } from './useEventStore'
+import { useCardPaymentStore } from './useCardPaymentStore'
 
 export interface PortfolioPosition {
   assetId: string
@@ -183,29 +184,33 @@ export const useStockStore = defineStore('stocks', () => {
     if (totalPayout.gt(0)) {
       // Apply combined stock_returns multiplier (skill tree + prestige + events)
       const adjustedPayout = mul(totalPayout, stockReturnsMul)
-      player.earnCash(adjustedPayout, { key: 'banking.tx_stock_dividend', cat: 'investment' })
+      player.earnToCard(adjustedPayout, { key: 'banking.tx_stock_dividend', cat: 'investment' })
       totalDividendsEarned.value = add(totalDividendsEarned.value, adjustedPayout)
     }
   }
 
-  /** Buy shares. Returns cost as Decimal, or null if asset not found. */
+  /** Buy shares. Returns cost as Decimal, or null if asset not found / payment failed. */
   function buyShares(assetId: string, shareCount: number): Decimal | null {
     const asset = assets.value.find((a) => a.id === assetId)
     if (!asset || shareCount <= 0) return null
 
     const player = usePlayerStore()
+    const cardPayment = useCardPaymentStore()
     const cost = D(asset.currentPrice * shareCount)
+    const total = cardPayment.calculateTotal(cost)
 
-    // Check and spend cash
-    if (!gte(player.cash, cost)) return null
+    // Check cardBalance (including fee)
+    if (!gte(player.cardBalance, total)) return null
+
+    // Use quickPay (silent) — no dialog. Works correctly with limit orders.
     if (
-      !player.spendCash(cost, {
-        key: 'banking.tx_stock_buy',
-        cat: 'investment',
-        params: { name: asset.name, qty: shareCount }
+      !cardPayment.quickPay(cost, 'banking.tx_stock_buy', 'investment', {
+        name: asset.name,
+        qty: shareCount
       })
-    )
+    ) {
       return null
+    }
 
     const existing = portfolio.value.find((p) => p.assetId === assetId)
 
@@ -249,7 +254,7 @@ export const useStockStore = defineStore('stocks', () => {
     totalRealizedProfit.value = add(totalRealizedProfit.value, profit)
 
     // Add revenue to player cash
-    player.earnCash(revenue, {
+    player.earnToCard(revenue, {
       key: 'banking.tx_stock_sell',
       cat: 'investment',
       params: { name: asset.name, qty: shareCount }
