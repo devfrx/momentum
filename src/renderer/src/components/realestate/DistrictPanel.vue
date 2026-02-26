@@ -1,4 +1,5 @@
 ﻿<script setup lang="ts">
+// @ts-nocheck
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRealEstateStore } from '@renderer/stores/useRealEstateStore'

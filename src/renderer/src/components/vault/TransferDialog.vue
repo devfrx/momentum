@@ -10,7 +10,7 @@ import { useStorageStore } from '@renderer/stores/useStorageStore'
 import { useFormat } from '@renderer/composables/useFormat'
 import { useI18n } from 'vue-i18n'
 import { resolveItemName } from '@renderer/data/storage/items'
-import { RARITY_ORDER } from '@renderer/data/rarity'
+import { RARITY_ORDER, rarityCssVar } from '@renderer/data/rarity'
 
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()

@@ -46,7 +46,7 @@ const sortOptions = [
     { label: t('vault.sort_value_asc'), value: 'value_asc' },
     { label: t('vault.sort_name'), value: 'name' },
     { label: t('vault.sort_rarity'), value: 'rarity' }
-] as const
+]
 
 const sortBy = ref<string>('value_desc')
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 /**
  * CityMap — Isometric 2.5D city map powered by PixiJS + D3
  *

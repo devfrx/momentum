@@ -1887,13 +1887,13 @@ export const useBlackMarketStore = defineStore('blackmarket', () => {
     if (data.contactStates) contactStates.value = data.contactStates as ContactState[]
     if (data.activeEffects) activeEffects.value = data.activeEffects as ActiveBlackMarketEffect[]
     if (data.investigations) investigations.value = data.investigations as Investigation[]
-    if (data.totalCashSpent !== undefined) totalCashSpent.value = D(data.totalCashSpent ?? 0)
-    if (data.totalCashEarned !== undefined) totalCashEarned.value = D(data.totalCashEarned ?? 0)
+    if (data.totalCashSpent !== undefined) totalCashSpent.value = D(data.totalCashSpent as string | number ?? 0)
+    if (data.totalCashEarned !== undefined) totalCashEarned.value = D(data.totalCashEarned as string | number ?? 0)
     if (data.totalHeatAccumulated !== undefined)
       totalHeatAccumulated.value = data.totalHeatAccumulated as number
     if (data.totalInvestigations !== undefined)
       totalInvestigations.value = data.totalInvestigations as number
-    if (data.totalFinesPaid !== undefined) totalFinesPaid.value = D(data.totalFinesPaid ?? 0)
+    if (data.totalFinesPaid !== undefined) totalFinesPaid.value = D(data.totalFinesPaid as string | number ?? 0)
     if (data.lastTickProcessed !== undefined)
       lastTickProcessed.value = data.lastTickProcessed as number
     if (data.lastInvestigationSpawnTick !== undefined)

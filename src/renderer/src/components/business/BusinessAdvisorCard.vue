@@ -125,10 +125,6 @@ const advisorItems = computed(() =>
     overflow: hidden;
 }
 
-.advisor-card.hired {
-    /* border-color: color-mix(in srgb, var(--t-success) 40%, var(--t-border)); */
-}
-
 /* Accent strip */
 .accent-hired {
     background: var(--t-success);
