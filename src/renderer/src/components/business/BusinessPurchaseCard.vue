@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UButton, UCard, UTooltip, UModal } from '@renderer/components/ui'
+import { UButton, UCard, UModal } from '@renderer/components/ui'
 import { useFormat } from '@renderer/composables/useFormat'
 import { usePlayerStore } from '@renderer/stores/usePlayerStore'
 import { type BusinessDef } from '@renderer/data/businesses'
@@ -125,49 +125,59 @@ function confirmBuy() {
         <UCard class="purchase-card" variant="dashed" :locked="!isUnlocked">
             <template #header>
                 <div class="purchase-header">
-                    <div class="biz-icon-wrap">
+                    <div class="biz-icon-wrap" :class="{ locked: !isUnlocked }">
                         <AppIcon :icon="tierIcon" class="biz-icon" />
                     </div>
                     <div class="purchase-info">
-                        <h3 class="purchase-name">{{ sizeName }}</h3>
+                        <div class="purchase-name-row">
+                            <h3 class="purchase-name">{{ sizeName }}</h3>
+                            <span class="roi-badge"
+                                :class="{ fast: roiMinutes < 60, mid: roiMinutes >= 60 && roiMinutes < 480 }">
+                                <AppIcon icon="mdi:clock-fast" class="roi-icon" />
+                                {{ roiLabel }}
+                            </span>
+                        </div>
                         <span class="purchase-price-tag">{{ formatCash(def.purchasePrice) }}</span>
                     </div>
-                    <UTooltip :text="t('business.roi_tooltip')">
-                        <span class="roi-badge"
-                            :class="{ fast: roiMinutes < 60, mid: roiMinutes >= 60 && roiMinutes < 480 }">
-                            <AppIcon icon="mdi:clock-fast" class="roi-icon" />
-                            {{ roiLabel }}
-                        </span>
-                    </UTooltip>
                 </div>
             </template>
 
-            <div class="purchase-stats">
-                <div class="ps-row">
-                    <span class="ps-label">{{ $t('business.production_cap') }}</span>
-                    <span class="ps-value">{{ startCapacity }} {{ $t('business.units_tick') }}</span>
+            <div class="purchase-body">
+                <!-- Key metrics row -->
+                <div class="key-metrics">
+                    <div class="metric-card" :class="profitPerSecond >= 0 ? 'profit' : 'loss'">
+                        <span class="metric-label">{{ $t('business.est_profit') }}</span>
+                        <span class="metric-value">{{ formatCash(profitPerSecond) }}/s</span>
+                    </div>
+                    <div class="metric-card" :class="margin >= 25 ? 'good' : margin >= 10 ? 'mid' : 'bad'">
+                        <span class="metric-label">{{ $t('business.est_margin') }}</span>
+                        <span class="metric-value">{{ margin.toFixed(1) }}%</span>
+                    </div>
                 </div>
-                <div class="ps-row">
-                    <span class="ps-label">{{ $t('business.optimal_price') }}</span>
-                    <span class="ps-value">{{ formatCash(def.optimalPrice) }}</span>
-                </div>
-                <div class="ps-row">
-                    <span class="ps-label">{{ $t('business.max_employees') }}</span>
-                    <span class="ps-value">{{ def.maxEmployeesBase }}</span>
-                </div>
-                <div class="ps-divider" />
-                <div class="ps-row highlight">
-                    <span class="ps-label">{{ $t('business.est_profit') }}</span>
-                    <span class="ps-value" :class="profitPerSecond >= 0 ? 'text-success' : 'text-danger'">
-                        {{ formatCash(profitPerSecond) }}/s
-                    </span>
-                </div>
-                <div class="ps-row">
-                    <span class="ps-label">{{ $t('business.est_margin') }}</span>
-                    <span class="ps-value"
-                        :class="margin >= 25 ? 'text-success' : margin >= 10 ? 'text-warning' : 'text-danger'">
-                        {{ margin.toFixed(1) }}%
-                    </span>
+
+                <!-- Detail rows -->
+                <div class="detail-rows">
+                    <div class="ps-row">
+                        <span class="ps-label">
+                            <AppIcon icon="mdi:cog" class="ps-icon" />
+                            {{ $t('business.production_cap') }}
+                        </span>
+                        <span class="ps-value">{{ startCapacity }} {{ $t('business.units_tick') }}</span>
+                    </div>
+                    <div class="ps-row">
+                        <span class="ps-label">
+                            <AppIcon icon="mdi:tag" class="ps-icon" />
+                            {{ $t('business.optimal_price') }}
+                        </span>
+                        <span class="ps-value">{{ formatCash(def.optimalPrice) }}</span>
+                    </div>
+                    <div class="ps-row">
+                        <span class="ps-label">
+                            <AppIcon icon="mdi:account-group" class="ps-icon" />
+                            {{ $t('business.max_employees') }}
+                        </span>
+                        <span class="ps-value">{{ def.maxEmployeesBase }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -216,23 +226,40 @@ function confirmBuy() {
 }
 
 .biz-icon-wrap {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: var(--t-radius-md);
-    background: var(--t-bg-muted);
+    background: color-mix(in srgb, var(--t-accent) 10%, var(--t-bg-muted));
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.biz-icon-wrap.locked {
+    background: var(--t-bg-muted);
+    opacity: 0.5;
 }
 
 .biz-icon {
-    font-size: 1.1rem;
-    color: var(--t-text-secondary);
+    font-size: 1.15rem;
+    color: var(--t-accent);
+}
+
+.locked .biz-icon {
+    color: var(--t-text-muted);
 }
 
 .purchase-info {
     flex: 1;
+    min-width: 0;
+}
+
+.purchase-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .purchase-name {
@@ -251,17 +278,18 @@ function confirmBuy() {
 
 /* ── ROI badge ── */
 .roi-badge {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.2rem;
     font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-xs);
-    font-weight: var(--t-font-semibold);
-    padding: 0.15rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: var(--t-font-bold);
+    padding: 0.1rem 0.4rem;
     border-radius: var(--t-radius-pill);
-    background: var(--t-bg-secondary);
+    background: var(--t-bg-muted);
     color: var(--t-text-muted);
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .roi-badge.fast {
@@ -275,28 +303,90 @@ function confirmBuy() {
 }
 
 .roi-icon {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
-/* ── Stats ── */
-.purchase-stats {
+/* ── Body ── */
+.purchase-body {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: var(--t-space-3);
+}
+
+/* Key metrics */
+.key-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--t-space-2);
+}
+
+.metric-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    padding: var(--t-space-2);
+    border-radius: var(--t-radius-md);
+    background: var(--t-bg-muted);
+    border: 1px solid var(--t-border);
+}
+
+.metric-label {
+    font-size: var(--t-font-size-2xs);
+    color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.metric-value {
+    font-family: var(--t-font-mono);
+    font-size: var(--t-font-size-sm);
+    font-weight: var(--t-font-bold);
+}
+
+.metric-card.profit .metric-value {
+    color: var(--t-success);
+}
+
+.metric-card.loss .metric-value {
+    color: var(--t-error);
+}
+
+.metric-card.good .metric-value {
+    color: var(--t-success);
+}
+
+.metric-card.mid .metric-value {
+    color: var(--t-gold);
+}
+
+.metric-card.bad .metric-value {
+    color: var(--t-error);
+}
+
+/* Detail rows */
+.detail-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .ps-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: var(--t-font-size-xs);
 }
 
-.ps-row.highlight {
-    padding-top: 0.15rem;
+.ps-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--t-text-muted);
 }
 
-.ps-label {
-    color: var(--t-text-muted);
+.ps-icon {
+    font-size: 0.8rem;
 }
 
 .ps-value {
@@ -305,31 +395,8 @@ function confirmBuy() {
     color: var(--t-text-secondary);
 }
 
-.ps-value.text-success {
-    color: var(--t-success);
-}
-
-.ps-value.text-warning {
-    color: var(--t-gold);
-}
-
-.ps-value.text-danger {
-    color: var(--t-error);
-}
-
-.ps-divider {
-    height: 1px;
-    background: var(--t-border);
-    margin: 0.2rem 0;
-}
-
 .buy-button {
     width: 100%;
-}
-
-.buy-button:focus-visible {
-    box-shadow: var(--t-shadow-focus);
-    outline: none;
 }
 
 /* ── Buy dialog ── */

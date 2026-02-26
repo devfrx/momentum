@@ -103,6 +103,25 @@ function pickN<T>(arr: T[], n: number): T[] {
   return shuffled.slice(0, Math.min(n, arr.length))
 }
 
+/** Interpolate a value within [min, max] using a 0-1 factor */
+function lerp(min: number, max: number, t: number): number {
+  return min + (max - min) * t
+}
+
+/** Clamp value between 0 and 1 */
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v))
+}
+
+/**
+ * Add gaussian-ish noise to a 0-1 factor.
+ * Uses the average of two uniform randoms for a softer bell shape.
+ */
+function noisyFactor(base: number, spread: number): number {
+  const noise = ((Math.random() + Math.random()) / 2 - 0.5) * spread
+  return clamp01(base + noise)
+}
+
 /** Street-style procedural name */
 function generateName(template: PropertyTemplate): string {
   const suffixes = [
@@ -116,6 +135,12 @@ function generateName(template: PropertyTemplate): string {
 
 /**
  * Generate a single property opportunity.
+ *
+ * Uses a correlated quality system: a single `qualityFactor` (0–1) drives
+ * both price and stats in the same direction, so pricier properties
+ * *tend* to have better stats.  Per-stat noise (±0.2) and a ~12 % chance
+ * of full correlation inversion ("diamond in the rough" / "overpriced dud")
+ * keep things unpredictable.
  *
  * @param netWorth – Player's current net worth
  * @param currentTime – Date.now() for unique IDs
@@ -137,34 +162,83 @@ export function generateOpportunity(
   const template = eligible.length > 0 ? pick(eligible) : PROPERTY_TEMPLATES[0]
   const category = pick(template.categories)
 
-  // 3. Price (light net-worth scaling so late-game sees slightly pricier deals)
+  // ── Quality-correlated generation ──────────────────────────────
+  // qualityFactor 0 = worst possible within template, 1 = best possible
+  const qualityFactor = Math.random()
+
+  // ~12 % chance of anomaly: cheap-but-good or expensive-but-mediocre
+  const isAnomaly = Math.random() < 0.12
+  // For stats: if anomaly, invert the quality relative to price
+  const statQuality = isAnomaly ? 1 - qualityFactor : qualityFactor
+
+  // 3. Price — driven by qualityFactor (higher quality = higher price)
   const netWorthFactor = Math.max(1, Math.log10(Math.max(netWorth, 1000)))
-  const priceBase = rand(template.priceRange[0], template.priceRange[1])
+  const priceBase = lerp(template.priceRange[0], template.priceRange[1], qualityFactor)
   const scaledPrice = priceBase * (1 + (netWorthFactor - 3) * 0.15)
   const askingPrice = D(Math.round(scaledPrice))
 
-  const valueVariance = rand(0.85, 1.15)
+  // True value: higher quality → slightly above asking; lower → slightly below
+  const valueCenter = isAnomaly
+    ? lerp(0.95, 1.25, statQuality)   // anomalies can be real bargains
+    : lerp(0.88, 1.12, statQuality)
+  const valueVariance = valueCenter + rand(-0.04, 0.04)
   const trueValue = D(Math.round(scaledPrice * valueVariance))
 
-  // 4. Rent — grade multiplier is baked into baseRent here (single source of truth)
-  const baseRentNum = rand(template.baseRentRange[0], template.baseRentRange[1])
+  // 4. Rent — correlated with statQuality + noise (spread ±0.20)
+  const rentFactor = noisyFactor(statQuality, 0.40)
+  const baseRentNum = lerp(template.baseRentRange[0], template.baseRentRange[1], rentFactor)
   const baseRent = D(Math.round(baseRentNum * gradeData.rentMultiplier * 100) / 100)
 
-  // 5. Units
+  // 5. Units — correlated gently with statQuality
+  const unitFactor = noisyFactor(statQuality, 0.50)
   const units = template.unitRange[0]
-    + Math.floor(Math.random() * (template.unitRange[1] - template.unitRange[0] + 1))
+    + Math.floor(unitFactor * (template.unitRange[1] - template.unitRange[0] + 1))
 
-  // 6. Condition
-  const startingCondition = Math.round(rand(template.conditionRange[0], template.conditionRange[1]))
+  // 6. Condition — correlated with statQuality + noise
+  const condFactor = noisyFactor(statQuality, 0.35)
+  const startingCondition = Math.round(
+    lerp(template.conditionRange[0], template.conditionRange[1], condFactor),
+  )
 
-  // 7. Traits
+  // 7. Wear rate — INVERSELY correlated (better quality = less wear)
+  const wearFactor = noisyFactor(1 - statQuality, 0.35)
+  const wearRate = lerp(template.wearRateRange[0], template.wearRateRange[1], wearFactor)
+
+  // 8. Tax rate — INVERSELY correlated (better quality = lower tax)
+  const taxFactor = noisyFactor(1 - statQuality, 0.40)
+  const taxRate = lerp(template.taxRateRange[0], template.taxRateRange[1], taxFactor)
+
+  // 9. Traits — biased by statQuality
+  const positiveTraits = PROPERTY_TRAITS.filter((t) => t.isPositive)
+  const negativeTraits = PROPERTY_TRAITS.filter((t) => !t.isPositive)
   const traitCount = Math.floor(rand(1, 3.5))
-  const traits = pickN(PROPERTY_TRAITS, traitCount)
+  let traits: PropertyTrait[]
 
-  // 8. Hot deal
+  if (statQuality > 0.7) {
+    // High quality: mostly positive traits
+    const positiveCount = Math.min(traitCount, Math.ceil(traitCount * rand(0.7, 1.0)))
+    const negativeCount = traitCount - positiveCount
+    traits = [
+      ...pickN(positiveTraits, positiveCount),
+      ...pickN(negativeTraits, negativeCount),
+    ]
+  } else if (statQuality < 0.3) {
+    // Low quality: mostly negative traits
+    const negativeCount = Math.min(traitCount, Math.ceil(traitCount * rand(0.6, 1.0)))
+    const positiveCount = traitCount - negativeCount
+    traits = [
+      ...pickN(negativeTraits, negativeCount),
+      ...pickN(positiveTraits, positiveCount),
+    ]
+  } else {
+    // Mid quality: fully random (as before)
+    traits = pickN(PROPERTY_TRAITS, traitCount)
+  }
+
+  // 10. Hot deal
   const isHotDeal = Math.random() < 0.15
 
-  // 9. Scout costs
+  // 11. Scout costs
   const priceNum = askingPrice.toNumber()
   const scoutCosts: Record<ScoutPhase, number> = {
     none: 0,
@@ -172,6 +246,12 @@ export function generateOpportunity(
     inspection: Math.round(priceNum * SCOUT_PHASE_DATA.inspection.costMultiplier),
     appraisal: Math.round(priceNum * SCOUT_PHASE_DATA.appraisal.costMultiplier),
   }
+
+  // 12. Appreciation — correlated with statQuality
+  const appreciationBoost = lerp(0.85, 1.15, noisyFactor(statQuality, 0.30))
+  const baseAppreciationRate = template.baseAppreciationRate
+    * gradeData.appreciationMultiplier
+    * appreciationBoost
 
   return {
     id: `prop_opp_${currentTime}_${Math.random().toString(36).slice(2, 8)}`,
@@ -185,9 +265,9 @@ export function generateOpportunity(
     baseRent,
     units,
     startingCondition,
-    wearRate: rand(template.wearRateRange[0], template.wearRateRange[1]),
-    taxRate: rand(template.taxRateRange[0], template.taxRateRange[1]),
-    baseAppreciationRate: template.baseAppreciationRate * gradeData.appreciationMultiplier,
+    wearRate,
+    taxRate,
+    baseAppreciationRate,
     baseMaintenance: D(Math.round(baseRentNum * template.maintenanceRatio * 100) / 100),
     maxRenovationLevel: template.maxRenovationLevel,
     renovationCostMultiplier: template.renovationCostMultiplier,

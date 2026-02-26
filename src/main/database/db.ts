@@ -2,7 +2,7 @@
  * db.ts — LowDB initialization for the Electron main process
  *
  * Uses JSONFileSync adapter (synchronous writes, safe for Electron main).
- * Save location: app.getPath('userData')/savegame.json
+ * Save location: app.getPath('userData')/savegame.json (prod) or savegame-dev.json (dev)
  *
  * IMPORTANT: LowDB v7 is ESM-only. We use dynamic import() in the init function.
  */
@@ -18,6 +18,9 @@ let db: LowSync<GameSave> | null = null
 /**
  * Initialize the database. Must be called after app.whenReady().
  * Uses dynamic import because lowdb v7 is ESM-only.
+ *
+ * Dev and production use separate save files so running the built app
+ * won't overwrite the dev session and vice-versa.
  */
 export async function initDatabase(): Promise<LowSync<GameSave>> {
   if (db) return db
@@ -25,8 +28,9 @@ export async function initDatabase(): Promise<LowSync<GameSave>> {
   const { LowSync } = await import('lowdb')
   const { JSONFileSync } = await import('lowdb/node')
 
-  const savePath = join(app.getPath('userData'), 'savegame.json')
-  console.debug('[DB] Save file path:', savePath)
+  const saveFileName = app.isPackaged ? 'savegame.json' : 'savegame-dev.json'
+  const savePath = join(app.getPath('userData'), saveFileName)
+  console.debug(`[DB] Save file path (${app.isPackaged ? 'prod' : 'dev'}):`, savePath)
 
   const defaultData = createDefaultSave()
   const adapter = new JSONFileSync<GameSave>(savePath)

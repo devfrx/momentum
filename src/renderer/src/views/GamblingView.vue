@@ -115,6 +115,9 @@ const gamblingInfoSections = computed<InfoSection[]>(() => [
             { term: t('gambling.info_lobby.games.dice'), desc: t('gambling.info_lobby.games.dice_desc'), icon: 'mdi:dice-6' },
             { term: t('gambling.info_lobby.games.plinko'), desc: t('gambling.info_lobby.games.plinko_desc'), icon: 'mdi:triangle-outline' },
             { term: t('gambling.info_lobby.games.lottery'), desc: t('gambling.info_lobby.games.lottery_desc'), icon: 'mdi:ticket' },
+            { term: t('gambling.info_lobby.games.poker'), desc: t('gambling.info_lobby.games.poker_desc'), icon: 'mdi:cards-playing-heart' },
+            { term: t('gambling.info_lobby.games.scratchcard'), desc: t('gambling.info_lobby.games.scratchcard_desc'), icon: 'mdi:card-remove' },
+            { term: t('gambling.info_lobby.games.horseracing'), desc: t('gambling.info_lobby.games.horseracing_desc'), icon: 'mdi:horse-variant' },
         ],
     },
     {

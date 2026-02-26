@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@renderer/components/AppIcon.vue'
-import { UAccordion, UButton, UTooltip } from '@renderer/components/ui'
+import { UAccordion, UButton } from '@renderer/components/ui'
 import { useBusinessStore, type OwnedBusiness } from '@renderer/stores/useBusinessStore'
 import { getGeoTier, getNextGeoTier, GEO_TIERS } from '@renderer/data/businesses'
 import { useFormat } from '@renderer/composables/useFormat'
@@ -30,66 +30,66 @@ const tierProgress = computed(() => {
 
 <template>
     <div class="branch-panel">
-        <h4 class="panel-title">
-            <AppIcon icon="mdi:source-branch" />
-            {{ $t('business.branches_title') }}
-        </h4>
-
-        <!-- Current Stats -->
-        <div class="branch-stats">
-            <div class="stat-block">
-                <span class="stat-label">{{ $t('business.total_branches') }}</span>
-                <span class="stat-value">{{ business.branches }}</span>
-            </div>
-            <div class="stat-block">
-                <span class="stat-label">{{ $t('business.geo_tier') }}</span>
-                <div class="tier-badge">
-                    <AppIcon :icon="currentTier.icon" />
-                    <span>{{ $t(currentTier.nameKey) }}</span>
+        <!-- Current tier hero -->
+        <div class="tier-hero">
+            <div class="tier-hero-left">
+                <div class="tier-icon-wrap">
+                    <AppIcon :icon="currentTier.icon" class="tier-main-icon" />
+                </div>
+                <div class="tier-hero-info">
+                    <span class="tier-hero-name">{{ $t(currentTier.nameKey) }}</span>
+                    <span class="tier-hero-mult">×{{ currentTier.revenueMultiplier.toFixed(1) }} {{
+                        $t('business.revenue') }}</span>
                 </div>
             </div>
-            <div class="stat-block">
-                <span class="stat-label">{{ $t('business.revenue_mult') }}</span>
-                <UTooltip :text="$t('business.revenue_mult')" placement="bottom">
-                    <span class="stat-value accent">×{{ currentTier.revenueMultiplier.toFixed(1) }}</span>
-                </UTooltip>
+            <div class="branch-count">
+                <span class="branch-count-val">{{ business.branches }}</span>
+                <span class="branch-count-label">{{ $t('business.total_branches') }}</span>
             </div>
         </div>
 
         <!-- Next Tier Progress -->
-        <div v-if="nextTier" class="next-tier">
-            <div class="tier-target">
-                <AppIcon :icon="nextTier.icon" class="tier-icon" />
-                <span>{{ $t(nextTier.nameKey) }}</span>
-                <span class="tier-req">({{ business.branches }}/{{ nextTier.minBranches }})</span>
+        <div v-if="nextTier" class="next-tier-card">
+            <div class="next-tier-header">
+                <AppIcon :icon="nextTier.icon" class="next-tier-icon" />
+                <span class="next-tier-name">{{ $t(nextTier.nameKey) }}</span>
+                <span class="next-tier-counter">{{ business.branches }}/{{ nextTier.minBranches }}</span>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: tierProgress + '%' }" />
+            <div class="next-tier-bar">
+                <div class="next-tier-fill" :style="{ width: tierProgress + '%' }" />
             </div>
-            <span class="tier-reward">×{{ nextTier.revenueMultiplier.toFixed(1) }} {{ $t('business.revenue') }}</span>
+            <div class="next-tier-footer">
+                <span class="next-tier-reward">
+                    <AppIcon icon="mdi:arrow-up" class="reward-icon" />
+                    ×{{ nextTier.revenueMultiplier.toFixed(1) }}
+                </span>
+                <span class="next-tier-remaining">{{ nextTier.minBranches - business.branches }} {{
+                    $t('business.branches_needed') }}</span>
+            </div>
         </div>
         <div v-else class="max-tier-badge">
-            <AppIcon icon="mdi:rocket-launch" />
-            {{ $t('business.max_tier_reached') }}
+            <AppIcon icon="mdi:rocket-launch" class="max-tier-icon" />
+            <span>{{ $t('business.max_tier_reached') }}</span>
         </div>
 
         <!-- All tiers reference -->
         <UAccordion :title="$t('business.all_tiers')" icon="mdi:format-list-bulleted" variant="ghost" compact>
             <div class="tier-list">
                 <div v-for="tier in GEO_TIERS" :key="tier.tier" class="tier-item"
-                    :class="{ active: tier.tier === currentTier.tier }">
+                    :class="{ active: tier.tier === currentTier.tier, achieved: tier.minBranches <= business.branches }">
                     <AppIcon :icon="tier.icon" class="tier-item-icon" />
                     <span class="tier-item-name">{{ $t(tier.nameKey) }}</span>
                     <span class="tier-item-req">{{ tier.minBranches }}+</span>
                     <span class="tier-item-mult">×{{ tier.revenueMultiplier.toFixed(1) }}</span>
+                    <AppIcon v-if="tier.minBranches <= business.branches" icon="mdi:check-circle" class="tier-check" />
                 </div>
             </div>
         </UAccordion>
 
         <!-- Open branch button -->
-        <UButton variant="primary" icon="mdi:plus-circle" @click="store.openBranch(business.id)">
+        <UButton variant="primary" icon="mdi:plus-circle" class="branch-buy-btn" @click="store.openBranch(business.id)">
             {{ $t('business.open_branch') }}
-            <span class="cost">{{ formatCash(branchCost) }}</span>
+            <span class="branch-cost">{{ formatCash(branchCost) }}</span>
         </UButton>
     </div>
 </template>
@@ -101,153 +101,198 @@ const tierProgress = computed(() => {
     gap: var(--t-space-3);
 }
 
-.panel-title {
+/* Tier hero */
+.tier-hero {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    font-size: var(--t-font-size-sm);
-    font-weight: var(--t-font-bold);
-    color: var(--t-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 0;
+    justify-content: space-between;
+    padding: var(--t-space-3);
+    /* background: color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card));
+    border: 1px solid color-mix(in srgb, var(--t-accent) 25%, var(--t-border)); */
+    border-radius: var(--t-radius-md);
 }
 
-.branch-stats {
+.tier-hero-left {
     display: flex;
-    gap: var(--t-space-4);
-    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--t-space-2);
 }
 
-.stat-block {
+.tier-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--t-radius-md);
+    background: color-mix(in srgb, var(--t-accent) 15%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tier-main-icon {
+    font-size: 1.3rem;
+    color: var(--t-accent);
+}
+
+.tier-hero-info {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
 }
 
-.stat-label {
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
-}
-
-.stat-value {
-    font-size: var(--t-font-size-md);
+.tier-hero-name {
+    font-size: var(--t-font-size-sm);
     font-weight: var(--t-font-bold);
-    font-family: var(--t-font-mono);
     color: var(--t-text);
 }
 
-.stat-value.accent {
+.tier-hero-mult {
+    font-size: var(--t-font-size-xs);
+    font-family: var(--t-font-mono);
     color: var(--t-accent);
 }
 
-.tier-badge {
+.branch-count {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.3rem;
-    font-size: var(--t-font-size-sm);
-    font-weight: var(--t-font-semibold);
-    color: var(--t-accent);
 }
 
-.next-tier {
-    padding: var(--t-space-2);
+.branch-count-val {
+    font-size: var(--t-font-size-lg);
+    font-weight: var(--t-font-bold);
+    font-family: var(--t-font-mono);
+    color: var(--t-text);
+    line-height: 1;
+}
+
+.branch-count-label {
+    font-size: var(--t-font-size-2xs);
+    color: var(--t-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Next tier card */
+.next-tier-card {
+    padding: var(--t-space-2) var(--t-space-3);
     background: var(--t-bg-muted);
     border-radius: var(--t-radius-md);
     border: 1px solid var(--t-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 }
 
-.tier-target {
+.next-tier-header {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    font-size: var(--t-font-size-sm);
-    font-weight: var(--t-font-semibold);
-    color: var(--t-text);
-    margin-bottom: 0.4rem;
+    gap: 0.35rem;
 }
 
-.tier-icon {
+.next-tier-icon {
+    font-size: 0.9rem;
     color: var(--t-text-muted);
 }
 
-.tier-req {
+.next-tier-name {
+    flex: 1;
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-semibold);
+    color: var(--t-text);
+}
+
+.next-tier-counter {
     font-family: var(--t-font-mono);
     font-size: var(--t-font-size-xs);
     color: var(--t-text-muted);
 }
 
-.progress-bar {
+.next-tier-bar {
     height: 6px;
     background: var(--t-bg);
-    border-radius: var(--t-radius-xs);
+    border-radius: 999px;
     overflow: hidden;
-    margin-bottom: 0.3rem;
 }
 
-.progress-fill {
+.next-tier-fill {
     height: 100%;
     background: var(--t-accent);
-    border-radius: var(--t-radius-xs);
-    transition: width var(--t-transition-normal);
+    border-radius: 999px;
+    transition: width 0.4s ease;
 }
 
-.tier-reward {
+.next-tier-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.next-tier-reward {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
     font-size: var(--t-font-size-xs);
+    font-family: var(--t-font-mono);
+    font-weight: var(--t-font-bold);
+    color: var(--t-accent);
+}
+
+.reward-icon {
+    font-size: 0.75rem;
+}
+
+.next-tier-remaining {
+    font-size: var(--t-font-size-2xs);
     color: var(--t-text-muted);
 }
 
+/* Max tier */
 .max-tier-badge {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.4rem;
+    padding: var(--t-space-3);
+    background: color-mix(in srgb, var(--t-success) 10%, var(--t-bg-muted));
+    border: 1px solid color-mix(in srgb, var(--t-success) 25%, var(--t-border));
+    border-radius: var(--t-radius-md);
     font-size: var(--t-font-size-sm);
     font-weight: var(--t-font-semibold);
     color: var(--t-success);
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-md);
 }
 
-.tier-details {
-    font-size: var(--t-font-size-xs);
-    color: var(--t-text-muted);
+.max-tier-icon {
+    font-size: 1.2rem;
 }
 
-.tier-details summary {
-    cursor: pointer;
-    font-weight: var(--t-font-semibold);
-}
-
-.tier-details summary:focus-visible {
-    box-shadow: var(--t-shadow-focus);
-    outline: none;
-}
-
+/* Tier list */
 .tier-list {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    margin-top: 0.4rem;
-    padding-left: 0.2rem;
+    gap: 0.15rem;
 }
 
 .tier-item {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.15rem 0.3rem;
+    padding: 0.25rem 0.4rem;
     border-radius: var(--t-radius-sm);
+    font-size: var(--t-font-size-xs);
+    color: var(--t-text-muted);
+    transition: background 0.15s;
 }
 
 .tier-item.active {
-    background: var(--t-bg-muted);
+    background: color-mix(in srgb, var(--t-accent) 10%, transparent);
     color: var(--t-text);
     font-weight: var(--t-font-semibold);
 }
 
+.tier-item.achieved .tier-item-icon {
+    color: var(--t-accent);
+}
+
 .tier-item-icon {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .tier-item-name {
@@ -264,8 +309,19 @@ const tierProgress = computed(() => {
     color: var(--t-accent);
 }
 
-.cost {
+.tier-check {
+    font-size: 0.8rem;
+    color: var(--t-success);
+}
+
+/* Buy button */
+.branch-buy-btn {
+    width: 100%;
+}
+
+.branch-cost {
     font-family: var(--t-font-mono);
-    color: var(--t-text-muted);
+    margin-left: 0.25rem;
+    opacity: 0.85;
 }
 </style>

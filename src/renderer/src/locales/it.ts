@@ -1202,7 +1202,28 @@ export default {
       scout: 'Perlustrazione',
       locate: 'Mostra sulla Mappa',
       neighborhood: 'Vicinato',
-      structural: 'Struttura'
+      structural: 'Struttura',
+      // Etichette stile documento
+      deed_title: 'PROPOSTA D\'ACQUISTO IMMOBILIARE',
+      doc_category: 'Tipologia',
+      doc_units: 'Unità',
+      doc_zone: 'Zona / Classe',
+      doc_financial: 'Riepilogo Finanziario',
+      doc_asking: 'Prezzo Richiesto',
+      doc_appraisal: 'Valore Perizia',
+      doc_gross_rent: 'Rendita Lorda',
+      doc_payback: 'Rientro Stimato',
+      doc_details: 'Analisi Dettagliata',
+      doc_condition: 'Condizione',
+      doc_reno: 'Ristrutturaz.',
+      doc_slots: 'Slot Migliorie',
+      doc_tax: 'Aliquota',
+      doc_notes: 'Note e Osservazioni',
+      doc_favorable: 'favorevoli',
+      doc_unfavorable: 'sfavorevoli',
+      doc_classified_hint: 'Commissiona un sopralluogo per sbloccare questa sezione.',
+      doc_verification: 'Fasi di Verifica',
+      doc_purchase: 'Conferma Acquisto'
     },
 
     // Gradi Posizione

@@ -100,7 +100,7 @@ export const MEGA_CORP_REQUIREMENTS = {
 
 /**
  * Market dominance bonus: exponential bonus for having many businesses in same category
- * bonus = 1 + 0.05 × count^1.5
+ * bonus = 1 + 0.15 × count^1.5
  */
 export function marketDominanceMultiplier(countInCategory: number): number {
   if (countInCategory <= 0) return 1.0

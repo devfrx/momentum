@@ -22,7 +22,7 @@ const EVENT_TO_CRYPTO_CONDITION: Record<string, MarketCondition> = {
 }
 
 export const useEventStore = defineStore('events', () => {
-  const eventSystem = new EventSystem(100) // evaluate every 100 ticks (10s)
+  const eventSystem = new EventSystem(12000) // evaluate every 12000 ticks (20 minutes)
   const activeEvents = ref<ActiveEvent[]>([])
   const pendingChoices = ref<GameEventDef[]>([])
   /** Recent event notifications for toast display */

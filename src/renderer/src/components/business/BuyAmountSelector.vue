@@ -24,7 +24,7 @@ const { formatCash } = useFormat()
             <UButton variant="tab" size="sm" v-for="amount in (options ?? [1, 10, 100])" :key="amount"
                 :active="modelValue === amount" @click="$emit('update:modelValue', amount)">
                 <span class="btn-amount">x{{ amount }}</span>
-                <span v-if="costFn" class="btn-cost">{{ formatCash(costFn(amount)) }}</span>
+                <!-- <span v-if="costFn" class="btn-cost">{{ formatCash(costFn(amount)) }}</span> -->
             </UButton>
         </div>
     </div>

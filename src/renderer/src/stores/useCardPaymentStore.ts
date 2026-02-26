@@ -74,7 +74,7 @@ const ATM_FEES: Record<CardTier, number> = {
   standard: 0.03,
   gold: 0.02,
   platinum: 0.01,
-  black: 0
+  black: 0.005
 }
 
 /** Minimum time between transactions (ms) */

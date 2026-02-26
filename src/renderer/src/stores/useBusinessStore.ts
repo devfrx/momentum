@@ -1,8 +1,8 @@
 /**
  * useBusinessStore — Complete rework: "Business Empire: Infinite Scaling"
  *
- * - Infinite levels (cost × 1.15^level, output × level^1.05)
- * - Infinite branches (cost × 1.5^branches, geo tier bonuses)
+ * - Infinite levels (cost × 1.18^level, output × level^0.75)
+ * - Infinite branches (cost × 1.3^branches, geo tier bonuses)
  * - Infinite upgrades with log2 scaling
  * - Mega-Corporation fusion system
  * - Continuous policy sliders
@@ -18,7 +18,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import Decimal from 'break_infinity.js'
-import { D, ZERO, add, sub, mul, div, pow, gte } from '@renderer/core/BigNum'
+import { D, ZERO, add, sub, mul, div, pow, gte, max } from '@renderer/core/BigNum'
 import { Formulas } from '@renderer/core'
 import { economySim } from '@renderer/core/EconomySim'
 import type { TickContext } from '@renderer/core/GameEngine'
@@ -99,6 +99,17 @@ export interface OwnedBusiness {
   // ── Mega-Corp ──
   isCorporation: boolean
 
+  // ── Investment tracking (for valuation floor) ──
+  /** Total money spent on this business (levels, branches, training, upgrades, quality, advisors) */
+  totalInvested: Decimal
+
+  // ── CFO smart pricing ──
+  cfoPricingEnabled: boolean
+  /** Hill-climbing direction: +1 = raise price, -1 = lower price, 0 = not started */
+  _cfoDirection: number
+  /** EMA profit snapshot at last CFO check */
+  _cfoLastProfit: Decimal
+
   // ── Fixed from definition ──
   outputPerEmployee: number
   baseSalary: number
@@ -167,15 +178,27 @@ export const useBusinessStore = defineStore('business', () => {
     return mul(total, 10)
   })
 
+  /**
+   * Business valuation that accounts for total money invested.
+   * Combines profit-based value (forward-looking) and investment recovery (backward-looking).
+   *
+   * Formula:
+   *   profitValue   = avgProfitPerTick × 10000 × sectorMult
+   *   investValue   = totalInvested × 0.35   (35% liquidation value)
+   *   combined      = max(profitValue + investValue × 0.25, investValue)
+   *   valuation     = max(combined, purchasePrice × 0.1)
+   */
+  function getBusinessValuation(biz: OwnedBusiness): Decimal {
+    const profitValue = mul(mul(biz.avgProfitPerTick, 10000), biz.sectorMultiplier)
+    const investValue = mul(biz.totalInvested, 0.35)
+    const combined = max(add(profitValue, mul(investValue, 0.25)), investValue)
+    return max(combined, mul(biz.purchasePrice, 0.1))
+  }
+
   const totalBusinessValue = computed<Decimal>(() => {
     let total = ZERO
     for (const biz of businesses.value) {
-      const val = Formulas.businessValuation(
-        biz.avgProfitPerTick,
-        biz.purchasePrice,
-        biz.sectorMultiplier
-      )
-      total = add(total, add(val, biz.pendingProfit))
+      total = add(total, add(getBusinessValuation(biz), biz.pendingProfit))
     }
     return total
   })
@@ -241,6 +264,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   function getLevelOutputMult(level: number): number {
+    if (level <= 0) return 1
     return Math.pow(level, LEVEL_OUTPUT_EXPONENT)
   }
 
@@ -358,7 +382,11 @@ export const useBusinessStore = defineStore('business', () => {
         marketingFactor: 1,
         hasManager: false,
         managerCost: mul(def.purchasePrice, 0.5),
-        pendingProfit: ZERO
+        pendingProfit: ZERO,
+        totalInvested: def.purchasePrice,
+        cfoPricingEnabled: true,
+        _cfoDirection: 0,
+        _cfoLastProfit: ZERO
       })
 
       player.addXp(D(50))
@@ -404,6 +432,7 @@ export const useBusinessStore = defineStore('business', () => {
     // Apply card fee via quickPay (no dialog for minor purchases)
     if (!cardPayment.quickPay(cost, 'banking.tx_biz_level', 'business', { name: biz.name }))
       return false
+    biz.totalInvested = add(biz.totalInvested, cost)
     biz.level++
     player.addXp(D(10 + biz.level * 2))
     return true
@@ -426,6 +455,7 @@ export const useBusinessStore = defineStore('business', () => {
     const cardPayment = useCardPaymentStore()
     if (!cardPayment.quickPay(cost, 'banking.tx_biz_branch', 'business', { name: biz.name }))
       return false
+    biz.totalInvested = add(biz.totalInvested, cost)
     biz.branches++
     player.addXp(D(25 + biz.branches * 5))
     return true
@@ -439,6 +469,7 @@ export const useBusinessStore = defineStore('business', () => {
     const cardPayment = useCardPaymentStore()
     if (!cardPayment.quickPay(cost, 'banking.tx_biz_train', 'business', { name: biz.name }))
       return false
+    biz.totalInvested = add(biz.totalInvested, cost)
     biz.trainingLevel++
     player.addXp(D(15))
     return true
@@ -456,6 +487,7 @@ export const useBusinessStore = defineStore('business', () => {
     const cardPayment = useCardPaymentStore()
     if (!cardPayment.quickPay(cost, 'banking.tx_biz_upgrade', 'business', { name: biz.name }))
       return false
+    biz.totalInvested = add(biz.totalInvested, cost)
     let state = biz.upgrades.find((u) => u.upgradeId === upgradeId)
     if (state) {
       state.level++
@@ -478,6 +510,7 @@ export const useBusinessStore = defineStore('business', () => {
     const cardPayment = useCardPaymentStore()
     if (!cardPayment.quickPay(cost, 'banking.tx_biz_advisor', 'business', { name: biz.name }))
       return false
+    biz.totalInvested = add(biz.totalInvested, cost)
     if (state) {
       state.level++
     } else {
@@ -517,11 +550,7 @@ export const useBusinessStore = defineStore('business', () => {
     const idx = businesses.value.findIndex((b) => b.id === businessId)
     if (idx === -1) return ZERO
     const biz = businesses.value[idx]
-    const valuation = Formulas.businessValuation(
-      biz.avgProfitPerTick,
-      biz.purchasePrice,
-      biz.sectorMultiplier
-    )
+    const valuation = getBusinessValuation(biz)
     const player = usePlayerStore()
     const cardPayment = useCardPaymentStore()
     // Collect pending profit before selling (BUG-02 fix)
@@ -573,6 +602,7 @@ export const useBusinessStore = defineStore('business', () => {
       })
     )
       return false
+    biz.totalInvested = add(biz.totalInvested, biz.qualityUpgradeCost)
     biz.quality++
     biz.qualityUpgradeCost = mul(biz.qualityUpgradeCost, 1.15)
     return true
@@ -581,6 +611,17 @@ export const useBusinessStore = defineStore('business', () => {
   function renameBusiness(businessId: string, newName: string): void {
     const biz = businesses.value.find((b) => b.id === businessId)
     if (biz) biz.customName = newName.trim() || undefined
+  }
+
+  function setCfoPricingEnabled(businessId: string, enabled: boolean): void {
+    const biz = businesses.value.find((b) => b.id === businessId)
+    if (!biz) return
+    biz.cfoPricingEnabled = enabled
+    if (enabled) {
+      // Reset hill-climbing state so it re-evaluates from current price
+      biz._cfoDirection = 0
+      biz._cfoLastProfit = ZERO
+    }
   }
 
   function hireManager(businessId: string): boolean {
@@ -715,12 +756,30 @@ export const useBusinessStore = defineStore('business', () => {
         }
       }
 
-      // ── CFO auto-pricing ──
-      if (hasCFO) {
-        const diff = biz.optimalPrice - biz.pricePerUnit
-        if (Math.abs(diff) > 0.01) {
-          biz.pricePerUnit += diff * 0.02
+      // ── CFO smart hill-climbing pricing (every 30 ticks) ──
+      // Instead of targeting optimalPrice, the CFO nudges price up or down and
+      // observes whether avg profit improves or worsens, reversing direction as needed.
+      if (hasCFO && biz.cfoPricingEnabled && biz.ticksOwned > 0 && biz.ticksOwned % 30 === 0) { // Start checks after 1 ticks to allow initial profit to stabilize
+        const minPrice = biz.optimalPrice * 0.15
+        const maxPrice = biz.optimalPrice * 3.5
+        const nudgePct = 0.008 // 0.8% step each check
+
+        if (biz._cfoDirection === 0) {
+          // Bootstrap: nudge toward optimal as starting direction
+          biz._cfoDirection = biz.pricePerUnit < biz.optimalPrice ? 1 : -1
+          biz._cfoLastProfit = biz.avgProfitPerTick
+        } else {
+          const currentProfit = biz.avgProfitPerTick.toNumber()
+          const lastProfit = biz._cfoLastProfit.toNumber()
+          // If profit didn't improve (allow 0.05% noise margin), reverse direction
+          if (currentProfit < lastProfit * 0.9995) {
+            biz._cfoDirection *= -1
+          }
+          biz._cfoLastProfit = biz.avgProfitPerTick
         }
+
+        const nudge = biz.pricePerUnit * nudgePct * biz._cfoDirection
+        biz.pricePerUnit = Math.max(minPrice, Math.min(maxPrice, biz.pricePerUnit + nudge))
       }
 
       // ── Policies ──
@@ -796,12 +855,16 @@ export const useBusinessStore = defineStore('business', () => {
         biz.marketingBudget,
         ecoState.inflationIndex
       )
-      const costRedTotal =
+      // Cap combined cost-reduction multiplier to 4× (=75% max reduction before advisor)
+      // Prevents stacking of all sources (prestige + upgrades + BM + milestones) from
+      // making costs negligible.
+      const rawCostRedTotal =
         costReductionMul.toNumber() *
         upgCostRedMult *
         (1 + msBonus.cost_reduction) *
         bmCostReduction.toNumber() *
         prestigeCostRed
+      const costRedTotal = Math.min(rawCostRedTotal, 4.0)
       const afterCostRed = costRedTotal > 1 ? div(baseCosts, D(costRedTotal)) : baseCosts
       const afterEventCosts = mul(afterCostRed, bizEventCostMul)
       const costs =
@@ -935,6 +998,12 @@ export const useBusinessStore = defineStore('business', () => {
       totalCosts: biz.totalCosts ? D(biz.totalCosts as string | number) : ZERO,
       totalProfit: biz.totalProfit ? D(biz.totalProfit as string | number) : ZERO,
       avgProfitPerTick: biz.avgProfitPerTick ? D(biz.avgProfitPerTick as string | number) : ZERO,
+      totalInvested: biz.totalInvested
+        ? D(biz.totalInvested as string | number)
+        : D((biz.purchasePrice as string | number) || 0),
+      cfoPricingEnabled: (biz.cfoPricingEnabled as boolean) ?? true,
+      _cfoDirection: (biz._cfoDirection as number) ?? 0,
+      _cfoLastProfit: biz._cfoLastProfit ? D(biz._cfoLastProfit as string | number) : ZERO,
       revenuePerTick: biz.revenuePerTick ? D(biz.revenuePerTick as string | number) : ZERO,
       costsPerTick: biz.costsPerTick ? D(biz.costsPerTick as string | number) : ZERO,
       profitPerTick: biz.profitPerTick ? D(biz.profitPerTick as string | number) : ZERO,
@@ -1020,6 +1089,8 @@ export const useBusinessStore = defineStore('business', () => {
     tick,
     prestigeReset,
     loadFromSave,
-    reduceAssetValue
+    reduceAssetValue,
+    getBusinessValuation,
+    setCfoPricingEnabled
   }
 })

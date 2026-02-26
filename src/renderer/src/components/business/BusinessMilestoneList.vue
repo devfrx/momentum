@@ -36,45 +36,51 @@ const milestoneProgress = computed(() =>
 
 <template>
     <div class="milestone-panel">
-        <h4 class="panel-title">
-            <AppIcon icon="mdi:trophy" />
-            {{ $t('business.milestones_title') }}
-        </h4>
-
         <!-- Active bonuses summary -->
-        <div class="bonus-summary" v-if="activeMilestones.length > 0">
-            <div class="bonus-item" v-if="bonuses.revenue_mult > 0">
-                <AppIcon icon="mdi:currency-usd" class="bonus-icon" />
-                <span>{{ $t('business.ms_revenue') }}: +{{ (bonuses.revenue_mult * 100).toFixed(0) }}%</span>
+        <div class="bonus-row" v-if="activeMilestones.length > 0">
+            <div class="bonus-chip" v-if="bonuses.revenue_mult > 0">
+                <AppIcon icon="mdi:currency-usd" class="bonus-chip-icon revenue" />
+                <span class="bonus-chip-val">+{{ (bonuses.revenue_mult * 100).toFixed(0) }}%</span>
             </div>
-            <div class="bonus-item" v-if="bonuses.customer_attraction > 0">
-                <AppIcon icon="mdi:account-multiple-plus" class="bonus-icon" />
-                <span>{{ $t('business.ms_customers') }}: +{{ (bonuses.customer_attraction * 100).toFixed(0) }}%</span>
+            <div class="bonus-chip" v-if="bonuses.customer_attraction > 0">
+                <AppIcon icon="mdi:account-multiple-plus" class="bonus-chip-icon customers" />
+                <span class="bonus-chip-val">+{{ (bonuses.customer_attraction * 100).toFixed(0) }}%</span>
             </div>
-            <div class="bonus-item" v-if="bonuses.cost_reduction > 0">
-                <AppIcon icon="mdi:tag-minus" class="bonus-icon" />
-                <span>{{ $t('business.ms_cost_reduction') }}: -{{ (bonuses.cost_reduction * 100).toFixed(0) }}%</span>
+            <div class="bonus-chip" v-if="bonuses.cost_reduction > 0">
+                <AppIcon icon="mdi:tag-minus" class="bonus-chip-icon cost" />
+                <span class="bonus-chip-val">-{{ (bonuses.cost_reduction * 100).toFixed(0) }}%</span>
             </div>
         </div>
-        <div v-else class="no-milestones">
-            {{ $t('business.no_milestones_yet') }}
+        <div v-else class="empty-milestones">
+            <AppIcon icon="mdi:trophy-outline" class="empty-icon" />
+            <span>{{ $t('business.no_milestones_yet') }}</span>
         </div>
 
-        <!-- Next milestone progress -->
+        <!-- Milestone tracks -->
         <div class="milestone-tracks">
-            <div v-for="mp in milestoneProgress" :key="mp.tier.type" class="track">
-                <div class="track-header">
-                    <AppIcon :icon="mp.tier.icon" class="track-icon" />
-                    <span class="track-name">{{ $t(mp.tier.nameKey) }}</span>
-                    <span class="track-counter">{{ mp.current }}/{{ mp.next }}</span>
+            <div v-for="mp in milestoneProgress" :key="mp.tier.type" class="track-card">
+                <div class="track-top">
+                    <div class="track-icon-wrap">
+                        <AppIcon :icon="mp.tier.icon" class="track-icon" />
+                    </div>
+                    <div class="track-info">
+                        <span class="track-name">{{ $t(mp.tier.nameKey) }}</span>
+                        <span class="track-counter">{{ mp.current }}/{{ mp.next }}</span>
+                    </div>
+                    <div class="track-achieved-badge" v-if="mp.achieved > 0">
+                        <AppIcon icon="mdi:star" class="achieved-star" />
+                        <span>{{ mp.achieved }}</span>
+                    </div>
                 </div>
                 <div class="track-bar">
                     <div class="track-fill" :style="{ width: mp.progress + '%' }" />
                 </div>
-                <span class="track-reward">
-                    +{{ (mp.tier.bonusValue * 100).toFixed(0) }}%
-                    {{ $t('business.ms_' + mp.tier.bonusType) }}
-                </span>
+                <div class="track-bottom">
+                    <span class="track-reward">
+                        +{{ (mp.tier.bonusValue * 100).toFixed(0) }}%
+                        {{ $t('business.ms_' + mp.tier.bonusType) }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -87,73 +93,110 @@ const milestoneProgress = computed(() =>
     gap: var(--t-space-3);
 }
 
-.panel-title {
+/* Bonus row */
+.bonus-row {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: var(--t-font-size-sm);
-    font-weight: var(--t-font-bold);
-    color: var(--t-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 0;
-}
-
-.bonus-summary {
-    display: flex;
-    flex-wrap: wrap;
     gap: var(--t-space-2);
+    flex-wrap: wrap;
 }
 
-.bonus-item {
+.bonus-chip {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.6rem;
-    background: var(--t-bg-muted);
+    gap: 0.25rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
     border-radius: var(--t-radius-sm);
     font-size: var(--t-font-size-xs);
-    font-weight: var(--t-font-semibold);
-    color: var(--t-accent);
+    font-weight: var(--t-font-bold);
+    font-family: var(--t-font-mono);
 }
 
-.bonus-icon {
+.bonus-chip-icon {
     font-size: 0.85rem;
 }
 
-.no-milestones {
-    font-size: var(--t-font-size-xs);
+.bonus-chip-icon.revenue {
+    color: var(--t-success);
+}
+
+.bonus-chip-icon.customers {
+    color: var(--t-accent);
+}
+
+.bonus-chip-icon.cost {
+    color: var(--t-warning);
+}
+
+.bonus-chip-val {
+    color: var(--t-text);
+}
+
+/* Empty state */
+.empty-milestones {
+    display: flex;
+    align-items: center;
+    gap: var(--t-space-2);
+    justify-content: center;
+    padding: var(--t-space-3);
     color: var(--t-text-muted);
+    font-size: var(--t-font-size-xs);
     font-style: italic;
 }
 
+.empty-icon {
+    font-size: 1.2rem;
+    opacity: 0.4;
+}
+
+/* Milestone tracks */
 .milestone-tracks {
     display: flex;
     flex-direction: column;
     gap: var(--t-space-2);
 }
 
-.track {
-    padding: var(--t-space-2);
-    background: var(--t-bg-muted);
-    border-radius: var(--t-radius-md);
+.track-card {
+    padding: var(--t-space-2) var(--t-space-3);
+    background: var(--t-bg-card);
     border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
 }
 
-.track-header {
+.track-top {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    margin-bottom: 0.3rem;
+    gap: 0.5rem;
+}
+
+.track-icon-wrap {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--t-radius-sm);
+    background: var(--t-bg-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .track-icon {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--t-text-muted);
 }
 
-.track-name {
+.track-info {
     flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.track-name {
     font-size: var(--t-font-size-xs);
     font-weight: var(--t-font-semibold);
     color: var(--t-text);
@@ -161,27 +204,50 @@ const milestoneProgress = computed(() =>
 
 .track-counter {
     font-family: var(--t-font-mono);
-    font-size: var(--t-font-size-xs);
+    font-size: var(--t-font-size-2xs);
     color: var(--t-text-muted);
 }
 
+.track-achieved-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-size: var(--t-font-size-xs);
+    font-weight: var(--t-font-bold);
+    font-family: var(--t-font-mono);
+    color: var(--t-gold);
+    padding: 0.05rem 0.35rem;
+    background: color-mix(in srgb, var(--t-gold) 12%, transparent);
+    border-radius: var(--t-radius-sm);
+}
+
+.achieved-star {
+    font-size: 0.7rem;
+}
+
+/* Track bar */
 .track-bar {
-    height: 4px;
-    background: var(--t-bg);
-    border-radius: var(--t-radius-xs);
+    height: 5px;
+    background: var(--t-bg-muted);
+    border-radius: 999px;
     overflow: hidden;
-    margin-bottom: 0.2rem;
 }
 
 .track-fill {
     height: 100%;
     background: var(--t-accent);
-    border-radius: var(--t-radius-xs);
-    transition: width var(--t-transition-normal);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.track-bottom {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .track-reward {
-    font-size: var(--t-font-size-xs);
+    font-size: var(--t-font-size-2xs);
     color: var(--t-text-muted);
+    font-family: var(--t-font-mono);
 }
 </style>

@@ -50,8 +50,8 @@ onBeforeUnmount(() => {
       <GameSidebar />
       <main class="app-content">
         <router-view v-slot="{ Component }">
-          <transition name="page-fade" mode="out-in">
-            <component :is="Component" />
+          <transition name="page-fade">
+            <component :is="Component" :key="$route.path" />
           </transition>
         </router-view>
       </main>
@@ -174,12 +174,18 @@ a:hover {
   padding: 0;
   margin: var(--t-space-2) var(--t-space-2) 0 0;
   border-radius: var(--t-radius-xl);
+  position: relative;
 }
 
-/* Page transitions */
+/* Page transitions – simultaneous cross-fade */
 .page-fade-enter-active,
 .page-fade-leave-active {
-  transition: opacity 0.12s ease;
+  transition: opacity 0.1s ease;
+}
+
+.page-fade-leave-active {
+  position: absolute;
+  inset: 0;
 }
 
 .page-fade-enter-from,

@@ -182,6 +182,8 @@ const loanInfoSections = computed<InfoSection[]>(() => [
             { term: t('loans.info.categories.business'), desc: t('loans.info.categories.business_desc') },
             { term: t('loans.info.categories.mortgage'), desc: t('loans.info.categories.mortgage_desc') },
             { term: t('loans.info.categories.high_risk'), desc: t('loans.info.categories.high_risk_desc') },
+            { term: t('loans.info.categories.investment'), desc: t('loans.info.categories.investment_desc') },
+            { term: t('loans.info.categories.special'), desc: t('loans.info.categories.special_desc') },
         ],
     },
     {
@@ -296,9 +298,9 @@ const loanInfoSections = computed<InfoSection[]>(() => [
                                 </div>
                                 <div class="history-details">
                                     <span>{{ $t('loans.interest_label') }} {{ formatCash(entry.totalInterestPaid)
-                                        }}</span>
+                                    }}</span>
                                     <span>{{ $t('loans.on_time') }} {{ entry.onTimePayments }} | {{ $t('loans.late')
-                                        }} {{ entry.latePayments
+                                    }} {{ entry.latePayments
                                         }}</span>
                                     <span class="history-status" :class="entry.status">{{ entry.status }}</span>
                                 </div>
@@ -373,7 +375,7 @@ const loanInfoSections = computed<InfoSection[]>(() => [
 
                 <div class="dialog-actions">
                     <UButton variant="ghost" @click="showRefinanceDialog = false">{{ $t('common.cancel')
-                        }}</UButton>
+                    }}</UButton>
                     <UButton variant="ghost" :disabled="!refinanceTarget" @click="confirmRefinance">{{
                         $t('loans.refinance') }}</UButton>
                 </div>

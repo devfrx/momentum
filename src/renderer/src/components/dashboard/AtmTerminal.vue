@@ -41,16 +41,12 @@ const totalCost = computed(() => cardPayment.calculateAtmTotal(parsedAmount.valu
 
 const maxWithdrawable = computed(() => {
     const balance = player.cardBalance
-    if (cardPayment.atmFeeRate === 0) return balance
-    const maxFromBalance = balance.div(1 + cardPayment.atmFeeRate).floor()
-    return maxFromBalance
+    return balance.div(1 + cardPayment.atmFeeRate).floor()
 })
 
 const maxDepositable = computed(() => {
     const cash = player.cash
-    if (cardPayment.atmFeeRate === 0) return cash
-    const maxFromCash = cash.div(1 + cardPayment.atmFeeRate).floor()
-    return maxFromCash
+    return cash.div(1 + cardPayment.atmFeeRate).floor()
 })
 
 const canExecute = computed(() => {
@@ -101,8 +97,8 @@ function onInput(e: Event): void {
                 <AppIcon icon="mdi:atm" class="atm-logo-icon" />
                 <span class="atm-logo-text">ATM</span>
             </div>
-            <div class="atm-fee-badge" :class="{ 'atm-fee-badge--free': cardPayment.atmFeeRate === 0 }">
-                {{ cardPayment.atmFeeRate === 0 ? t('atm.free') : cardPayment.atmFeePercent + '%' }}
+            <div class="atm-fee-badge">
+                {{ cardPayment.atmFeePercent }}%
                 <span class="atm-fee-label">{{ t('atm.fee_rate') }}</span>
             </div>
         </div>
@@ -161,7 +157,7 @@ function onInput(e: Event): void {
                 <span>{{ isDeposit ? t('atm.deposit_amount') : t('atm.withdraw_amount') }}</span>
                 <span class="atm-receipt-val">{{ formatCash(parsedAmount) }}</span>
             </div>
-            <div v-if="feeAmount.gt(0)" class="atm-receipt-row atm-receipt-row--fee">
+            <div class="atm-receipt-row atm-receipt-row--fee">
                 <span>{{ t('atm.fee') }} ({{ cardPayment.atmFeePercent }}%)</span>
                 <span class="atm-receipt-val atm-receipt-val--fee">+{{ formatCash(feeAmount) }}</span>
             </div>
@@ -242,11 +238,7 @@ function onInput(e: Event): void {
     border: 1px solid color-mix(in srgb, var(--t-warning) 20%, transparent);
 }
 
-.atm-fee-badge--free {
-    color: var(--t-success);
-    background: color-mix(in srgb, var(--t-success) 10%, transparent);
-    border-color: color-mix(in srgb, var(--t-success) 20%, transparent);
-}
+
 
 .atm-fee-label {
     font-family: var(--t-font-body);

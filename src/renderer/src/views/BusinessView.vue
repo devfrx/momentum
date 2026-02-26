@@ -60,6 +60,9 @@ const businessInfoSections = computed<InfoSection[]>(() => [
             { term: t('business.info.scaling.synergies'), desc: t('business.info.scaling.synergies_desc'), icon: 'mdi:lightning-bolt' },
             { term: t('business.info.scaling.corporation'), desc: t('business.info.scaling.corporation_desc'), icon: 'mdi:domain' },
             { term: t('business.info.scaling.milestones'), desc: t('business.info.scaling.milestones_desc'), icon: 'mdi:trophy' },
+            { term: t('business.info.scaling.advisors'), desc: t('business.info.scaling.advisors_desc'), icon: 'mdi:account-tie' },
+            { term: t('business.info.scaling.training'), desc: t('business.info.scaling.training_desc'), icon: 'mdi:school' },
+            { term: t('business.info.scaling.policies'), desc: t('business.info.scaling.policies_desc'), icon: 'mdi:tune-vertical' },
         ]
     },
     {

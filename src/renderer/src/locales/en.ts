@@ -852,20 +852,26 @@ export default {
       scaling: {
         title: 'Infinite Scaling',
         levels: 'Levels',
-        levels_desc: 'Each level increases output (×level^1.05) at exponential cost (×1.15^level)',
+        levels_desc: 'Each level boosts output and increases cost. Higher levels give diminishing output gains but costs keep growing.',
         branches: 'Branches',
         branches_desc:
-          'Open branches to unlock geographic tiers with revenue multipliers (up to ×12 interplanetary)',
+          'Open branches to unlock geographic tiers with revenue multipliers (up to interplanetary).',
         upgrades: 'Upgrades',
         upgrades_desc:
-          'Per-business upgrades with log₂ scaling — revenue, cost reduction, output, quality, employees',
+          'Per-business upgrades that improve revenue, cost reduction, output, quality, and employees. Effect grows with each level.',
         synergies: 'Synergies',
-        synergies_desc: 'Multiple businesses of the same category grant synergy multipliers',
+        synergies_desc: 'Owning multiple businesses of the same category grants synergy multipliers to all of them.',
         corporation: 'Corporation',
         corporation_desc:
-          'At level 50 + 25 branches, become a Mega-Corporation for market dominance bonuses',
+          'At level 25 with 15 branches, a business becomes a Mega-Corporation with market dominance bonuses.',
         milestones: 'Milestones',
-        milestones_desc: 'Automatic bonuses every 25 levels, 10 branches, or 50 upgrade levels'
+        milestones_desc: 'Automatic bonuses every 25 levels, 10 branches, or 50 upgrade levels.',
+        advisors: 'Advisors',
+        advisors_desc: 'Hire advisors (Operations, Marketing, HR, CFO) to boost different aspects of a business. Each advisor has its own level and escalating cost.',
+        training: 'Staff Training',
+        training_desc: 'Train your employees for a permanent per-level output boost. Training cost increases with each level.',
+        policies: 'Policy Sliders',
+        policies_desc: 'Adjust pricing, labor, and marketing strategy sliders (0–100). Effects scale with business reputation.'
       },
       details: {
         title: 'Details Panel',
@@ -901,16 +907,16 @@ export default {
     data_points: 'Data Points',
     info_title: 'How the Stock Market Works',
     info_desc:
-      'Buy and sell shares of 8 publicly listed companies. Prices move every tick via a Geometric Brownian Motion model — realistic drift, volatility, and random shocks. Stocks also pay dividends based on their annual yield. Pin any stock to focus on its detailed chart.',
+      'Buy and sell shares of 8 publicly listed companies. Prices update every 50 game ticks via a Geometric Brownian Motion model with drift, volatility, and random shocks. Stocks also pay dividends based on their annual yield. Purchase costs are deducted from your card balance. Pin any stock to focus on its detailed chart.',
     info: {
       trading: {
         title: 'Trading',
         buy: 'Buy Shares',
         buy_desc:
-          'Select a quantity and click Buy to purchase shares at the current market price. The full cost (price × shares) is deducted from your cash.',
+          'Select a quantity and click Buy to purchase shares at the current market price. The full cost is deducted from your card balance.',
         sell: 'Sell Shares',
         sell_desc:
-          'Sell some or all of your position. Revenue = price × shares × stock_returns multiplier. Realized profit is tracked separately.',
+          'Sell some or all of your position. The stock_returns skill multiplier applies to your profit portion, not the total revenue. Realized profit is tracked separately.',
         xp: 'XP Rewards',
         xp_desc: 'Selling at a profit grants 10 XP; selling at a loss still grants 3 XP.'
       },
@@ -942,7 +948,7 @@ export default {
         title: 'Price Simulation',
         gbm: 'Geometric Brownian Motion',
         gbm_desc:
-          'Each tick, price = old price × e^((drift − ½ vol²) × dt + vol × √dt × Z), where Z is a standard normal random. dt = 1/30240 (252 trading days × 120 ticks/day).',
+          'Each market tick (every 50 game ticks), the price is recalculated using drift, volatility, and a random factor. Prices move realistically — trending up or down with random noise.',
         drift: 'Drift',
         drift_desc:
           'The expected annual return of the stock (e.g. 0.08 = 8% per year). Modified by market conditions and sector events.',
@@ -961,16 +967,16 @@ export default {
         crash: 'Market Crash',
         crash_desc: 'Drift −50%, volatility ×2.5. Severe price drops with extreme swings.',
         bubble: 'Bubble',
-        bubble_desc: 'Drift +40%, volatility ×1.8. Rapid price increases but with high instability.'
+        bubble_desc: 'Drift +40%, volatility ×1.3. Rapid price increases but with instability.'
       },
       dividends: {
         title: 'Dividends',
         yield: 'Dividend Yield',
         yield_desc:
-          'Each stock has an annual dividend yield (0%–3.8%). Growth stocks (e.g. GAMEV) pay nothing; value stocks (e.g. FINBK) pay more.',
+          'Each stock has an annual dividend yield (0%–3.8%). GAMEV pays nothing; TCORP pays 0.5%; value stocks like FINBK pay up to 3.8%.',
         payout: 'Payout Frequency',
         payout_desc:
-          'Dividends accrue every 10 seconds based on: price × shares × annual yield × elapsed ticks ÷ 30,240 ticks/year.',
+          'Dividends accrue every 10 seconds based on price, shares held, and annual yield.',
         multiplier: 'Skill Multiplier',
         multiplier_desc:
           'The stock_returns skill from the Skill Tree also multiplies dividend payouts, not just sale revenue.',
@@ -994,16 +1000,16 @@ export default {
     data_points: 'Data Points',
     info_title: 'How the Crypto Exchange Works',
     info_desc:
-      'Trade 8 cryptocurrencies with much higher volatility than stocks. Prices use the same GBM model but with wilder drift and larger random swings. No dividends — all returns come from price appreciation. Pin any token for a detailed chart.',
+      'Trade 8 cryptocurrencies with much higher volatility than stocks. Prices use the same GBM model but with wilder drift and larger random swings. Proof-of-Stake cryptos earn staking rewards. All purchases are deducted from your card balance. Pin any token for a detailed chart.',
     info: {
       trading: {
         title: 'Trading',
         buy: 'Buy Crypto',
         buy_desc:
-          'Choose a cash amount and purchase fractional cryptocurrency at the current market price. The full cost is deducted from your cash balance.',
+          'Choose a cash amount and purchase fractional cryptocurrency at the current market price. The full cost is deducted from your card balance.',
         sell: 'Sell Crypto',
         sell_desc:
-          'Sell some or all of your holding. Revenue = price × amount × crypto_returns multiplier. Realized profit is tracked separately.',
+          'Sell some or all of your holding. The crypto_returns skill multiplier applies to your profit portion only, not the total revenue. Realized profit is tracked separately.',
         xp: 'XP Rewards',
         xp_desc:
           'Buying any crypto grants 5 XP. Selling at a profit grants 15 XP; selling at a loss still grants 3 XP.'
@@ -1027,7 +1033,7 @@ export default {
           'Crypto assets have much higher volatility parameters than stocks. Prices can swing ±30% in a single day.',
         no_dividends: 'Staking Rewards',
         no_dividends_desc:
-          'Proof-of-Stake cryptos (ETH, SOL, AVAX, LINK) earn passive staking rewards. Meme tokens (DOGE, PEPE, SHIB) have no staking yield.',
+          'Proof-of-Stake cryptos (BTC, ETH, SOL, AVAX, LINK) earn passive staking rewards while you hold them. Meme tokens (DOGE, PEPE, SHIB) have no staking yield.',
         separate_sim: 'Separate Simulation',
         separate_sim_desc:
           'Crypto uses its own MarketSimulator instance — market conditions can affect crypto differently than stocks.'
@@ -1048,7 +1054,7 @@ export default {
         title: 'Multipliers',
         crypto_returns: 'Crypto Returns Skill',
         crypto_returns_desc:
-          'The crypto_returns skill from the Skill Tree multiplies your sell revenue, making each sale more profitable.',
+          'The crypto_returns skill from the Skill Tree multiplies only your profit portion on sells, making profitable trades even more rewarding.',
         prestige: 'Prestige Bonuses',
         prestige_desc:
           'Prestige upgrades and perks can boost crypto returns as an additional multiplier layer.'
@@ -1084,7 +1090,7 @@ export default {
     needs_repair: 'Needs Repair',
     repair_cost: 'Repair {cost}',
     renovate: 'Renovate',
-    reno_hint: '(+12% rent, +5% value)',
+    reno_hint: '(+15% rent per level)',
     reno_level: 'LV.{level} — {cost}',
     value_label: 'Value: {value}',
     purchase_price: 'Purchase price',
@@ -1110,7 +1116,7 @@ export default {
     no_owned_desc: 'Buy properties from the market tab to start building your portfolio.',
     info_title: 'How Realty Works',
     info_desc:
-      'Real estate generates passive rental income from tenants. Each property has a number of units that can be occupied. Your net income per second is gross rent minus maintenance, property tax, and insurance. Occupancy depends on condition, rent price, economy, and renovation level — if you raise rent too high, fewer tenants will stay. Properties degrade over time (wear), and you can repair them at any point to restore condition. Renovations permanently boost rent (+12% per level) and property value (+5% per level). Selling price depends on current condition (50–100% of market value). Market value fluctuates with the economy, but never drops below 30% of the purchase price. New properties unlock as your net worth grows.',
+      'Real estate generates passive rental income from tenants. Each property has a number of units that can be occupied. Your net income per second is gross rent minus maintenance, property tax, and insurance. Occupancy depends on condition, rent price, economy, and renovation level — if you raise rent too high, fewer tenants will stay. Properties degrade over time (wear), and you can repair them when condition is below 98%. Renovations permanently boost rent (+15% per level). Selling price depends on current condition (50–100% of market value). Market value fluctuates with the economy. New properties unlock as your net worth grows.',
 
     // Expandable details keys
     financials: 'Financials',
@@ -1190,7 +1196,28 @@ export default {
       scout: 'Scout',
       locate: 'Show on Map',
       neighborhood: 'Neighborhood',
-      structural: 'Structure'
+      structural: 'Structure',
+      // Document-style card labels
+      deed_title: 'PROPERTY PURCHASE PROPOSAL',
+      doc_category: 'Category',
+      doc_units: 'Units',
+      doc_zone: 'Zone / Grade',
+      doc_financial: 'Financial Summary',
+      doc_asking: 'Asking Price',
+      doc_appraisal: 'Appraised Value',
+      doc_gross_rent: 'Gross Rent',
+      doc_payback: 'Est. Payback',
+      doc_details: 'Detailed Analysis',
+      doc_condition: 'Condition',
+      doc_reno: 'Renovation',
+      doc_slots: 'Imp. Slots',
+      doc_tax: 'Tax Rate',
+      doc_notes: 'Notes & Observations',
+      doc_favorable: 'favorable',
+      doc_unfavorable: 'unfavorable',
+      doc_classified_hint: 'Commission a survey to unlock this section.',
+      doc_verification: 'Verification Stages',
+      doc_purchase: 'Confirm Purchase'
     },
 
     // Location Grades
@@ -1367,7 +1394,7 @@ export default {
           'How many rentable units the property contains. Shown as "occupied / total" in the occupancy bar.',
         category: 'Category',
         category_desc:
-          'The property type (Residential, Commercial, Hospitality, Luxury). This is just a label for reference.',
+          'The property type (Residential, Commercial, Mixed, Hospitality, Luxury, Industrial). This is just a label for reference.',
         base_rent: 'Base Rent',
         base_rent_desc:
           'The starting rent income per tick at 100% occupancy before any bonuses or multipliers.',
@@ -1385,7 +1412,7 @@ export default {
           'How fast the condition decreases. Each property has a different wear rate shown in the details panel.',
         repair: 'Repair',
         repair_desc:
-          'When condition drops below 70%, the Repair button appears. Click it to restore condition to 100% for a cost based on how damaged it is.',
+          'When condition is below 98%, the Repair button appears. Click it to restore condition to 100% for a cost based on how damaged it is.',
         low_condition_penalty: 'Low Condition',
         low_condition_penalty_desc:
           'If condition falls very low (below 30%), the property starts losing value faster.'
@@ -1431,16 +1458,16 @@ export default {
           'Adjust rent from ×0.5 (discount) to ×3.0 (premium). Higher rent = more income per tenant but fewer tenants.',
         renovate: 'Renovate',
         renovate_desc:
-          'Permanent upgrade that increases base rent (+12%) and property value (+5%). Each property has a maximum renovation level.',
+          'Permanent upgrade that increases base rent by 15% per level. Each property has a maximum renovation level.',
         renovation_cost: 'Renovation Cost',
         renovation_cost_desc:
           'Cost increases with each upgrade level. Shown on the Renovate button.',
         repair: 'Repair',
         repair_desc:
-          'Restores condition to 100%. Only appears when condition is below 70%. Cost depends on how much repair is needed.',
+          'Restores condition to 100%. Available when condition drops below 98%. Cost depends on how much repair is needed.',
         sell: 'Sell',
         sell_desc:
-          'Sell the property for 90% of its current value. Poor condition reduces the selling price further.',
+          'Sell the property. The selling price depends on current condition: ranges from 50% (zero condition) to 100% (full condition) of market value.',
         rename: 'Rename',
         rename_desc:
           'Double-click the property name or tap the pencil icon to give it a custom name.'
@@ -1454,7 +1481,7 @@ export default {
         economy_multiplier_desc:
           'In expansion, properties appreciate. In contraction, they depreciate. Watch the economy indicators.',
         value_floor: 'Minimum Value',
-        value_floor_desc: 'A property can never lose more than 70% of its original purchase price.'
+        value_floor_desc: 'Property value can drop very low but never below $1. There is no guaranteed floor relative to purchase price.'
       },
       details: {
         title: 'Details Panel',
@@ -1471,14 +1498,14 @@ export default {
         title: 'Scouting',
         how: 'How It Works',
         how_desc:
-          'Pay to scout the market. Each scout reveals a batch of new properties you can purchase.',
+          'Pay to scout the market. Each scout reveals 2–4 new properties you can purchase.',
         cost: 'Scout Cost',
-        cost_desc: 'Cost increases with each scout. Resets slowly over time with a cooldown.',
+        cost_desc: 'Cost scales with your net worth (base $500 + 0.1% of net worth, capped at $5M). There is a cooldown between scouts.',
         cooldown: 'Cooldown',
-        cooldown_desc: 'After scouting, there is a short cooldown before you can scout again.',
+        cooldown_desc: 'After scouting, there is a 5-minute cooldown before you can scout again.',
         reveals: 'Reveals',
         reveals_desc:
-          'Each scout reveals 3 new property opportunities. Unseen properties disappear after a while.'
+          'Each scout reveals 2–4 new property opportunities. Unseen properties disappear after a while.'
       },
       improvements_info: {
         title: 'Improvements',
@@ -1506,30 +1533,34 @@ export default {
         title: 'Location Grades',
         what: 'What Are They',
         what_desc:
-          'Each property has a location grade from D (worst) to S (best). Higher grades mean more rent and faster appreciation.',
+          'Each property has a location grade from D (worst) to S (best). Higher grades increase rent and appreciation rates.',
         effect: 'Effect on Rent',
         effect_desc:
-          'Grade S gives ×1.50 rent, Grade A gives ×1.25, Grade B gives ×1.00, Grade C gives ×0.80, Grade D gives ×0.60.'
+          'Grade D gives ×0.80 rent, Grade C gives ×0.90, Grade B gives ×1.00, Grade A gives ×1.15, Grade S gives ×1.35. Appreciation multipliers range from ×0.70 (D) to ×1.50 (S).'
       },
       styles: {
         title: 'Management Styles',
         what: 'What Are They',
         what_desc:
-          'Choose how to manage each property. Style affects rent income, wear speed, and maintenance costs.',
+          'Choose how to manage each property. Four styles available: Budget, Standard, Premium, and Luxury. Style affects rent income, wear speed, occupancy, and expense costs.',
         budget: 'Budget',
-        budget_desc: 'Lowest costs but faster wear and lower rents. Good for cheap properties.',
+        budget_desc: 'Lowest expenses but faster wear, lower occupancy, and lower rents. Good for cheap properties.',
+        standard: 'Standard',
+        standard_desc: 'Balanced approach with market-rate performance across all metrics.',
+        premium: 'Premium',
+        premium_desc: 'Higher expenses but better occupancy, slower wear, and increased rents.',
         luxury: 'Luxury',
         luxury_desc:
-          'Highest costs but premium rents and slowest wear. Best for high-value properties.'
+          'Highest expenses but maximum rent potential, best occupancy, and slowest wear. Best for high-value properties.'
       },
       portfolio: {
         title: 'Portfolio Bonus',
         what: 'How It Works',
         what_desc:
-          'Owning multiple properties in the same category unlocks rent bonuses: +5% at 2, +12% at 5, +25% at 10 properties.',
+          'Owning multiple properties in the same category unlocks rent bonuses: +3% at 2 properties, +8% at 5, +15% at 10.',
         categories: 'Categories',
         categories_desc:
-          'Residential, Commercial, Hospitality, and Luxury each have their own portfolio bonus track.'
+          'Residential, Commercial, Mixed, Hospitality, Luxury, and Industrial each have their own portfolio bonus track.'
       }
     }
   },
@@ -1607,13 +1638,13 @@ export default {
         title: 'Research',
         quick_scan: 'Quick Scan',
         quick_scan_desc:
-          'Costs ~8% of min investment. Reveals an approximate success range (±10%). Grants 20 XP.',
+          'Costs ~5% of min investment. Reveals an approximate success range (±10%). Grants 20 XP.',
         due_diligence: 'Due Diligence',
         due_diligence_desc:
-          'Costs ~18% of min investment. Reveals the exact success chance and a risk rating (1–5). Grants 50 XP.',
+          'Costs ~12% of min investment. Reveals the exact success chance and a risk rating (1–5). Grants 50 XP.',
         deep_analysis: 'Deep Analysis',
         deep_analysis_desc:
-          'Costs ~35% of min investment. Reveals founder score (1–100) and adds +4% success chance. Grants 120 XP.'
+          'Costs ~25% of min investment. Reveals founder score (1–100) and adds +6% success chance. Grants 120 XP.'
       },
       stages: {
         title: 'Stages',
@@ -1685,7 +1716,7 @@ export default {
     late: 'Late:',
     how_it_works: 'How Loans Work',
     info_desc:
-      'Loans let you borrow cash now and repay it over time with interest. Your credit score (0–100) determines which loans you qualify for and at what rate — better credit means lower interest. Repayments are manual: you choose when to make a payment or pay in full. Missing a scheduled payment hurts your credit and incurs late fees. There are six loan categories: Personal (small, quick), Business (larger, needs good credit), Mortgage (low rate, backed by property collateral), Predatory (no credit check, very high rate), Investment (backed by portfolio collateral), and Special (unique terms). Some loans require asset-based collateral — such as a business, property, or portfolio — that stays locked until repaid. You can refinance an existing loan to get better terms if your credit improves. Build your credit by making on-time payments, keeping debt low, and having a mix of loan types.',
+      'Loans let you borrow cash now and repay it over time with interest. Your credit score (0–100) determines which loans you qualify for and at what rate — better credit means lower interest. Repayments are manual: you choose when to make a payment or pay in full. Missing a scheduled payment hurts your credit and incurs late fees. There are six loan categories: Personal (small, quick), Business (larger, needs good credit), Mortgage (low rate, backed by property collateral), Predatory (no credit check, very high rate), Investment (backed by portfolio collateral), and Special (unique terms). Some loans require collateral — such as a business, property, portfolio, or mixed assets — that stays locked until repaid. You can refinance an existing loan to get better terms if your credit improves. Build your credit by making on-time payments, keeping debt low, and having a mix of loan types.',
     apply_title: 'Apply for Loan',
     loan_amount: 'Loan Amount',
     interest_rate: 'Interest Rate',
@@ -1822,8 +1853,12 @@ export default {
         business_desc: 'Larger loans for bigger ventures. Requires good credit.',
         mortgage: 'Mortgage',
         mortgage_desc: 'Secured against property. Lower rates but needs collateral.',
-        high_risk: 'High-Risk',
-        high_risk_desc: 'No credit check required, but comes with very high interest rates.'
+        high_risk: 'High-Risk / Predatory',
+        high_risk_desc: 'No credit check required, but comes with very high interest rates.',
+        investment: 'Investment',
+        investment_desc: 'Backed by your portfolio as collateral. Good for leveraging assets.',
+        special: 'Special',
+        special_desc: 'Unique loans with special terms and requirements.'
       },
       interest: {
         title: 'Interest & Payments',
@@ -1843,11 +1878,11 @@ export default {
         title: 'Collateral',
         unsecured: 'Unsecured',
         unsecured_desc: 'No collateral needed. Higher rates because the lender takes more risk.',
-        cash_collateral: 'Cash Collateral',
-        cash_collateral_desc: 'Part of your cash is locked until the loan is repaid.',
-        collateral_ratio: 'Collateral Amount',
+        cash_collateral: 'Business / Property / Portfolio',
+        cash_collateral_desc: 'Some loans require you to lock business assets, property, or portfolio holdings as security until the loan is repaid.',
+        collateral_ratio: 'Mixed Collateral',
         collateral_ratio_desc:
-          'Some loans require you to lock more cash than you borrow as security.',
+          'Some loans accept a mix of asset types as combined collateral.',
         margin_call: 'Forced Repayment',
         margin_call_desc:
           'If your collateral value drops too low, you may need to repay immediately.'
@@ -1909,7 +1944,7 @@ export default {
     early_withdrawals: 'Early Withdrawals',
     how_it_works: 'How Deposits Work',
     info_desc:
-      'Deposits let you lock cash into interest-bearing accounts to earn passive income. Each account has an APY (annual percentage yield) and a compounding frequency that determines how fast your balance grows. Fixed-term accounts lock your money for a set period — withdrawing early costs you a percentage of the earned interest, but your principal is always safe. Flexible accounts let you withdraw anytime with no penalty but offer lower rates. Some accounts are volatile: they offer higher APY, but random market swings can wipe your accrued interest. Your effective APY is boosted by the economy base rate, your credit score, skill tree bonuses, prestige upgrades, and active events. Holding past maturity earns a loyalty bonus. New account types unlock as your net worth and credit score improve.',
+      'Deposits let you lock funds from your card balance into interest-bearing accounts to earn passive income. Each account has an APY and a compounding frequency that determines how fast your balance grows. Fixed-term accounts lock your money for a set period — withdrawing early costs you a percentage of the earned interest, but your principal is always safe. Flexible accounts let you withdraw anytime with no penalty but offer lower rates. Some accounts are volatile: they offer higher APY, but random market swings can wipe your accrued interest. Your effective APY is boosted by the economy base rate, your credit score, skill tree bonuses, prestige upgrades, and active events. Holding past maturity earns a loyalty bonus. New account types unlock as your net worth and credit score improve.',
     open_title: 'Open Deposit Account',
     deposit_amount: 'Deposit Amount',
     effective_apy: 'Effective APY',
@@ -2234,14 +2269,14 @@ export default {
     lt_abilities_found: 'Abilities Found:',
     info_title: 'How the Casino Works',
     info_desc:
-      'Seven games with unique odds, payouts, and playstyles. Your Luck Bonus from skills, prestige, and events gives most games a Second Chance mechanic. Each game tracks individual stats. Pick a game from the lobby and manage your bankroll.',
+      'Ten games with unique odds, payouts, and playstyles. The casino uses a chip system — buy chips with cash or your card, play games, then cash out chips back to cash (with a small fee based on card tier). Your Luck Bonus from skills, prestige, and events gives most games a Second Chance mechanic. Each game tracks individual stats.',
     // Lobby InfoPanel sections
     info_lobby: {
       games: {
         title: 'Available Games',
         blackjack: 'Blackjack',
         blackjack_desc:
-          'Table game. Get closer to 21 than the dealer without busting. Base odds ~49%. Pays 2× or 3× (natural blackjack). Luck gives Anti-Bust protection.',
+          'Table game. Get closer to 21 than the dealer without busting. Base odds ~49%. Pays 2× on a regular win or 2.5× on a natural blackjack (21 with first two cards). Luck gives Anti-Bust protection.',
         roulette: 'Roulette',
         roulette_desc:
           'Table game with inside and outside bets. Straight bet pays 36×. Outside bets (red/black, even/odd) pay 2×. Luck gives Second Chance re-spin.',
@@ -2259,7 +2294,16 @@ export default {
           'Machine game — drop a ball through pegs. Choose row count and risk level. Edge hits pay up to 30×. No luck mechanic.',
         lottery: 'Lottery',
         lottery_desc:
-          'Pick numbers and hope for a match. Up to 100,000× jackpot. Luck gives Second Chance draws and rolling luck bonus.'
+          'Pick numbers and hope for a match. Up to 100,000× jackpot. Luck gives Second Chance draws and rolling luck bonus.',
+        poker: 'Video Poker',
+        poker_desc:
+          'Table game. Play a hand of video poker with draw mechanics. Base odds ~45%. Pays up to 2.5×. Luck gives Second Chance.',
+        scratchcard: 'Scratch Card',
+        scratchcard_desc:
+          'Quick play — scratch off panels to reveal prizes. Base odds ~30%. Pays up to 3×. Luck gives Second Chance.',
+        horseracing: 'Horse Racing',
+        horseracing_desc:
+          'Sports betting — pick a horse and watch the race. Base odds ~20%. Pays up to 5×. High risk, high reward.'
       },
       luck: {
         title: 'Luck System',
@@ -2323,7 +2367,7 @@ export default {
         win: 'Win',
         win_desc: 'Getting closer to 21 than the dealer pays 2× your bet.',
         blackjack: 'Blackjack',
-        blackjack_desc: 'Getting exactly 21 with your first two cards pays 2.5× your bet.',
+        blackjack_desc: 'Getting exactly 21 with your first two cards pays 2.5× your bet (3:2 payout).',
         push: 'Push',
         push_desc: 'Tie with the dealer. Your bet is returned.',
         bust: 'Bust / Lose',
@@ -2451,7 +2495,7 @@ export default {
     subtitle: 'Unlock permanent upgrades to boost your empire',
     info_title: 'How the Skill Tree Works',
     info_desc:
-      'Purchase skill nodes with cash to gain multiplicative bonuses across all game systems. Five category trees with 75 nodes each. Skills reset on prestige rebirth.',
+      'Purchase skill nodes with cash to gain multiplicative bonuses across all game systems. Five category trees with a total of 326 nodes. Skills reset on prestige rebirth.',
     info: {
       nodes: {
         title: 'Nodes & Purchasing',
@@ -2469,7 +2513,7 @@ export default {
         title: 'Categories & Paths',
         five_trees: 'Five Category Trees',
         five_trees_desc:
-          'Business (jobs, revenue, marketing), Finance (stocks, crypto, real estate), Gambling (luck, strategy, composure), Empire (XP, income, offline), Prestige (PP gain, memory, evolution).',
+          'Business (jobs, revenue, marketing), Finance (stocks, crypto, real estate), Gambling (luck, strategy, composure), Empire (XP, income, offline), Prestige (PP gain, memory, evolution). 326 total nodes across all trees.',
         three_paths: 'Branching Paths',
         three_paths_desc:
           'Each tree has three paths (left, center, right) that split early and converge at milestone rows 8, 12, and 16. The final row (17) has two powerful capstone nodes.',
@@ -2522,7 +2566,7 @@ export default {
         title: 'Prestige Points',
         formula: 'Points Formula',
         formula_desc:
-          'Points = floor((totalCashEarned ÷ 100M) ^ 0.2). You need at least $100M total cash earned to prestige. Multiplied by skill tree, upgrade, milestone, and perk bonuses.',
+          'Points are based on your total cash earned divided by $100M, with diminishing returns. You need at least $100M total cash earned to prestige. The final amount is boosted by skill tree, upgrade, milestone, and perk bonuses.',
         threshold: 'Minimum Threshold',
         threshold_desc:
           'You must earn at least 1 point to perform a rebirth. Preview your potential gain in the Prestige Panel before committing.'
@@ -2531,13 +2575,13 @@ export default {
         title: 'Rebirth',
         resets: 'What Gets Reset',
         resets_desc:
-          'Cash, businesses, jobs, stocks, crypto, real estate, startups, upgrades (skill tree), gambling stats, loans, and deposits are all wiped clean.',
+          'Cash, businesses, jobs, stocks, crypto, real estate, startups, upgrades (skill tree), gambling stats, loans, deposits, black market (heat, deals, effects, investigations), vault, shop, storage wars, events, card payments, casino chips, banking, and limit orders are all wiped clean.',
         keeps: 'What Persists',
         keeps_desc:
           'Prestige points, upgrades, perks, milestones, era progress, achievements, divine abilities, and lottery win history are kept forever.',
         starting_bonuses: 'Starting Bonuses',
         starting_bonuses_desc:
-          'After rebirth, certain perks and upgrades grant starting cash and XP so your next run begins stronger.'
+          'After rebirth, certain perks, upgrades, and milestones can grant starting cash and XP so your next run begins stronger.'
       },
       eras: {
         title: 'Eras',
@@ -4004,7 +4048,7 @@ export default {
       'All income ×0.75 (25% penalty), deal costs +60%, risk +35, 15% investigation chance.',
     info_heat_inv_check: 'Investigation Trigger',
     info_heat_inv_check_desc:
-      'Every 100 ticks (~10s), if your heat level has an investigation_chance penalty, a random roll is made. If triggered, severity = ceil(heat / 20), capped at 5.',
+      'Every 600 ticks (~1 min), if your heat level has an investigation_chance penalty, a random roll is made. If triggered, severity = ceil(heat / 20), capped at 5.',
 
     // Section: Reputation Tiers
     info_rep_title: 'Reputation Tiers',
@@ -4018,17 +4062,17 @@ export default {
     info_rep_t2: 'Tier 2 — Trusted (25 deals)',
     info_rep_t2_desc: 'Risk −5. Unlocks: Boost.',
     info_rep_t3: 'Tier 3 — Connected (50 deals)',
-    info_rep_t3_desc: 'Risk −10, prices −5%. Unlocks: Special.',
+    info_rep_t3_desc: 'Risk −10, prices −5%. Unlocks: Special deals, The Fixer contact.',
     info_rep_t4: 'Tier 4 — Feared (100 deals)',
     info_rep_t4_desc: 'Risk −20, prices −20%. All categories unlocked.',
     info_rep_t5: 'Tier 5 — Legendary (200 deals)',
-    info_rep_t5_desc: 'Risk −30, prices −25%. Unlocks: Legendary deals, The Fixer contact.',
+    info_rep_t5_desc: 'Risk −30, prices −25%. Unlocks: Legendary deals.',
 
     // Section: Contacts & Loyalty
     info_contacts_title: 'Contacts & Loyalty',
     info_contacts_overview: 'NPC Contacts',
     info_contacts_overview_desc:
-      '5 contacts, each with unique abilities gated by loyalty and reputation tier: Broker (Tier 0), Fence (Tier 0), Smuggler (Tier 1), Hacker (Tier 2), Fixer (Tier 5).',
+      '5 contacts, each with unique abilities gated by loyalty and reputation tier: Broker (Tier 0), Fence (Tier 0), Smuggler (Tier 1), Hacker (Tier 2), Fixer (Tier 3).',
     info_contacts_loyalty_gain: 'Loyalty Per Use',
     info_contacts_loyalty_gain_desc:
       'Broker: +2, Fence: +1, Smuggler: +2, Hacker: +3, Fixer: +5. All contacts have max loyalty of 100.',
@@ -4072,7 +4116,7 @@ export default {
     info_inv_title: 'Investigation System',
     info_inv_trigger: 'How Investigations Start',
     info_inv_trigger_desc:
-      'Investigations are triggered by: deal failure consequences, betrayals by contacts, or passive heat checks (every 100 ticks). Max 3 concurrent investigations.',
+      'Investigations are triggered by: deal failure consequences, betrayals by contacts, or passive heat checks (every 600 ticks). Max 2 concurrent investigations.',
     info_inv_severity: 'Severity',
     info_inv_severity_desc:
       'Severity ranges from 1 to 5. From heat: severity = ceil(heat / 20). From deals/betrayals: severity is defined per consequence (typically 2–5).',
@@ -4118,7 +4162,7 @@ export default {
       'Hack Stock ($3,000, 10min CD, Tier 2) — manipulate a stock ±30% for 1 minute. Hack Crypto ($4,000, 10min CD, 20 loyalty, Tier 2) — manipulate crypto ±30%. DDoS ($10,000, 30min CD, 70 loyalty, Tier 4) — income ×1.5 + business ×2.0.',
     info_fixer_abilities: 'Fixer Abilities',
     info_fixer_abilities_desc:
-      'Clear Event (dynamic cost, 15min CD, Tier 5) — remove a negative event, cost = $500 × severity × (ticks remaining / 100). Clear Heat ($15,000, 30min CD, 30 loyalty) — drastic heat reduction. Dismiss Investigation (dynamic cost, 1hr CD, 60 loyalty) — dismiss an active investigation.',
+      'Clear Event (dynamic cost, 15min CD, Tier 3) — remove a negative event. Clear Heat ($15,000, 30min CD, 30 loyalty, Tier 3) — drastic heat reduction. Dismiss Investigation (dynamic cost, 1hr CD, 60 loyalty, Tier 4) — dismiss an active investigation.',
 
     // Section: Prestige
     info_prestige_title: 'Prestige Reset',
@@ -4139,7 +4183,7 @@ export default {
       'Start with low-risk Intel deals (5–22% risk) to safely build rep. You need 200 deals for Tier 5.',
     info_tip_fixer: 'Use the Fixer',
     info_tip_fixer_desc:
-      'At Tier 5, the Fixer can clear heat and dismiss investigations — an invaluable safety net.',
+      'At Tier 3, the Fixer can clear heat and dismiss investigations — an invaluable safety net.',
     info_tip_loyalty: 'Loyalty Safety',
     info_tip_loyalty_desc:
       'Keep contact loyalty above 40 to avoid elevated betrayal (+5%) and scam (+10%) chances. Passive recovery gives +1 every 30 seconds.',

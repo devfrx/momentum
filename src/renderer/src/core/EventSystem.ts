@@ -193,8 +193,8 @@ export class EventSystem {
         return aDef?.exclusionGroup === def.exclusionGroup
       })) continue
 
-      // Check max active events (global cap to avoid spam)
-      if (this.state.activeEvents.length >= 5) continue
+      // Check max active events (global cap — max 2 concurrent)
+      if (this.state.activeEvents.length >= 2) continue
 
       // Roll probability
       if (Math.random() >= def.probability) continue

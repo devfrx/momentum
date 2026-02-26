@@ -218,6 +218,8 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
         entries: [
             { term: t('realestate.info.styles.what'), desc: t('realestate.info.styles.what_desc'), icon: 'mdi:tune-vertical' },
             { term: t('realestate.info.styles.budget'), desc: t('realestate.info.styles.budget_desc'), icon: 'mdi:currency-usd-off' },
+            { term: t('realestate.info.styles.standard'), desc: t('realestate.info.styles.standard_desc'), icon: 'mdi:equal' },
+            { term: t('realestate.info.styles.premium'), desc: t('realestate.info.styles.premium_desc'), icon: 'mdi:star-outline' },
             { term: t('realestate.info.styles.luxury'), desc: t('realestate.info.styles.luxury_desc'), icon: 'mdi:diamond-stone' },
         ],
     },
@@ -316,21 +318,7 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
     margin-bottom: var(--t-space-4);
 }
 
-.re-section--focus {
-    animation: fadeInFocus 0.25s ease;
-}
 
-@keyframes fadeInFocus {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
 /* ── Misc ── */
 .section-header-row {
@@ -378,18 +366,6 @@ const realEstateInfoSections = computed<InfoSection[]>(() => [
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    animation: fadeInGrid 0.3s ease;
-}
 
-@keyframes fadeInGrid {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 </style>
